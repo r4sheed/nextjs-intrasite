@@ -17,7 +17,7 @@ export function MobileNav({
   items,
   className,
 }: {
-  items: { href: string; label: string }[];
+  items: ReadonlyArray<{ href: string; label: string }>;
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
