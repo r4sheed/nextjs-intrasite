@@ -6,7 +6,7 @@ import { GalleryHorizontalIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useLayout } from '@/hooks/use-layout';
-// import { trackEvent } from "@/lib/events"
+import { trackEvent } from '@/lib/events';
 import { cn } from '@/lib/utils';
 
 export function SiteConfig({ className }: React.ComponentProps<typeof Button>) {
@@ -19,10 +19,10 @@ export function SiteConfig({ className }: React.ComponentProps<typeof Button>) {
       onClick={() => {
         const newLayout = layout === 'fixed' ? 'full' : 'fixed';
         setLayout(newLayout);
-        // trackEvent({
-        //   name: "set_layout",
-        //   properties: { layout: newLayout },
-        // })
+        trackEvent({
+          name: 'set_layout',
+          properties: { layout: newLayout },
+        });
       }}
       className={cn('size-8', className)}
       title="Toggle layout"
