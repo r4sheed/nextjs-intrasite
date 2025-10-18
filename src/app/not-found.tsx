@@ -4,7 +4,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@/components/ui/empty"
+} from '@/components/ui/empty';
 
 export default function PageNotFound() {
   return (
@@ -22,5 +22,5 @@ export default function PageNotFound() {
         </EmptyDescription>
       </EmptyContent>
     </Empty>
-  )
+  );
 }

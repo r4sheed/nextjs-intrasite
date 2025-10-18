@@ -1,3 +1,3 @@
 export default function Page() {
-    return <div>App Page</div>;
+  return <div>App Page</div>;
 }

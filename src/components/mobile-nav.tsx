@@ -1,25 +1,26 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import Link, { LinkProps } from "next/link"
-import { useRouter } from "next/navigation"
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link, { LinkProps } from 'next/link';
+import { useRouter } from 'next/navigation';
+
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export function MobileNav({
   items,
   className,
 }: {
-  items: { href: string; label: string }[]
-  className?: string
+  items: { href: string; label: string }[];
+  className?: string;
 }) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -27,7 +28,7 @@ export function MobileNav({
         <Button
           variant="ghost"
           className={cn(
-            "extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 !p-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent",
+            'extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 !p-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent',
             className
           )}
         >
@@ -35,14 +36,14 @@ export function MobileNav({
             <div className="relative size-4">
               <span
                 className={cn(
-                  "bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100",
-                  open ? "top-[0.4rem] -rotate-45" : "top-1"
+                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                  open ? 'top-[0.4rem] -rotate-45' : 'top-1'
                 )}
               />
               <span
                 className={cn(
-                  "bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100",
-                  open ? "top-[0.4rem] rotate-45" : "top-2.5"
+                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                  open ? 'top-[0.4rem] rotate-45' : 'top-2.5'
                 )}
               />
             </div>
@@ -79,7 +80,7 @@ export function MobileNav({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 function MobileLink({
@@ -89,22 +90,22 @@ function MobileLink({
   children,
   ...props
 }: LinkProps & {
-  onOpenChange?: (open: boolean) => void
-  children: React.ReactNode
-  className?: string
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
+  className?: string;
 }) {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <Link
       href={href}
       onClick={() => {
-        router.push(href.toString())
-        onOpenChange?.(false)
+        router.push(href.toString());
+        onOpenChange?.(false);
       }}
-      className={cn("text-2xl font-medium", className)}
+      className={cn('text-2xl font-medium', className)}
       {...props}
     >
       {children}
     </Link>
-  )
+  );
 }

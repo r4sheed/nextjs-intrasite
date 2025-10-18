@@ -1,25 +1,22 @@
-import Link from "next/link"
+import Link from 'next/link';
 
-import { siteConfig } from "@/lib/config";
-import { GitHubLink } from "@/components/github-link"
-import { Icons } from "@/components/icons"
-import { MainNav } from "@/components/main-nav"
-import { MobileNav } from "@/components/mobile-nav"
-import { ModeSwitcher } from "@/components/mode-switcher"
-import { SiteConfig } from "@/components/site-config"
+import { GitHubLink } from '@/components/github-link';
+import { Icons } from '@/components/icons';
+import { MainNav } from '@/components/main-nav';
+import { MobileNav } from '@/components/mobile-nav';
+import { ModeSwitcher } from '@/components/mode-switcher';
+import { SiteConfig } from '@/components/site-config';
 // import blocks from "@/registry/__blocks__.json"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { siteConfig } from '@/lib/config';
 
 export function SiteHeader() {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="container-wrapper 3xl:fixed:px-0 px-6">
         <div className="3xl:fixed:container flex h-(--header-height) items-center gap-2 **:data-[slot=separator]:!h-4">
-          <MobileNav
-            items={siteConfig.navItems}
-            className="flex lg:hidden"
-          />
+          <MobileNav items={siteConfig.navItems} className="flex lg:hidden" />
           <Button
             asChild
             variant="ghost"
@@ -46,5 +43,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }

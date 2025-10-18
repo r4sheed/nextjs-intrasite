@@ -1,15 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
-import { siteConfig, META_THEME_COLORS } from "@/lib/config";
-import { fontVariables } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
-
-import { Providers } from "@/components/providers";
-import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Toaster } from "@/components/ui/sonner";
-import { Analytics } from "@/components/analitycs";
-
-import "@/styles/globals.css";
+import { Analytics } from '@/components/analitycs';
+import { Providers } from '@/components/providers';
+import { TailwindIndicator } from '@/components/tailwind-indicator';
+import { Toaster } from '@/components/ui/sonner';
+import { META_THEME_COLORS, siteConfig } from '@/lib/config';
+import { fontVariables } from '@/lib/fonts';
+import { cn } from '@/lib/utils';
+import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
@@ -24,7 +22,7 @@ export const metadata: Metadata = {
     },
   ],
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
   },
 };
 
@@ -54,7 +52,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]",
+          'text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]',
           fontVariables
         )}
       >

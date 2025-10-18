@@ -1,6 +1,6 @@
-import { FileIcon } from "lucide-react"
+import { FileIcon } from 'lucide-react';
 
-type IconProps = React.HTMLAttributes<SVGElement>
+type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
   logo: (props: IconProps) => (
@@ -187,21 +187,21 @@ export const Icons = {
       ></path>
     </svg>
   ),
-}
+};
 
 export function getIconForLanguageExtension(language: string) {
   switch (language) {
-    case "json":
-      return <Icons.json />
-    case "css":
-      return <Icons.css className="fill-foreground" />
-    case "js":
-    case "jsx":
-    case "ts":
-    case "tsx":
-    case "typescript":
-      return <Icons.ts className="fill-foreground" />
+    case 'json':
+      return <Icons.json />;
+    case 'css':
+      return <Icons.css className="fill-foreground" />;
+    case 'js':
+    case 'jsx':
+    case 'ts':
+    case 'tsx':
+    case 'typescript':
+      return <Icons.ts className="fill-foreground" />;
     default:
-      return <FileIcon />
+      return <FileIcon />;
   }
 }

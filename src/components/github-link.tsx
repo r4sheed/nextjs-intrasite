@@ -1,10 +1,11 @@
-import * as React from "react"
-import Link from "next/link"
+import * as React from 'react';
 
-import { siteConfig } from "@/lib/config"
-import { Icons } from "@/components/icons"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import Link from 'next/link';
+
+import { Icons } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { siteConfig } from '@/lib/config';
 
 export function GitHubLink() {
   return (
@@ -16,14 +17,14 @@ export function GitHubLink() {
         </React.Suspense>
       </Link>
     </Button>
-  )
+  );
 }
 
 export async function StarsCount() {
-  const data = await fetch("https://api.github.com/repos/shadcn-ui/ui", {
+  const data = await fetch('https://api.github.com/repos/shadcn-ui/ui', {
     next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
-  })
-  const json = await data.json()
+  });
+  const json = await data.json();
 
   return (
     <span className="text-muted-foreground w-8 text-xs tabular-nums">
@@ -31,5 +32,5 @@ export async function StarsCount() {
         ? `${(json.stargazers_count / 1000).toFixed(1)}k`
         : json.stargazers_count.toLocaleString()}
     </span>
-  )
+  );
 }

@@ -1,8 +1,7 @@
-"use client"
+'use client';
 
-import { cn } from "@/lib/utils"
-import { useThemeConfig } from "@/components/providers/active-theme"
-import { Label } from "@/components/ui/label"
+import { useThemeConfig } from '@/components/providers/active-theme';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -12,59 +11,60 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_THEMES = [
   {
-    name: "Default",
-    value: "default",
+    name: 'Default',
+    value: 'default',
   },
   {
-    name: "Scaled",
-    value: "scaled",
+    name: 'Scaled',
+    value: 'scaled',
   },
   {
-    name: "Mono",
-    value: "mono",
+    name: 'Mono',
+    value: 'mono',
   },
-]
+];
 
 const COLOR_THEMES = [
   {
-    name: "Blue",
-    value: "blue",
+    name: 'Blue',
+    value: 'blue',
   },
   {
-    name: "Green",
-    value: "green",
+    name: 'Green',
+    value: 'green',
   },
   {
-    name: "Amber",
-    value: "amber",
+    name: 'Amber',
+    value: 'amber',
   },
   {
-    name: "Rose",
-    value: "rose",
+    name: 'Rose',
+    value: 'rose',
   },
   {
-    name: "Purple",
-    value: "purple",
+    name: 'Purple',
+    value: 'purple',
   },
   {
-    name: "Orange",
-    value: "orange",
+    name: 'Orange',
+    value: 'orange',
   },
   {
-    name: "Teal",
-    value: "teal",
+    name: 'Teal',
+    value: 'teal',
   },
-]
+];
 
-export function ThemeSelector({ className }: React.ComponentProps<"div">) {
-  const { activeTheme, setActiveTheme } = useThemeConfig()
+export function ThemeSelector({ className }: React.ComponentProps<'div'>) {
+  const { activeTheme, setActiveTheme } = useThemeConfig();
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <Label htmlFor="theme-selector" className="sr-only">
         Theme
       </Label>
@@ -79,7 +79,7 @@ export function ThemeSelector({ className }: React.ComponentProps<"div">) {
         </SelectTrigger>
         <SelectContent align="end">
           <SelectGroup>
-            {DEFAULT_THEMES.map((theme) => (
+            {DEFAULT_THEMES.map(theme => (
               <SelectItem
                 key={theme.name}
                 value={theme.value}
@@ -92,7 +92,7 @@ export function ThemeSelector({ className }: React.ComponentProps<"div">) {
           <SelectSeparator />
           <SelectGroup>
             <SelectLabel>Colors</SelectLabel>
-            {COLOR_THEMES.map((theme) => (
+            {COLOR_THEMES.map(theme => (
               <SelectItem
                 key={theme.name}
                 value={theme.value}
@@ -105,5 +105,5 @@ export function ThemeSelector({ className }: React.ComponentProps<"div">) {
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }
