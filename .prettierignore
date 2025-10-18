@@ -1,18 +1,38 @@
+# Node modules and package managers
 node_modules/
-.next/
-.turbo/
-*.log
-dist/
-build/
-coverage/
-.DS_Store
-*.env*
-.vscode/
-.idea/
-*.zip
-*.tar.gz
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Build outputs
+.next/
+.turbo/
+dist/
+build/
+coverage/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Environment files
+*.env*
+
+# IDE / Editor configs
+.vscode/
+.idea/
+
+# Archives
+*.zip
+*.tar.gz
+
+# Public and generated content
 public/
+
+# Git internals
 .git/
+
+# Specific project directories (UI components)
+src/components/ui/
