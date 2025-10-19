@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { Providers } from '@/app';
+import { Providers } from '@/app/providers';
 import { Analytics } from '@/components/analitycs';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { Toaster } from '@/components/ui/sonner';
