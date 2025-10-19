@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { login } from '@/features/auth/actions';
 import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
 import { loginUser } from '@/features/auth/services';
-import { Status } from '@/lib/response';
+import { Status, failure, success } from '@/lib/response';
 
 // Mock the service layer
 vi.mock('@/features/auth/services', () => ({
@@ -16,8 +16,8 @@ describe('login action', () => {
   });
 
   it('should return success for valid credentials', async () => {
-    const mockUser = { userId: 'test@example.com' };
-    vi.mocked(loginUser).mockResolvedValue(mockUser);
+    const mockResponse = success({ userId: 'test@example.com' });
+    vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
     const response = await login({
       email: 'test@example.com',
@@ -26,7 +26,7 @@ describe('login action', () => {
 
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
-      expect(response.data).toEqual(mockUser);
+      expect(response.data).toEqual({ userId: 'test@example.com' });
       expect(response.data.userId).toBe('test@example.com');
     }
   });
@@ -58,9 +58,8 @@ describe('login action', () => {
   });
 
   it('should return error for invalid credentials', async () => {
-    vi.mocked(loginUser).mockRejectedValue(
-      AuthErrorDefinitions.INVALID_CREDENTIALS
-    );
+    const mockResponse = failure(AuthErrorDefinitions.INVALID_CREDENTIALS);
+    vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
     const response = await login({
       email: 'test@example.com',

@@ -1,21 +1,22 @@
 import { AuthError } from 'next-auth';
 
-import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
+import { signIn } from '@/features/auth/lib/auth';
+import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
-import { signIn } from '@/lib/auth';
-import { BaseErrorDefinitions } from '@/lib/errors/definitions';
+import { CoreErrors } from '@/lib/errors/definitions';
+import { type Response, failure, success } from '@/lib/response';
 
 /**
  * Login service - handles user authentication
- * Throws AppError on failure, returns user data on success
+ * Returns Response<T> with user data on success, error response on failure
  */
 export async function loginUser(
   values: LoginInput
-): Promise<{ userId: string }> {
+): Promise<Response<{ userId: string }>> {
   // Validate input
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
-    throw AuthErrorDefinitions.INVALID_FIELDS(parsed.error.issues);
+    return failure(AuthErrors.INVALID_FIELDS(parsed.error.issues));
   }
 
   const { email, password } = parsed.data;
@@ -29,27 +30,22 @@ export async function loginUser(
     });
 
     if (!result || result.error) {
-      throw AuthErrorDefinitions.INVALID_CREDENTIALS;
+      return failure(AuthErrors.INVALID_CREDENTIALS);
     }
 
-    return { userId: email };
+    return success({ userId: email });
   } catch (error) {
     // Handle NextAuth errors
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          throw AuthErrorDefinitions.INVALID_CREDENTIALS;
+          return failure(AuthErrors.INVALID_CREDENTIALS);
         default:
-          throw BaseErrorDefinitions.INTERNAL_SERVER_ERROR;
+          return failure(CoreErrors.INTERNAL_SERVER_ERROR);
       }
     }
 
-    // Re-throw AppError
-    if (error instanceof Error && 'code' in error) {
-      throw error;
-    }
-
-    // Throw generic error for unexpected errors
-    throw BaseErrorDefinitions.INTERNAL_SERVER_ERROR;
+    // Return generic error for unexpected errors
+    return failure(CoreErrors.INTERNAL_SERVER_ERROR);
   }
 }

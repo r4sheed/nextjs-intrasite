@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { register } from '@/features/auth/actions';
 import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
 import { registerUser } from '@/features/auth/services';
-import { Status } from '@/lib/response';
+import { CoreErrors } from '@/lib/errors/definitions';
+import { Status, failure, success } from '@/lib/response';
 
 // Mock the service layer
 vi.mock('@/features/auth/services', () => ({
@@ -16,8 +17,8 @@ describe('register action', () => {
   });
 
   it('should return success for valid registration', async () => {
-    const mockUser = { userId: 'newuser@example.com' };
-    vi.mocked(registerUser).mockResolvedValue(mockUser);
+    const mockResponse = success({ userId: 'newuser@example.com' });
+    vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
       name: 'Test User',
@@ -27,7 +28,7 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
-      expect(response.data).toEqual(mockUser);
+      expect(response.data).toEqual({ userId: 'newuser@example.com' });
       expect(response.data.userId).toBe('newuser@example.com');
     }
   });
@@ -61,9 +62,8 @@ describe('register action', () => {
   });
 
   it('should return error for email already in use', async () => {
-    vi.mocked(registerUser).mockRejectedValue(
-      AuthErrorDefinitions.EMAIL_IN_USE
-    );
+    const mockResponse = failure(AuthErrorDefinitions.EMAIL_IN_USE);
+    vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
       name: 'Test User',
@@ -78,9 +78,8 @@ describe('register action', () => {
   });
 
   it('should return error for registration failure', async () => {
-    vi.mocked(registerUser).mockRejectedValue(
-      AuthErrorDefinitions.REGISTRATION_FAILED
-    );
+    const mockResponse = failure(AuthErrorDefinitions.REGISTRATION_FAILED);
+    vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
       name: 'Test User',

@@ -33,11 +33,11 @@ export function useAuthAction<TData>(options: UseAuthActionOptions = {}) {
         const response = await action();
 
         if (response.status === Status.Error) {
-          // Extract error message
+          // Extract error message from AppError.message
           const errorMsg =
             typeof response.error.message === 'string'
               ? response.error.message
-              : response.error.message.key;
+              : (response.error.message as { key: string }).key;
 
           setError(errorMsg);
           return;

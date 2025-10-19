@@ -1,30 +1,34 @@
 import bcrypt from 'bcryptjs';
 
 import { getUserByEmail } from '@/features/auth/data/user';
-import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
+import { signIn } from '@/features/auth/lib/auth';
+import { AuthErrorDefinitions as AuthError } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
-import { signIn } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { type Response, failure, success } from '@/lib/response';
 
 /**
  * Register service - handles user registration and auto-login
- * Throws AppError on failure, returns user data on success
+ * Returns Response<T> with user data on success, error response on failure
  */
 export async function registerUser(
   values: RegisterInput
-): Promise<{ userId: string }> {
+): Promise<Response<{ userId: string }>> {
   // Validate input
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
-    throw AuthErrorDefinitions.INVALID_FIELDS(parsed.error.issues);
+    return failure(AuthError.INVALID_FIELDS(parsed.error.issues));
   }
 
   const { email, password, name } = parsed.data;
 
   // Check if user already exists
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) {
-    throw AuthErrorDefinitions.EMAIL_IN_USE;
+  const response = await getUserByEmail(email);
+  if (response.status === 'error') {
+    return response;
+  }
+  if (response.status === 'success' && response.data) {
+    return failure(AuthError.EMAIL_IN_USE);
   }
 
   // Hash password
@@ -52,8 +56,8 @@ export async function registerUser(
       // Don't throw error, just return success
     }
 
-    return { userId: email };
+    return success({ userId: email });
   } catch (error) {
-    throw AuthErrorDefinitions.REGISTRATION_FAILED;
+    return failure(AuthError.REGISTRATION_FAILED);
   }
 }

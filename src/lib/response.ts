@@ -2,6 +2,7 @@
  * Unified Response Pattern for Server Actions
  * All server actions must return Response<T>
  */
+import { AppError } from '@/lib/errors/app-error';
 
 export enum Status {
   Success = 'success',
@@ -12,11 +13,7 @@ export enum Status {
 
 export interface ErrorResponse {
   status: Status.Error;
-  error: {
-    code: string;
-    message: string | { key: string; params?: Record<string, unknown> };
-    details?: unknown;
-  };
+  error: AppError;
 }
 
 export interface SuccessResponse<TData> {
@@ -59,18 +56,10 @@ export function success<TData>(data: TData): SuccessResponse<TData> {
 /**
  * Helper function to create an error response
  */
-export function failure(error: {
-  code: string;
-  message: string | { key: string; params?: Record<string, unknown> };
-  details?: unknown;
-}): ErrorResponse {
+export function failure(error: AppError): ErrorResponse {
   return {
     status: Status.Error,
-    error: {
-      code: error.code,
-      message: error.message, // Keep the full message object or string
-      details: error.details,
-    },
+    error,
   };
 }
 

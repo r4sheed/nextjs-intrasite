@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { auth } from '@/lib/auth';
+import { auth } from '@/features/auth/lib/auth';
 import { ROUTES } from '@/lib/navigation';
 import {
   AUTH_ROUTES,

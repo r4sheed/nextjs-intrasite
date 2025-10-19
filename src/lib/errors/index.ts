@@ -10,5 +10,5 @@
  */
 
 export { AppError } from './app-error';
-export { BaseErrorDefinitions } from './definitions';
+export { CoreErrors } from './definitions';
 export type { HttpStatusCode } from '@/lib/http-status';
