@@ -1,3 +1,5 @@
+import { ROUTES } from '@/lib/navigation';
+
 export const siteConfig = {
   name: 'shadcn/ui',
   author: 'shadcn',
@@ -10,30 +12,8 @@ export const siteConfig = {
     github: 'https://github.com/shadcn-ui/ui',
   },
   navItems: [
-    {
-      href: '/docs/installation',
-      label: 'Docs',
-    },
-    {
-      href: '/docs/components',
-      label: 'Components',
-    },
-    {
-      href: '/blocks',
-      label: 'Blocks',
-    },
-    {
-      href: '/charts/area',
-      label: 'Charts',
-    },
-    {
-      href: '/themes',
-      label: 'Themes',
-    },
-    {
-      href: '/colors',
-      label: 'Colors',
-    },
+    { label: 'Login', href: ROUTES.AUTH.LOGIN },
+    { label: 'Register', href: ROUTES.AUTH.REGISTER },
   ],
 } as const;
 

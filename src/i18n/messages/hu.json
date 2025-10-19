@@ -1,0 +1,46 @@
+{
+  "common": {
+    "success": "A művelet sikeresen befejeződött",
+    "loading": "Betöltés...",
+    "error": "Hiba történt"
+  },
+  "errors": {
+    "internal_server_error": "Váratlan hiba történt. Kérjük, próbálja újra később.",
+    "validation_failed": "Az adatok ellenőrzése sikertelen. Kérjük, ellenőrizze a bevitt adatokat.",
+    "unauthorized": "Nincs jogosultsága ehhez a művelethez.",
+    "forbidden": "Hozzáférés megtagadva.",
+    "not_found": "{resource} nem található."
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Hibás email cím vagy jelszó.",
+      "email_in_use": "Ez az email cím már regisztrálva van.",
+      "invalid_fields": "Kérjük, ellenőrizze az adatokat és próbálja újra.",
+      "user_not_found": "A {email} email címmel nem található felhasználó.",
+      "registration_failed": "A regisztráció sikertelen. Kérjük, próbálja újra.",
+      "login_failed": "A bejelentkezés sikertelen. Kérjük, próbálja újra.",
+      "register_failed": "A regisztráció sikertelen. Kérjük, próbálja újra."
+    },
+    "success": {
+      "login": "Üdvözöljük!",
+      "register": "Fiók sikeresen létrehozva!"
+    },
+    "ui": {
+      "register_title": "Fiók létrehozása",
+      "login_title": "Bejelentkezés",
+      "register_subtitle": "Add meg az adataidat a fiók létrehozásához",
+      "login_subtitle": "Add meg az email címedet és jelszavadat a bejelentkezéshez",
+      "email_label": "Email cím",
+      "name_label": "Név",
+      "password_label": "Jelszó",
+      "forgot_password": "Elfelejtett jelszó?",
+      "login_button": "Bejelentkezés",
+      "register_button": "Fiók létrehozása",
+      "signup_cta": "Nincs még fiókod? Regisztrálj",
+      "login_cta": "Van már fiókod? Jelentkezz be",
+      "placeholder_email": "Add meg az email címedet",
+      "placeholder_name": "Add meg a nevedet",
+      "placeholder_password": "Add meg a jelszavadat"
+    }
+  }
+}

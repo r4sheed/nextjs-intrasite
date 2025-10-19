@@ -1,0 +1,46 @@
+{
+  "common": {
+    "success": "Operation completed successfully",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "errors": {
+    "internal_server_error": "An unexpected error occurred. Please try again later.",
+    "validation_failed": "Input validation failed. Please check your entries.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "forbidden": "Access forbidden.",
+    "not_found": "{resource} could not be found."
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Invalid email or password.",
+      "email_in_use": "This email is already registered.",
+      "invalid_fields": "Please check your input and try again.",
+      "user_not_found": "User with email {email} could not be found.",
+      "registration_failed": "Registration failed. Please try again.",
+      "login_failed": "Login failed. Please try again.",
+      "register_failed": "Registration failed. Please try again."
+    },
+    "success": {
+      "login": "Welcome back!",
+      "register": "Account created successfully!"
+    },
+    "ui": {
+      "register_title": "Create an account",
+      "login_title": "Sign in",
+      "register_subtitle": "Enter your details to create your account",
+      "login_subtitle": "Enter your email and password to sign in",
+      "email_label": "Email",
+      "name_label": "Name",
+      "password_label": "Password",
+      "forgot_password": "Forgot password?",
+      "login_button": "Sign in",
+      "register_button": "Create account",
+      "signup_cta": "Don't have an account? Sign up",
+      "login_cta": "Already have an account? Sign in",
+      "placeholder_email": "Enter your email",
+      "placeholder_name": "Enter your name",
+      "placeholder_password": "Enter your password"
+    }
+  }
+}

@@ -1,3 +1,3 @@
-export default function Page() {
-  return <div>App Page</div>;
+export default function RootPage() {
+  return <div>Root Page</div>;
 }

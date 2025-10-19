@@ -1,0 +1,49 @@
+'use server';
+
+import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
+import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { loginUser } from '@/features/auth/services';
+import { AppError, BaseErrorDefinitions } from '@/lib/errors';
+import { type Response, failure, success } from '@/lib/response';
+
+/**
+ * Login action - validates input and calls service
+ * Always returns Response<T>, never throws
+ */
+export async function login(
+  values: LoginInput
+): Promise<Response<{ userId: string }>> {
+  try {
+    // Validate input
+    const validation = loginSchema.safeParse(values);
+    if (!validation.success) {
+      const errorDetails = validation.error.issues;
+
+      return failure({
+        code: AuthErrorDefinitions.INVALID_FIELDS(errorDetails).code,
+        message: AuthErrorDefinitions.INVALID_FIELDS(errorDetails).i18nMessage,
+        details: errorDetails,
+      });
+    }
+
+    // Call service layer
+    const result = await loginUser(validation.data);
+
+    return success(result);
+  } catch (error) {
+    // Handle AppError
+    if (error instanceof AppError) {
+      return failure({
+        code: error.code,
+        message: error.i18nMessage,
+        details: error.details,
+      });
+    }
+
+    // Return generic error for unexpected errors
+    return failure({
+      code: BaseErrorDefinitions.INTERNAL_SERVER_ERROR.code,
+      message: BaseErrorDefinitions.INTERNAL_SERVER_ERROR.i18nMessage,
+    });
+  }
+}
