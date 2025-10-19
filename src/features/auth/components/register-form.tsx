@@ -67,6 +67,7 @@ export const RegisterForm = () => {
                     disabled={isPending}
                   />
                 </FormControl>
+                <FormDescription>Your public display name.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -86,6 +87,10 @@ export const RegisterForm = () => {
                     disabled={isPending}
                   />
                 </FormControl>
+                <FormDescription>
+                  We&apos;ll use this to contact you. We will not share your
+                  email with anyone else.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -105,6 +110,9 @@ export const RegisterForm = () => {
                     disabled={isPending}
                   />
                 </FormControl>
+                <FormDescription>
+                  Must be at least 8 characters long.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
