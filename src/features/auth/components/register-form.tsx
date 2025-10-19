@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
 import { LinkUnderline } from '@/components/link-underline';
-import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/loading-button';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
   Form,
@@ -118,9 +118,9 @@ export const RegisterForm = () => {
             )}
           />
           <FormError message={error} />
-          <Button type="submit" disabled={isPending}>
+          <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.REGISTER_BUTTON}
-          </Button>
+          </LoadingButton>
           <FieldSeparator />
           <FormDescription className="text-center">
             {AUTH_UI_MESSAGES.LOGIN_CTA_TEXT}{' '}
