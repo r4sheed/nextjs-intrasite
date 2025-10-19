@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
+import { Providers } from '@/app';
 import { Analytics } from '@/components/analitycs';
-import { Providers } from '@/components/providers';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { Toaster } from '@/components/ui/sonner';
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';

@@ -2,10 +2,9 @@
 
 import { SessionProvider } from 'next-auth/react';
 
+import { ActiveThemeProvider } from '@/components/active-theme';
+import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutProvider } from '@/hooks/use-layout';
-
-import { ActiveThemeProvider } from './active-theme';
-import { ThemeProvider } from './theme-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
