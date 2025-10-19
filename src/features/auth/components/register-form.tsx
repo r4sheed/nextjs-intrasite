@@ -1,17 +1,13 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { FormError } from '@/components/form-error';
 import { Button } from '@/components/ui/button';
-import { FieldGroup } from '@/components/ui/field';
+import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
   Form,
   FormControl,
@@ -120,7 +116,7 @@ export const RegisterForm = () => {
           <Button type="submit" disabled={isPending}>
             {AUTH_UI_MESSAGES.REGISTER_BUTTON}
           </Button>
-          <Separator />
+          <FieldSeparator />
           <FormDescription className="text-center">
             <Link href={ROUTES.AUTH.LOGIN}>{AUTH_UI_MESSAGES.LOGIN_CTA}</Link>
           </FormDescription>

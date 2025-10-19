@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
 import { LoadingButton } from '@/components/loading-button';
-import { FieldGroup } from '@/components/ui/field';
+import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
   Form,
   FormControl,
@@ -102,7 +102,7 @@ export const LoginForm = () => {
           <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.LOGIN_BUTTON}
           </LoadingButton>
-          <Separator />
+          <FieldSeparator />
           <FormDescription className="text-center">
             <Link href={ROUTES.AUTH.REGISTER}>
               {AUTH_UI_MESSAGES.SIGNUP_CTA}
