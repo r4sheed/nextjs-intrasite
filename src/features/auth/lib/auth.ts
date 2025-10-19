@@ -1,73 +1,73 @@
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import authConfig from 'auth.config';
 import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
 
-import { getUserById } from '@/features/auth/data/user';
+import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
+import { verifyUserCredentials } from '@/features/auth/data/user';
+import { loginSchema } from '@/features/auth/schemas';
+import { ROUTES } from '@/lib/navigation';
 import prisma from '@/lib/prisma';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    Credentials({
+      async authorize(credentials) {
+        const parsed = loginSchema.safeParse(credentials);
+
+        if (!parsed.success) {
+          return null;
+        }
+
+        const { email, password } = parsed.data;
+
+        try {
+          // Use the new verifyUserCredentials utility
+          const user = await verifyUserCredentials(email, password);
+          return user;
+        } catch (error) {
+          // If database error occurs, throw it so it can be handled properly
+          throw error;
+        }
+      },
+    }),
+  ],
   callbacks: {
     authorized({ request, auth }) {
-      // Logged in users are authenticated, otherwise redirect to login page
       return !!auth;
     },
-    async jwt({ token, trigger, session, account }) {
-      if (trigger === 'update') {
-        token.name = session.user.name;
-      }
-
-      if (!token.sub) {
-        return token;
-      }
-
-      const userResponse = await getUserById(token.sub);
-
-      if (userResponse.status === 'error') {
-        console.error(
-          'JWT callback: Failed to fetch user:',
-          userResponse.error
-        );
-        return token;
-      }
-
-      if (userResponse.status === 'success') {
-        const user = userResponse.data;
-
-        if (!user) {
-          return token;
-        }
-
-        token.role = user.role;
-
-        if (account?.provider === 'keycloak') {
-          return { ...token, accessToken: account.access_token };
-        }
-        return token;
-      }
-
-      // Handle other response types (pending, partial) - return token without role
-      return token;
-    },
     async session({ session, token }) {
-      if (token?.accessToken)
-        session.sessionToken = token.accessToken as string;
+      if (token.sub) {
+        // Fetch the latest user data from the database
+        const response = await getUserByIdWithoutPassword(token.sub);
+        if (response.status === 'success' && response.data) {
+          const user = response.data;
+          // Update session with fresh user data
+          session.user = {
+            ...session.user,
+            role: user.role,
+          };
 
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+          console.log('Updated session user:', session.user);
+        }
       }
-
-      if (token.role && session.user) {
-        (session.user as any).role = token.role;
-      }
-
-      console.log({
-        sessionToken: token,
-      });
-
       return session;
     },
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.sub = user.id;
+      }
+
+      // Handle session updates from client
+      if (trigger === 'update' && session) {
+        return { ...token, ...session };
+      }
+
+      return token;
+    },
   },
-  adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
-  ...authConfig,
+  pages: {
+    signIn: ROUTES.AUTH.LOGIN,
+  },
 });
