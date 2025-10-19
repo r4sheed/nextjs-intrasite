@@ -36,8 +36,10 @@
       "forgot_password": "Forgot password?",
       "login_button": "Sign in",
       "register_button": "Create account",
-      "signup_cta": "Don't have an account? Sign up",
-      "login_cta": "Already have an account? Sign in",
+      "signup_cta_text": "Don't have an account?",
+      "signup_cta_link": "Sign up",
+      "login_cta_text": "Already have an account?",
+      "login_cta_link": "Sign in",
       "placeholder_email": "Enter your email",
       "placeholder_name": "Enter your name",
       "placeholder_password": "Enter your password"

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
+import { LinkUnderline } from '@/components/link-underline';
 import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
@@ -18,13 +19,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { register } from '@/features/auth/actions';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
-import {
-  AUTH_ERROR_MESSAGES,
-  AUTH_UI_MESSAGES,
-} from '@/features/auth/lib/messages';
+import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { ROUTES } from '@/lib/navigation';
 
@@ -118,7 +115,12 @@ export const RegisterForm = () => {
           </Button>
           <FieldSeparator />
           <FormDescription className="text-center">
-            <Link href={ROUTES.AUTH.LOGIN}>{AUTH_UI_MESSAGES.LOGIN_CTA}</Link>
+            {AUTH_UI_MESSAGES.LOGIN_CTA_TEXT}{' '}
+            <LinkUnderline>
+              <Link href={ROUTES.AUTH.LOGIN}>
+                {AUTH_UI_MESSAGES.LOGIN_CTA_LINK}
+              </Link>
+            </LinkUnderline>
           </FormDescription>
         </FieldGroup>
       </form>

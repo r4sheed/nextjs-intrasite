@@ -36,8 +36,10 @@
       "forgot_password": "Elfelejtett jelszó?",
       "login_button": "Bejelentkezés",
       "register_button": "Fiók létrehozása",
-      "signup_cta": "Nincs még fiókod? Regisztrálj",
-      "login_cta": "Van már fiókod? Jelentkezz be",
+      "signup_cta_text": "Nincs még fiókod?",
+      "signup_cta_link": "Regisztrálj",
+      "login_cta_text": "Van már fiókod?",
+      "login_cta_link": "Jelentkezz be",
       "placeholder_email": "Add meg az email címedet",
       "placeholder_name": "Add meg a nevedet",
       "placeholder_password": "Add meg a jelszavadat"

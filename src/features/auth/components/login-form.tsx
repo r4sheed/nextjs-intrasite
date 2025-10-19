@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
+import { LinkUnderline } from '@/components/link-underline';
 import { LoadingButton } from '@/components/loading-button';
 import { FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
@@ -18,7 +19,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { login } from '@/features/auth/actions';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
@@ -80,7 +80,7 @@ export const LoginForm = () => {
                   <FormLabel>{AUTH_UI_MESSAGES.PASSWORD_LABEL}</FormLabel>
                   <Link
                     href={ROUTES.AUTH.FORGOT_PASSWORD}
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                    className="ml-auto text-sm"
                   >
                     {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
                   </Link>
@@ -104,9 +104,12 @@ export const LoginForm = () => {
           </LoadingButton>
           <FieldSeparator />
           <FormDescription className="text-center">
-            <Link href={ROUTES.AUTH.REGISTER}>
-              {AUTH_UI_MESSAGES.SIGNUP_CTA}
-            </Link>
+            {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
+            <LinkUnderline>
+              <Link href={ROUTES.AUTH.REGISTER}>
+                {AUTH_UI_MESSAGES.SIGNUP_CTA_LINK}
+              </Link>
+            </LinkUnderline>
           </FormDescription>
         </FieldGroup>
       </form>
