@@ -132,6 +132,71 @@ Always move client-only UI into a Client Component and import it directly in you
   - Write clear README and code comments.
   - Document public APIs and components.
 
+## 6. Function Definition and Export Styles
+
+To maintain consistency within the App Router codebase, differentiate your function definition style based on the type of export. Both styles below are widely accepted in the modern Next.js ecosystem.
+
+### 6.1. Preferred: Arrow Function for Named Exports 🚀
+
+**Application:** Use for **named exports** such as **Route Handlers** (`GET`, `POST`, etc.), **Server Actions**, custom **hooks** (`use...`), and shared **utility** functions.
+
+**Rationale:** This standardizes the style for all modular, server-side logic and adheres to the modern JavaScript convention of defining exported functions as constants.
+
+**Preferred Syntax:**
+
+```typescript
+// Route Handler (e.g., app/api/users/route.ts)
+// Exported as an async constant (Arrow Function)
+export const GET = async (request: Request) => {
+  // Your server logic
+  return new Response(JSON.stringify({ users: [] }), { status: 200 });
+};
+
+// Server Action (e.g., lib/actions.ts)
+// Exported as a named constant (Arrow Function)
+export const createPost = async (formData: FormData) => {
+  'use server';
+  // Server-side data processing
+  console.log('Post data:', formData.get('title'));
+  // ...
+};
+```
+
+## 6.2. Preferred: Function Declaration for Default Component Exports 📄
+
+Application: Use for the main, default exported React components, primarily Pages (`page.tsx`) and Layouts (`layout.tsx`).
+
+Rationale: This aligns with Next.js official documentation examples for defining asynchronous Server Components and leverages the clarity of the `function` keyword for the main routing element.
+
+# Preferred Syntax:
+
+```typescript
+// Page Component (e.g., app/dashboard/page.tsx)
+// Exported as the default async function (Function Declaration)
+export default async function DashboardPage({ params }: { params: { slug: string } }) {
+  // Data fetching happens here on the server
+  const data = await fetch(`https://api.example.com/${params.slug}`);
+
+  return (
+    <main>
+      <h1>Dashboard</h1>
+      {/* ... */}
+    </main>
+  );
+}
+```
+
+### Avoidance Rule
+
+Avoid using the traditional export async function syntax for named exports (like Route Handlers or Server Actions) to maintain a consistent distinction from Page/Layout exports.
+
+```typescript
+// Avoid this for named exports (Handlers/Actions)
+export async function createPost(formData: FormData) {
+  // ...
+}
+```
+
 # Avoid Unnecessary Example Files
 
 Do not create example/demo files (like ModalExample.tsx) in the main codebase unless the user specifically requests a live example, Storybook story, or explicit documentation component. Keep the repository clean and production-focused by default.
