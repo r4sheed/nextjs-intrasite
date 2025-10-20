@@ -1,6 +1,5 @@
+import { AppError } from '@/lib/errors/app-error';
 import { HTTP_STATUS } from '@/lib/http-status';
-
-import { AppError } from './app-error';
 
 /**
  * Core error definitions used across all features
