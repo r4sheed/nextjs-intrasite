@@ -422,6 +422,10 @@ import { loginService } from '../services/login';
 
 // File: src/features/auth/actions/login.ts
 
+// File: src/features/auth/actions/login.ts
+
+// File: src/features/auth/actions/login.ts
+
 export async function loginAction(formData: FormData): Promise<Response<User>> {
   try {
     // 1. Parse and validate input
@@ -490,7 +494,7 @@ export async function badLoginAction(formData: FormData) {
 ```typescript
 // File: src/features/auth/services/login.ts
 import { comparePasswords } from '@/lib/crypto';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 
 import { AuthErrorDefinitions } from '../lib/errors';
 import type { LoginInput } from '../schemas/login';
@@ -498,7 +502,7 @@ import type { User } from '../types';
 
 export async function loginService(input: LoginInput): Promise<User> {
   // 1. Find user
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: { email: input.email },
   });
 
@@ -524,7 +528,7 @@ export async function loginService(input: LoginInput): Promise<User> {
 ```typescript
 // DON'T DO THIS
 export async function badLoginService(email: string, password: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await db.user.findUnique({ where: { email } });
 
   if (!user || user.password !== password) {
     return null; // ❌ Returning null
@@ -848,6 +852,10 @@ import type { Response } from '@/lib/response';
 import type { PartialError } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
+
+// File: src/features/bookmarks/actions/delete-many.ts
+
+// File: src/features/bookmarks/actions/delete-many.ts
 
 // File: src/features/bookmarks/actions/delete-many.ts
 

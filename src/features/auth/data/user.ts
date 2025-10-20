@@ -2,7 +2,7 @@ import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 import { CoreErrors } from '@/lib/errors/definitions';
-import prisma from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 import { type Response, failure, success } from '@/lib/response';
 
 /**
@@ -52,7 +52,7 @@ async function findUser<T = User>(
   select?: Record<string, boolean>
 ): Promise<Response<T | null>> {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where,
       ...(select && { select }),
     });

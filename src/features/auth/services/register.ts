@@ -4,7 +4,7 @@ import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthError } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
-import prisma from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 import { type Response, failure, success } from '@/lib/response';
 
 /**
@@ -36,7 +36,7 @@ export async function registerUser(
 
   // Create user
   try {
-    await prisma.user.create({
+    await db.user.create({
       data: {
         name,
         email,

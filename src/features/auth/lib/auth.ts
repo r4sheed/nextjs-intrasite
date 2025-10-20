@@ -6,7 +6,7 @@ import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { loginSchema } from '@/features/auth/schemas';
 import { ROUTES } from '@/lib/navigation';
-import prisma from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

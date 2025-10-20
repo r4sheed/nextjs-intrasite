@@ -31,8 +31,8 @@ describe('User Data Layer', () => {
   let mockFindUnique: any;
 
   beforeAll(async () => {
-    const { default: prisma } = await import('@/lib/prisma');
-    mockFindUnique = vi.mocked(prisma.user.findUnique);
+    const { db } = await import('@/lib/prisma');
+    mockFindUnique = vi.mocked(db.user.findUnique);
   });
 
   beforeEach(() => {
