@@ -13,7 +13,7 @@ import { Status } from '@/lib/response';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
-  default: {
+  db: {
     user: {
       findUnique: vi.fn(),
     },
