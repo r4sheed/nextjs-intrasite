@@ -1,3 +1,4 @@
-export type { AuthError, AuthErrorCode } from './error';
-export { isAuthError } from './error';
-export type { AuthResponse } from './response';
+export enum AuthProvider {
+  Google = 'google',
+  GitHub = 'github',
+}
