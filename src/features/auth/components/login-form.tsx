@@ -28,11 +28,7 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 
-export const LoginForm = ({
-  showSocial = siteFeatures.socialAuth,
-}: {
-  showSocial?: boolean;
-}) => {
+export const LoginForm = () => {
   const { execute, error, isPending } = useAuthAction();
 
   const form = useForm<LoginInput>({
@@ -46,6 +42,8 @@ export const LoginForm = ({
   const onSubmit = (values: LoginInput) => {
     execute(() => login(values));
   };
+
+  const showSocial = siteFeatures.socialAuth;
 
   return (
     <Form {...form}>

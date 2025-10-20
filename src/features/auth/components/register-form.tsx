@@ -28,11 +28,7 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 
-export const RegisterForm = ({
-  showSocial = siteFeatures.socialAuth,
-}: {
-  showSocial?: boolean;
-}) => {
+export const RegisterForm = () => {
   const { execute, error, isPending } = useAuthAction();
 
   const form = useForm<RegisterInput>({
@@ -47,6 +43,8 @@ export const RegisterForm = ({
   const onSubmit = (values: RegisterInput) => {
     execute(() => register(values));
   };
+
+  const showSocial = siteFeatures.socialAuth;
 
   return (
     <Form {...form}>
