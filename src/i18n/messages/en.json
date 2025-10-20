@@ -20,7 +20,8 @@
       "registration_failed": "Registration failed. Please try again.",
       "callback_error": "Authentication callback failed. Please try again.",
       "login_failed": "Login failed. Please try again.",
-      "register_failed": "Registration failed. Please try again."
+      "register_failed": "Registration failed. Please try again.",
+      "oauth_account_not_linked": "Email already in use with different provider."
     },
     "success": {
       "login": "Welcome back!",

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -23,12 +24,21 @@ import { login } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { SocialLogin } from '@/features/auth/components/social-login';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import {
+  AUTH_ERROR_MESSAGES,
+  AUTH_UI_MESSAGES,
+} from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 
 export const LoginForm = () => {
+  const searchParams = useSearchParams();
+  const urlError =
+    searchParams.get('error') === 'OAuthAccountNotLinked'
+      ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
+      : '';
+
   const { execute, error, isPending } = useAuthAction();
 
   const form = useForm<LoginInput>({
@@ -99,7 +109,7 @@ export const LoginForm = () => {
               </FormItem>
             )}
           />
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.LOGIN_BUTTON}
           </LoadingButton>

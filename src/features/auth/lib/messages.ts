@@ -2,6 +2,7 @@ export const AUTH_ERROR_MESSAGES = {
   INVALID_FIELDS: 'auth.errors.invalid_fields', // Please check your input and try again.
   INVALID_CREDENTIALS: 'auth.errors.invalid_credentials', // Invalid email or password.
   EMAIL_ALREADY_EXISTS: 'auth.errors.email_already_exists', // This email is already registered.
+  OAUTH_ACCOUNT_NOT_LINKED: 'auth.errors.oauth_account_not_linked', // Email already in use with different provider.
   UNEXPECTED_ERROR: 'auth.errors.unexpected_error', // An unexpected error occurred.
 } as const;
 
