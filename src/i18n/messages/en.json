@@ -18,6 +18,7 @@
       "invalid_fields": "Please check your input and try again.",
       "user_not_found": "User with email {email} could not be found.",
       "registration_failed": "Registration failed. Please try again.",
+      "callback_error": "Authentication callback failed. Please try again.",
       "login_failed": "Login failed. Please try again.",
       "register_failed": "Registration failed. Please try again."
     },

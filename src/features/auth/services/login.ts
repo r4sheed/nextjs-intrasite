@@ -37,6 +37,8 @@ export async function loginUser(
       switch (error.type) {
         case 'CredentialsSignin':
           return failure(AuthErrors.INVALID_CREDENTIALS);
+        case 'CallbackRouteError':
+          return failure(AuthErrors.CALLBACK_ERROR);
       }
     }
 

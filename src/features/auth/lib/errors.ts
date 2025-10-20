@@ -42,4 +42,10 @@ export const AuthErrorDefinitions = {
     message: { key: 'auth.errors.registration_failed' },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   }),
+
+  CALLBACK_ERROR: new AppError({
+    code: 'AUTH_CALLBACK_ERROR',
+    message: { key: 'auth.errors.callback_error' },
+    httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+  }),
 } as const;

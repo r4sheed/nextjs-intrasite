@@ -18,6 +18,7 @@
       "invalid_fields": "Kérjük, ellenőrizze az adatokat és próbálja újra.",
       "user_not_found": "A {email} email címmel nem található felhasználó.",
       "registration_failed": "A regisztráció sikertelen. Kérjük, próbálja újra.",
+      "callback_error": "Hitelesítési visszahívás sikertelen. Kérjük, próbálja újra.",
       "login_failed": "A bejelentkezés sikertelen. Kérjük, próbálja újra.",
       "register_failed": "A regisztráció sikertelen. Kérjük, próbálja újra."
     },
