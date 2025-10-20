@@ -18,6 +18,10 @@ export const siteConfig = {
   ],
 } as const;
 
+export const siteFeatures = {
+  socialAuth: true,
+} as const;
+
 export const META_THEME_COLORS = {
   light: '#ffffff',
   dark: '#09090b',
