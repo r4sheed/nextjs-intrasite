@@ -1,12 +1,11 @@
 import Link from 'next/link';
 
 import { GitHubLink } from '@/components/github-link';
-import { Icons } from '@/components/icons';
+import { SocialIcons } from '@/components/icons/social-icons';
 import { MainNav } from '@/components/main-nav';
 import { MobileNav } from '@/components/mobile-nav';
 import { ModeSwitcher } from '@/components/mode-switcher';
 import { SiteConfig } from '@/components/site-config';
-// import blocks from "@/registry/__blocks__.json"
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { siteConfig } from '@/lib/config';
@@ -24,7 +23,7 @@ export function SiteHeader() {
             className="hidden size-8 lg:flex"
           >
             <Link href="/">
-              <Icons.logo className="size-5" />
+              <SocialIcons.logo className="size-5" />
               <span className="sr-only">{siteConfig.name}</span>
             </Link>
           </Button>

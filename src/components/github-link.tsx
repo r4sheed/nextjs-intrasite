@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import { Icons } from '@/components/icons';
+import { SocialIcons } from '@/components/icons/social-icons';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { siteConfig } from '@/lib/config';
@@ -11,7 +11,7 @@ export function GitHubLink() {
   return (
     <Button asChild size="sm" variant="ghost" className="h-8 shadow-none">
       <Link href={siteConfig.links.github} target="_blank" rel="noreferrer">
-        <Icons.gitHub />
+        <SocialIcons.github />
         <React.Suspense fallback={<Skeleton className="h-4 w-8" />}>
           <StarsCount />
         </React.Suspense>
