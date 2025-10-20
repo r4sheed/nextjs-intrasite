@@ -9,7 +9,7 @@ import { ROUTES } from '@/lib/navigation';
 import { db } from '@/lib/prisma';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(db),
   providers: [
     Credentials({
       async authorize(credentials) {
