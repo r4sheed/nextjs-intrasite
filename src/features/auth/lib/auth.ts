@@ -1,4 +1,3 @@
-import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import { authConfig } from '@/features/auth/auth.config';
@@ -9,38 +8,26 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     authorized({ request, auth }) {
       return !!auth;
     },
-    async jwt({ token, account, user, trigger, session }) {
-      // The user is not logged in
-      if (!token.sub) {
+    async jwt({ token, user }) {
+      try {
+        // The user is not logged in
+        if (!token.sub) {
+          return token;
+        }
+        // Assign data from user to token
+        if (user) {
+          token.role = user.role;
+        }
         return token;
+      } catch (error) {
+        throw new Error('AUTH_JWT_FAILURE');
       }
-
-      // Access token from provider
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-
-      // Extend token with user data
-      if (user) {
-        token.sub = user.id;
-        token.role = user.role;
-      }
-
-      // Handle session updates from client
-      if (trigger === 'update' && session) {
-        return { ...token, ...session };
-      }
-
-      return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (token.sub && session.user) {
-        session.accessToken = token.accessToken as string;
         session.user.id = token.sub;
-        session.user.role = token.role as UserRole;
+        session.user.role = token.role;
       }
-
-      console.log('Session callback:', { session, token, user });
       return session;
     },
   },

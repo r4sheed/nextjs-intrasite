@@ -13,7 +13,6 @@ import { type Response, failure, success } from '@/lib/response';
 export async function loginUser(
   values: LoginInput
 ): Promise<Response<{ userId: string }>> {
-  // Validate input
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
     return failure(AuthErrors.INVALID_FIELDS(parsed.error.issues));
@@ -22,11 +21,10 @@ export async function loginUser(
   const { email, password } = parsed.data;
 
   try {
-    // Attempt sign in
     const result = await signIn('credentials', {
       email,
       password,
-      redirect: false,
+      redirect: false, // Handle redirection manually to ensure proper response handling
     });
 
     if (!result || result.error) {
@@ -35,15 +33,15 @@ export async function loginUser(
 
     return success({ userId: email });
   } catch (error) {
-    // Handle NextAuth errors
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
           return failure(AuthErrors.INVALID_CREDENTIALS);
-        default:
-          return failure(CoreErrors.INTERNAL_SERVER_ERROR);
       }
     }
+
+    // TODO: Log the error for debugging
+    console.error('Unexpected login error:', error);
 
     // Return generic error for unexpected errors
     return failure(CoreErrors.INTERNAL_SERVER_ERROR);
