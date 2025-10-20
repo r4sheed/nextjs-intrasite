@@ -1,14 +1,3 @@
-/**
- * Auth feature message keys and error codes.
- * Use these keys with the i18n system to render localized text.
- */
-export const AUTH_ERROR_CODES = {
-  INVALID_FIELDS: 'INVALID_FIELDS',
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-  EMAIL_ALREADY_EXISTS: 'EMAIL_ALREADY_EXISTS',
-  UNEXPECTED_ERROR: 'UNEXPECTED_ERROR',
-} as const;
-
 export const AUTH_ERROR_MESSAGES = {
   INVALID_FIELDS: 'auth.errors.invalid_fields', // Please check your input and try again.
   INVALID_CREDENTIALS: 'auth.errors.invalid_credentials', // Invalid email or password.
