@@ -9,19 +9,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return !!auth;
     },
     async jwt({ token, user }) {
-      try {
-        // The user is not logged in
-        if (!token.sub) {
-          return token;
-        }
-        // Assign data from user to token
-        if (user) {
-          token.role = user.role;
-        }
+      // The user is not logged in
+      if (!token.sub) {
         return token;
-      } catch (error) {
-        throw new Error('AUTH_JWT_FAILURE');
       }
+      // Assign data from user to token
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
     },
     async session({ session, token }) {
       if (token.sub && session.user) {
