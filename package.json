@@ -60,9 +60,5 @@
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
-  },
-  "prisma": {
-    "seed": "npx tsx src/prisma/seed.ts",
-    "schema": "src/prisma/schema.prisma"
   }
 }
