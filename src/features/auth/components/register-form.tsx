@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { register } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
-import { SocialApps } from '@/features/auth/components/social-apps';
+import { SocialLogin } from '@/features/auth/components/social-login';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
@@ -29,9 +29,9 @@ import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 
 export const RegisterForm = ({
-  showSocialApps = siteFeatures.socialAuth,
+  showSocial = siteFeatures.socialAuth,
 }: {
-  showSocialApps?: boolean;
+  showSocial?: boolean;
 }) => {
   const { execute, error, isPending } = useAuthAction();
 
@@ -125,13 +125,13 @@ export const RegisterForm = ({
           <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.REGISTER_BUTTON}
           </LoadingButton>
-          {showSocialApps && (
+          {showSocial && (
             <>
               <FieldSeparator>
                 {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
               </FieldSeparator>
               <Field className="grid grid-cols-2 gap-4">
-                <SocialApps />
+                <SocialLogin />
               </Field>
             </>
           )}
