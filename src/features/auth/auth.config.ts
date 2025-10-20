@@ -41,5 +41,7 @@ export const authConfig = {
   ],
   pages: {
     signIn: ROUTES.AUTH.LOGIN,
+    error: ROUTES.ERROR,
   },
+  session: { strategy: 'jwt' },
 } satisfies NextAuthConfig;

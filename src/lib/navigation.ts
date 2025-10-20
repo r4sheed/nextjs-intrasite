@@ -9,6 +9,7 @@ export const ROUTES = {
     FORGOT_PASSWORD: '/forgot-password',
   },
   SETTINGS: '/settings',
+  ERROR: '/error',
 } as const;
 
 export type Routes = typeof ROUTES;
