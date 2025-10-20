@@ -18,21 +18,7 @@ enum UserRole {
   MODERATOR
   USER
 }
- 
-model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole       @default(USER)
-  accounts      Account[]
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
- 
+
 model Account {
   userId            String
   type              String
@@ -52,4 +38,18 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([provider, providerAccountId])
+}
+ 
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole       @default(USER)
+  accounts      Account[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
