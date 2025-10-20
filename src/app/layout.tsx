@@ -4,6 +4,7 @@ import { Providers } from '@/app/providers';
 import { Analytics } from '@/components/analitycs';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { Toaster } from '@/components/ui/sonner';
+import { auth } from '@/features/auth/lib/auth';
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';
 import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
@@ -26,11 +27,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -56,7 +58,7 @@ export default function RootLayout({
           fontVariables
         )}
       >
-        <Providers>
+        <Providers session={session}>
           <main>{children}</main>
           <TailwindIndicator />
           <Toaster position="top-center" />
