@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { FormError } from '@/components/form-error';
 import { LinkUnderline } from '@/components/link-underline';
 import { LoadingButton } from '@/components/loading-button';
-import { FieldGroup, FieldSeparator } from '@/components/ui/field';
+import { Field, FieldGroup, FieldSeparator } from '@/components/ui/field';
 import {
   Form,
   FormControl,
@@ -20,12 +20,19 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { login } from '@/features/auth/actions';
+import { Header } from '@/features/auth/components/header';
+import { SocialApps } from '@/features/auth/components/social-apps';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 
-export const LoginForm = () => {
+export const LoginForm = ({
+  showSocialApps = siteFeatures.socialAuth,
+}: {
+  showSocialApps?: boolean;
+}) => {
   const { execute, error, isPending } = useAuthAction();
 
   const form = useForm<LoginInput>({
@@ -44,14 +51,10 @@ export const LoginForm = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
         <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">
-              {AUTH_UI_MESSAGES.LOGIN_TITLE}
-            </h1>
-            <p className="text-muted-foreground text-balance">
-              {AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
-            </p>
-          </div>
+          <Header
+            title={AUTH_UI_MESSAGES.LOGIN_TITLE}
+            description={AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -102,7 +105,16 @@ export const LoginForm = () => {
           <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.LOGIN_BUTTON}
           </LoadingButton>
-          <FieldSeparator />
+          {showSocialApps && (
+            <>
+              <FieldSeparator>
+                {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
+              </FieldSeparator>
+              <Field className="grid grid-cols-2 gap-4">
+                <SocialApps />
+              </Field>
+            </>
+          )}
           <FormDescription className="text-center">
             {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
             <LinkUnderline>
