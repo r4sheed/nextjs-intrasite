@@ -34,6 +34,10 @@ export const AUTH_UI_MESSAGES = {
   PLACEHOLDER_EMAIL: 'auth.ui.placeholder_email', // Enter your email
   PLACEHOLDER_NAME: 'auth.ui.placeholder_name', // Enter your name
   PLACEHOLDER_PASSWORD: 'auth.ui.placeholder_password', // Enter your password
+  NAME_DESCRIPTION: 'auth.ui.name_description', // Your public display name.
+  EMAIL_DESCRIPTION: 'auth.ui.email_description', // We'll use this to contact you. We will not share your email with anyone else.
+  PASSWORD_DESCRIPTION: 'auth.ui.password_description', // Must be at least 8 characters long.
+  OR_CONTINUE_WITH: 'auth.ui.or_continue_with', // Or continue with
   SUCCESS_LOGIN: 'auth.success.login', // Welcome back!
   LOGIN_FAILED: 'auth.errors.login_failed', // Login failed. Please try again.
   REGISTER_FAILED: 'auth.errors.register_failed', // Registration failed. Please try again.

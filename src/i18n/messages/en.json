@@ -43,7 +43,11 @@
       "login_cta_link": "Sign in",
       "placeholder_email": "Enter your email",
       "placeholder_name": "Enter your name",
-      "placeholder_password": "Enter your password"
+      "placeholder_password": "Enter your password",
+      "name_description": "Your public display name.",
+      "email_description": "We'll use this to contact you. We will not share your email with anyone else.",
+      "password_description": "Must be at least 8 characters long.",
+      "or_continue_with": "Or continue with"
     }
   }
 }
