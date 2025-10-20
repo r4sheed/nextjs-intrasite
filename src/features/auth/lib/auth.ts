@@ -1,61 +1,29 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
 
-import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
-import { verifyUserCredentials } from '@/features/auth/data/user';
-import { loginSchema } from '@/features/auth/schemas';
-import { ROUTES } from '@/lib/navigation';
-import { db } from '@/lib/prisma';
+import { authConfig } from '@/features/auth/auth.config';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
-  providers: [
-    Credentials({
-      async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-
-        if (!parsed.success) {
-          return null;
-        }
-
-        const { email, password } = parsed.data;
-
-        try {
-          // Use the new verifyUserCredentials utility
-          const user = await verifyUserCredentials(email, password);
-          return user;
-        } catch (error) {
-          // If database error occurs, throw it so it can be handled properly
-          throw error;
-        }
-      },
-    }),
-  ],
+  ...authConfig,
   callbacks: {
     authorized({ request, auth }) {
       return !!auth;
     },
-    async session({ session, token }) {
-      if (token.sub) {
-        // Fetch the latest user data from the database
-        const response = await getUserByIdWithoutPassword(token.sub);
-        if (response.status === 'success' && response.data) {
-          const user = response.data;
-          // Update session with fresh user data
-          session.user = {
-            ...session.user,
-            role: user.role,
-          };
-
-          console.log('Updated session user:', session.user);
-        }
+    async jwt({ token, account, user, trigger, session }) {
+      // The user is not logged in
+      if (!token.sub) {
+        return token;
       }
-      return session;
-    },
-    async jwt({ token, user, trigger, session }) {
+
+      // Access token from provider
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+
+      // Extend token with user data
       if (user) {
         token.sub = user.id;
+        token.role = user.role;
       }
 
       // Handle session updates from client
@@ -65,9 +33,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
       return token;
     },
+    async session({ session, token, user }) {
+      if (token.sub && session.user) {
+        session.accessToken = token.accessToken as string;
+        session.user.id = token.sub;
+        session.user.role = token.role as UserRole;
+      }
+
+      console.log('Session callback:', { session, token, user });
+      return session;
+    },
   },
   session: { strategy: 'jwt' },
-  pages: {
-    signIn: ROUTES.AUTH.LOGIN,
-  },
 });
