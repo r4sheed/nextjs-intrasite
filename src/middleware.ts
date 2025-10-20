@@ -10,9 +10,10 @@ import {
 } from '@/lib/routes';
 
 export default auth(req => {
+  const isLoggedIn = !!req.auth;
+
   const url = req.nextUrl ?? new URL(req.url);
   const pathname = url.pathname;
-  const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = pathname.startsWith(AUTH_ROUTE_PREFIX);
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
