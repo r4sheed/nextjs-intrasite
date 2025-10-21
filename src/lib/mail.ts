@@ -1,11 +1,12 @@
 import { Resend } from 'resend';
 
 import { VerificationTemplate } from '@/features/auth/components/email-template';
+import { ROUTES } from '@/lib/navigation';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `https://localhost:3000/verification?token=${token}`;
+  const confirmLink = `http://localhost:3000/${ROUTES.AUTH.VERIFY_EMAIL}?token=${token}`;
 
   const templateProps = {
     url: confirmLink,
