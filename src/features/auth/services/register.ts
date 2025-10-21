@@ -45,7 +45,7 @@ export async function registerUser(
       },
     });
 
-    if (siteFeatures.requireEmailVerification) {
+    if (siteFeatures.emailVerification) {
       const verificationToken = await generateVerificationToken(email);
 
       await sendVerificationEmail(

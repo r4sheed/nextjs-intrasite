@@ -26,7 +26,7 @@ export async function loginUser(
   const { email, password } = parsed.data;
 
   try {
-    if (siteFeatures.requireEmailVerification) {
+    if (siteFeatures.emailVerification) {
       const user = await getUserByEmail(email);
       if (!user) {
         return failure(AuthErrors.INVALID_CREDENTIALS);

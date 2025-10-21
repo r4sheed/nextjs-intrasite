@@ -20,7 +20,7 @@ export const siteConfig = {
 
 export const siteFeatures = {
   socialAuth: true,
-  requireEmailVerification: true,
+  emailVerification: true,
 } as const;
 
 export const META_THEME_COLORS = {

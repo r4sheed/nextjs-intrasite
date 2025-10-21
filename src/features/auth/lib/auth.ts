@@ -26,7 +26,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       // Allow signing in where verification is disabled
-      if (!siteFeatures.requireEmailVerification) {
+      if (!siteFeatures.emailVerification) {
         return true;
       }
 
