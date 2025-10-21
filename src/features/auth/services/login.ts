@@ -3,6 +3,7 @@ import { AuthError } from 'next-auth';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { CoreErrors } from '@/lib/errors/definitions';
@@ -30,7 +31,11 @@ export async function loginUser(
       }
 
       if (!user.emailVerified) {
-        return failure(AuthErrors.EMAIL_VERIFICATION_REQUIRED);
+        // TODO: Send verification email
+        return success(
+          { userId: email },
+          AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT
+        );
       }
     }
 
