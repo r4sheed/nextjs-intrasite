@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react';
 
 import { SocialIcons } from '@/components/icons/social-icons';
 import { Button } from '@/components/ui/button';
-import { AuthProvider } from '@/features/auth/types';
+import { AuthProvider } from '@/features/auth/types/auth-provider';
 import { siteFeatures } from '@/lib/config';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
