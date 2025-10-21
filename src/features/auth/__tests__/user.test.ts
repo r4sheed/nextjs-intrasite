@@ -8,8 +8,8 @@ import {
   getUserByIdWithoutPassword,
   verifyUserCredentials,
 } from '@/features/auth/data/user';
-import { CoreErrors } from '@/lib/errors/definitions';
 import { AppError } from '@/lib/errors/app-error';
+import { CoreErrors } from '@/lib/errors/definitions';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -336,7 +336,9 @@ describe('User Data Layer', () => {
 
       await expect(
         verifyUserCredentials('test@example.com', 'password123')
-      ).rejects.toEqual(CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com'));
+      ).rejects.toEqual(
+        CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com')
+      );
     });
 
     it('should return DATABASE_ERROR response for all user lookup functions when database fails', async () => {
@@ -376,21 +378,29 @@ describe('User Data Layer', () => {
           name === 'getUserById'
             ? CoreErrors.DATABASE_ERROR('getUserById', 'test-user-id')
             : name === 'getUserByEmail'
-            ? CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com')
-            : name === 'getUserByIdWithoutPassword'
-            ? CoreErrors.DATABASE_ERROR('getUserByIdWithoutPassword', 'test-user-id')
-            : name === 'getUserByEmailWithoutPassword'
-            ? CoreErrors.DATABASE_ERROR('getUserByEmailWithoutPassword', 'test@example.com')
-            : name === 'getUser (with ID)'
-            ? CoreErrors.DATABASE_ERROR('getUser', 'test-user-id')
-            : CoreErrors.DATABASE_ERROR('getUser', 'test@example.com')
+              ? CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com')
+              : name === 'getUserByIdWithoutPassword'
+                ? CoreErrors.DATABASE_ERROR(
+                    'getUserByIdWithoutPassword',
+                    'test-user-id'
+                  )
+                : name === 'getUserByEmailWithoutPassword'
+                  ? CoreErrors.DATABASE_ERROR(
+                      'getUserByEmailWithoutPassword',
+                      'test@example.com'
+                    )
+                  : name === 'getUser (with ID)'
+                    ? CoreErrors.DATABASE_ERROR('getUser', 'test-user-id')
+                    : CoreErrors.DATABASE_ERROR('getUser', 'test@example.com')
         );
       }
 
       // Test verifyUserCredentials separately since it throws AppError
       await expect(
         verifyUserCredentials('test@example.com', 'password')
-      ).rejects.toEqual(CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com'));
+      ).rejects.toEqual(
+        CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com')
+      );
     });
   });
 });

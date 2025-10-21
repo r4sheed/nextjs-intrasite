@@ -62,7 +62,7 @@ describe('register action', () => {
   });
 
   it('should return error for email already in use', async () => {
-    const mockResponse = failure(AuthErrorDefinitions.EMAIL_IN_USE);
+    const mockResponse = failure(AuthErrorDefinitions.EMAIL_ALREADY_EXISTS);
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
@@ -73,7 +73,7 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_EMAIL_IN_USE');
+      expect(response.code).toBe('AUTH_EMAIL_ALREADY_EXISTS');
     }
   });
 
