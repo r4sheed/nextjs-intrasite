@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm md:max-w-4xl">
         <AuthWrapper
           image={{
-            src: 'assets/svg/sign-up-pana.svg',
+            src: '/assets/svg/sign-up-pana.svg',
             alt: 'Register Illustration',
           }}
         >

@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm md:max-w-4xl">
         <AuthWrapper
           image={{
-            src: 'assets/svg/tablet-login-pana.svg',
+            src: '/assets/svg/tablet-login-pana.svg',
             alt: 'Login Illustration',
           }}
         >
