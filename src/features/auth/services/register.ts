@@ -7,8 +7,9 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
+import { sendVerificationEmail } from '@/lib/mail';
 import { db } from '@/lib/prisma';
-import { type Response, Status, failure, success } from '@/lib/response';
+import { type Response, failure, success } from '@/lib/response';
 
 /**
  * Register service - handles user registration and auto-login
@@ -45,7 +46,12 @@ export async function registerUser(
     });
 
     if (siteFeatures.requireEmailVerification) {
-      const verificationToken = generateVerificationToken(email);
+      const verificationToken = await generateVerificationToken(email);
+
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token
+      );
 
       return success(
         { userId: email },

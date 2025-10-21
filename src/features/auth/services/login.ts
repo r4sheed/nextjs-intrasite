@@ -4,9 +4,11 @@ import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { CoreErrors } from '@/lib/errors/definitions';
+import { sendVerificationEmail } from '@/lib/mail';
 import { type Response, failure, success } from '@/lib/response';
 
 /**
@@ -31,7 +33,13 @@ export async function loginUser(
       }
 
       if (!user.emailVerified) {
-        // TODO: Send verification email
+        const verificationToken = await generateVerificationToken(email);
+
+        await sendVerificationEmail(
+          verificationToken.email,
+          verificationToken.token
+        );
+
         return success(
           { userId: email },
           AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT
