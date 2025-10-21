@@ -39,8 +39,8 @@ describe('login action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_INVALID_FIELDS');
-      expect(response.error.details).toBeDefined();
+      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.details).toBeDefined();
     }
   });
 
@@ -52,8 +52,8 @@ describe('login action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_INVALID_FIELDS');
-      expect(response.error.details).toBeDefined();
+      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.details).toBeDefined();
     }
   });
 
@@ -68,7 +68,7 @@ describe('login action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_INVALID_CREDENTIALS');
+      expect(response.code).toBe('AUTH_INVALID_CREDENTIALS');
     }
   });
 });

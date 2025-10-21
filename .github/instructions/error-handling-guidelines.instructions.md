@@ -3,7 +3,7 @@ description: 'Enterprise-Level Error Handling & Response Guidelines for Next.js 
 applyTo: '**'
 ---
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Last Updated:** October 2025  
 **Target:** Next.js 15+, TypeScript 5+, PostgreSQL, NextAuth
 
@@ -18,10 +18,11 @@ This document establishes a **unified, type-safe error handling pattern** for la
 1. **Single Return Type**: All server actions return `Response<T>`
 2. **No Throws**: Expected errors are handled via `AppError` and returned, not thrown
 3. **Type Safety**: Status-driven flow using TypeScript discriminated unions
-4. **Composability**: Feature-specific errors extend base definitions without modification
+4. **Flat Structure**: No nested error objects, all properties at top level
 5. **HTTP Standards**: Always use `HTTP_STATUS` constants, never magic numbers
 6. **i18n Ready**: Error messages use translation keys with parameters
 7. **Future-Proof**: Object-based constructors allow easy extension
+8. **Race Condition Free**: State updates ordered correctly (setStatus last)
 
 ---
 
@@ -33,47 +34,81 @@ This document establishes a **unified, type-safe error handling pattern** for la
 // File: src/lib/response.ts
 
 export enum Status {
-  Success = 'success',
-  Error = 'error',
-  Pending = 'pending',
-  Partial = 'partial',
+  Idle = 'idle', // Initial state, no action performed yet
+  Success = 'success', // Action completed successfully
+  Error = 'error', // Action failed with error
+  Pending = 'pending', // Action in progress
+  Partial = 'partial', // Some operations succeeded, some failed
 }
 
-export interface ErrorResponse {
-  status: Status.Error;
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  };
-}
+/**
+ * Message type for i18n support
+ * Simple string or i18n key with params for formatted messages
+ */
+export type Message =
+  | string
+  | { key: string; params?: Record<string, unknown> };
 
-export interface SuccessResponse<TData> {
-  status: Status.Success;
-  data: TData;
-}
-
+/**
+ * Partial error type for batch operations
+ */
 export interface PartialError {
   code: string;
-  message: string;
+  error: Message;
   details?: unknown;
 }
 
-export interface PartialResponse<TData> {
-  status: Status.Partial;
-  data: TData;
-  errors?: PartialError[];
+/**
+ * Idle response - initial state, no action performed yet
+ */
+export interface IdleResponse {
+  status: Status.Idle;
 }
 
+/**
+ * Success response - contains data and optional success message
+ */
+export interface SuccessResponse<TData> {
+  status: Status.Success;
+  data: TData;
+  success?: Message;
+}
+
+/**
+ * Error response - all error details directly on response
+ * No nested objects, simple and clear
+ */
+export interface ErrorResponse {
+  status: Status.Error;
+  error: Message; // Error message (string or i18n key)
+  code: string; // Error code for programmatic handling
+  httpStatus: number; // HTTP status code
+  details?: unknown; // Additional error context
+}
+
+/**
+ * Pending response - operation in progress
+ */
 export interface PendingResponse {
   status: Status.Pending;
 }
 
+/**
+ * Partial response - some operations succeeded, some failed
+ */
+export interface PartialResponse<TData> {
+  status: Status.Partial;
+  data: TData;
+  success?: Message;
+  errors: PartialError[];
+}
+
 export type Response<TData> =
+  | IdleResponse
   | SuccessResponse<TData>
   | ErrorResponse
-  | PartialResponse<TData>
-  | PendingResponse;
+  | PendingResponse
+  | PartialResponse<TData>;
 ```
 
 ### ❌ WRONG: String literal types without enum
@@ -93,6 +128,7 @@ export interface BadResponse<T> {
 - No single source of truth for status values
 - Not type-safe (data might be undefined even when status is 'success')
 - String errors are not structured
+- Missing Idle state causes race conditions in client hooks
 
 ---
 
@@ -103,40 +139,128 @@ export interface BadResponse<T> {
 ```typescript
 // File: src/lib/response.ts
 
-export function success<TData>(data: TData): SuccessResponse<TData> {
+/**
+ * Create idle response
+ */
+export function idle(): IdleResponse {
+  return {
+    status: Status.Idle,
+  };
+}
+
+/**
+ * Create success response
+ * @param data - The response data
+ * @param success - Optional success message (string or i18n key with params)
+ *
+ * @example
+ * success({ userId: '123' })
+ * success({ userId: '123' }, 'Registration successful')
+ * success({ userId: '123' }, { key: 'auth.success.registered', params: { email: 'user@example.com' } })
+ */
+export function success<TData>(
+  data: TData,
+  success?: Message
+): SuccessResponse<TData> {
   return {
     status: Status.Success,
     data,
+    ...(success && { success }),
   };
 }
 
+/**
+ * Create error response from AppError
+ * Automatically serializes AppError for client-server communication
+ *
+ * @example
+ * failure(AuthErrors.INVALID_CREDENTIALS)
+ */
 export function failure(error: AppError): ErrorResponse {
   return {
     status: Status.Error,
-    error: {
-      code: error.code,
-      message:
-        typeof error.message === 'string' ? error.message : error.message.key,
-      details: error.details,
-    },
+    error: error.errorMessage,
+    code: error.code,
+    httpStatus: error.httpStatus,
+    details: error.details,
   };
 }
 
+/**
+ * Create pending response
+ */
+export function pending(): PendingResponse {
+  return {
+    status: Status.Pending,
+  };
+}
+
+/**
+ * Create partial response - some operations succeeded, some failed
+ */
 export function partial<TData>(
   data: TData,
-  errors?: PartialError[]
+  errors: PartialError[],
+  success?: Message
 ): PartialResponse<TData> {
   return {
     status: Status.Partial,
     data,
     errors,
+    ...(success && { success }),
   };
 }
 
-export function pending(): PendingResponse {
-  return {
-    status: Status.Pending,
-  };
+/**
+ * Extract string from Message type (for display purposes)
+ * Note: This only extracts the key, actual i18n formatting happens in components
+ */
+export function getMessage(msg: Message | undefined): string | undefined {
+  if (!msg) return undefined;
+  return typeof msg === 'string' ? msg : msg.key;
+}
+
+/**
+ * Format a Message with i18n support
+ *
+ * @param msg - The message to format (string or i18n object)
+ * @param translator - Optional translation function from your i18n library
+ * @returns Formatted string message
+ *
+ * @example
+ * // Without i18n (returns plain string or key)
+ * formatMessage('Simple error message')
+ *
+ * @example
+ * // With next-intl
+ * import { useTranslations } from 'next-intl';
+ * const t = useTranslations();
+ * formatMessage(response.error, t)
+ *
+ * @example
+ * // With react-i18next
+ * import { useTranslation } from 'react-i18next';
+ * const { t } = useTranslation();
+ * formatMessage(response.error, t)
+ */
+export function formatMessage(
+  msg: Message | undefined,
+  translator?: (key: string, params?: Record<string, unknown>) => string
+): string | undefined {
+  if (!msg) return undefined;
+
+  // Simple string message
+  if (typeof msg === 'string') {
+    return msg;
+  }
+
+  // i18n object with key and params
+  if (translator) {
+    return translator(msg.key, msg.params);
+  }
+
+  // Fallback: return key if no translator provided
+  return msg.key;
 }
 ```
 
@@ -209,19 +333,18 @@ return new AppError({
 ```typescript
 // File: src/lib/errors/app-error.ts
 import { HTTP_STATUS, type HttpStatus } from '@/lib/http-status';
+import { Message } from '@/lib/response';
 
 interface AppErrorParams {
   code: string;
-  message: string | { key: string; params?: Record<string, unknown> };
+  message: Message; // Can be string or { key, params }
   httpStatus?: HttpStatus;
   details?: unknown;
 }
 
 export class AppError extends Error {
   public readonly code: string;
-  public readonly message:
-    | string
-    | { key: string; params?: Record<string, unknown> };
+  public readonly errorMessage: Message; // Message type with i18n support
   public readonly httpStatus: HttpStatus;
   public readonly details?: unknown;
 
@@ -231,15 +354,18 @@ export class AppError extends Error {
     httpStatus = HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details,
   }: AppErrorParams) {
+    // Call Error constructor with string representation for stack traces
     super(typeof message === 'string' ? message : message.key);
     this.code = code;
-    this.message = message;
+    this.errorMessage = message; // Store full Message type (string or i18n object)
     this.httpStatus = httpStatus;
     this.details = details;
 
     // Maintains correct stack trace
     Object.setPrototypeOf(this, new.target.prototype);
-    Error.captureStackTrace?.(this, this.constructor);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
 ```
@@ -405,56 +531,59 @@ export const BadErrors = {
 ### ✅ CORRECT: Type-safe server action with Response<T>
 
 ```typescript
-// File: src/features/auth/actions/login.ts
-
+// File: src/features/auth/actions/register.ts
 'use server';
 
-import type { User } from '@/features/auth/types';
-import { BaseErrorDefinitions } from '@/lib/errors/definitions';
-import { failure, success } from '@/lib/response';
-import { Status } from '@/lib/response';
-import type { Response } from '@/lib/response';
+import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { registerUser } from '@/features/auth/services';
+import { type Response, failure } from '@/lib/response';
 
-import { loginSchema } from '../schemas/login';
-import { loginService } from '../services/login';
+// File: src/features/auth/actions/register.ts
 
-// File: src/features/auth/actions/login.ts
+// File: src/features/auth/actions/register.ts
 
-// File: src/features/auth/actions/login.ts
+// File: src/features/auth/actions/register.ts
 
-// File: src/features/auth/actions/login.ts
-
-// File: src/features/auth/actions/login.ts
-
-export async function loginAction(formData: FormData): Promise<Response<User>> {
-  try {
-    // 1. Parse and validate input
-    const rawData = Object.fromEntries(formData);
-    const validation = loginSchema.safeParse(rawData);
-
-    if (!validation.success) {
-      return failure(
-        BaseErrorDefinitions.VALIDATION_FAILED(validation.error.flatten())
-      );
-    }
-
-    // 2. Call service layer
-    const result = await loginService(validation.data);
-
-    // 3. Return success
-    return success(result);
-  } catch (error) {
-    // 4. Handle unexpected errors
-    console.error('Login action error:', error);
-
-    // If it's an AppError, return it
-    if (error instanceof AppError) {
-      return failure(error);
-    }
-
-    // Otherwise, return generic error
-    return failure(BaseErrorDefinitions.INTERNAL_SERVER_ERROR);
+/**
+ * Register action - validates input and calls service
+ * Always returns Response<T>, never throws
+ */
+export async function register(
+  values: RegisterInput
+): Promise<Response<{ userId: string }>> {
+  // 1. Validate input with Zod
+  const validation = registerSchema.safeParse(values);
+  if (!validation.success) {
+    return failure(AuthErrors.INVALID_FIELDS(validation.error.issues));
   }
+
+  // 2. Call service layer - it returns Response<T>
+  return await registerUser(validation.data);
+}
+```
+
+### Example with success message:
+
+```typescript
+// In service layer:
+export async function registerUser(
+  values: RegisterInput
+): Promise<Response<{ userId: string }>> {
+  // ... validation, user creation ...
+
+  if (siteFeatures.requireEmailConfirmation) {
+    const verificationToken = generateVerificationToken(email);
+
+    // Return success with message (second parameter)
+    return success(
+      { userId: email },
+      'Verification e-mail sent!' // Message shown to user
+    );
+  }
+
+  // Return success without message (auto-redirect will happen)
+  return success({ userId: email });
 }
 ```
 
@@ -549,59 +678,207 @@ export async function badLoginService(email: string, password: string) {
 
 ## 8. Client-Side Handling
 
-### ✅ CORRECT: Status-driven UI logic with i18n
+### ✅ CORRECT: Using useAction hook with structured messages
 
 ```typescript
-// File: src/features/auth/components/login-form.tsx
-
+// File: src/features/auth/components/register-form.tsx
 'use client';
 
-import { useTransition } from 'react';
-import { useTranslations } from 'next-intl'; // or your i18n solution
-import { loginAction } from '../actions/login';
-import { Status } from '@/lib/response';
-import { toast } from 'sonner';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
-export function LoginForm() {
-  const [isPending, startTransition] = useTransition();
-  const t = useTranslations();
+import { FormError } from '@/components/form-error';
+import { FormSuccess } from '@/components/form-success';
+import { LoadingButton } from '@/components/loading-button';
+import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { register } from '@/features/auth/actions';
+import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
+import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
-  async function handleSubmit(formData: FormData) {
-    startTransition(async () => {
-      const response = await loginAction(formData);
+export function RegisterForm() {
+  // useAuthAction wraps useAction with redirect logic
+  const { execute, message, isPending } = useAuthAction();
 
-      switch (response.status) {
-        case Status.Success:
-          toast.success(t('auth.success.login'));
-          // response.data is typed as User
-          console.log(response.data.email);
-          break;
+  const form = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { email: '', password: '', name: '' },
+  });
 
-        case Status.Error:
-          // Handle i18n message
-          const errorMessage = typeof response.error.message === 'string'
-            ? response.error.message
-            : t(response.error.message.key, response.error.message.params);
-
-          toast.error(errorMessage);
-          console.error('Error code:', response.error.code);
-          break;
-
-        case Status.Pending:
-          // Handle pending state if needed
-          break;
-      }
-    });
-  }
+  const onSubmit = (values: RegisterInput) => {
+    execute(() => register(values));
+  };
 
   return (
-    <form action={handleSubmit}>
-      {/* form fields */}
-      <button type="submit" disabled={isPending}>
-        {isPending ? t('common.loading') : t('auth.buttons.login')}
-      </button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" disabled={isPending} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* Display success/error messages */}
+        <FormError message={message.error} />
+        <FormSuccess message={message.success} />
+
+        <LoadingButton type="submit" loading={isPending}>
+          Register
+        </LoadingButton>
+      </form>
+    </Form>
   );
+}
+```
+
+### useAction hook implementation:
+
+```typescript
+// File: src/hooks/use-action.ts
+'use client';
+
+import { useCallback, useState, useTransition } from 'react';
+
+import type { Message, Response } from '@/lib/response';
+import { Status, getMessage } from '@/lib/response';
+
+// File: src/hooks/use-action.ts
+
+// File: src/hooks/use-action.ts
+
+// File: src/hooks/use-action.ts
+
+export function useAction<TData>() {
+  const [status, setStatus] = useState<Status>(Status.Idle);
+  const [successMsg, setSuccessMsg] = useState<string | undefined>(undefined);
+  const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
+  const [data, setData] = useState<TData | undefined>(undefined);
+  const [isPending, startTransition] = useTransition();
+
+  const execute = useCallback(
+    async (action: () => Promise<Response<TData>>): Promise<void> => {
+      setErrorMsg(undefined);
+      setSuccessMsg(undefined);
+      setStatus(Status.Pending);
+
+      startTransition(async () => {
+        try {
+          const response = await action();
+
+          switch (response.status) {
+            case Status.Success:
+              setData(response.data);
+              setSuccessMsg(getMessage(response.success));
+              setStatus(response.status); // IMPORTANT: Set status LAST
+              break;
+
+            case Status.Error:
+              setErrorMsg(getMessage(response.error));
+              setStatus(response.status); // IMPORTANT: Set status LAST
+              break;
+
+            case Status.Partial:
+              setData(response.data);
+              setSuccessMsg(getMessage(response.success));
+              if (response.errors.length > 0) {
+                setErrorMsg(getMessage(response.errors[0].error));
+              }
+              setStatus(response.status); // IMPORTANT: Set status LAST
+              break;
+
+            case Status.Pending:
+              setStatus(response.status);
+              break;
+          }
+        } catch (err) {
+          setErrorMsg('An unexpected error occurred. Please try again.');
+          setStatus(Status.Error); // IMPORTANT: Set status LAST
+          console.error('useAction error:', err);
+        }
+      });
+    },
+    []
+  );
+
+  const reset = useCallback(() => {
+    setStatus(Status.Idle);
+    setSuccessMsg(undefined);
+    setErrorMsg(undefined);
+    setData(undefined);
+  }, []);
+
+  return {
+    execute,
+    reset,
+    status,
+    message: {
+      success: successMsg,
+      error: errorMsg,
+    },
+    data,
+    isPending: status === Status.Pending || isPending,
+  };
+}
+```
+
+### useAuthAction with redirect logic:
+
+```typescript
+// File: src/features/auth/hooks/use-auth-action.tsx
+'use client';
+
+import { useCallback, useEffect, useRef } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import { useAction } from '@/hooks/use-action';
+import { type Response, Status } from '@/lib/response';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+
+// File: src/features/auth/hooks/use-auth-action.tsx
+
+// File: src/features/auth/hooks/use-auth-action.tsx
+
+// File: src/features/auth/hooks/use-auth-action.tsx
+
+export function useAuthAction<TData>(options: { redirectTo?: string } = {}) {
+  const router = useRouter();
+  const actionState = useAction<TData>();
+  const hasRedirectedRef = useRef(false);
+
+  const { redirectTo = DEFAULT_LOGIN_REDIRECT } = options;
+
+  const execute = useCallback(
+    async (action: () => Promise<Response<TData>>): Promise<void> => {
+      hasRedirectedRef.current = false;
+      await actionState.execute(action);
+    },
+    [actionState]
+  );
+
+  // Handle redirect on success (only if no success message)
+  useEffect(() => {
+    if (actionState.status === Status.Success && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
+
+      // If success message exists, don't redirect (show message instead)
+      if (actionState.message.success) {
+        return;
+      }
+
+      // No message, redirect to target page
+      router.push(redirectTo);
+    }
+  }, [actionState.status, actionState.message.success, redirectTo, router]);
+
+  return actionState;
 }
 ```
 
@@ -631,177 +908,6 @@ async function badHandleSubmit(formData: FormData) {
 - Poor UX
 
 ---
-
-## 9. useApiResponse Hook
-
-### ✅ CORRECT: Reusable hook for API response state
-
-```typescript
-// File: src/hooks/use-api-response.ts
-import { useState, useTransition } from 'react';
-
-import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
-
-import { type Response, Status } from '@/lib/response';
-
-interface UseApiResponseOptions<TData> {
-  onSuccess?: (data: TData) => void;
-  onError?: (error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  }) => void;
-  showSuccessToast?: boolean;
-  showErrorToast?: boolean;
-  successMessage?: string;
-}
-
-export function useApiResponse<TData>(
-  options: UseApiResponseOptions<TData> = {}
-) {
-  const [data, setData] = useState<TData | null>(null);
-  const [error, setError] = useState<{
-    code: string;
-    message: string;
-    details?: unknown;
-  } | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const t = useTranslations();
-
-  const {
-    onSuccess,
-    onError,
-    showSuccessToast = true,
-    showErrorToast = true,
-    successMessage,
-  } = options;
-
-  async function execute<TResult = TData>(
-    action: () => Promise<Response<TResult>>
-  ): Promise<Response<TResult>> {
-    setError(null);
-
-    return new Promise(resolve => {
-      startTransition(async () => {
-        const response = await action();
-
-        switch (response.status) {
-          case Status.Success:
-            setData(response.data as unknown as TData);
-
-            if (showSuccessToast) {
-              toast.success(successMessage || t('common.success'));
-            }
-
-            onSuccess?.(response.data as unknown as TData);
-            break;
-
-          case Status.Error:
-            const errorMessage =
-              typeof response.error.message === 'string'
-                ? response.error.message
-                : t(response.error.message.key, response.error.message.params);
-
-            const errorObj = {
-              code: response.error.code,
-              message: errorMessage,
-              details: response.error.details,
-            };
-
-            setError(errorObj);
-
-            if (showErrorToast) {
-              toast.error(errorMessage);
-            }
-
-            onError?.(errorObj);
-            break;
-
-          case Status.Partial:
-            setData(response.data as unknown as TData);
-
-            if (response.errors && response.errors.length > 0) {
-              const firstError = response.errors[0];
-              const partialErrorMessage =
-                typeof firstError.message === 'string'
-                  ? firstError.message
-                  : t(firstError.message.key, firstError.message.params);
-
-              if (showErrorToast) {
-                toast.warning(partialErrorMessage);
-              }
-            }
-            break;
-
-          case Status.Pending:
-            // Handle pending if needed
-            break;
-        }
-
-        resolve(response);
-      });
-    });
-  }
-
-  function reset() {
-    setData(null);
-    setError(null);
-  }
-
-  return {
-    data,
-    error,
-    isPending,
-    execute,
-    reset,
-  };
-}
-```
-
-### Usage Example
-
-```typescript
-// File: src/features/auth/components/login-form-with-hook.tsx
-
-'use client';
-
-import { useApiResponse } from '@/hooks/use-api-response';
-import { loginAction } from '../actions/login';
-import type { User } from '../types';
-
-export function LoginFormWithHook() {
-  const { execute, isPending, error } = useApiResponse<User>({
-    onSuccess: (user) => {
-      console.log('Logged in:', user.email);
-      // Redirect or update state
-    },
-    successMessage: 'Welcome back!',
-  });
-
-  async function handleSubmit(formData: FormData) {
-    await execute(() => loginAction(formData));
-  }
-
-  return (
-    <form action={handleSubmit}>
-      {error && (
-        <div className="error">
-          {error.message}
-          <small>Code: {error.code}</small>
-        </div>
-      )}
-
-      <input type="email" name="email" required />
-      <input type="password" name="password" required />
-
-      <button type="submit" disabled={isPending}>
-        {isPending ? 'Logging in...' : 'Log in'}
-      </button>
-    </form>
-  );
-}
-```
 
 ### ❌ WRONG: Scattered state management
 
@@ -837,23 +943,19 @@ function BadLoginForm() {
 
 ---
 
-## 10. Batch Operations (Partial Responses)
+## 9. Batch Operations (Partial Responses)
 
 ### ✅ CORRECT: Using partial status
 
 ```typescript
 // File: src/features/bookmarks/actions/delete-many.ts
-
 'use server';
 
 import { AppError } from '@/lib/errors/app-error';
 import { failure, partial, success } from '@/lib/response';
 import type { Response } from '@/lib/response';
-import type { PartialError } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
-
-// File: src/features/bookmarks/actions/delete-many.ts
 
 // File: src/features/bookmarks/actions/delete-many.ts
 
@@ -873,12 +975,9 @@ export async function deleteManyBookmarksAction(
       deletedIds.push(id);
     } catch (error) {
       if (error instanceof AppError) {
-        const errorMessage =
-          typeof error.message === 'string' ? error.message : error.message.key;
-
         errors.push({
           code: error.code,
-          message: errorMessage,
+          error: error.errorMessage,
           details: { id },
         });
       }
@@ -892,7 +991,7 @@ export async function deleteManyBookmarksAction(
 
   // All failed
   if (deletedIds.length === 0) {
-    return failure(errors[0] as any);
+    return failure(errors[0]); // Return first error as AppError
   }
 
   // Partial success
@@ -920,7 +1019,7 @@ export async function badDeleteMany(ids: string[]) {
 
 ---
 
-## 11. Rules Summary
+## 10. Rules Summary
 
 ### MUST DO ✅
 
@@ -934,8 +1033,9 @@ export async function badDeleteMany(ids: string[]) {
 8. **Throw `AppError` in services**, catch in actions
 9. **Use i18n keys with params** for error messages
 10. **Use `partial` status** for batch operations with mixed results
-11. **Use `useApiResponse` hook** to reduce boilerplate
-12. **Log unexpected errors** before returning `INTERNAL_SERVER_ERROR`
+11. **Log unexpected errors** before returning `INTERNAL_SERVER_ERROR`
+12. **Initialize hook state with `Status.Idle`** to prevent race conditions
+13. **Set status LAST** in state updates (setData/setMsg first, setStatus last)
 
 ### NEVER DO ❌
 
@@ -951,10 +1051,12 @@ export async function badDeleteMany(ids: string[]) {
 10. **Don't skip input validation**
 11. **Don't mix error handling patterns** across features
 12. **Don't use positional parameters** in AppError constructor
+13. **Don't start with `Status.Pending`** as initial state (causes disabled forms)
+14. **Don't call `setStatus()` before setting data/messages** (causes race conditions)
 
 ---
 
-## 12. File Structure
+## 11. File Structure
 
 ```
 src/
@@ -965,9 +1067,6 @@ src/
 │       ├── app-error.ts         # AppError class
 │       ├── definitions.ts       # Base error definitions
 │       └── index.ts             # Exports all errors
-│
-├── hooks/
-│   └── use-api-response.ts     # Reusable API response hook
 │
 ├── features/
 │   ├── auth/
@@ -998,7 +1097,7 @@ src/
 
 ---
 
-## 13. TypeScript Configuration
+## 12. TypeScript Configuration
 
 Ensure strict mode is enabled:
 
@@ -1016,7 +1115,7 @@ Ensure strict mode is enabled:
 
 ---
 
-## 14. Testing
+## 13. Testing
 
 ### ✅ CORRECT: Testing error responses
 
@@ -1061,7 +1160,7 @@ describe('loginAction', () => {
 
 ---
 
-## 15. i18n Message Files
+## 14. i18n Message Files
 
 ### Example i18n structure
 
@@ -1116,6 +1215,6 @@ This pattern provides:
 ✅ **Testability**: Responses are easy to test and mock  
 ✅ **Maintainability**: Single source of truth for errors and statuses  
 ✅ **Future-Proof**: Object-based constructors allow easy extension  
-✅ **Reduced Boilerplate**: `useApiResponse` hook eliminates repetitive code
+✅ **Race Condition Free**: State updates ordered correctly (setStatus last)
 
 Follow these guidelines for all new features and refactor existing code to match this pattern.

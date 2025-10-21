@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { useAction } from '@/hooks/use-action';
 import { type Response, Status } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
@@ -13,56 +14,48 @@ interface UseAuthActionOptions {
 }
 
 /**
- * Hook for handling auth actions with proper error handling
- * Simplifies form submission and error display
+ * Auth-specific hook with redirect logic
+ * If success message exists, no redirect (e.g., email verification)
+ * Otherwise redirects on success
  */
 export function useAuthAction<TData>(options: UseAuthActionOptions = {}) {
   const router = useRouter();
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [isPending, startTransition] = useTransition();
+  const actionState = useAction<TData>();
+  const hasRedirectedRef = useRef(false);
 
   const { onSuccess, redirectTo = DEFAULT_LOGIN_REDIRECT } = options;
 
-  async function execute(
-    action: () => Promise<Response<TData>>
-  ): Promise<void> {
-    setError(undefined);
+  const execute = useCallback(
+    async (action: () => Promise<Response<TData>>): Promise<void> => {
+      hasRedirectedRef.current = false;
+      await actionState.execute(action);
+    },
+    [actionState]
+  );
 
-    startTransition(async () => {
-      try {
-        const response = await action();
+  // Handle redirect on success (only if no success message)
+  useEffect(() => {
+    if (actionState.status === Status.Success && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
 
-        if (response.status === Status.Error) {
-          // Extract error message from AppError.message
-          const errorMsg =
-            typeof response.error.message === 'string'
-              ? response.error.message
-              : (response.error.message as { key: string }).key;
-
-          setError(errorMsg);
-          return;
-        }
-
-        if (response.status === Status.Success) {
-          setError(undefined);
-
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            router.push(redirectTo);
-          }
-        }
-      } catch (err) {
-        // Handle unexpected errors
-        setError('An unexpected error occurred. Please try again.');
+      // If success message exists, don't redirect (show message instead)
+      if (actionState.message.success) {
+        return;
       }
-    });
-  }
 
-  return {
-    execute,
-    error,
-    setError,
-    isPending,
-  };
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(redirectTo);
+      }
+    }
+  }, [
+    actionState.status,
+    actionState.message.success,
+    onSuccess,
+    redirectTo,
+    router,
+  ]);
+
+  return actionState;
 }

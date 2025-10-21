@@ -42,8 +42,8 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_INVALID_FIELDS');
-      expect(response.error.details).toBeDefined();
+      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.details).toBeDefined();
     }
   });
 
@@ -56,8 +56,8 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_INVALID_FIELDS');
-      expect(response.error.details).toBeDefined();
+      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.details).toBeDefined();
     }
   });
 
@@ -73,7 +73,7 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_EMAIL_IN_USE');
+      expect(response.code).toBe('AUTH_EMAIL_IN_USE');
     }
   });
 
@@ -89,7 +89,7 @@ describe('register action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.error.code).toBe('AUTH_REGISTRATION_FAILED');
+      expect(response.code).toBe('AUTH_REGISTRATION_FAILED');
     }
   });
 });

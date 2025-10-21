@@ -86,9 +86,9 @@ describe('User Data Layer', () => {
 
       expect(response.status).toBe(Status.Error);
       if (response.status === Status.Error) {
-        expect(response.error.code).toBe('DATABASE_ERROR');
-        expect(response.error.i18nMessage).toEqual(
-          CoreErrors.DATABASE_ERROR('getUserById', 'user-123').i18nMessage
+        expect(response.code).toBe('DATABASE_ERROR');
+        expect(response.error).toEqual(
+          CoreErrors.DATABASE_ERROR('getUserById', 'user-123').errorMessage
         );
       }
     });
@@ -414,25 +414,26 @@ describe('User Data Layer', () => {
         ).toBe(Status.Error);
         if (response.status === Status.Error) {
           expect(
-            response.error.code,
+            response.code,
             `Function ${name} should return DATABASE_ERROR code`
           ).toBe('DATABASE_ERROR');
           expect(
-            response.error.message,
+            response.error,
             `Function ${name} should return i18n message object`
           ).toBeDefined();
           // Check if message is an object with key property
           if (
-            typeof response.error.message === 'object' &&
-            response.error.message !== null
+            typeof response.error === 'object' &&
+            response.error !== null &&
+            'key' in response.error
           ) {
             expect(
-              response.error.message,
+              response.error.key,
               `Function ${name} should have correct error key`
             ).toBe('errors.database_error');
           }
           expect(
-            response.error.details,
+            response.details,
             `Function ${name} should include error details`
           ).toBeDefined();
         }

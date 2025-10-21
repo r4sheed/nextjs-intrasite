@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
+import { FormSuccess } from '@/components/form-success';
 import { LinkUnderline } from '@/components/link-underline';
 import { LoadingButton } from '@/components/loading-button';
 import { Field, FieldGroup, FieldSeparator } from '@/components/ui/field';
@@ -27,9 +28,10 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
+import { Status } from '@/lib/response';
 
 export const RegisterForm = () => {
-  const { execute, error, isPending } = useAuthAction();
+  const { execute, status, message, isPending } = useAuthAction();
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -40,7 +42,11 @@ export const RegisterForm = () => {
     },
   });
 
+  // Consider the form completed when the action succeeded and a success message exists
+  const isCompleted = status === Status.Success && Boolean(message.success);
+
   const onSubmit = (values: RegisterInput) => {
+    if (isCompleted) return;
     execute(() => register(values));
   };
 
@@ -65,7 +71,7 @@ export const RegisterForm = () => {
                     {...field}
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
                     autoComplete="name"
-                    disabled={isPending}
+                    disabled={isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -87,7 +93,7 @@ export const RegisterForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={isPending}
+                    disabled={isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -109,7 +115,7 @@ export const RegisterForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="new-password"
-                    disabled={isPending}
+                    disabled={isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -119,8 +125,13 @@ export const RegisterForm = () => {
               </FormItem>
             )}
           />
-          <FormError message={error} />
-          <LoadingButton type="submit" loading={isPending}>
+          <FormError message={message.error} />
+          <FormSuccess message={message.success} />
+          <LoadingButton
+            type="submit"
+            loading={isPending}
+            disabled={isPending || isCompleted}
+          >
             {AUTH_UI_MESSAGES.REGISTER_BUTTON}
           </LoadingButton>
           {showSocial && (

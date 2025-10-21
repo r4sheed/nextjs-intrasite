@@ -1,8 +1,9 @@
 import { HTTP_STATUS, type HttpStatusCode } from '@/lib/http-status';
+import { Message } from '@/lib/response';
 
 interface AppErrorParams {
   code: string;
-  message: string | { key: string; params?: Record<string, unknown> };
+  message: Message;
   httpStatus?: HttpStatusCode;
   details?: unknown;
 }
@@ -13,9 +14,7 @@ interface AppErrorParams {
  */
 export class AppError extends Error {
   public readonly code: string;
-  public readonly i18nMessage:
-    | string
-    | { key: string; params?: Record<string, unknown> };
+  public readonly errorMessage: Message; // Message type with i18n support
   public readonly httpStatus: HttpStatusCode;
   public readonly details?: unknown;
 
@@ -25,9 +24,10 @@ export class AppError extends Error {
     httpStatus = HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details,
   }: AppErrorParams) {
+    // Call Error constructor with string representation for stack traces
     super(typeof message === 'string' ? message : message.key);
     this.code = code;
-    this.i18nMessage = message;
+    this.errorMessage = message; // Store full Message type (string or i18n object)
     this.httpStatus = httpStatus;
     this.details = details;
 

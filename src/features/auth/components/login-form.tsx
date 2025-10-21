@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
+import { FormSuccess } from '@/components/form-success';
 import { LinkUnderline } from '@/components/link-underline';
 import { LoadingButton } from '@/components/loading-button';
 import { Field, FieldGroup, FieldSeparator } from '@/components/ui/field';
@@ -39,7 +40,7 @@ export const LoginForm = () => {
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
       : '';
 
-  const { execute, error, isPending } = useAuthAction();
+  const { execute, message, isPending } = useAuthAction();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -109,7 +110,8 @@ export const LoginForm = () => {
               </FormItem>
             )}
           />
-          <FormError message={error || urlError} />
+          <FormSuccess message={message.success} />
+          <FormError message={message.error || urlError} />
           <LoadingButton type="submit" loading={isPending}>
             {AUTH_UI_MESSAGES.LOGIN_BUTTON}
           </LoadingButton>
