@@ -1,8 +1,10 @@
 import { AuthError } from 'next-auth';
 
+import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { siteFeatures } from '@/lib/config';
 import { CoreErrors } from '@/lib/errors/definitions';
 import { type Response, failure, success } from '@/lib/response';
 
@@ -21,6 +23,17 @@ export async function loginUser(
   const { email, password } = parsed.data;
 
   try {
+    if (siteFeatures.requireEmailConfirmation) {
+      const user = await getUserByEmail(email);
+      if (!user) {
+        return failure(AuthErrors.INVALID_CREDENTIALS);
+      }
+
+      if (!user.emailVerified) {
+        return failure(AuthErrors.EMAIL_VERIFICATION_REQUIRED);
+      }
+    }
+
     const result = await signIn('credentials', {
       email,
       password,

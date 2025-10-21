@@ -28,7 +28,7 @@ export async function registerUser(
   // Check if user already exists
   const user = await getUserByEmail(email);
   if (user) {
-    return failure(AuthError.EMAIL_IN_USE);
+    return failure(AuthError.EMAIL_VERIFICATION_REQUIRED);
   }
 
   // Hash password

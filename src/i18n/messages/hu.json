@@ -14,14 +14,15 @@
   "auth": {
     "errors": {
       "invalid_credentials": "Hibás email cím vagy jelszó.",
-      "email_in_use": "Ez az email cím már regisztrálva van.",
+      "email_already_exists": "Ez az email cím már regisztrálva van.",
       "invalid_fields": "Kérjük, ellenőrizze az adatokat és próbálja újra.",
       "user_not_found": "A {email} email címmel nem található felhasználó.",
       "registration_failed": "A regisztráció sikertelen. Kérjük, próbálja újra.",
       "callback_error": "Hitelesítési visszahívás sikertelen. Kérjük, próbálja újra.",
       "login_failed": "A bejelentkezés sikertelen. Kérjük, próbálja újra.",
       "register_failed": "A regisztráció sikertelen. Kérjük, próbálja újra.",
-      "oauth_account_not_linked": "Ez az email cím már használatban van másik szolgáltatóval."
+      "oauth_account_not_linked": "Ez az email cím már használatban van másik szolgáltatóval.",
+      "email_verification_required": "Meg kell erősítened az email címed mielőtt bejelentkeznél."
     },
     "success": {
       "login": "Üdvözöljük!",
