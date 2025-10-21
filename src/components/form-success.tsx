@@ -1,29 +1,22 @@
-import { CircleCheck } from 'lucide-react';
+import { CheckCircle2Icon } from 'lucide-react';
 
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-} from '@/components/ui/item';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface FormSuccessProps {
+  title?: string;
   message?: string;
 }
 
-export const FormSuccess = ({ message }: FormSuccessProps) => {
+export const FormSuccess = ({ title, message }: FormSuccessProps) => {
   if (!message) return null;
 
   return (
-    <Item variant="outline" size="sm" className="bg-emerald-500/10">
-      <ItemMedia>
-        <CircleCheck className="size-5 text-green-500" />
-      </ItemMedia>
-      <ItemContent>
-        <ItemDescription className="text-emerald-500">
-          {message}
-        </ItemDescription>
-      </ItemContent>
-    </Item>
+    <Alert className="bg-emerald-500/10 text-emerald-500">
+      <CheckCircle2Icon />
+      {title && <AlertTitle>{title}</AlertTitle>}
+      <AlertDescription className='text-emerald-500"'>
+        <p>{message}</p>
+      </AlertDescription>
+    </Alert>
   );
 };

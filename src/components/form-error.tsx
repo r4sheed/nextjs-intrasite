@@ -1,29 +1,22 @@
-import { TriangleAlert } from 'lucide-react';
+import { AlertCircleIcon } from 'lucide-react';
 
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-} from '@/components/ui/item';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface FormErrorProps {
+  title?: string;
   message?: string;
 }
 
-export const FormError = ({ message }: FormErrorProps) => {
+export const FormError = ({ title, message }: FormErrorProps) => {
   if (!message) return null;
 
   return (
-    <Item variant="outline" size="sm" className="bg-destructive/10">
-      <ItemMedia>
-        <TriangleAlert className="text-destructive size-5" />
-      </ItemMedia>
-      <ItemContent>
-        <ItemDescription className="text-destructive">
-          {message}
-        </ItemDescription>
-      </ItemContent>
-    </Item>
+    <Alert variant="destructive" className="bg-destructive/10">
+      <AlertCircleIcon />
+      {title && <AlertTitle>{title}</AlertTitle>}
+      <AlertDescription>
+        <p>{message}</p>
+      </AlertDescription>
+    </Alert>
   );
 };
