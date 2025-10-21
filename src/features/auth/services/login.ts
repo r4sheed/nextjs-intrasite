@@ -33,7 +33,7 @@ export async function loginUser(
       }
 
       if (!user.emailVerified) {
-        const verificationToken = await generateVerificationToken(email);
+        const verificationToken = await generateVerificationToken(user.email);
 
         await sendVerificationEmail(
           verificationToken.email,
