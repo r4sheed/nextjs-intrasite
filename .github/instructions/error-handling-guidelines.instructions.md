@@ -440,9 +440,9 @@ export const AuthErrorDefinitions = {
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
   }),
 
-  EMAIL_IN_USE: new AppError({
-    code: 'AUTH_EMAIL_IN_USE',
-    message: { key: 'auth.errors.email_in_use' },
+  EMAIL_ALREADY_EXISTS: new AppError({
+    code: 'AUTH_EMAIL_ALREADY_EXISTS',
+    message: { key: 'auth.errors.email_already_exists' },
     httpStatus: HTTP_STATUS.CONFLICT,
   }),
 
@@ -538,6 +538,8 @@ import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 import { type Response, failure } from '@/lib/response';
+
+// File: src/features/auth/actions/register.ts
 
 // File: src/features/auth/actions/register.ts
 
@@ -755,6 +757,8 @@ import { Status, getMessage } from '@/lib/response';
 
 // File: src/hooks/use-action.ts
 
+// File: src/hooks/use-action.ts
+
 export function useAction<TData>() {
   const [status, setStatus] = useState<Status>(Status.Idle);
   const [successMsg, setSuccessMsg] = useState<string | undefined>(undefined);
@@ -841,6 +845,8 @@ import { useRouter } from 'next/navigation';
 import { useAction } from '@/hooks/use-action';
 import { type Response, Status } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+
+// File: src/features/auth/hooks/use-auth-action.tsx
 
 // File: src/features/auth/hooks/use-auth-action.tsx
 
@@ -956,6 +962,8 @@ import { failure, partial, success } from '@/lib/response';
 import type { Response } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
+
+// File: src/features/bookmarks/actions/delete-many.ts
 
 // File: src/features/bookmarks/actions/delete-many.ts
 
@@ -1179,7 +1187,7 @@ describe('loginAction', () => {
   "auth": {
     "errors": {
       "invalid_credentials": "Invalid email or password.",
-      "email_in_use": "This email is already registered.",
+      "email_already_exists": "This email is already registered.",
       "user_not_found": "User with email {email} could not be found."
     },
     "success": {
