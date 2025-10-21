@@ -3,13 +3,12 @@ import bcrypt from 'bcryptjs';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthError } from '@/features/auth/lib/errors';
+import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 import { type Response, Status, failure, success } from '@/lib/response';
-
-import { AUTH_UI_MESSAGES } from '../lib/messages';
 
 /**
  * Register service - handles user registration and auto-login
@@ -27,11 +26,8 @@ export async function registerUser(
   const { email, password, name } = parsed.data;
 
   // Check if user already exists
-  const response = await getUserByEmail(email);
-  if (response.status === Status.Error) {
-    return response;
-  }
-  if (response.status === Status.Success && response.data) {
+  const user = await getUserByEmail(email);
+  if (user) {
     return failure(AuthError.EMAIL_IN_USE);
   }
 

@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 
 import { CoreErrors } from '@/lib/errors/definitions';
 import { db } from '@/lib/prisma';
-import { type Response, failure, success } from '@/lib/response';
 
 /**
  * Data access layer for User entity
@@ -50,19 +49,21 @@ async function findUser<T = User>(
   operation: string,
   where: { id: string } | { email: string },
   select?: Record<string, boolean>
-): Promise<Response<T | null>> {
+): Promise<T | null> {
   try {
     const user = await db.user.findUnique({
       where,
       ...(select && { select }),
     });
 
-    return success(user as T | null);
+    return user as T | null;
   } catch (error) {
     const identifier = ('id' in where ? where.id : where.email) || 'unknown';
     console.error(`[${operation}] Database error for ${identifier}:`, error);
 
-    return failure(CoreErrors.DATABASE_ERROR(operation, identifier));
+    // Service layer should throw AppError for expected failures so callers can
+    // handle or convert them to Responses at the action layer.
+    throw CoreErrors.DATABASE_ERROR(operation, identifier);
   }
 }
 
@@ -73,43 +74,33 @@ async function findUser<T = User>(
  */
 export async function getUser(
   options: UserLookupOptions
-): Promise<Response<User | UserWithoutPassword | null>> {
+): Promise<User | UserWithoutPassword | null> {
   const { id, email, includePassword = true } = options;
 
   // Prioritize ID if provided
   if (id) {
-    const response = includePassword
+    return includePassword
       ? await findUser('getUser', { id })
       : await findUser<UserWithoutPassword>(
           'getUser',
           { id },
           USER_WITHOUT_PASSWORD_SELECT
         );
-
-    if (response.status === 'success') {
-      return success(response.data);
-    }
-    return response;
   }
 
   // Fall back to email if no ID provided
   if (email) {
-    const response = includePassword
+    return includePassword
       ? await findUser('getUser', { email })
       : await findUser<UserWithoutPassword>(
           'getUser',
           { email },
           USER_WITHOUT_PASSWORD_SELECT
         );
-
-    if (response.status === 'success') {
-      return success(response.data);
-    }
-    return response;
   }
 
   // Neither ID nor email provided
-  return success(null);
+  return null;
 }
 
 /**
@@ -117,11 +108,8 @@ export async function getUser(
  * @param userId - The user's unique identifier
  * @returns Response with user object if found, error response on database errors
  */
-export async function getUserById(
-  userId: string
-): Promise<Response<User | null>> {
-  const response = await findUser('getUserById', { id: userId });
-  return response;
+export async function getUserById(userId: string): Promise<User | null> {
+  return await findUser('getUserById', { id: userId });
 }
 
 /**
@@ -129,11 +117,8 @@ export async function getUserById(
  * @param email - The user's email address
  * @returns Response with user object if found, error response on database errors
  */
-export async function getUserByEmail(
-  email: string
-): Promise<Response<User | null>> {
-  const response = await findUser('getUserByEmail', { email });
-  return response;
+export async function getUserByEmail(email: string): Promise<User | null> {
+  return await findUser('getUserByEmail', { email });
 }
 
 /**
@@ -143,13 +128,12 @@ export async function getUserByEmail(
  */
 export async function getUserByIdWithoutPassword(
   userId: string
-): Promise<Response<UserWithoutPassword | null>> {
-  const response = await findUser<UserWithoutPassword>(
+): Promise<UserWithoutPassword | null> {
+  return await findUser<UserWithoutPassword>(
     'getUserByIdWithoutPassword',
     { id: userId },
     USER_WITHOUT_PASSWORD_SELECT
   );
-  return response;
 }
 
 /**
@@ -159,13 +143,12 @@ export async function getUserByIdWithoutPassword(
  */
 export async function getUserByEmailWithoutPassword(
   email: string
-): Promise<Response<UserWithoutPassword | null>> {
-  const response = await findUser<UserWithoutPassword>(
+): Promise<UserWithoutPassword | null> {
+  return await findUser<UserWithoutPassword>(
     'getUserByEmailWithoutPassword',
     { email },
     USER_WITHOUT_PASSWORD_SELECT
   );
-  return response;
 }
 
 /**
@@ -180,32 +163,16 @@ export async function verifyUserCredentials(
   password: string
 ): Promise<UserWithoutPassword | null> {
   // Fetch user with password
-  const userResponse = await getUserByEmail(email);
+  const user = await getUserByEmail(email);
 
-  if (userResponse.status === 'error') {
-    // Throw the database error instead of returning it
-    throw new Error('Database error occurred');
-  }
+  if (!user || !user.password) return null;
 
-  if (userResponse.status === 'success') {
-    const user = userResponse.data;
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!user || !user.password) {
-      return null;
-    }
+  if (!isPasswordValid) return null;
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return null;
-    }
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  }
-
-  // Handle other response types (pending, partial) - though unlikely for this operation
-  return null;
+  // Return user without password
+  const { password: _, ...userWithoutPassword } = user;
+  return userWithoutPassword;
 }

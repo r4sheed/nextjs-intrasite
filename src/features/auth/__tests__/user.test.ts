@@ -9,7 +9,7 @@ import {
   verifyUserCredentials,
 } from '@/features/auth/data/user';
 import { CoreErrors } from '@/lib/errors/definitions';
-import { Status } from '@/lib/response';
+import { AppError } from '@/lib/errors/app-error';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -57,11 +57,8 @@ describe('User Data Layer', () => {
 
       const response = await getUserById('user-123');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-        expect(response.data?.id).toBe('user-123');
-      }
+      expect(response).toEqual(mockUser);
+      expect(response?.id).toBe('user-123');
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-123' },
       });
@@ -72,25 +69,16 @@ describe('User Data Layer', () => {
 
       const response = await getUserById('nonexistent-user');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toBeNull();
-      }
+      expect(response).toBeNull();
     });
 
     it('should return error when database fails', async () => {
       const dbError = new Error('Database connection failed');
       mockFindUnique.mockRejectedValue(dbError);
 
-      const response = await getUserById('user-123');
-
-      expect(response.status).toBe(Status.Error);
-      if (response.status === Status.Error) {
-        expect(response.code).toBe('DATABASE_ERROR');
-        expect(response.error).toEqual(
-          CoreErrors.DATABASE_ERROR('getUserById', 'user-123').errorMessage
-        );
-      }
+      await expect(getUserById('user-123')).rejects.toEqual(
+        CoreErrors.DATABASE_ERROR('getUserById', 'user-123')
+      );
     });
   });
 
@@ -112,11 +100,8 @@ describe('User Data Layer', () => {
 
       const response = await getUserByEmail('test@example.com');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-        expect(response.data?.email).toBe('test@example.com');
-      }
+      expect(response).toEqual(mockUser);
+      expect(response?.email).toBe('test@example.com');
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
       });
@@ -127,10 +112,7 @@ describe('User Data Layer', () => {
 
       const response = await getUserByEmail('nonexistent@example.com');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toBeNull();
-      }
+      expect(response).toBeNull();
     });
   });
 
@@ -151,11 +133,8 @@ describe('User Data Layer', () => {
 
       const response = await getUserByIdWithoutPassword('user-123');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-        expect(response.data).not.toHaveProperty('password');
-      }
+      expect(response).toEqual(mockUser);
+      expect(response).not.toHaveProperty('password');
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-123' },
         select: {
@@ -189,11 +168,8 @@ describe('User Data Layer', () => {
 
       const response = await getUserByEmailWithoutPassword('test@example.com');
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-        expect(response.data).not.toHaveProperty('password');
-      }
+      expect(response).toEqual(mockUser);
+      expect(response).not.toHaveProperty('password');
     });
   });
 
@@ -219,10 +195,7 @@ describe('User Data Layer', () => {
         includePassword: true,
       });
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-      }
+      expect(response).toEqual(mockUser);
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-123' },
       });
@@ -248,10 +221,7 @@ describe('User Data Layer', () => {
         includePassword: true,
       });
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-      }
+      expect(response).toEqual(mockUser);
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
       });
@@ -276,20 +246,14 @@ describe('User Data Layer', () => {
         includePassword: false,
       });
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toEqual(mockUser);
-        expect(response.data).not.toHaveProperty('password');
-      }
+      expect(response).toEqual(mockUser);
+      expect(response).not.toHaveProperty('password');
     });
 
     it('should return success with null when neither ID nor email provided', async () => {
       const response = await getUser({});
 
-      expect(response.status).toBe(Status.Success);
-      if (response.status === Status.Success) {
-        expect(response.data).toBeNull();
-      }
+      expect(response).toBeNull();
       expect(mockFindUnique).not.toHaveBeenCalled();
     });
   });
@@ -372,7 +336,7 @@ describe('User Data Layer', () => {
 
       await expect(
         verifyUserCredentials('test@example.com', 'password123')
-      ).rejects.toThrow('Database error occurred');
+      ).rejects.toEqual(CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com'));
     });
 
     it('should return DATABASE_ERROR response for all user lookup functions when database fails', async () => {
@@ -406,43 +370,27 @@ describe('User Data Layer', () => {
       ];
 
       for (const { name, fn } of functionsToTest) {
-        const response = await fn();
-
-        expect(
-          response.status,
-          `Function ${name} should return error status`
-        ).toBe(Status.Error);
-        if (response.status === Status.Error) {
-          expect(
-            response.code,
-            `Function ${name} should return DATABASE_ERROR code`
-          ).toBe('DATABASE_ERROR');
-          expect(
-            response.error,
-            `Function ${name} should return i18n message object`
-          ).toBeDefined();
-          // Check if message is an object with key property
-          if (
-            typeof response.error === 'object' &&
-            response.error !== null &&
-            'key' in response.error
-          ) {
-            expect(
-              response.error.key,
-              `Function ${name} should have correct error key`
-            ).toBe('errors.database_error');
-          }
-          expect(
-            response.details,
-            `Function ${name} should include error details`
-          ).toBeDefined();
-        }
+        await expect(fn()).rejects.toEqual(
+          // Match the appropriate AppError for each operation by using the same
+          // operation/identifier mapping as the data layer.
+          name === 'getUserById'
+            ? CoreErrors.DATABASE_ERROR('getUserById', 'test-user-id')
+            : name === 'getUserByEmail'
+            ? CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com')
+            : name === 'getUserByIdWithoutPassword'
+            ? CoreErrors.DATABASE_ERROR('getUserByIdWithoutPassword', 'test-user-id')
+            : name === 'getUserByEmailWithoutPassword'
+            ? CoreErrors.DATABASE_ERROR('getUserByEmailWithoutPassword', 'test@example.com')
+            : name === 'getUser (with ID)'
+            ? CoreErrors.DATABASE_ERROR('getUser', 'test-user-id')
+            : CoreErrors.DATABASE_ERROR('getUser', 'test@example.com')
+        );
       }
 
-      // Test verifyUserCredentials separately since it throws errors instead of returning Response
+      // Test verifyUserCredentials separately since it throws AppError
       await expect(
         verifyUserCredentials('test@example.com', 'password')
-      ).rejects.toThrow('Database error occurred');
+      ).rejects.toEqual(CoreErrors.DATABASE_ERROR('getUserByEmail', 'test@example.com'));
     });
   });
 });
