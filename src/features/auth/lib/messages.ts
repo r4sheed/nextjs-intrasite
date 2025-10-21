@@ -32,4 +32,5 @@ export const AUTH_UI_MESSAGES = {
   LOGIN_FAILED: 'auth.errors.login_failed', // Login failed. Please try again.
   REGISTER_FAILED: 'auth.errors.register_failed', // Registration failed. Please try again.
   SUCCESS_REGISTER: 'auth.success.register', // Account created successfully!
+  EMAIL_VERIFICATION_SENT: 'auth.success.email_verification_sent', // A verification email has been sent to your address ({email}). Please check your inbox and follow the instructions to verify your account.
 } as const;

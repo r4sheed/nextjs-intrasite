@@ -25,7 +25,8 @@
     },
     "success": {
       "login": "Üdvözöljük!",
-      "register": "Fiók sikeresen létrehozva!"
+      "register": "Fiók sikeresen létrehozva!",
+      "email_verification_sent": "Egy megerősítő e-mailt küldtünk az e-mail címedre ({email}). Kérjük, ellenőrizd a postafiókodat és kövesd az utasításokat a fiókod megerősítéséhez."
     },
     "ui": {
       "register_title": "Fiók létrehozása",

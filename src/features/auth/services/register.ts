@@ -3,9 +3,13 @@ import bcrypt from 'bcryptjs';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import { AuthErrorDefinitions as AuthError } from '@/features/auth/lib/errors';
+import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
-import { type Response, failure, success } from '@/lib/response';
+import { type Response, Status, failure, success } from '@/lib/response';
+
+import { AUTH_UI_MESSAGES } from '../lib/messages';
 
 /**
  * Register service - handles user registration and auto-login
@@ -24,10 +28,10 @@ export async function registerUser(
 
   // Check if user already exists
   const response = await getUserByEmail(email);
-  if (response.status === 'error') {
+  if (response.status === Status.Error) {
     return response;
   }
-  if (response.status === 'success' && response.data) {
+  if (response.status === Status.Success && response.data) {
     return failure(AuthError.EMAIL_IN_USE);
   }
 
@@ -44,16 +48,25 @@ export async function registerUser(
       },
     });
 
-    // Automatically sign in the user after registration
-    const signInResult = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
+    if (siteFeatures.requireEmailConfirmation) {
+      const verificationToken = generateVerificationToken(email);
 
-    if (!signInResult || signInResult.error) {
-      // User is created but not signed in, they can login manually
-      // Don't throw error, just return success
+      return success(
+        { userId: email },
+        { key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT, params: { email } }
+      );
+    } else {
+      // Automatically sign in the user after registration
+      const signInResult = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (!signInResult || signInResult.error) {
+        // User is created but not signed in, they can login manually
+        // Don't throw error, just return success
+      }
     }
 
     return success({ userId: email });
