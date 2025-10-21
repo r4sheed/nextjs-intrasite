@@ -17,8 +17,10 @@ export const AUTH_ERROR_MESSAGES = {
 export const AUTH_UI_MESSAGES = {
   REGISTER_TITLE: 'auth.ui.register_title', // Create an account
   LOGIN_TITLE: 'auth.ui.login_title', // Sign in
+  EMAIL_VERIFICATION_TITLE: 'auth.ui.email_verification', // Email verification
   REGISTER_SUBTITLE: 'auth.ui.register_subtitle', // Enter your details to create your account
   LOGIN_SUBTITLE: 'auth.ui.login_subtitle', // Enter your email and password to sign in
+  EMAIL_VERIFICATION_SUBTITLE: 'auth.ui.email_verification_subtitle', // Confirming your verification
   EMAIL_LABEL: 'auth.ui.email_label', // Email
   NAME_LABEL: 'auth.ui.name_label', // Name
   PASSWORD_LABEL: 'auth.ui.password_label', // Password

@@ -32,8 +32,10 @@
     "ui": {
       "register_title": "Create an account",
       "login_title": "Sign in",
+      "email_verification": "Email verification",
       "register_subtitle": "Enter your details to create your account",
       "login_subtitle": "Enter your email and password to sign in",
+      "email_verification_subtitle": "Confirming your verification",
       "email_label": "Email",
       "name_label": "Name",
       "password_label": "Password",

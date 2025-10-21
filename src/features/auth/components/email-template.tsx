@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import { email } from 'zod';
-
 interface VerificationTemplateProps {
   url: string;
   companyName: string;

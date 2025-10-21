@@ -32,8 +32,10 @@
     "ui": {
       "register_title": "Fiók létrehozása",
       "login_title": "Bejelentkezés",
+      "email_verification": "Email megerősítése",
       "register_subtitle": "Add meg az adataidat a fiók létrehozásához",
       "login_subtitle": "Add meg az email címedet és jelszavadat a bejelentkezéshez",
+      "email_verification_subtitle": "Email megerősítése folyamatban",
       "email_label": "Email cím",
       "name_label": "Név",
       "password_label": "Jelszó",
