@@ -19,8 +19,8 @@ export const siteConfig = {
 } as const;
 
 export const siteFeatures = {
-  socialAuth: true,
-  emailVerification: true,
+  socialAuth: true, // Enables authentication via OAuth providers (e.g., Google, GitHub) - See AuthProvider for supported providers.
+  emailVerification: true, // Require email verification for login or registration
 } as const;
 
 export const META_THEME_COLORS = {
