@@ -44,7 +44,7 @@ export async function registerUser(
       },
     });
 
-    if (siteFeatures.requireEmailConfirmation) {
+    if (siteFeatures.requireEmailVerification) {
       const verificationToken = generateVerificationToken(email);
 
       return success(

@@ -547,6 +547,8 @@ import { type Response, failure } from '@/lib/response';
 
 // File: src/features/auth/actions/register.ts
 
+// File: src/features/auth/actions/register.ts
+
 /**
  * Register action - validates input and calls service
  * Always returns Response<T>, never throws
@@ -574,7 +576,7 @@ export async function registerUser(
 ): Promise<Response<{ userId: string }>> {
   // ... validation, user creation ...
 
-  if (siteFeatures.requireEmailConfirmation) {
+  if (siteFeatures.requireEmailVerification) {
     const verificationToken = generateVerificationToken(email);
 
     // Return success with message (second parameter)
@@ -759,6 +761,8 @@ import { Status, getMessage } from '@/lib/response';
 
 // File: src/hooks/use-action.ts
 
+// File: src/hooks/use-action.ts
+
 export function useAction<TData>() {
   const [status, setStatus] = useState<Status>(Status.Idle);
   const [successMsg, setSuccessMsg] = useState<string | undefined>(undefined);
@@ -845,6 +849,8 @@ import { useRouter } from 'next/navigation';
 import { useAction } from '@/hooks/use-action';
 import { type Response, Status } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+
+// File: src/features/auth/hooks/use-auth-action.tsx
 
 // File: src/features/auth/hooks/use-auth-action.tsx
 
@@ -962,6 +968,8 @@ import { failure, partial, success } from '@/lib/response';
 import type { Response } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
+
+// File: src/features/bookmarks/actions/delete-many.ts
 
 // File: src/features/bookmarks/actions/delete-many.ts
 

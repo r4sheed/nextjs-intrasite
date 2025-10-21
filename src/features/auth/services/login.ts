@@ -24,7 +24,7 @@ export async function loginUser(
   const { email, password } = parsed.data;
 
   try {
-    if (siteFeatures.requireEmailConfirmation) {
+    if (siteFeatures.requireEmailVerification) {
       const user = await getUserByEmail(email);
       if (!user) {
         return failure(AuthErrors.INVALID_CREDENTIALS);
@@ -52,7 +52,10 @@ export async function loginUser(
     return success({ userId: email });
   } catch (error) {
     if (error instanceof AuthError) {
+      // https://authjs.dev/reference/core/errors
       switch (error.type) {
+        case 'AccessDenied': // Thrown when the execution of the signIn callback fails or if it returns false.
+          return failure(AuthErrors.EMAIL_VERIFICATION_REQUIRED);
         case 'CredentialsSignin':
           return failure(AuthErrors.INVALID_CREDENTIALS);
         case 'CallbackRouteError':
