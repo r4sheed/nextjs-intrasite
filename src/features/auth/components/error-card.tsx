@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import {
@@ -9,6 +10,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { ROUTES } from '@/lib/navigation';
 
 export function ErrorCard() {
   const searchParams = useSearchParams();
@@ -31,8 +33,8 @@ export function ErrorCard() {
       </EmptyHeader>
       <EmptyContent>
         <EmptyDescription>
-          Need help? <a href="/login">Try signing in again</a> or{' '}
-          <a href="#">Contact support</a>
+          Need help? <Link href={ROUTES.AUTH.LOGIN}>Try signing in again</Link>{' '}
+          or <Link href="#">Contact support</Link>
         </EmptyDescription>
       </EmptyContent>
     </Empty>
