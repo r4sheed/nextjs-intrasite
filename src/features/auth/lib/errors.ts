@@ -36,18 +36,6 @@ export const invalidCredentials = () =>
   });
 
 /**
- * 409 - Email already exists error.
- * Used during user registration when the email is already in use.
- * @returns AppError with status 409.
- */
-export const emailAlreadyExists = () =>
-  new AppError({
-    code: AUTH_ERROR_CODES.AUTH_EMAIL_ALREADY_EXISTS,
-    message: { key: AUTH_ERROR_MESSAGES.EMAIL_ALREADY_EXISTS },
-    httpStatus: HTTP_STATUS.CONFLICT,
-  });
-
-/**
  * 404 - User not found error.
  * Used when trying to access or process a user by email, but the user doesn't exist.
  * @param email The email address that could not be found.
@@ -62,6 +50,18 @@ export const userNotFound = (email: string) =>
     },
     httpStatus: HTTP_STATUS.NOT_FOUND,
     details: { email },
+  });
+
+/**
+ * 409 - Email already exists error.
+ * Used during user registration when the email is already in use.
+ * @returns AppError with status 409.
+ */
+export const emailAlreadyExists = () =>
+  new AppError({
+    code: AUTH_ERROR_CODES.AUTH_EMAIL_ALREADY_EXISTS,
+    message: { key: AUTH_ERROR_MESSAGES.EMAIL_ALREADY_EXISTS },
+    httpStatus: HTTP_STATUS.CONFLICT,
   });
 
 /**
@@ -98,4 +98,30 @@ export const emailVerificationRequired = () =>
     code: AUTH_ERROR_CODES.AUTH_EMAIL_VERIFICATION_REQUIRED,
     message: { key: AUTH_ERROR_MESSAGES.EMAIL_VERIFICATION_REQUIRED },
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
+  });
+
+/**
+ * 404 - Token not found or invalid.
+ * Used when a verification/reset token can't be located or is invalid.
+ * @param tokenId Optional token identifier for debugging/details
+ */
+export const tokenNotFound = (tokenId?: string) =>
+  new AppError({
+    code: AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND,
+    message: { key: AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND },
+    httpStatus: HTTP_STATUS.NOT_FOUND,
+    details: tokenId ? { tokenId } : undefined,
+  });
+
+/**
+ * 410 - Token expired.
+ * Used when a token was valid but has passed its expiry time.
+ * @param tokenId Optional token identifier for debugging/details
+ */
+export const tokenExpired = (tokenId?: string) =>
+  new AppError({
+    code: AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED,
+    message: { key: AUTH_ERROR_MESSAGES.TOKEN_EXPIRED },
+    httpStatus: HTTP_STATUS.GONE,
+    details: tokenId ? { tokenId } : undefined,
   });

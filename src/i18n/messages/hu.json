@@ -23,7 +23,9 @@
       "login_failed": "A bejelentkezés sikertelen. Kérjük, próbálja újra.",
       "register_failed": "A regisztráció sikertelen. Kérjük, próbálja újra.",
       "oauth_account_not_linked": "Ez az email cím már használatban van másik szolgáltatóval.",
-      "email_verification_required": "Meg kell erősítened az email címed mielőtt bejelentkeznél."
+      "email_verification_required": "Meg kell erősítened az email címed mielőtt bejelentkeznél.",
+      "token_not_found": "A kért token nem található vagy érvénytelen.",
+      "token_expired": "A token lejárt. Kérjük, kérjen újat."
     },
     "success": {
       "login": "Üdvözöljük!",

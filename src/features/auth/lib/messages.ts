@@ -11,6 +11,8 @@ export const AUTH_ERROR_MESSAGES = {
   REGISTRATION_FAILED: 'auth.errors.registration_failed', // Registration failed. Please try again.
   CALLBACK_ERROR: 'auth.errors.callback_error', // Authentication callback failed. Please try again.
   EMAIL_VERIFICATION_REQUIRED: 'auth.errors.email_verification_required', // You need to verify your email before logging in.
+  TOKEN_NOT_FOUND: 'auth.errors.token_not_found', // Token not found or invalid.
+  TOKEN_EXPIRED: 'auth.errors.token_expired', // The token has expired.
 } as const;
 
 export const AUTH_UI_MESSAGES = {
