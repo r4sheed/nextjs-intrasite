@@ -87,7 +87,7 @@ export type Response<TData> =
 export function idle(): IdleResponse {
   return {
     status: Status.Idle,
-  };
+  } as const;
 }
 
 /**
@@ -108,7 +108,7 @@ export function success<TData>(
     status: Status.Success,
     data,
     ...(success && { success }),
-  };
+  } as const;
 }
 
 /**
@@ -125,7 +125,7 @@ export function failure(error: AppError): ErrorResponse {
     code: error.code,
     httpStatus: error.httpStatus,
     details: error.details,
-  };
+  } as const;
 }
 
 /**
@@ -134,7 +134,7 @@ export function failure(error: AppError): ErrorResponse {
 export function pending(): PendingResponse {
   return {
     status: Status.Pending,
-  };
+  } as const;
 }
 
 /**
@@ -150,7 +150,7 @@ export function partial<TData>(
     data,
     errors,
     ...(success && { success }),
-  };
+  } as const;
 }
 
 /**
