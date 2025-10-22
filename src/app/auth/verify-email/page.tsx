@@ -1,5 +1,5 @@
 import { AuthWrapper } from '@/features/auth/components/auth-wrapper';
-import { EmailVerifyForm } from '@/features/auth/components/email-verify-form';
+import { EmailVerificationForm } from '@/features/auth/components/email-verification-form';
 
 export default function VerifyEmailPage() {
   return (
@@ -11,7 +11,7 @@ export default function VerifyEmailPage() {
             alt: 'Verification Illustration',
           }}
         >
-          <EmailVerifyForm />
+          <EmailVerificationForm />
         </AuthWrapper>
       </div>
     </div>
