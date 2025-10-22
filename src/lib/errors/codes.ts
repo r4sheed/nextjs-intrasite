@@ -8,6 +8,7 @@ export const ERROR_CODES = {
   FORBIDDEN: 'FORBIDDEN',
   NOT_FOUND: 'NOT_FOUND',
   DATABASE_ERROR: 'DATABASE_ERROR',
+  UNCAUGHT_EXCEPTION: 'UNCAUGHT_EXCEPTION',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
