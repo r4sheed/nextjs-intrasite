@@ -8,7 +8,7 @@ import { AuthProvider } from '@/features/auth/types/auth-provider';
 import { siteFeatures } from '@/lib/config';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
-export const SocialLogin = () => {
+export const SocialProviders = () => {
   if (!siteFeatures.socialAuth) {
     return null;
   }

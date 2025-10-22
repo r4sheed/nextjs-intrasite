@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { login } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
-import { SocialLogin } from '@/features/auth/components/social-login';
+import { SocialProviders } from '@/features/auth/components/social-providers';
 import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import {
   AUTH_ERROR_MESSAGES,
@@ -121,7 +121,7 @@ export const LoginForm = () => {
                 {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
               </FieldSeparator>
               <Field className="grid grid-cols-2 gap-4">
-                <SocialLogin />
+                <SocialProviders />
               </Field>
             </>
           )}
