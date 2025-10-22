@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect } from 'react';
 
+import { useFormState } from 'react-dom';
+
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -20,9 +22,9 @@ export const EmailVerifyForm = () => {
 
   const { execute, message, isPending } = useAuthAction();
 
-  const onSubmit = useCallback(() => {
-    console.log(token);
-  }, [token]);
+  const onSubmit = useCallback(() => {}, [token]);
+
+  useFormState;
 
   useEffect(() => {
     onSubmit();
@@ -38,9 +40,9 @@ export const EmailVerifyForm = () => {
         <div className="flex w-full items-center justify-center p-6 md:p-8">
           <Spinner className="size-12"></Spinner>
         </div>
-        <Button>
-          <Link href={ROUTES.AUTH.LOGIN}>Back to login</Link>
-        </Button>
+        <Link href={ROUTES.AUTH.LOGIN}>
+          <Button className="w-full">Back to login</Button>
+        </Link>
       </FieldGroup>
     </div>
   );
