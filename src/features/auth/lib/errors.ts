@@ -1,5 +1,5 @@
 import { AUTH_ERROR_MESSAGES } from '@/features/auth/lib/messages';
-import { AppError } from '@/lib/errors/app-error';
+import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
 /**

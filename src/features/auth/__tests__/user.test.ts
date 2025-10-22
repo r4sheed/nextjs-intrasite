@@ -8,7 +8,7 @@ import {
   getUserByIdWithoutPassword,
   verifyUserCredentials,
 } from '@/features/auth/data/user';
-import { databaseError } from '@/lib/errors/definitions';
+import { databaseError } from '@/lib/errors';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({

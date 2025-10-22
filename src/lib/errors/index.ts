@@ -18,5 +18,5 @@ export {
   notFound,
   databaseError,
   invalidCredentials,
-} from './definitions';
+} from './helpers';
 export type { HttpStatusCode } from '@/lib/http-status';

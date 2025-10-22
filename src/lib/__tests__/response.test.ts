@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { AppError } from '@/lib/errors/app-error';
+import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 import {
   Status,

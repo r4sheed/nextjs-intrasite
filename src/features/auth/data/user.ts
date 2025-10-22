@@ -1,7 +1,7 @@
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-import { databaseError } from '@/lib/errors/definitions';
+import { databaseError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 
 /**

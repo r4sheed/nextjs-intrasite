@@ -2,7 +2,7 @@
  * Unified Response Pattern for Server Actions
  * All server actions must return Response<T>
  */
-import { AppError } from '@/lib/errors/app-error';
+import { AppError } from '@/lib/errors';
 
 export enum Status {
   Idle = 'idle',
