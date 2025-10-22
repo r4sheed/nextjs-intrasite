@@ -30,7 +30,8 @@
     "success": {
       "login": "Üdvözöljük!",
       "register": "Fiók sikeresen létrehozva!",
-      "email_verification_sent": "Egy megerősítő e-mailt küldtünk az e-mail címedre ({email}). Kérjük, ellenőrizd a postafiókodat és kövesd az utasításokat a fiókod megerősítéséhez."
+      "email_verification_sent": "Egy megerősítő e-mailt küldtünk az e-mail címedre ({email}). Kérjük, ellenőrizd a postafiókodat és kövesd az utasításokat a fiókod megerősítéséhez.",
+      "email_verified": "E-mail címed megerősítve! Most már be tudsz jelentkezni."
     },
     "ui": {
       "register_title": "Fiók létrehozása",
@@ -55,7 +56,12 @@
       "name_description": "A nyilvános megjelenítendő neved.",
       "email_description": "Ezt használjuk a kapcsolatfelvételhez. Nem osztjuk meg az email címedet senki mással.",
       "password_description": "Legalább 8 karakter hosszúnak kell lennie.",
-      "or_continue_with": "Vagy folytasd ezzel"
+      "or_continue_with": "Vagy folytasd ezzel",
+      "verification_success_title": "Megerősítés sikeres",
+      "verification_failed_title": "Megerősítés sikertelen",
+      "verification_processing_title": "Kérés feldolgozása",
+      "verification_processing_description": "Kérjük, várj, amíg ellenőrizzük az email címedet...",
+      "back_to_login_button": "Vissza a bejelentkezéshez"
     }
   }
 }

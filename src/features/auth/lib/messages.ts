@@ -44,4 +44,11 @@ export const AUTH_UI_MESSAGES = {
   REGISTER_FAILED: 'auth.errors.register_failed', // Registration failed. Please try again.
   SUCCESS_REGISTER: 'auth.success.register', // Account created successfully!
   EMAIL_VERIFICATION_SENT: 'auth.success.email_verification_sent', // A verification email has been sent to your address ({email}). Please check your inbox and follow the instructions to verify your account.
+  EMAIL_VERIFIED: 'auth.success.email_verified', // Email verified! You can now log in.
+  VERIFICATION_SUCCESS_TITLE: 'auth.ui.verification_success_title', // Verification Success
+  VERIFICATION_FAILED_TITLE: 'auth.ui.verification_failed_title', // Verification Failed
+  VERIFICATION_PROCESSING_TITLE: 'auth.ui.verification_processing_title', // Processing Request
+  VERIFICATION_PROCESSING_DESCRIPTION:
+    'auth.ui.verification_processing_description', // Please wait while we verify your email...
+  BACK_TO_LOGIN_BUTTON: 'auth.ui.back_to_login_button', // Back to login
 } as const;

@@ -30,7 +30,8 @@
     "success": {
       "login": "Welcome back!",
       "register": "Account created successfully!",
-      "email_verification_sent": "A verification email has been sent to your address ({email}). Please check your inbox and follow the instructions to verify your account."
+      "email_verification_sent": "A verification email has been sent to your address ({email}). Please check your inbox and follow the instructions to verify your account.",
+      "email_verified": "Email verified! You can now log in."
     },
     "ui": {
       "register_title": "Create an account",
@@ -55,7 +56,12 @@
       "name_description": "Your public display name.",
       "email_description": "We'll use this to contact you. We will not share your email with anyone else.",
       "password_description": "Must be at least 8 characters long.",
-      "or_continue_with": "Or continue with"
+      "or_continue_with": "Or continue with",
+      "verification_success_title": "Verification Success",
+      "verification_failed_title": "Verification Failed",
+      "verification_processing_title": "Processing Request",
+      "verification_processing_description": "Please wait while we verify your email...",
+      "back_to_login_button": "Back to login"
     }
   }
 }
