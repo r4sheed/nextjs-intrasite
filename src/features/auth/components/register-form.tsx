@@ -71,7 +71,7 @@ export const RegisterForm = () => {
                     {...field}
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
                     autoComplete="name"
-                    disabled={isPending || isCompleted}
+                    disabled={isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -93,7 +93,7 @@ export const RegisterForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={isPending || isCompleted}
+                    disabled={isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -115,7 +115,7 @@ export const RegisterForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="new-password"
-                    disabled={isPending || isCompleted}
+                    disabled={isPending}
                   />
                 </FormControl>
                 <FormDescription>
