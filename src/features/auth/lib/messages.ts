@@ -1,6 +1,5 @@
 /**
  * Centralized i18n keys for auth feature errors/messages
- * This file is referenced by `src/features/auth/lib/errors.ts`
  */
 export const AUTH_ERROR_MESSAGES = {
   INVALID_FIELDS: 'auth.errors.invalid_fields', // Please check your input and try again.
