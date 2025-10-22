@@ -16,7 +16,7 @@ This document establishes a **unified, type-safe error handling pattern** for la
 ### Core Principles
 
 1. **Single Return Type**: All server actions return `Response<T>`
-2. **No Throws**: Expected errors are handled via `AppError` and returned, not thrown
+2. **AppError-driven flow**: Expected, domain-level errors are represented with `AppError`. Services may throw `AppError` instances; server actions should catch them and convert to `Response<T>` using the helpers in `src/lib/response.ts` (for example `failure`).
 3. **Type Safety**: Status-driven flow using TypeScript discriminated unions
 4. **Flat Structure**: No nested error objects, all properties at top level
 5. **HTTP Standards**: Always use `HTTP_STATUS` constants, never magic numbers
@@ -136,9 +136,9 @@ export interface BadResponse<T> {
 
 ### ✅ CORRECT: Factory Functions with Status Enum
 
-```typescript
 // File: src/lib/response.ts
 
+```typescript
 /**
  * Create idle response
  */
@@ -289,22 +289,26 @@ export async function badLoginAction(data: LoginInput) {
 
 ### ✅ CORRECT: Centralized constants with type
 
-```typescript
 // File: src/lib/http-status.ts
 
+```typescript
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
   UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
   INTERNAL_SERVER_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
 } as const;
 
-export type HttpStatus = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
+export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
 ```
 
 ### ❌ WRONG: Magic numbers
@@ -330,22 +334,23 @@ return new AppError({
 
 ### ✅ CORRECT: Object-based constructor with i18n support
 
-```typescript
 // File: src/lib/errors/app-error.ts
-import { HTTP_STATUS, type HttpStatus } from '@/lib/http-status';
+
+```typescript
+import { HTTP_STATUS, type HttpStatusCode } from '@/lib/http-status';
 import { Message } from '@/lib/response';
 
 interface AppErrorParams {
   code: string;
   message: Message; // Can be string or { key, params }
-  httpStatus?: HttpStatus;
+  httpStatus?: HttpStatusCode;
   details?: unknown;
 }
 
 export class AppError extends Error {
   public readonly code: string;
   public readonly errorMessage: Message; // Message type with i18n support
-  public readonly httpStatus: HttpStatus;
+  public readonly httpStatus: HttpStatusCode;
   public readonly details?: unknown;
 
   constructor({
@@ -403,107 +408,42 @@ export class BadAppError extends Error {
 
 ## 5. Error Definitions
 
-### ✅ CORRECT: Centralized with composition and i18n
+### ✅ CORRECT: Centralized helpers + messages + codes with i18n
+
+The repository centralizes base error data and helpers across three files:
+
+- `src/lib/errors/codes.ts` — `ERROR_CODES` and `ErrorCode` type (string constants)
+- `src/lib/errors/messages.ts` — `ERROR_MESSAGES` (i18n keys)
+- `src/lib/errors/helpers.ts` — factory helpers that create `AppError` instances (e.g. `internalServerError`, `validationFailed`, `unauthorized`, `forbidden`, `notFound`, `databaseError`)
+
+Example (helpers usage):
+
+// File: src/lib/errors/helpers.ts
 
 ```typescript
-// File: src/lib/errors/definitions.ts
+import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
-import { AppError } from './app-error';
+import { ERROR_CODES } from './codes';
+import { ERROR_MESSAGES } from './messages';
 
-export const BaseErrorDefinitions = {
-  INTERNAL_SERVER_ERROR: new AppError({
-    code: 'INTERNAL_SERVER_ERROR',
-    message: { key: 'errors.internal_server_error' },
+export const internalServerError = () =>
+  new AppError({
+    code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+    message: { key: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  }),
+  });
 
-  VALIDATION_FAILED: (details: unknown) =>
-    new AppError({
-      code: 'VALIDATION_FAILED',
-      message: { key: 'errors.validation_failed' },
-      httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
-      details,
-    }),
-} as const;
+export const validationFailed = (details: unknown) =>
+  new AppError({
+    code: ERROR_CODES.VALIDATION_FAILED,
+    message: { key: ERROR_MESSAGES.VALIDATION_FAILED },
+    httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+    details,
+  });
 ```
 
-```typescript
-// File: src/features/auth/lib/errors.ts
-import { AppError } from '@/lib/errors/app-error';
-import { HTTP_STATUS } from '@/lib/http-status';
-
-export const AuthErrorDefinitions = {
-  INVALID_CREDENTIALS: new AppError({
-    code: 'AUTH_INVALID_CREDENTIALS',
-    message: { key: 'auth.errors.invalid_credentials' },
-    httpStatus: HTTP_STATUS.UNAUTHORIZED,
-  }),
-
-  EMAIL_ALREADY_EXISTS: new AppError({
-    code: 'AUTH_EMAIL_ALREADY_EXISTS',
-    message: { key: 'auth.errors.email_already_exists' },
-    httpStatus: HTTP_STATUS.CONFLICT,
-  }),
-
-  USER_NOT_FOUND: (email: string) =>
-    new AppError({
-      code: 'AUTH_USER_NOT_FOUND',
-      message: {
-        key: 'auth.errors.user_not_found',
-        params: { email },
-      },
-      httpStatus: HTTP_STATUS.NOT_FOUND,
-      details: { email },
-    }),
-} as const;
-```
-
-```typescript
-// File: src/features/posts/lib/errors.ts
-import { AppError } from '@/lib/errors/app-error';
-import { HTTP_STATUS } from '@/lib/http-status';
-
-export const PostErrorDefinitions = {
-  FILE_TOO_LARGE: (maxSize: number) =>
-    new AppError({
-      code: 'POST_FILE_TOO_LARGE',
-      message: {
-        key: 'posts.errors.file_too_large',
-        params: { maxSize },
-      },
-      httpStatus: HTTP_STATUS.CONFLICT,
-      details: { maxSize },
-    }),
-
-  POST_NOT_FOUND: (id: string) =>
-    new AppError({
-      code: 'POST_NOT_FOUND',
-      message: {
-        key: 'posts.errors.post_not_found',
-        params: { id },
-      },
-      httpStatus: HTTP_STATUS.NOT_FOUND,
-      details: { id },
-    }),
-} as const;
-```
-
-```typescript
-// File: src/lib/errors/index.ts
-import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
-import { PostErrorDefinitions } from '@/features/posts/lib/errors';
-
-import { BaseErrorDefinitions } from './definitions';
-
-export const ErrorDefinitions = {
-  ...BaseErrorDefinitions,
-  ...AuthErrorDefinitions,
-  ...PostErrorDefinitions,
-} as const;
-
-export { AppError } from './app-error';
-```
+Feature-specific errors (for example `features/auth/lib/errors.ts`) continue to define domain errors as `AppError` instances or factories and are exported from the feature. The package-level `src/lib/errors/index.ts` re-exports `AppError` and common helpers for convenience.
 
 ### ❌ WRONG: Hardcoded strings without i18n
 
@@ -530,26 +470,15 @@ export const BadErrors = {
 
 ### ✅ CORRECT: Type-safe server action with Response<T>
 
-```typescript
 // File: src/features/auth/actions/register.ts
+
+```typescript
 'use server';
 
 import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 import { type Response, failure } from '@/lib/response';
-
-// File: src/features/auth/actions/register.ts
-
-// File: src/features/auth/actions/register.ts
-
-// File: src/features/auth/actions/register.ts
-
-// File: src/features/auth/actions/register.ts
-
-// File: src/features/auth/actions/register.ts
-
-// File: src/features/auth/actions/register.ts
 
 /**
  * Register action - validates input and calls service
@@ -572,6 +501,8 @@ export async function register(
 ### Example with success message:
 
 ```typescript
+import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+
 // In service layer:
 export async function registerUser(
   values: RegisterInput
@@ -584,7 +515,8 @@ export async function registerUser(
     // Return success with message (second parameter)
     return success(
       { userId: email },
-      'Verification e-mail sent!' // Message shown to user
+      { key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT, params: { email } }
+      // Message shown to user
     );
   }
 
@@ -626,14 +558,15 @@ export async function badLoginAction(formData: FormData) {
 
 ### ✅ CORRECT: Service throws AppError
 
-```typescript
 // File: src/features/auth/services/login.ts
-import { comparePasswords } from '@/lib/crypto';
-import { db } from '@/lib/prisma';
 
-import { AuthErrorDefinitions } from '../lib/errors';
-import type { LoginInput } from '../schemas/login';
-import type { User } from '../types';
+```typescript
+import { comparePasswords } from '@/lib/crypto';
+import { invalidCredentials } from '@/lib/errors';
+import { db } from '@/lib/prisma';
+import { fail } from '@/lib/response';
+import type { LoginInput } from '@/schemas/login';
+import type { User } from '@/types';
 
 export async function loginService(input: LoginInput): Promise<User> {
   // 1. Find user
@@ -642,14 +575,14 @@ export async function loginService(input: LoginInput): Promise<User> {
   });
 
   if (!user) {
-    throw AuthErrorDefinitions.INVALID_CREDENTIALS;
+    return fail(invalidCredentials());
   }
 
   // 2. Verify password
   const isValid = await comparePasswords(input.password, user.password);
 
   if (!isValid) {
-    throw AuthErrorDefinitions.INVALID_CREDENTIALS;
+    return fail(invalidCredentials());
   }
 
   // 3. Return user (without password)
@@ -686,8 +619,9 @@ export async function badLoginService(email: string, password: string) {
 
 ### ✅ CORRECT: Using useAction hook with structured messages
 
-```typescript
 // File: src/features/auth/components/register-form.tsx
+
+```typescript
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -746,26 +680,15 @@ export function RegisterForm() {
 
 ### useAction hook implementation:
 
+File: src/hooks/use-action.ts
+
 ```typescript
-// File: src/hooks/use-action.ts
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
 
 import type { Message, Response } from '@/lib/response';
 import { Status, getMessage } from '@/lib/response';
-
-// File: src/hooks/use-action.ts
-
-// File: src/hooks/use-action.ts
-
-// File: src/hooks/use-action.ts
-
-// File: src/hooks/use-action.ts
-
-// File: src/hooks/use-action.ts
-
-// File: src/hooks/use-action.ts
 
 export function useAction<TData>() {
   const [status, setStatus] = useState<Status>(Status.Idle);
@@ -842,8 +765,9 @@ export function useAction<TData>() {
 
 ### useAuthAction with redirect logic:
 
-```typescript
 // File: src/features/auth/hooks/use-auth-action.tsx
+
+```typescript
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
@@ -853,18 +777,6 @@ import { useRouter } from 'next/navigation';
 import { useAction } from '@/hooks/use-action';
 import { type Response, Status } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
-
-// File: src/features/auth/hooks/use-auth-action.tsx
-
-// File: src/features/auth/hooks/use-auth-action.tsx
-
-// File: src/features/auth/hooks/use-auth-action.tsx
-
-// File: src/features/auth/hooks/use-auth-action.tsx
-
-// File: src/features/auth/hooks/use-auth-action.tsx
-
-// File: src/features/auth/hooks/use-auth-action.tsx
 
 export function useAuthAction<TData>(options: { redirectTo?: string } = {}) {
   const router = useRouter();
@@ -965,8 +877,9 @@ function BadLoginForm() {
 
 ### ✅ CORRECT: Using partial status
 
-```typescript
 // File: src/features/bookmarks/actions/delete-many.ts
+
+```typescript
 'use server';
 
 import { AppError } from '@/lib/errors/app-error';
@@ -974,18 +887,6 @@ import { failure, partial, success } from '@/lib/response';
 import type { Response } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
-
-// File: src/features/bookmarks/actions/delete-many.ts
-
-// File: src/features/bookmarks/actions/delete-many.ts
-
-// File: src/features/bookmarks/actions/delete-many.ts
-
-// File: src/features/bookmarks/actions/delete-many.ts
-
-// File: src/features/bookmarks/actions/delete-many.ts
-
-// File: src/features/bookmarks/actions/delete-many.ts
 
 export async function deleteManyBookmarksAction(
   ids: string[]
@@ -1143,8 +1044,9 @@ Ensure strict mode is enabled:
 
 ### ✅ CORRECT: Testing error responses
 
+// File: src/features/auth/**tests**/login.test.ts
+
 ```typescript
-// File: src/features/auth/__tests__/login.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { Status } from '@/lib/response';
@@ -1188,9 +1090,9 @@ describe('loginAction', () => {
 
 ### Example i18n structure
 
-```json
 // File: src/i18n/messages/en.json
 
+```json
 {
   "common": {
     "success": "Operation completed successfully",
