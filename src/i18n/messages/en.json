@@ -7,6 +7,7 @@
   "errors": {
     "internal_server_error": "An unexpected error occurred. Please try again later.",
     "validation_failed": "Input validation failed. Please check your entries.",
+    "database_error": "A database error occurred while performing {operation} on {identifier}.",
     "unauthorized": "You are not authorized to perform this action.",
     "forbidden": "Access forbidden.",
     "not_found": "{resource} could not be found."
