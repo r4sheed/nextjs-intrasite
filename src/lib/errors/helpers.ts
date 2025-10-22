@@ -1,6 +1,9 @@
 import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
+import { ERROR_CODES } from './codes';
+import { ERROR_MESSAGES } from './messages';
+
 /**
  * These functional helpers create AppError instances for common, core application issues.
  */
@@ -11,8 +14,8 @@ import { HTTP_STATUS } from '@/lib/http-status';
  */
 export const internalServerError = () =>
   new AppError({
-    code: 'INTERNAL_SERVER_ERROR',
-    message: { key: 'errors.internal_server_error' },
+    code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+    message: { key: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   });
 
@@ -24,8 +27,8 @@ export const internalServerError = () =>
  */
 export const validationFailed = (details: unknown) =>
   new AppError({
-    code: 'VALIDATION_FAILED',
-    message: { key: 'errors.validation_failed' },
+    code: ERROR_CODES.VALIDATION_FAILED,
+    message: { key: ERROR_MESSAGES.VALIDATION_FAILED },
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
     details,
   });
@@ -37,8 +40,8 @@ export const validationFailed = (details: unknown) =>
  */
 export const unauthorized = () =>
   new AppError({
-    code: 'UNAUTHORIZED',
-    message: { key: 'errors.unauthorized' },
+    code: ERROR_CODES.UNAUTHORIZED,
+    message: { key: ERROR_MESSAGES.UNAUTHORIZED },
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
   });
 
@@ -49,8 +52,8 @@ export const unauthorized = () =>
  */
 export const forbidden = () =>
   new AppError({
-    code: 'FORBIDDEN',
-    message: { key: 'errors.forbidden' },
+    code: ERROR_CODES.FORBIDDEN,
+    message: { key: ERROR_MESSAGES.FORBIDDEN },
     httpStatus: HTTP_STATUS.FORBIDDEN,
   });
 
@@ -61,8 +64,8 @@ export const forbidden = () =>
  */
 export const notFound = (resource: string) =>
   new AppError({
-    code: 'NOT_FOUND',
-    message: { key: 'errors.not_found', params: { resource } },
+    code: ERROR_CODES.NOT_FOUND,
+    message: { key: ERROR_MESSAGES.NOT_FOUND, params: { resource } },
     httpStatus: HTTP_STATUS.NOT_FOUND,
     details: { resource },
   });
@@ -76,23 +79,11 @@ export const notFound = (resource: string) =>
  */
 export const databaseError = (operation: string, identifier: string) =>
   new AppError({
-    code: 'DATABASE_ERROR',
+    code: ERROR_CODES.DATABASE_ERROR,
     message: {
-      key: 'errors.database_error',
+      key: ERROR_MESSAGES.DATABASE_ERROR,
       params: { operation, identifier },
     },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details: { operation, identifier },
-  });
-
-/**
- * 401 - Specific authentication failure (e.g., wrong password/username combination).
- * NOTE: Often used instead of UNAUTHORIZED for login flows.
- * @returns AppError with status 401.
- */
-export const invalidCredentials = () =>
-  new AppError({
-    code: 'INVALID_CREDENTIALS',
-    message: { key: 'errors.auth.invalid_credentials' },
-    httpStatus: HTTP_STATUS.UNAUTHORIZED,
   });
