@@ -29,6 +29,7 @@ export const AuthWrapper = ({
                 src={image.src}
                 alt={image.alt}
                 className="dark:brightness-[0.2] dark:grayscale"
+                priority
                 fill
               />
             )}
