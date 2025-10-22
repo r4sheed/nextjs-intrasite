@@ -33,7 +33,7 @@ export interface IdleResponse {
 export interface SuccessResponse<TData> {
   status: Status.Success;
   data: TData;
-  success?: Message;
+  message?: Message;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface SuccessResponse<TData> {
  */
 export interface ErrorResponse {
   status: Status.Error;
-  error: Message;
+  message: Message;
   code: string;
   httpStatus: number;
   details?: unknown;
@@ -60,7 +60,7 @@ export interface PendingResponse {
  */
 export interface PartialError {
   code: string;
-  error: Message;
+  message: Message;
   details?: unknown;
 }
 
@@ -70,7 +70,7 @@ export interface PartialError {
 export interface PartialResponse<TData> {
   status: Status.Partial;
   data: TData;
-  success?: Message;
+  message?: Message;
   errors: PartialError[];
 }
 
@@ -93,7 +93,7 @@ export function idle(): IdleResponse {
 /**
  * Create success response
  * @param data - The response data
- * @param success - Optional success message (string or i18n key with params)
+ * @param message - Optional success message (string or i18n key with params)
  *
  * @example
  * success({ userId: '123' })
@@ -102,12 +102,12 @@ export function idle(): IdleResponse {
  */
 export function success<TData>(
   data: TData,
-  success?: Message
+  message?: Message
 ): SuccessResponse<TData> {
   return {
     status: Status.Success,
     data,
-    ...(success && { success }),
+    ...(message && { message }),
   } as const;
 }
 
@@ -121,7 +121,7 @@ export function success<TData>(
 export function failure(error: AppError): ErrorResponse {
   return {
     status: Status.Error,
-    error: error.errorMessage,
+    message: error.errorMessage,
     code: error.code,
     httpStatus: error.httpStatus,
     details: error.details,
@@ -143,13 +143,13 @@ export function pending(): PendingResponse {
 export function partial<TData>(
   data: TData,
   errors: PartialError[],
-  success?: Message
+  message?: Message
 ): PartialResponse<TData> {
   return {
     status: Status.Partial,
     data,
     errors,
-    ...(success && { success }),
+    ...(message && { message }),
   } as const;
 }
 

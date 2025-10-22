@@ -25,7 +25,7 @@ describe('Response Helpers', () => {
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
-      expect(response.success).toBeUndefined();
+      expect(response.message).toBeUndefined();
     });
 
     it('should create a success response with string message', () => {
@@ -35,7 +35,7 @@ describe('Response Helpers', () => {
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
-      expect(response.success).toBe(message);
+      expect(response.message).toBe(message);
     });
 
     it('should create a success response with i18n message', () => {
@@ -45,7 +45,7 @@ describe('Response Helpers', () => {
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
-      expect(response.success).toEqual(message);
+      expect(response.message).toEqual(message);
     });
 
     it('should create success with formatted i18n message', () => {
@@ -56,8 +56,8 @@ describe('Response Helpers', () => {
       };
       const response = success(data, message);
 
-      expect(response.success).toEqual(message);
-      expect(getMessage(response.success)).toBe(
+      expect(response.message).toEqual(message);
+      expect(getMessage(response.message)).toBe(
         'auth.success.verification_sent'
       );
     });
@@ -74,7 +74,7 @@ describe('Response Helpers', () => {
       const response = failure(error);
 
       expect(response.status).toBe(Status.Error);
-      expect(response.error).toBe('Test error message');
+      expect(response.message).toBe('Test error message');
       expect(response.code).toBe('TEST_ERROR');
       expect(response.httpStatus).toBe(HTTP_STATUS.BAD_REQUEST);
       expect(response.details).toBeUndefined();
@@ -90,10 +90,10 @@ describe('Response Helpers', () => {
       const response = failure(error);
 
       expect(response.status).toBe(Status.Error);
-      expect(response.error).toEqual({
+      expect(response.message).toEqual({
         key: 'auth.errors.invalid_credentials',
       });
-      expect(getMessage(response.error)).toBe(
+      expect(getMessage(response.message)).toBe(
         'auth.errors.invalid_credentials'
       );
     });
@@ -121,7 +121,7 @@ describe('Response Helpers', () => {
       const errors = [
         {
           code: 'DELETE_FAILED',
-          error: 'Failed to delete item 3',
+          message: 'Failed to delete item 3',
           details: { id: '3' },
         },
       ];
@@ -131,7 +131,7 @@ describe('Response Helpers', () => {
       expect(response.status).toBe(Status.Partial);
       expect(response.data).toEqual(data);
       expect(response.errors).toEqual(errors);
-      expect(response.success).toBeUndefined();
+      expect(response.message).toBeUndefined();
     });
 
     it('should create a partial response with success message', () => {
@@ -139,7 +139,7 @@ describe('Response Helpers', () => {
       const errors = [
         {
           code: 'DELETE_FAILED',
-          error: { key: 'posts.error.delete_failed', params: { id: '3' } },
+          message: { key: 'posts.error.delete_failed', params: { id: '3' } },
         },
       ];
       const message = {
@@ -149,7 +149,7 @@ describe('Response Helpers', () => {
 
       const response = partial(data, errors, message);
 
-      expect(response.success).toEqual(message);
+      expect(response.message).toEqual(message);
       expect(response.errors).toHaveLength(1);
     });
   });
@@ -247,7 +247,7 @@ describe('Response Helpers', () => {
 
       expect(parsed.status).toBe(Status.Success);
       expect(parsed.data).toEqual({ userId: '123' });
-      expect(parsed.success).toBe('Success!');
+      expect(parsed.message).toBe('Success!');
     });
 
     it('should serialize and deserialize error response', () => {
@@ -264,7 +264,7 @@ describe('Response Helpers', () => {
 
       expect(parsed.status).toBe(Status.Error);
       expect(parsed.code).toBe('TEST_ERROR');
-      expect(parsed.error).toEqual({ key: 'test.error' });
+      expect(parsed.message).toEqual({ key: 'test.error' });
       expect(parsed.httpStatus).toBe(HTTP_STATUS.BAD_REQUEST);
       expect(parsed.details).toEqual({ field: 'email' });
     });
@@ -274,7 +274,7 @@ describe('Response Helpers', () => {
       const errors = [
         {
           code: 'DELETE_FAILED',
-          error: { key: 'error.delete_failed', params: { id: '3' } },
+          message: { key: 'error.delete_failed', params: { id: '3' } },
           details: { id: '3' },
         },
       ];
@@ -287,7 +287,7 @@ describe('Response Helpers', () => {
       expect(parsed.data).toEqual(data);
       expect(parsed.errors).toHaveLength(1);
       expect(parsed.errors[0].code).toBe('DELETE_FAILED');
-      expect(parsed.success).toBe('Partially completed');
+      expect(parsed.message).toBe('Partially completed');
     });
   });
 
@@ -302,7 +302,7 @@ describe('Response Helpers', () => {
         }
       );
 
-      expect(response.success).toEqual({
+      expect(response.message).toEqual({
         key: 'auth.success.verification_sent',
         params: { email },
       });
@@ -320,7 +320,7 @@ describe('Response Helpers', () => {
 
       const response = failure(error);
 
-      expect(response.error).toEqual({
+      expect(response.message).toEqual({
         key: 'auth.errors.user_not_found',
         params: { email: 'test@example.com' },
       });

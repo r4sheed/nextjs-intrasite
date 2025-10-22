@@ -32,20 +32,20 @@ export function useAction<TData>() {
           switch (response.status) {
             case Status.Success:
               setData(response.data);
-              setSuccessMsg(getMessage(response.success));
+              setSuccessMsg(getMessage(response.message));
               setStatus(response.status); // Set status LAST
               break;
 
             case Status.Error:
-              setErrorMsg(getMessage(response.error));
+              setErrorMsg(getMessage(response.message));
               setStatus(response.status); // Set status LAST
               break;
 
             case Status.Partial:
               setData(response.data);
-              setSuccessMsg(getMessage(response.success));
+              setSuccessMsg(getMessage(response.message));
               if (response.errors.length > 0) {
-                setErrorMsg(getMessage(response.errors[0].error));
+                setErrorMsg(getMessage(response.errors[0].message));
               }
               setStatus(response.status); // Set status LAST
               break;
