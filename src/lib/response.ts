@@ -4,6 +4,9 @@
  */
 import { AppError } from '@/lib/errors';
 
+/**
+ * Status types for server responses
+ */
 export enum Status {
   Idle = 'idle',
   Success = 'success',
@@ -14,21 +17,21 @@ export enum Status {
 
 /**
  * Message type for i18n support
- * Simple string or i18n key with params for formatted messages
+ * Can be a simple string or an i18n key with optional parameters
  */
 export type Message =
   | string
   | { key: string; params?: Record<string, unknown> };
 
 /**
- * Idle response - initial state, no action performed yet
+ * Response when no action has been performed yet
  */
 export interface IdleResponse {
   status: Status.Idle;
 }
 
 /**
- * Success response - contains data and optional success message
+ * Response when an action is successful
  */
 export interface SuccessResponse<TData> {
   status: Status.Success;
@@ -37,8 +40,7 @@ export interface SuccessResponse<TData> {
 }
 
 /**
- * Error response - all error details directly on response
- * No nested objects, simple and clear
+ * Response when an error occurs
  */
 export interface ErrorResponse {
   status: Status.Error;
@@ -49,14 +51,14 @@ export interface ErrorResponse {
 }
 
 /**
- * Pending response - operation in progress
+ * Response when an operation is in progress
  */
 export interface PendingResponse {
   status: Status.Pending;
 }
 
 /**
- * Partial error type for batch operations
+ * Represents an individual error in a partial operation
  */
 export interface PartialError {
   code: string;
@@ -65,7 +67,7 @@ export interface PartialError {
 }
 
 /**
- * Partial response - some operations succeeded, some failed
+ * Response when some operations succeed and some fail
  */
 export interface PartialResponse<TData> {
   status: Status.Partial;
@@ -74,6 +76,9 @@ export interface PartialResponse<TData> {
   errors: PartialError[];
 }
 
+/**
+ * Union type of all possible server responses
+ */
 export type Response<TData> =
   | IdleResponse
   | SuccessResponse<TData>
@@ -82,19 +87,21 @@ export type Response<TData> =
   | PartialResponse<TData>;
 
 /**
- * Create idle response
+ * Create an idle response
+ * @returns {IdleResponse}
+ * @example
+ * const response = idle();
+ * // response => { status: 'idle' }
  */
 export function idle(): IdleResponse {
-  return {
-    status: Status.Idle,
-  } as const;
+  return { status: Status.Idle } as const;
 }
 
 /**
- * Create success response
- * @param data - The response data
- * @param message - Optional success message (string or i18n key with params)
- *
+ * Create a success response
+ * @param data - The response payload
+ * @param message - Optional success message (string or i18n object)
+ * @returns {SuccessResponse<TData>}
  * @example
  * success({ userId: '123' })
  * success({ userId: '123' }, 'Registration successful')
@@ -112,11 +119,11 @@ export function success<TData>(
 }
 
 /**
- * Create error response from AppError
- * Automatically serializes AppError for client-server communication
- *
+ * Create an error response from an AppError
+ * @param error - Instance of AppError
+ * @returns {ErrorResponse}
  * @example
- * failure(AuthErrors.INVALID_CREDENTIALS)
+ * const errorResponse = failure(new AppError('INVALID_CREDENTIALS', 401, 'Invalid credentials'));
  */
 export function failure(error: AppError): ErrorResponse {
   return {
@@ -129,16 +136,27 @@ export function failure(error: AppError): ErrorResponse {
 }
 
 /**
- * Create pending response
+ * Create a pending response
+ * @returns {PendingResponse}
+ * @example
+ * const loading = pending();
+ * // loading => { status: 'pending' }
  */
 export function pending(): PendingResponse {
-  return {
-    status: Status.Pending,
-  } as const;
+  return { status: Status.Pending } as const;
 }
 
 /**
- * Create partial response - some operations succeeded, some failed
+ * Create a partial response - some operations succeeded, some failed
+ * @param data - The successful data
+ * @param errors - List of partial errors
+ * @param message - Optional message
+ * @returns {PartialResponse<TData>}
+ * @example
+ * const response = partial(
+ *   [{ id: 1 }, { id: 2 }],
+ *   [{ code: 'FAIL_3', message: 'Failed to process item 3' }]
+ * );
  */
 export function partial<TData>(
   data: TData,
@@ -154,7 +172,7 @@ export function partial<TData>(
 }
 
 /**
- * Type guard helpers
+ * Type guards for response types
  */
 export function isIdle<TData>(
   response: Response<TData>
@@ -197,7 +215,11 @@ export const isStatusPartial = (status: Status) => status === Status.Partial;
 
 /**
  * Extract string from Message type (for display purposes)
- * Note: This only extracts the key, actual i18n formatting happens in components
+ * @param msg - Message object or string
+ * @returns string or undefined
+ * @example
+ * getMessage('Simple message') => 'Simple message'
+ * getMessage({ key: 'auth.success', params: { email: 'a@b.com' }}) => 'auth.success'
  */
 export function getMessage(msg: Message | undefined): string | undefined {
   if (!msg) return undefined;
@@ -206,26 +228,12 @@ export function getMessage(msg: Message | undefined): string | undefined {
 
 /**
  * Format a Message with i18n support
- *
- * @param msg - The message to format (string or i18n object)
- * @param translator - Optional translation function from your i18n library
- * @returns Formatted string message
- *
+ * @param msg - Message to format
+ * @param translator - Optional translation function from i18n library
+ * @returns Formatted string
  * @example
- * // Without i18n (returns plain string or key)
- * formatMessage('Simple error message')
- *
- * @example
- * // With next-intl
- * import { useTranslations } from 'next-intl';
- * const t = useTranslations();
- * formatMessage(response.error, t)
- *
- * @example
- * // With react-i18next
- * import { useTranslation } from 'react-i18next';
- * const { t } = useTranslation();
- * formatMessage(response.error, t)
+ * formatMessage('Simple message') => 'Simple message'
+ * formatMessage({ key: 'auth.success', params: { email: 'a@b.com' }}, t) => 'Registration successful for a@b.com'
  */
 export function formatMessage(
   msg: Message | undefined,
@@ -233,16 +241,9 @@ export function formatMessage(
 ): string | undefined {
   if (!msg) return undefined;
 
-  // Simple string message
-  if (typeof msg === 'string') {
-    return msg;
-  }
+  if (typeof msg === 'string') return msg;
 
-  // i18n object with key and params
-  if (translator) {
-    return translator(msg.key, msg.params);
-  }
+  if (translator) return translator(msg.key, msg.params);
 
-  // Fallback: return key if no translator provided
   return msg.key;
 }
