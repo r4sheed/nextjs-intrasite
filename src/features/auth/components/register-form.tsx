@@ -125,15 +125,17 @@ export const RegisterForm = () => {
               </FormItem>
             )}
           />
-          <FormError message={message.error} />
-          <FormSuccess message={message.success} />
-          <LoadingButton
-            type="submit"
-            loading={isPending}
-            disabled={isPending || isCompleted}
-          >
-            {AUTH_UI_MESSAGES.REGISTER_BUTTON}
-          </LoadingButton>
+          <>
+            <FormError message={message.error} />
+            <FormSuccess message={message.success} />
+            <LoadingButton
+              type="submit"
+              loading={isPending}
+              disabled={isPending || isCompleted}
+            >
+              {AUTH_UI_MESSAGES.REGISTER_BUTTON}
+            </LoadingButton>
+          </>
           {showSocial && (
             <>
               <FieldSeparator>

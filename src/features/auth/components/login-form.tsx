@@ -110,11 +110,13 @@ export const LoginForm = () => {
               </FormItem>
             )}
           />
-          <FormSuccess message={message.success} />
-          <FormError message={message.error || urlError} />
-          <LoadingButton type="submit" loading={isPending}>
-            {AUTH_UI_MESSAGES.LOGIN_BUTTON}
-          </LoadingButton>
+          <>
+            <FormSuccess message={message.success} />
+            <FormError message={message.error || urlError} />
+            <LoadingButton type="submit" loading={isPending}>
+              {AUTH_UI_MESSAGES.LOGIN_BUTTON}
+            </LoadingButton>
+          </>
           {showSocial && (
             <>
               <FieldSeparator>
