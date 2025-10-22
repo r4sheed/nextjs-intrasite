@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { register } from '@/features/auth/actions';
 import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
 import { registerUser } from '@/features/auth/services';
-import { CoreErrors } from '@/lib/errors/definitions';
 import { Status, failure, success } from '@/lib/response';
 
 // Mock the service layer

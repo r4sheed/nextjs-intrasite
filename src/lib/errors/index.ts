@@ -10,5 +10,13 @@
  */
 
 export { AppError } from './app-error';
-export { CoreErrors } from './definitions';
+export {
+  internalServerError,
+  validationFailed,
+  unauthorized,
+  forbidden,
+  notFound,
+  databaseError,
+  invalidCredentials,
+} from './definitions';
 export type { HttpStatusCode } from '@/lib/http-status';

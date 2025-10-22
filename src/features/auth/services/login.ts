@@ -7,7 +7,7 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
-import { CoreErrors } from '@/lib/errors/definitions';
+import { internalServerError } from '@/lib/errors/definitions';
 import { sendVerificationEmail } from '@/lib/mail';
 import { type Response, failure, success } from '@/lib/response';
 
@@ -75,6 +75,6 @@ export async function loginUser(
     console.error('Unexpected login error:', error);
 
     // Return generic error for unexpected errors
-    return failure(CoreErrors.INTERNAL_SERVER_ERROR);
+    return failure(internalServerError());
   }
 }

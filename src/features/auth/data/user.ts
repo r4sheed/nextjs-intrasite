@@ -1,7 +1,7 @@
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-import { CoreErrors } from '@/lib/errors/definitions';
+import { databaseError } from '@/lib/errors/definitions';
 import { db } from '@/lib/prisma';
 
 /**
@@ -63,7 +63,7 @@ async function findUser<T = User>(
 
     // Service layer should throw AppError for expected failures so callers can
     // handle or convert them to Responses at the action layer.
-    throw CoreErrors.DATABASE_ERROR(operation, identifier);
+    throw databaseError(operation, identifier);
   }
 }
 
