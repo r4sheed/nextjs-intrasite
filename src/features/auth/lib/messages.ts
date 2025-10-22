@@ -1,5 +1,5 @@
 /**
- * Centralized i18n keys for auth feature errors/messages
+ * Centralized messages for auth feature errors
  */
 export const AUTH_ERROR_MESSAGES = {
   INVALID_FIELDS: 'auth.errors.invalid_fields', // Please check your input and try again.
