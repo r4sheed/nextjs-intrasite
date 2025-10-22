@@ -1,6 +1,6 @@
 'use server';
 
-import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import { invalidFields } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 import { type Response, failure } from '@/lib/response';
@@ -15,7 +15,7 @@ export async function register(
   // Validate input
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {
-    return failure(AuthErrors.INVALID_FIELDS(validation.error.issues));
+    return failure(invalidFields(validation.error.issues));
   }
 
   // Call service layer - it returns Response<T>

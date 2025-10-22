@@ -2,7 +2,11 @@ import bcrypt from 'bcryptjs';
 
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
-import { AuthErrorDefinitions as AuthError } from '@/features/auth/lib/errors';
+import {
+  emailAlreadyExists,
+  invalidFields,
+  registrationFailed,
+} from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
@@ -21,7 +25,7 @@ export async function registerUser(
   // Validate input
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
-    return failure(AuthError.INVALID_FIELDS(parsed.error.issues));
+    return failure(invalidFields(parsed.error.issues));
   }
 
   const { email, password, name } = parsed.data;
@@ -29,7 +33,7 @@ export async function registerUser(
   // Check if user already exists
   const user = await getUserByEmail(email);
   if (user) {
-    return failure(AuthError.EMAIL_ALREADY_EXISTS);
+    return failure(emailAlreadyExists());
   }
 
   // Hash password
@@ -73,6 +77,6 @@ export async function registerUser(
 
     return success({ userId: email });
   } catch (error) {
-    return failure(AuthError.REGISTRATION_FAILED);
+    return failure(registrationFailed());
   }
 }

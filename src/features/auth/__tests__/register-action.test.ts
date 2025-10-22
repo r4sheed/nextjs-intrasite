@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { register } from '@/features/auth/actions';
-import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
+import {
+  emailAlreadyExists,
+  registrationFailed,
+} from '@/features/auth/lib/errors';
 import { registerUser } from '@/features/auth/services';
 import { Status, failure, success } from '@/lib/response';
 
@@ -61,7 +64,7 @@ describe('register action', () => {
   });
 
   it('should return error for email already in use', async () => {
-    const mockResponse = failure(AuthErrorDefinitions.EMAIL_ALREADY_EXISTS);
+    const mockResponse = failure(emailAlreadyExists());
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
@@ -77,7 +80,7 @@ describe('register action', () => {
   });
 
   it('should return error for registration failure', async () => {
-    const mockResponse = failure(AuthErrorDefinitions.REGISTRATION_FAILED);
+    const mockResponse = failure(registrationFailed());
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({

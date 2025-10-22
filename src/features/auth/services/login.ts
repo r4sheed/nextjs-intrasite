@@ -2,7 +2,12 @@ import { AuthError } from 'next-auth';
 
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
-import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import {
+  callbackError,
+  emailVerificationRequired,
+  invalidCredentials,
+  invalidFields,
+} from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
@@ -20,7 +25,7 @@ export async function loginUser(
 ): Promise<Response<{ userId: string }>> {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
-    return failure(AuthErrors.INVALID_FIELDS(parsed.error.issues));
+    return failure(invalidFields(parsed.error.issues));
   }
 
   const { email, password } = parsed.data;
@@ -29,7 +34,7 @@ export async function loginUser(
     if (siteFeatures.emailVerification) {
       const user = await getUserByEmail(email);
       if (!user) {
-        return failure(AuthErrors.INVALID_CREDENTIALS);
+        return failure(invalidCredentials());
       }
 
       if (!user.emailVerified) {
@@ -54,7 +59,7 @@ export async function loginUser(
     });
 
     if (!result || result.error) {
-      return failure(AuthErrors.INVALID_CREDENTIALS);
+      return failure(invalidCredentials());
     }
 
     return success({ userId: email });
@@ -63,11 +68,11 @@ export async function loginUser(
       // https://authjs.dev/reference/core/errors
       switch (error.type) {
         case 'AccessDenied': // Thrown when the execution of the signIn callback fails or if it returns false.
-          return failure(AuthErrors.EMAIL_VERIFICATION_REQUIRED);
+          return failure(emailVerificationRequired());
         case 'CredentialsSignin':
-          return failure(AuthErrors.INVALID_CREDENTIALS);
+          return failure(invalidCredentials());
         case 'CallbackRouteError':
-          return failure(AuthErrors.CALLBACK_ERROR);
+          return failure(callbackError());
       }
     }
 

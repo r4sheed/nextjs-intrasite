@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { login } from '@/features/auth/actions';
-import { AuthErrorDefinitions } from '@/features/auth/lib/errors';
+import { invalidCredentials } from '@/features/auth/lib/errors';
 import { loginUser } from '@/features/auth/services';
 import { Status, failure, success } from '@/lib/response';
 
@@ -58,7 +58,7 @@ describe('login action', () => {
   });
 
   it('should return error for invalid credentials', async () => {
-    const mockResponse = failure(AuthErrorDefinitions.INVALID_CREDENTIALS);
+    const mockResponse = failure(invalidCredentials());
     vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
     const response = await login({

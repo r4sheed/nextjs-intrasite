@@ -1,6 +1,6 @@
 'use server';
 
-import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import { invalidFields } from '@/features/auth/lib/errors';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { loginUser } from '@/features/auth/services';
 import { type Response, failure } from '@/lib/response';
@@ -15,7 +15,7 @@ export async function login(
   // Validate input
   const validation = loginSchema.safeParse(values);
   if (!validation.success) {
-    return failure(AuthErrors.INVALID_FIELDS(validation.error.issues));
+    return failure(invalidFields(validation.error.issues));
   }
 
   // Call service layer - it returns Response<T>
