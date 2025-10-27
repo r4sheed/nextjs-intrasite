@@ -25,7 +25,13 @@
       "oauth_account_not_linked": "Email already in use with different provider.",
       "email_verification_required": "You need to verify your email before logging in.",
       "token_not_found": "The requested token was not found or is invalid.",
-      "token_expired": "The token has expired. Please request a new one."
+      "token_expired": "The token has expired. Please request a new one.",
+      "email_required": "Email is required.",
+      "email_invalid": "Please enter a valid email address.",
+      "password_required": "Password is required.",
+      "password_too_short": "Password must be at least {min} characters long.",
+      "name_required": "Name is required.",
+      "name_too_short": "Name must be at least {min} characters long."
     },
     "success": {
       "login": "Welcome back!",

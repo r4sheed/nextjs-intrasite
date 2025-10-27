@@ -3,6 +3,12 @@
  */
 export const AUTH_ERROR_MESSAGES = {
   INVALID_FIELDS: 'auth.errors.invalid_fields', // Please check your input and try again.
+  EMAIL_REQUIRED: 'auth.errors.email_required', // Email is required
+  EMAIL_INVALID: 'auth.errors.email_invalid', // Invalid email address
+  PASSWORD_REQUIRED: 'auth.errors.password_required', // Password is required
+  PASSWORD_TOO_SHORT: 'auth.errors.password_too_short', // Password must be at least {min} characters long
+  NAME_REQUIRED: 'auth.errors.name_required', // Name is required
+  NAME_TOO_SHORT: 'auth.errors.name_too_short', // Name must be at least {min} characters long
   INVALID_CREDENTIALS: 'auth.errors.invalid_credentials', // Invalid email or password.
   EMAIL_ALREADY_EXISTS: 'auth.errors.email_already_exists', // This email is already registered.
   OAUTH_ACCOUNT_NOT_LINKED: 'auth.errors.oauth_account_not_linked', // Email already in use with different provider.

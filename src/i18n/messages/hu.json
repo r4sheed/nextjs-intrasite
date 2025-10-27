@@ -25,7 +25,13 @@
       "oauth_account_not_linked": "Ez az email cím már használatban van másik szolgáltatóval.",
       "email_verification_required": "Meg kell erősítened az email címed mielőtt bejelentkeznél.",
       "token_not_found": "A kért token nem található vagy érvénytelen.",
-      "token_expired": "A token lejárt. Kérjük, kérjen újat."
+      "token_expired": "A token lejárt. Kérjük, kérjen újat.",
+      "email_required": "Email cím megadása kötelező.",
+      "email_invalid": "Kérjük, érvényes email címet adjon meg.",
+      "password_required": "Jelszó megadása kötelező.",
+      "password_too_short": "A jelszónak legalább {min} karakter hosszúnak kell lennie.",
+      "name_required": "Név megadása kötelező.",
+      "name_too_short": "A névnek legalább {min} karakter hosszúnak kell lennie."
     },
     "success": {
       "login": "Üdvözöljük!",
