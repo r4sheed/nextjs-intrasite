@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
@@ -30,9 +31,9 @@ import {
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
-import { useAction } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
+import { Status, getMessage } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 export const LoginForm = () => {
@@ -44,7 +45,14 @@ export const LoginForm = () => {
 
   const router = useRouter();
 
-  const { execute, message, isPending } = useAction();
+  const mutation = useMutation({
+    mutationFn: login,
+    onSuccess: response => {
+      if (response.status === Status.Success) {
+        router.push(DEFAULT_LOGIN_REDIRECT);
+      }
+    },
+  });
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -55,12 +63,18 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (values: LoginInput) => {
-    execute(() => login(values), {
-      onSuccess: () => {
-        router.push(DEFAULT_LOGIN_REDIRECT);
-      },
-    });
+    mutation.mutate(values);
   };
+
+  const successMessage =
+    mutation.data?.status === Status.Success
+      ? getMessage(mutation.data.message)
+      : undefined;
+
+  const errorMessage =
+    mutation.data?.status === Status.Error
+      ? getMessage(mutation.data.message)
+      : undefined;
 
   return (
     <Form {...form}>
@@ -82,7 +96,7 @@ export const LoginForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={isPending}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -109,7 +123,7 @@ export const LoginForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="current-password"
-                    disabled={isPending}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -117,9 +131,9 @@ export const LoginForm = () => {
             )}
           />
           <>
-            <FormSuccess message={message.success} />
-            <FormError message={message.error || urlError} />
-            <LoadingButton type="submit" loading={isPending}>
+            <FormSuccess message={successMessage} />
+            <FormError message={errorMessage || urlError} />
+            <LoadingButton type="submit" loading={mutation.isPending}>
               {AUTH_UI_MESSAGES.LOGIN_BUTTON}
             </LoadingButton>
           </>

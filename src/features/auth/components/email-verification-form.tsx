@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
+import { useMutation } from '@tanstack/react-query';
 import { CircleCheckBig, TriangleAlert } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -23,19 +24,18 @@ import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
-import { useAction } from '@/hooks/use-action';
 import { ROUTES } from '@/lib/navigation';
+import { Status, getMessage } from '@/lib/response';
 
 const VerificationResult = ({
   icon: Icon,
   title,
   message,
-  success,
 }: {
   icon: React.ElementType;
   title: string;
   message: string;
-  success: boolean;
+  success?: boolean;
 }) => (
   <Empty>
     <EmptyHeader>
@@ -62,7 +62,6 @@ const VerificationSuccess = ({ message }: { message: string }) => (
     icon={CircleCheckBig}
     title={AUTH_UI_MESSAGES.VERIFICATION_SUCCESS_TITLE}
     message={message}
-    success={true}
   />
 );
 
@@ -71,7 +70,6 @@ const VerificationError = ({ message }: { message: string }) => (
     icon={TriangleAlert}
     title={AUTH_UI_MESSAGES.VERIFICATION_FAILED_TITLE}
     message={message}
-    success={false}
   />
 );
 
@@ -103,15 +101,26 @@ export const EmailVerificationForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const { execute, message, isPending } = useAction();
-  const { success, error } = message;
+  const mutation = useMutation({
+    mutationFn: verifyEmail,
+  });
+
+  const successMessage =
+    mutation.data?.status === Status.Success
+      ? getMessage(mutation.data.message)
+      : undefined;
+
+  const errorMessage =
+    mutation.data?.status === Status.Error
+      ? getMessage(mutation.data.message)
+      : undefined;
 
   useEffect(() => {
-    if (!token || success || error || isPending) {
+    if (!token || successMessage || errorMessage || mutation.isPending) {
       return;
     }
-    execute(() => verifyEmail(token));
-  }, [token, execute, success, error]);
+    mutation.mutate(token);
+  }, [token, mutation, successMessage, errorMessage]);
 
   let content;
 
@@ -119,12 +128,12 @@ export const EmailVerificationForm = () => {
     content = (
       <VerificationError message={AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND} />
     );
-  } else if (success) {
-    content = <VerificationSuccess message={success} />;
-  } else if (error) {
+  } else if (successMessage) {
+    content = <VerificationSuccess message={successMessage} />;
+  } else if (errorMessage) {
     content = (
       <VerificationError
-        message={error || AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR}
+        message={errorMessage || AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR}
       />
     );
   } else {

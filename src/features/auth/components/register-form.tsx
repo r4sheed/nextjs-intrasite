@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
 import { FormError } from '@/components/form-error';
@@ -25,13 +26,14 @@ import { Header } from '@/features/auth/components/header';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
-import { useAction } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { Status } from '@/lib/response';
+import { Status, getMessage } from '@/lib/response';
 
 export const RegisterForm = () => {
-  const { execute, status, message, isPending } = useAction();
+  const mutation = useMutation({
+    mutationFn: register,
+  });
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -43,14 +45,24 @@ export const RegisterForm = () => {
   });
 
   // Consider the form completed when the action succeeded
-  const isCompleted = status === Status.Success;
+  const isCompleted = mutation.data?.status === Status.Success;
 
   const onSubmit = (values: RegisterInput) => {
     if (isCompleted) {
       return;
     }
-    execute(() => register(values));
+    mutation.mutate(values);
   };
+
+  const successMessage =
+    mutation.data?.status === Status.Success
+      ? getMessage(mutation.data.message)
+      : undefined;
+
+  const errorMessage =
+    mutation.data?.status === Status.Error
+      ? getMessage(mutation.data.message)
+      : undefined;
 
   return (
     <Form {...form}>
@@ -71,7 +83,7 @@ export const RegisterForm = () => {
                     {...field}
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
                     autoComplete="name"
-                    disabled={isPending}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -93,7 +105,7 @@ export const RegisterForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={isPending}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -115,7 +127,7 @@ export const RegisterForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="new-password"
-                    disabled={isPending}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -126,12 +138,12 @@ export const RegisterForm = () => {
             )}
           />
           <>
-            <FormError message={message.error} />
-            <FormSuccess message={message.success} />
+            <FormError message={errorMessage} />
+            <FormSuccess message={successMessage} />
             <LoadingButton
               type="submit"
-              loading={isPending}
-              disabled={isPending || isCompleted}
+              loading={mutation.isPending}
+              disabled={mutation.isPending || isCompleted}
             >
               {AUTH_UI_MESSAGES.REGISTER_BUTTON}
             </LoadingButton>
