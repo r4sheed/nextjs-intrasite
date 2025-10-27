@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -24,14 +25,15 @@ import { Input } from '@/components/ui/input';
 import { login } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { SocialProviders } from '@/features/auth/components/social-providers';
-import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { useAction } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 export const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -40,7 +42,9 @@ export const LoginForm = () => {
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
       : '';
 
-  const { execute, message, isPending } = useAuthAction();
+  const router = useRouter();
+
+  const { execute, message, isPending } = useAction();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -51,10 +55,12 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (values: LoginInput) => {
-    execute(() => login(values));
+    execute(() => login(values), {
+      onSuccess: () => {
+        router.push(DEFAULT_LOGIN_REDIRECT);
+      },
+    });
   };
-
-  const showSocial = siteFeatures.socialAuth;
 
   return (
     <Form {...form}>
@@ -117,7 +123,7 @@ export const LoginForm = () => {
               {AUTH_UI_MESSAGES.LOGIN_BUTTON}
             </LoadingButton>
           </>
-          {showSocial && (
+          {siteFeatures.socialAuth && (
             <>
               <FieldSeparator>
                 {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}

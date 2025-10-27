@@ -20,9 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { login } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
-import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
@@ -31,10 +29,11 @@ import {
   type ResetPasswordInput,
   resetPasswordSchema,
 } from '@/features/auth/schemas';
+import { useAction } from '@/hooks/use-action';
 import { ROUTES } from '@/lib/navigation';
 
 export const ResetPasswordForm = () => {
-  const { execute, message, isPending } = useAuthAction();
+  const { execute, message, isPending } = useAction();
 
   const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
@@ -43,17 +42,15 @@ export const ResetPasswordForm = () => {
     },
   });
 
-  const onSubmit = (values: ResetPasswordInput) => {
-    execute(() => login(values));
-  };
+  const onSubmit = (values: ResetPasswordInput) => {};
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
         <FieldGroup>
           <Header
-            title={AUTH_UI_MESSAGES.LOGIN_TITLE}
-            description={AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
+            title={AUTH_UI_MESSAGES.RESET_PASSWORD_TITLE}
+            description={AUTH_UI_MESSAGES.RESET_PASSWORD_SUBTITLE}
           />
           <FormField
             control={form.control}
@@ -78,7 +75,7 @@ export const ResetPasswordForm = () => {
             <FormSuccess message={message.success} />
             <FormError message={message.error} />
             <LoadingButton type="submit" loading={isPending}>
-              {AUTH_UI_MESSAGES.LOGIN_BUTTON}
+              {AUTH_UI_MESSAGES.RESET_PASSWORD_BUTTON}
             </LoadingButton>
           </>
           <FormDescription className="text-center">

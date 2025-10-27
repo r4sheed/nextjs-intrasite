@@ -19,11 +19,11 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { verifyEmail } from '@/features/auth/actions/email-verify';
 import { Header } from '@/features/auth/components/header';
-import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
+import { useAction } from '@/hooks/use-action';
 import { ROUTES } from '@/lib/navigation';
 
 const VerificationResult = ({
@@ -103,14 +103,13 @@ export const EmailVerificationForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const { execute, message, isPending } = useAuthAction();
+  const { execute, message, isPending } = useAction();
   const { success, error } = message;
 
   useEffect(() => {
     if (!token || success || error || isPending) {
       return;
     }
-
     execute(() => verifyEmail(token));
   }, [token, execute, success, error]);
 

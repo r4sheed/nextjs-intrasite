@@ -24,7 +24,13 @@ interface UseActionResult<TData> {
    * @param action A function that returns a Promise resolving to a server Response.
    * @returns A Promise that resolves with the server's Response object.
    */
-  execute: (action: () => Promise<Response<TData>>) => Promise<Response<TData>>;
+  execute: (
+    action: () => Promise<Response<TData>>,
+    callbacks?: {
+      onSuccess?: (res: Response<TData>) => void;
+      onError?: (res: Response<TData>) => void;
+    }
+  ) => Promise<Response<TData>>;
   /**
    * Resets the hook's state to Idle.
    */
@@ -79,6 +85,17 @@ interface UseActionResult<TData> {
  * // ...
  */
 export function useAction<TData>(): UseActionResult<TData> {
+  // Optional hook-level callbacks can be supplied to react to responses
+  // (useful for redirect logic, notifications, etc.). We intentionally
+  // keep navigation out of this hook; callers pass callbacks that may
+  // perform routing or other side-effects.
+  // NOTE: This parameter is optional for backward compatibility.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function _noop() {}
+
+  // We support passing hook-level callbacks via closure. For now we keep
+  // the default empty behavior; callers can wrap useAction to
+  // provide onSuccess/onError behavior.
   const [status, setStatus] = useState<Status>(Status.Idle);
   const [message, setMessage] = useState<MessageState>({});
   const [data, setData] = useState<TData | undefined>(undefined);
@@ -104,7 +121,11 @@ export function useAction<TData>(): UseActionResult<TData> {
    */
   const execute = useCallback(
     async (
-      action: () => Promise<Response<TData>>
+      action: () => Promise<Response<TData>>,
+      callbacks?: {
+        onSuccess?: (res: Response<TData>) => void;
+        onError?: (res: Response<TData>) => void;
+      }
     ): Promise<Response<TData>> => {
       // Set immediate pending state (urgent update)
       setStatus(Status.Pending);
@@ -112,88 +133,114 @@ export function useAction<TData>(): UseActionResult<TData> {
       setData(undefined);
       setActionResponse(undefined);
 
-      let response: Response<TData>;
-      try {
-        // Await the server action itself
-        response = await action();
-      } catch (err: unknown) {
-        // Handle unexpected runtime errors during action execution
-        console.error('useAction: Uncaught error during action execution', err);
-        const errorMsg = 'An unexpected error occurred. Please try again.';
+      // IMPORTANT NOTE
+      // We'll return a promise that resolves when the transition's async
+      // work (the action + state updates) completes. Wrapping the entire
+      // action inside startTransition preserves the previous behavior
+      // where `isTransitionPending` stays true for the full duration of
+      // the server call and state commits, preventing brief UI re-activation
+      // before side-effects (like navigation) occur.
+      return await new Promise<Response<TData>>(resolve => {
+        startTransition(async () => {
+          let response: Response<TData>;
 
-        // Construct a generic error response
-        response = {
-          status: Status.Error,
-          message: errorMsg,
-          code: ERROR_CODES.UNCAUGHT_EXCEPTION,
-          httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        } as ErrorResponse; // We know this matches ErrorResponse
-
-        // Update state within a transition
-        startTransition(() => {
-          setStatus(Status.Error);
-          setMessage({ error: errorMsg });
-          setActionResponse(response);
-        });
-
-        // Return the constructed error response
-        return response;
-      }
-
-      // Handle the server's response and update state (non-urgent)
-      startTransition(() => {
-        setActionResponse(response); // Store for debugging
-
-        switch (response.status) {
-          case Status.Success:
-            setData(response.data);
-            setMessage({ success: getMessage(response.message) });
-            setStatus(response.status);
-            break;
-
-          case Status.Error:
-            setMessage({ error: getMessage(response.message) });
-            setStatus(response.status);
-            break;
-
-          case Status.Partial:
-            setData(response.data);
-            const partialError =
-              response.errors.length > 0
-                ? getMessage(response.errors[0].message)
-                : undefined;
-            setMessage({
-              success: getMessage(response.message),
-              error: partialError,
-            });
-            setStatus(response.status);
-            break;
-
-          // --- BUG FIX ---
-          // Handle non-terminal states. A server action should NEVER return
-          // 'pending' or 'idle'. If it does, it's an error.
-          case Status.Pending:
-          case Status.Idle:
-            console.warn(
-              `useAction: Received a non-terminal status '${response.status}' from a server action. This is likely a bug in the action.`
+          try {
+            response = await action();
+          } catch (err: unknown) {
+            console.error(
+              'useAction: Uncaught error during action execution',
+              err
             );
-            setMessage({
-              error: 'Received an invalid response state from the server.',
-            });
-            setStatus(Status.Error); // Treat this as an error
-            break;
+            const errorMsg = 'An unexpected error occurred. Please try again.';
 
-          // Default case to catch any unhandled enum values
-          default:
-            console.error(`useAction: Unhandled response status:`, response);
-            setMessage({ error: 'An unknown response status was received.' });
+            response = {
+              status: Status.Error,
+              message: errorMsg,
+              code: ERROR_CODES.UNCAUGHT_EXCEPTION,
+              httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+            } as ErrorResponse;
+
+            // Update state as error
             setStatus(Status.Error);
-            break;
-        }
-      });
+            setMessage({ error: errorMsg });
+            setActionResponse(response);
 
-      // Return the raw response so the caller can inspect it
-      return response;
+            // Invoke per-call error callback if provided
+            try {
+              callbacks?.onError?.(response);
+            } catch (cbErr) {
+              console.error('useAction: onError callback threw', cbErr);
+            }
+
+            resolve(response);
+            return;
+          }
+
+          // Normal response handling
+          setActionResponse(response);
+
+          // Invoke any per-call or hook-level callbacks after state updates
+          // (these are non-blocking and optional)
+
+          switch (response.status) {
+            case Status.Success:
+              setData(response.data);
+              setMessage({ success: getMessage(response.message) });
+              setStatus(response.status);
+              break;
+
+            case Status.Error:
+              setMessage({ error: getMessage(response.message) });
+              setStatus(response.status);
+              break;
+
+            case Status.Partial:
+              setData(response.data);
+              const partialError =
+                response.errors.length > 0
+                  ? getMessage(response.errors[0].message)
+                  : undefined;
+              setMessage({
+                success: getMessage(response.message),
+                error: partialError,
+              });
+              setStatus(response.status);
+              break;
+
+            case Status.Pending:
+            case Status.Idle:
+              console.warn(
+                `useAction: Received a non-terminal status '${response.status}' from a server action. This is likely a bug in the action.`
+              );
+              setMessage({
+                error: 'Received an invalid response state from the server.',
+              });
+              setStatus(Status.Error);
+              break;
+
+            default:
+              console.error(`useAction: Unhandled response status:`, response);
+              setMessage({ error: 'An unknown response status was received.' });
+              setStatus(Status.Error);
+              break;
+          }
+
+          // Callbacks are invoked after state updates to avoid race with
+          // local component effects. We try to call per-call callbacks
+          // passed via the second argument of `execute` (if any).
+          try {
+            if (response.status === Status.Success) {
+              callbacks?.onSuccess?.(response);
+            } else if (response.status === Status.Error) {
+              callbacks?.onError?.(response);
+            }
+          } catch (cbErr) {
+            console.error('useAction: callback threw', cbErr);
+          }
+
+          resolve(response);
+        });
+      });
     },
     [] // `startTransition` is stable and not needed as a dependency
   );

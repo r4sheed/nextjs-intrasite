@@ -23,15 +23,15 @@ import { Input } from '@/components/ui/input';
 import { register } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { SocialProviders } from '@/features/auth/components/social-providers';
-import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { useAction } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 import { Status } from '@/lib/response';
 
 export const RegisterForm = () => {
-  const { execute, status, message, isPending } = useAuthAction();
+  const { execute, status, message, isPending } = useAction();
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -42,15 +42,15 @@ export const RegisterForm = () => {
     },
   });
 
-  // Consider the form completed when the action succeeded and a success message exists
-  const isCompleted = status === Status.Success && Boolean(message.success);
+  // Consider the form completed when the action succeeded
+  const isCompleted = status === Status.Success;
 
   const onSubmit = (values: RegisterInput) => {
-    if (isCompleted) return;
+    if (isCompleted) {
+      return;
+    }
     execute(() => register(values));
   };
-
-  const showSocial = siteFeatures.socialAuth;
 
   return (
     <Form {...form}>
@@ -136,7 +136,7 @@ export const RegisterForm = () => {
               {AUTH_UI_MESSAGES.REGISTER_BUTTON}
             </LoadingButton>
           </>
-          {showSocial && (
+          {siteFeatures.socialAuth && (
             <>
               <FieldSeparator>
                 {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
