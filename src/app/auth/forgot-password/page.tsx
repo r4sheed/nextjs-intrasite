@@ -7,7 +7,7 @@ export default function VerifyEmailPage() {
       <div className="w-full max-w-sm md:max-w-4xl">
         <AuthWrapper
           image={{
-            src: '/assets/svg/forgot-password-pana.svg',
+            src: '/assets/svg/forgot-password-amico.svg',
             alt: 'Forgot Password Illustration',
           }}
         >
