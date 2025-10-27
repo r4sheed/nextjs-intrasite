@@ -61,7 +61,10 @@
       "verification_failed_title": "Verification Failed",
       "verification_processing_title": "Processing Request",
       "verification_processing_description": "Please wait while we verify your email...",
-      "back_to_login_button": "Back to login"
+      "back_to_login_button": "Back to login",
+      "reset_password_title": "Reset password",
+      "reset_password_subtitle": "Enter your email address and we'll send instructions to reset your password.",
+      "reset_password_button": "Reset my password"
     }
   }
 }

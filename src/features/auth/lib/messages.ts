@@ -51,4 +51,7 @@ export const AUTH_UI_MESSAGES = {
   VERIFICATION_PROCESSING_DESCRIPTION:
     'auth.ui.verification_processing_description', // Please wait while we verify your email...
   BACK_TO_LOGIN_BUTTON: 'auth.ui.back_to_login_button', // Back to login
+  RESET_PASSWORD_TITLE: 'auth.ui.reset_password_title', // Reset password
+  RESET_PASSWORD_SUBTITLE: 'auth.ui.reset_password_subtitle', // Enter your email to get reset instructions
+  RESET_PASSWORD_BUTTON: 'auth.ui.reset_password_button', // Reet password
 } as const;
