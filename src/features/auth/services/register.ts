@@ -41,7 +41,7 @@ export async function registerUser(
 
   // Create user
   try {
-    await db.user.create({
+    const createdUser = await db.user.create({
       data: {
         name,
         email,
@@ -58,7 +58,7 @@ export async function registerUser(
       );
 
       return response.success({
-        data: { userId: email },
+        data: { userId: createdUser.id },
         message: {
           key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
           params: { email },
@@ -78,7 +78,7 @@ export async function registerUser(
       }
     }
 
-    return response.success({ data: { userId: email } });
+    return response.success({ data: { userId: createdUser.id } });
   } catch (error) {
     return response.error(registrationFailed());
   }
