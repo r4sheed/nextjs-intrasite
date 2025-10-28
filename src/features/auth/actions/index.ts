@@ -1,2 +1,2 @@
 export { type LoginData, login } from './login';
-export { register } from './register';
+export { type RegisterData, register } from './register';

@@ -5,13 +5,16 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 import { type Response, response } from '@/lib/result';
 
+// Defines the expected successful data structure returned by the 'login' action.
+export type RegisterData = { userId: string };
+
 /**
  * Register action - validates input and calls service
  * Always returns Response<T>, never throws
  */
 export async function register(
   values: RegisterInput
-): Promise<Response<{ userId: string }>> {
+): Promise<Response<RegisterData>> {
   // Validate input
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {

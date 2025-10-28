@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 
+import { type RegisterData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -21,7 +22,7 @@ import { type Response, response } from '@/lib/result';
  */
 export async function registerUser(
   values: RegisterInput
-): Promise<Response<{ userId: string }>> {
+): Promise<Response<RegisterData>> {
   // Validate input
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
