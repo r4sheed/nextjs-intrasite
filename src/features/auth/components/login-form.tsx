@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { login } from '@/features/auth/actions';
+import { type LoginData, login } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 import {
@@ -31,13 +31,20 @@ import {
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/result';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
+/**
+ * @name LoginForm
+ * @description Handles user login, form validation, and calls the server action via TanStack Query.
+ */
 export const LoginForm = () => {
   const searchParams = useSearchParams();
+
+  // Checks for OAuth errors in the URL
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
@@ -45,15 +52,28 @@ export const LoginForm = () => {
 
   const router = useRouter();
 
-  const mutation = useMutation({
-    mutationFn: login,
-    onSuccess: response => {
-      if (response.status === Status.Success) {
-        router.push(DEFAULT_LOGIN_REDIRECT);
-      }
+  // TanStack Query mutation for the login action.
+  const mutation = useMutation<
+    SuccessResponse<LoginData>, // TData: Successful return type
+    ErrorResponse, // TError: Thrown error type (from the 'execute' adapter)
+    LoginInput // TVariables: Input data type
+  >({
+    mutationFn: data =>
+      // Calls the adapter which either returns SuccessResponse or throws ErrorResponse.
+      // Type casting is used to narrow the successful return type for TData.
+      execute(login, data) as Promise<SuccessResponse<LoginData>>,
+
+    onSuccess: () => {
+      // Redirect on successful login
+      router.push(DEFAULT_LOGIN_REDIRECT);
     },
   });
 
+  // Extracts success and error messages from the mutation state (using i18n message keys)
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
+
+  // React Hook Form initialization with Zod resolver
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -62,19 +82,10 @@ export const LoginForm = () => {
     },
   });
 
+  // Handles the form submission by calling the mutation
   const onSubmit = (values: LoginInput) => {
     mutation.mutate(values);
   };
-
-  const successMessage =
-    mutation.data?.status === Status.Success
-      ? getMessage(mutation.data.message)
-      : undefined;
-
-  const errorMessage =
-    mutation.data?.status === Status.Error
-      ? getMessage(mutation.data.message)
-      : undefined;
 
   return (
     <Form {...form}>
@@ -84,6 +95,7 @@ export const LoginForm = () => {
             title={AUTH_UI_MESSAGES.LOGIN_TITLE}
             description={AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
           />
+          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
@@ -103,6 +115,7 @@ export const LoginForm = () => {
               </FormItem>
             )}
           />
+          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
@@ -131,12 +144,15 @@ export const LoginForm = () => {
             )}
           />
           <>
+            {/* Display success/error messages */}
             <FormSuccess message={successMessage} />
             <FormError message={errorMessage || urlError} />
+
             <LoadingButton type="submit" loading={mutation.isPending}>
               {AUTH_UI_MESSAGES.LOGIN_BUTTON}
             </LoadingButton>
           </>
+          {/* Social Auth Providers (if enabled) */}
           {siteFeatures.socialAuth && (
             <>
               <FieldSeparator>
@@ -147,6 +163,7 @@ export const LoginForm = () => {
               </Field>
             </>
           )}
+          {/* Sign Up CTA */}
           <FormDescription className="text-center">
             {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
             <LinkUnderline>
