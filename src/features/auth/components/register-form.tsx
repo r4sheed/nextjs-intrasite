@@ -22,19 +22,38 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { register } from '@/features/auth/actions';
+import { type RegisterData } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/result';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
+/**
+ * @name RegisterForm
+ * @description Handles user registration, form validation, and calls the server action via TanStack Query.
+ */
 export const RegisterForm = () => {
-  const mutation = useMutation({
-    mutationFn: register,
+  // TanStack Query mutation for the registration action.
+  // We explicitly define the TData, TError, and TVariables types.
+  const mutation = useMutation<
+    SuccessResponse<RegisterData>, // TData: Successful return type
+    ErrorResponse, // TError: Thrown error type (from 'execute' adapter)
+    RegisterInput // TVariables: Input data type
+  >({
+    mutationFn: data =>
+      // Use the execute adapter, which handles error throwing for TanStack Query.
+      execute(register, data) as Promise<SuccessResponse<RegisterData>>,
   });
 
+  // Extracts success and error messages using the consistent pattern (i18n keys)
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
+
+  // React Hook Form initialization with Zod resolver
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -44,25 +63,16 @@ export const RegisterForm = () => {
     },
   });
 
-  // Consider the form completed when the action succeeded
-  const isCompleted = mutation.data?.status === Status.Success;
+  // The completion status is better checked via mutation.isSuccess if needed for UI logic,
+  // but we can simplify the button disable logic.
+  const isCompleted = mutation.isSuccess;
 
+  // Handles the form submission by calling the mutation
   const onSubmit = (values: RegisterInput) => {
-    if (isCompleted) {
-      return;
-    }
+    // Prevent multiple submissions while pending
+    if (mutation.isPending) return;
     mutation.mutate(values);
   };
-
-  const successMessage =
-    mutation.data?.status === Status.Success
-      ? getMessage(mutation.data.message)
-      : undefined;
-
-  const errorMessage =
-    mutation.data?.status === Status.Error
-      ? getMessage(mutation.data.message)
-      : undefined;
 
   return (
     <Form {...form}>
@@ -72,6 +82,7 @@ export const RegisterForm = () => {
             title={AUTH_UI_MESSAGES.REGISTER_TITLE}
             description={AUTH_UI_MESSAGES.REGISTER_SUBTITLE}
           />
+          {/* Name Field */}
           <FormField
             control={form.control}
             name="name"
@@ -83,7 +94,7 @@ export const RegisterForm = () => {
                     {...field}
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
                     autoComplete="name"
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -93,6 +104,7 @@ export const RegisterForm = () => {
               </FormItem>
             )}
           />
+          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
@@ -105,7 +117,7 @@ export const RegisterForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -115,6 +127,7 @@ export const RegisterForm = () => {
               </FormItem>
             )}
           />
+          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
@@ -127,7 +140,7 @@ export const RegisterForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="new-password"
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || isCompleted}
                   />
                 </FormControl>
                 <FormDescription>
@@ -138,8 +151,10 @@ export const RegisterForm = () => {
             )}
           />
           <>
+            {/* Error message is now retrieved directly from the thrown error */}
             <FormError message={errorMessage} />
             <FormSuccess message={successMessage} />
+
             <LoadingButton
               type="submit"
               loading={mutation.isPending}
@@ -148,6 +163,7 @@ export const RegisterForm = () => {
               {AUTH_UI_MESSAGES.REGISTER_BUTTON}
             </LoadingButton>
           </>
+          {/* Social Auth Providers (if enabled) */}
           {siteFeatures.socialAuth && (
             <>
               <FieldSeparator>
@@ -158,6 +174,7 @@ export const RegisterForm = () => {
               </Field>
             </>
           )}
+          {/* Login CTA */}
           <FormDescription className="text-center">
             {AUTH_UI_MESSAGES.LOGIN_CTA_TEXT}{' '}
             <LinkUnderline>
