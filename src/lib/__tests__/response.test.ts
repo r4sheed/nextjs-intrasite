@@ -31,7 +31,9 @@ describe('Response Helpers', () => {
       const message = 'Registration successful!';
       const response = success({
         data: data,
-        message: message,
+        message: {
+          key: message,
+        },
       });
 
       expect(response.status).toBe(Status.Success);
@@ -74,14 +76,14 @@ describe('Response Helpers', () => {
     it('should create an error response with all fields directly on response', () => {
       const data = new AppError({
         code: 'TEST_ERROR',
-        message: 'Test error message',
+        message: { key: 'Test error message' },
         httpStatus: HTTP_STATUS.BAD_REQUEST,
       });
 
       const response = error(data);
 
       expect(response.status).toBe(Status.Error);
-      expect(response.message).toBe('Test error message');
+      expect(response.message.key).toBe('Test error message');
       expect(response.code).toBe('TEST_ERROR');
       expect(response.httpStatus).toBe(HTTP_STATUS.BAD_REQUEST);
       expect(response.details).toBeUndefined();
@@ -108,7 +110,7 @@ describe('Response Helpers', () => {
     it('should include error details', () => {
       const data = new AppError({
         code: 'VALIDATION_ERROR',
-        message: 'Validation failed',
+        message: { key: 'Validation failed' },
         httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
         details: { field: 'email', reason: 'invalid format' },
       });
@@ -128,7 +130,9 @@ describe('Response Helpers', () => {
       const errors = [
         {
           code: 'DELETE_FAILED',
-          message: 'Failed to delete item 3',
+          message: {
+            key: 'Failed to delete item 3',
+          },
           details: { id: '3' },
         },
       ];
@@ -174,7 +178,9 @@ describe('Response Helpers', () => {
       const errorResponse = error(
         new AppError({
           code: 'TEST',
-          message: 'test',
+          message: {
+            key: 'test',
+          },
           httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         })
       );
@@ -187,7 +193,9 @@ describe('Response Helpers', () => {
       const errorResponse = error(
         new AppError({
           code: 'TEST',
-          message: 'test',
+          message: {
+            key: 'test',
+          },
           httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         })
       );
@@ -206,33 +214,18 @@ describe('Response Helpers', () => {
     });
   });
 
-  describe('getMessage', () => {
-    it('should extract string message', () => {
-      expect(getMessage('Simple error')).toBe('Simple error');
-    });
-
-    it('should extract i18n key from message', () => {
-      const msg = { key: 'auth.errors.invalid_credentials', params: {} };
-      expect(getMessage(msg)).toBe('auth.errors.invalid_credentials');
-    });
-
-    it('should return undefined for undefined input', () => {
-      expect(getMessage(undefined)).toBeUndefined();
-    });
-  });
-
   describe('JSON Serialization', () => {
     it('should serialize and deserialize success response', () => {
       const original = success({
         data: { userId: '123' },
-        message: 'Success!',
+        message: { key: 'Success!' },
       });
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
 
       expect(parsed.status).toBe(Status.Success);
       expect(parsed.data).toEqual({ userId: '123' });
-      expect(parsed.message).toBe('Success!');
+      expect(parsed.message.key).toBe('Success!');
     });
 
     it('should serialize and deserialize error response', () => {
@@ -267,7 +260,9 @@ describe('Response Helpers', () => {
       const original = partial({
         data: data,
         errors: errors,
-        message: 'Partially completed',
+        message: {
+          key: 'Partially completed',
+        },
       });
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
@@ -276,7 +271,7 @@ describe('Response Helpers', () => {
       expect(parsed.data).toEqual(data);
       expect(parsed.errors).toHaveLength(1);
       expect(parsed.errors[0].code).toBe('DELETE_FAILED');
-      expect(parsed.message).toBe('Partially completed');
+      expect(parsed.message.key).toBe('Partially completed');
     });
   });
 

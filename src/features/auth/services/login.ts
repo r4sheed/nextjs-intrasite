@@ -58,7 +58,9 @@ export async function loginUser(
 
       return response.success({
         data: { userId: email },
-        message: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+        message: {
+          key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+        },
       });
     }
 

@@ -17,9 +17,7 @@ export enum Status {
  * Message type for i18n support
  * Can be a simple string or an i18n key with optional parameters
  */
-export type Message =
-  | string
-  | { key: string; params?: Record<string, unknown> };
+export type Message = { key: string; params?: Record<string, unknown> };
 
 /**
  * Response when an action is successful

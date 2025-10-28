@@ -72,6 +72,8 @@ export const verifyEmail = async (
   // Success response
   return response.success({
     data: { email: existingToken.email },
-    message: AUTH_UI_MESSAGES.EMAIL_VERIFIED,
+    message: {
+      key: AUTH_UI_MESSAGES.EMAIL_VERIFIED,
+    },
   });
 };
