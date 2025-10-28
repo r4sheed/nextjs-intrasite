@@ -38,7 +38,7 @@ describe('Response Helpers', () => {
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
-      expect(response.message).toBe(message);
+      expect(response.message?.key).toBe(message);
     });
 
     it('should create a success response with i18n message', () => {
