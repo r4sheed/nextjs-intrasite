@@ -33,7 +33,7 @@ import {
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/response';
+import { Status, getMessage } from '@/lib/result';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 export const LoginForm = () => {

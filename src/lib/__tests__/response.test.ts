@@ -4,24 +4,22 @@ import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 import {
   Status,
-  failure,
+  error,
   getMessage,
-  idle,
   isError,
-  isIdle,
   isPartial,
-  isPending,
   isSuccess,
   partial,
-  pending,
   success,
-} from '@/lib/response';
+} from '@/lib/result';
 
 describe('Response Helpers', () => {
   describe('success', () => {
     it('should create a success response without message', () => {
       const data = { userId: '123' };
-      const response = success(data);
+      const response = success({
+        data: data,
+      });
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
@@ -31,7 +29,10 @@ describe('Response Helpers', () => {
     it('should create a success response with string message', () => {
       const data = { userId: '123' };
       const message = 'Registration successful!';
-      const response = success(data, message);
+      const response = success({
+        data: data,
+        message: message,
+      });
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
@@ -41,7 +42,10 @@ describe('Response Helpers', () => {
     it('should create a success response with i18n message', () => {
       const data = { userId: '123' };
       const message = { key: 'auth.success.login', params: { name: 'John' } };
-      const response = success(data, message);
+      const response = success({
+        data: data,
+        message: message,
+      });
 
       expect(response.status).toBe(Status.Success);
       expect(response.data).toEqual(data);
@@ -54,7 +58,10 @@ describe('Response Helpers', () => {
         key: 'auth.success.verification_sent',
         params: { email: 'user@example.com' },
       };
-      const response = success(data, message);
+      const response = success({
+        data: data,
+        message: message,
+      });
 
       expect(response.message).toEqual(message);
       expect(getMessage(response.message)).toBe(
@@ -63,15 +70,15 @@ describe('Response Helpers', () => {
     });
   });
 
-  describe('failure', () => {
+  describe('error', () => {
     it('should create an error response with all fields directly on response', () => {
-      const error = new AppError({
+      const data = new AppError({
         code: 'TEST_ERROR',
         message: 'Test error message',
         httpStatus: HTTP_STATUS.BAD_REQUEST,
       });
 
-      const response = failure(error);
+      const response = error(data);
 
       expect(response.status).toBe(Status.Error);
       expect(response.message).toBe('Test error message');
@@ -81,13 +88,13 @@ describe('Response Helpers', () => {
     });
 
     it('should handle i18n error messages', () => {
-      const error = new AppError({
+      const data = new AppError({
         code: 'AUTH_INVALID_CREDENTIALS',
         message: { key: 'auth.errors.invalid_credentials' },
         httpStatus: HTTP_STATUS.UNAUTHORIZED,
       });
 
-      const response = failure(error);
+      const response = error(data);
 
       expect(response.status).toBe(Status.Error);
       expect(response.message).toEqual({
@@ -99,14 +106,14 @@ describe('Response Helpers', () => {
     });
 
     it('should include error details', () => {
-      const error = new AppError({
+      const data = new AppError({
         code: 'VALIDATION_ERROR',
         message: 'Validation failed',
         httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
         details: { field: 'email', reason: 'invalid format' },
       });
 
-      const response = failure(error);
+      const response = error(data);
 
       expect(response.details).toEqual({
         field: 'email',
@@ -126,7 +133,10 @@ describe('Response Helpers', () => {
         },
       ];
 
-      const response = partial(data, errors);
+      const response = partial({
+        data: data,
+        errors: errors,
+      });
 
       expect(response.status).toBe(Status.Partial);
       expect(response.data).toEqual(data);
@@ -147,41 +157,21 @@ describe('Response Helpers', () => {
         params: { count: 2 },
       };
 
-      const response = partial(data, errors, message);
+      const response = partial({
+        data: data,
+        errors: errors,
+        message: message,
+      });
 
       expect(response.message).toEqual(message);
       expect(response.errors).toHaveLength(1);
     });
   });
 
-  describe('pending', () => {
-    it('should create a pending response', () => {
-      const response = pending();
-
-      expect(response.status).toBe(Status.Pending);
-    });
-  });
-
-  describe('idle', () => {
-    it('should create an idle response', () => {
-      const response = idle();
-
-      expect(response.status).toBe(Status.Idle);
-    });
-  });
-
   describe('Type Guards', () => {
-    it('isIdle should identify idle responses', () => {
-      const idleResponse = idle();
-      const successResponse = success({ data: 'test' });
-
-      expect(isIdle(idleResponse)).toBe(true);
-      expect(isIdle(successResponse)).toBe(false);
-    });
-
     it('isSuccess should identify success responses', () => {
       const successResponse = success({ data: 'test' });
-      const errorResponse = failure(
+      const errorResponse = error(
         new AppError({
           code: 'TEST',
           message: 'test',
@@ -194,7 +184,7 @@ describe('Response Helpers', () => {
     });
 
     it('isError should identify error responses', () => {
-      const errorResponse = failure(
+      const errorResponse = error(
         new AppError({
           code: 'TEST',
           message: 'test',
@@ -207,16 +197,8 @@ describe('Response Helpers', () => {
       expect(isError(successResponse)).toBe(false);
     });
 
-    it('isPending should identify pending responses', () => {
-      const pendingResponse = pending();
-      const successResponse = success({ data: 'test' });
-
-      expect(isPending(pendingResponse)).toBe(true);
-      expect(isPending(successResponse)).toBe(false);
-    });
-
     it('isPartial should identify partial responses', () => {
-      const partialResponse = partial({ data: 'test' }, []);
+      const partialResponse = partial({ data: { data: 'test' }, errors: [] });
       const successResponse = success({ data: 'test' });
 
       expect(isPartial(partialResponse)).toBe(true);
@@ -241,7 +223,10 @@ describe('Response Helpers', () => {
 
   describe('JSON Serialization', () => {
     it('should serialize and deserialize success response', () => {
-      const original = success({ userId: '123' }, 'Success!');
+      const original = success({
+        data: { userId: '123' },
+        message: 'Success!',
+      });
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
 
@@ -251,14 +236,14 @@ describe('Response Helpers', () => {
     });
 
     it('should serialize and deserialize error response', () => {
-      const error = new AppError({
+      const data = new AppError({
         code: 'TEST_ERROR',
         message: { key: 'test.error' },
         httpStatus: HTTP_STATUS.BAD_REQUEST,
         details: { field: 'email' },
       });
 
-      const original = failure(error);
+      const original = error(data);
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
 
@@ -279,7 +264,11 @@ describe('Response Helpers', () => {
         },
       ];
 
-      const original = partial(data, errors, 'Partially completed');
+      const original = partial({
+        data: data,
+        errors: errors,
+        message: 'Partially completed',
+      });
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
 
@@ -294,13 +283,13 @@ describe('Response Helpers', () => {
   describe('i18n Formatted Messages', () => {
     it('should support formatted success messages', () => {
       const email = 'user@example.com';
-      const response = success(
-        { userId: '123' },
-        {
+      const response = success({
+        data: { userId: '123' },
+        message: {
           key: 'auth.success.verification_sent',
           params: { email },
-        }
-      );
+        },
+      });
 
       expect(response.message).toEqual({
         key: 'auth.success.verification_sent',
@@ -309,7 +298,7 @@ describe('Response Helpers', () => {
     });
 
     it('should support formatted error messages', () => {
-      const error = new AppError({
+      const data = new AppError({
         code: 'AUTH_USER_NOT_FOUND',
         message: {
           key: 'auth.errors.user_not_found',
@@ -318,7 +307,7 @@ describe('Response Helpers', () => {
         httpStatus: HTTP_STATUS.NOT_FOUND,
       });
 
-      const response = failure(error);
+      const response = error(data);
 
       expect(response.message).toEqual({
         key: 'auth.errors.user_not_found',

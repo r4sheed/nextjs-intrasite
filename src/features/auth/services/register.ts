@@ -13,11 +13,11 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { sendVerificationEmail } from '@/lib/mail';
 import { db } from '@/lib/prisma';
-import { type Response, failure, success } from '@/lib/response';
+import { type Response, response } from '@/lib/result';
 
 /**
  * Register service - handles user registration and auto-login
- * Returns Response<T> with user data on success, error response on failure
+ * Returns Response<T> with user data on success, error response on error
  */
 export async function registerUser(
   values: RegisterInput
@@ -25,7 +25,7 @@ export async function registerUser(
   // Validate input
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
-    return failure(invalidFields(parsed.error.issues));
+    return response.error(invalidFields(parsed.error.issues));
   }
 
   const { email, password, name } = parsed.data;
@@ -33,7 +33,7 @@ export async function registerUser(
   // Check if user already exists
   const user = await getUserByEmail(email);
   if (user) {
-    return failure(emailAlreadyExists());
+    return response.error(emailAlreadyExists());
   }
 
   // Hash password
@@ -57,10 +57,13 @@ export async function registerUser(
         verificationToken.token
       );
 
-      return success(
-        { userId: email },
-        { key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT, params: { email } }
-      );
+      return response.success({
+        data: { userId: email },
+        message: {
+          key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+          params: { email },
+        },
+      });
     } else {
       // Automatically sign in the user after registration
       const signInResult = await signIn('credentials', {
@@ -75,8 +78,8 @@ export async function registerUser(
       }
     }
 
-    return success({ userId: email });
+    return response.success({ data: { userId: email } });
   } catch (error) {
-    return failure(registrationFailed());
+    return response.error(registrationFailed());
   }
 }

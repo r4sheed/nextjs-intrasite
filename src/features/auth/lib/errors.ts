@@ -11,7 +11,7 @@ import { HTTP_STATUS } from '@/lib/http-status';
 
 /**
  * 422 - Invalid fields error.
- * Used for detailed client-side input validation failure in auth forms.
+ * Used for detailed client-side input validation error in auth forms.
  * @param details The raw validation errors (e.g., ZodError object) or a custom error structure.
  * @returns AppError with status 422.
  */
@@ -25,7 +25,7 @@ export const invalidFields = (details: unknown) =>
 
 /**
  * 401 - Invalid credentials error.
- * Used specifically for login failures (e.g., wrong password or non-existent user).
+ * Used specifically for login errors (e.g., wrong password or non-existent user).
  * @returns AppError with status 401.
  */
 export const invalidCredentials = () =>
@@ -125,3 +125,21 @@ export const tokenExpired = (tokenId?: string) =>
     httpStatus: HTTP_STATUS.GONE,
     details: tokenId ? { tokenId } : undefined,
   });
+
+/**
+ * Convenience object containing all auth error factory functions
+ * @example
+ * import { errors } from '@/features/auth/lib/errors';
+ * throw errors.invalidCredentials();
+ */
+export const errors = {
+  invalidFields,
+  invalidCredentials,
+  userNotFound,
+  emailAlreadyExists,
+  registrationFailed,
+  callbackError,
+  emailVerificationRequired,
+  tokenNotFound,
+  tokenExpired,
+};

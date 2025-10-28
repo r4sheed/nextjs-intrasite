@@ -1,6 +1,9 @@
 import { AuthError } from 'next-auth';
 
-import { getUserByEmail } from '@/features/auth/data/user';
+import {
+  getUserByEmail,
+  verifyUserCredentials,
+} from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
   callbackError,
@@ -14,65 +17,77 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { internalServerError } from '@/lib/errors';
 import { sendVerificationEmail } from '@/lib/mail';
-import { type Response, failure, success } from '@/lib/response';
+import { type Response, response } from '@/lib/result';
 
 /**
  * Login service - handles user authentication
- * Returns Response<T> with user data on success, error response on failure
+ * Returns Response<T> with user data on success, error response on error
  */
 export async function loginUser(
   values: LoginInput
 ): Promise<Response<{ userId: string }>> {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
-    return failure(invalidFields(parsed.error.issues));
+    return response.error(invalidFields(parsed.error.issues));
   }
 
   const { email, password } = parsed.data;
 
   try {
-    if (siteFeatures.emailVerification) {
-      const user = await getUserByEmail(email);
-      if (!user) {
-        return failure(invalidCredentials());
-      }
+    // First validate credentials via the data layer. This avoids calling
+    // `signIn` as the credential validator (which would re-run the `signIn`
+    // callback and may prevent us from handling verification emails cleanly).
+    const verifiedUser = await verifyUserCredentials(email, password);
 
-      if (!user.emailVerified) {
-        const verificationToken = await generateVerificationToken(user.email);
-
-        await sendVerificationEmail(
-          verificationToken.email,
-          verificationToken.token
-        );
-
-        return success(
-          { userId: email },
-          AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT
-        );
-      }
+    // Invalid credentials (either user not found or wrong password)
+    if (!verifiedUser) {
+      return response.error(invalidCredentials());
     }
 
+    // If verification is enabled and the account is not verified, send a
+    // verification email now (credentials are correct) and return the
+    // appropriate UI message. We do NOT call `signIn` in this branch so we
+    // don't attempt to create a session for an unverified account.
+    if (siteFeatures.emailVerification && !verifiedUser.emailVerified) {
+      const verificationToken = await generateVerificationToken(email);
+
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token
+      );
+
+      return response.success({
+        data: { userId: email },
+        message: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+      });
+    }
+
+    // At this point credentials are valid and the account is either verified
+    // or verification is disabled. Proceed to call signIn to allow NextAuth
+    // to create a session and run its callbacks (authorization, jwt, etc.).
     const result = await signIn('credentials', {
       email,
       password,
-      redirect: false, // Handle redirection manually to ensure proper response handling
+      redirect: false,
     });
 
     if (!result || result.error) {
-      return failure(invalidCredentials());
+      // If signIn fails at this point, map to invalid credentials to avoid
+      // leaking internal details.
+      return response.error(invalidCredentials());
     }
 
-    return success({ userId: email });
+    return response.success({ data: { userId: email } });
   } catch (error) {
     if (error instanceof AuthError) {
       // https://authjs.dev/reference/core/errors
       switch (error.type) {
         case 'AccessDenied': // Thrown when the execution of the signIn callback fails or if it returns false.
-          return failure(emailVerificationRequired());
+          return response.error(emailVerificationRequired());
         case 'CredentialsSignin':
-          return failure(invalidCredentials());
+          return response.error(invalidCredentials());
         case 'CallbackRouteError':
-          return failure(callbackError());
+          return response.error(callbackError());
       }
     }
 
@@ -80,6 +95,6 @@ export async function loginUser(
     console.error('Unexpected login error:', error);
 
     // Return generic error for unexpected errors
-    return failure(internalServerError());
+    return response.error(internalServerError());
   }
 }

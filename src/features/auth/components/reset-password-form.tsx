@@ -28,7 +28,7 @@ import {
   resetPasswordSchema,
 } from '@/features/auth/schemas';
 import { ROUTES } from '@/lib/navigation';
-import { type Response, Status, getMessage } from '@/lib/response';
+import { type Response, Status, getMessage } from '@/lib/result';
 
 export const ResetPasswordForm = () => {
   // Note: This form doesn't have an action implementation yet

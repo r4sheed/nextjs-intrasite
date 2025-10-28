@@ -28,7 +28,7 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/response';
+import { Status, getMessage } from '@/lib/result';
 
 export const RegisterForm = () => {
   const mutation = useMutation({

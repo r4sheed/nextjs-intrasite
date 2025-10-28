@@ -1,5 +1,5 @@
 import { HTTP_STATUS, type HttpStatusCode } from '@/lib/http-status';
-import { Message } from '@/lib/response';
+import { Message } from '@/lib/result';
 
 interface AppErrorParams {
   code: string;
@@ -36,5 +36,18 @@ export class AppError extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }
+  }
+
+  /**
+   * Serializes the error to a plain object for JSON responses
+   * Useful for API responses where the full Error object can't be sent
+   */
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.errorMessage,
+      httpStatus: this.httpStatus,
+      details: this.details,
+    };
   }
 }

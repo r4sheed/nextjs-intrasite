@@ -17,5 +17,6 @@ export {
   forbidden,
   notFound,
   databaseError,
+  errors,
 } from './helpers';
 export type { HttpStatusCode } from '@/lib/http-status';

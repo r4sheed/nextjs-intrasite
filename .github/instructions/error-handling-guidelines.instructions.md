@@ -16,7 +16,7 @@ This document establishes a **unified, type-safe error handling pattern** for la
 ### Core Principles
 
 1. **Single Return Type**: All server actions return `Response<T>`
-2. **AppError-driven flow**: Expected, domain-level errors are represented with `AppError`. Services may throw `AppError` instances; server actions should catch them and convert to `Response<T>` using the helpers in `src/lib/response.ts` (for example `failure`).
+2. **AppError-driven flow**: Expected, domain-level errors are represented with `AppError`. Services may throw `AppError` instances; server actions should catch them and convert to `Response<T>` using the helpers in `src/lib/response.ts` (for example `error`).
 3. **Type Safety**: Status-driven flow using TypeScript discriminated unions
 4. **Flat Structure**: No nested error objects, all properties at top level
 5. **HTTP Standards**: Always use `HTTP_STATUS` constants, never magic numbers
@@ -174,9 +174,9 @@ export function success<TData>(
  * Automatically serializes AppError for client-server communication
  *
  * @example
- * failure(AuthErrors.INVALID_CREDENTIALS)
+ * error(AuthErrors.INVALID_CREDENTIALS)
  */
-export function failure(error: AppError): ErrorResponse {
+export function error(error: AppError): ErrorResponse {
   return {
     status: Status.Error,
     error: error.errorMessage,
@@ -478,7 +478,7 @@ export const BadErrors = {
 import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
-import { type Response, failure } from '@/lib/response';
+import { type Response, error } from '@/lib/response';
 
 /**
  * Register action - validates input and calls service
@@ -490,7 +490,7 @@ export async function register(
   // 1. Validate input with Zod
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {
-    return failure(AuthErrors.INVALID_FIELDS(validation.error.issues));
+    return error(AuthErrors.INVALID_FIELDS(validation.error.issues));
   }
 
   // 2. Call service layer - it returns Response<T>
@@ -883,7 +883,7 @@ function BadLoginForm() {
 'use server';
 
 import { AppError } from '@/lib/errors/app-error';
-import { failure, partial, success } from '@/lib/response';
+import { error, partial, success } from '@/lib/response';
 import type { Response } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
@@ -916,7 +916,7 @@ export async function deleteManyBookmarksAction(
 
   // All failed
   if (deletedIds.length === 0) {
-    return failure(errors[0]); // Return first error as AppError
+    return error(errors[0]); // Return first error as AppError
   }
 
   // Partial success

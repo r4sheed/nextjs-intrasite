@@ -25,7 +25,7 @@ import {
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/response';
+import { Status, getMessage } from '@/lib/result';
 
 const VerificationResult = ({
   icon: Icon,

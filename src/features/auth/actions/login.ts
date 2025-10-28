@@ -3,7 +3,7 @@
 import { invalidFields } from '@/features/auth/lib/errors';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { loginUser } from '@/features/auth/services';
-import { type Response, failure } from '@/lib/response';
+import { type Response, response } from '@/lib/result';
 
 /**
  * Login action - validates input and calls service
@@ -15,7 +15,7 @@ export async function login(
   // Validate input
   const validation = loginSchema.safeParse(values);
   if (!validation.success) {
-    return failure(invalidFields(validation.error.issues));
+    return response.error(invalidFields(validation.error.issues));
   }
 
   // Call service layer - it returns Response<T>

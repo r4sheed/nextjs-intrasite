@@ -6,7 +6,7 @@ import {
   registrationFailed,
 } from '@/features/auth/lib/errors';
 import { registerUser } from '@/features/auth/services';
-import { Status, failure, success } from '@/lib/response';
+import { Status, error, success } from '@/lib/result';
 
 // Mock the service layer
 vi.mock('@/features/auth/services', () => ({
@@ -19,7 +19,7 @@ describe('register action', () => {
   });
 
   it('should return success for valid registration', async () => {
-    const mockResponse = success({ userId: 'newuser@example.com' });
+    const mockResponse = success({ data: { userId: 'newuser@example.com' } });
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
@@ -64,7 +64,7 @@ describe('register action', () => {
   });
 
   it('should return error for email already in use', async () => {
-    const mockResponse = failure(emailAlreadyExists());
+    const mockResponse = error(emailAlreadyExists());
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
@@ -79,8 +79,8 @@ describe('register action', () => {
     }
   });
 
-  it('should return error for registration failure', async () => {
-    const mockResponse = failure(registrationFailed());
+  it('should return error for registration error', async () => {
+    const mockResponse = error(registrationFailed());
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({

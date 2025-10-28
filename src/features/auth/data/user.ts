@@ -6,7 +6,7 @@ import { db } from '@/lib/prisma';
 
 /**
  * Data access layer for User entity
- * Throws AppError on database failures
+ * Throws AppError on database errors
  * Returns null when user is not found (expected behavior)
  */
 
@@ -61,7 +61,7 @@ async function findUser<T = User>(
     const identifier = ('id' in where ? where.id : where.email) || 'unknown';
     console.error(`[${operation}] Database error for ${identifier}:`, error);
 
-    // Service layer should throw AppError for expected failures so callers can
+    // Service layer should throw AppError for expected errors so callers can
     // handle or convert them to Responses at the action layer.
     throw databaseError(operation, identifier);
   }

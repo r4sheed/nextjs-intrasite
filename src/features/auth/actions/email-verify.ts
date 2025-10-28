@@ -9,7 +9,7 @@ import {
 } from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { db } from '@/lib/prisma';
-import { type Response, failure, success } from '@/lib/response';
+import { type Response, response } from '@/lib/result';
 
 /**
  * Verifies a user's email address by validating the provided verification token.
@@ -23,7 +23,7 @@ import { type Response, failure, success } from '@/lib/response';
  * All updates are wrapped in a single database transaction to ensure atomicity.
  *
  * @param {string} token - The email verification token from the verification link.
- * @returns {Promise<Response<{ email: string }>>} A response indicating success or failure.
+ * @returns {Promise<Response<{ email: string }>>} A response indicating success or error.
  *
  * @example
  * // Typical usage:
@@ -40,19 +40,19 @@ export const verifyEmail = async (
   // Check token existence
   const existingToken = await getVerificationTokenByToken(token);
   if (!existingToken) {
-    return failure(tokenNotFound());
+    return response.error(tokenNotFound());
   }
 
   // Check expiration
   const hasExpired = existingToken.expires.getTime() <= Date.now();
   if (hasExpired) {
-    return failure(tokenExpired());
+    return response.error(tokenExpired());
   }
 
   // Find user
   const user = await getUserByEmailWithoutPassword(existingToken.email);
   if (!user) {
-    return failure(userNotFound(existingToken.email));
+    return response.error(userNotFound(existingToken.email));
   }
 
   // Transaction: update user and delete token atomically
@@ -70,8 +70,8 @@ export const verifyEmail = async (
   ]);
 
   // Success response
-  return success(
-    { email: existingToken.email },
-    AUTH_UI_MESSAGES.EMAIL_VERIFIED
-  );
+  return response.success({
+    data: { email: existingToken.email },
+    message: AUTH_UI_MESSAGES.EMAIL_VERIFIED,
+  });
 };

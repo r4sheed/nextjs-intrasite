@@ -20,7 +20,7 @@ export const internalServerError = () =>
   });
 
 /**
- * 422 - Validation failure.
+ * 422 - Validation error.
  * Used when input data validation (e.g., Zod schema check) fails.
  * @param details The raw validation errors (e.g., ZodError object) or a custom error structure.
  * @returns AppError with status 422.
@@ -87,3 +87,18 @@ export const databaseError = (operation: string, identifier: string) =>
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details: { operation, identifier },
   });
+
+/**
+ * Convenience object containing all core error factory functions
+ * @example
+ * import { errors } from '@/lib/errors';
+ * throw errors.internalServerError();
+ */
+export const errors = {
+  internalServerError,
+  validationFailed,
+  unauthorized,
+  forbidden,
+  notFound,
+  databaseError,
+};
