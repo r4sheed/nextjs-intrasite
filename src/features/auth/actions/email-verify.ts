@@ -11,6 +11,9 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/result';
 
+// Defines the expected successful data structure returned by the 'login' action.
+export type VerificationData = { email: string };
+
 /**
  * Verifies a user's email address by validating the provided verification token.
  *
@@ -23,7 +26,7 @@ import { type Response, response } from '@/lib/result';
  * All updates are wrapped in a single database transaction to ensure atomicity.
  *
  * @param {string} token - The email verification token from the verification link.
- * @returns {Promise<Response<{ email: string }>>} A response indicating success or error.
+ * @returns {Promise<Response<VerificationData>>} A response indicating success or error.
  *
  * @example
  * // Typical usage:
@@ -36,7 +39,7 @@ import { type Response, response } from '@/lib/result';
  */
 export const verifyEmail = async (
   token: string
-): Promise<Response<{ email: string }>> => {
+): Promise<Response<VerificationData>> => {
   // Check token existence
   const existingToken = await getVerificationTokenByToken(token);
   if (!existingToken) {

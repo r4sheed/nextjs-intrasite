@@ -18,14 +18,15 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
-import { verifyEmail } from '@/features/auth/actions/email-verify';
+import { type VerificationData, verifyEmail } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
+import { execute } from '@/hooks/use-action';
 import { ROUTES } from '@/lib/navigation';
-import { Status, getMessage } from '@/lib/result';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
 const VerificationResult = ({
   icon: Icon,
@@ -97,46 +98,74 @@ const renderForm = (formContent: React.ReactNode) => (
   </div>
 );
 
+/**
+ * @name EmailVerificationForm
+ * @description Automatically initiates email verification upon token presence in the URL.
+ * Displays success, error, or loading state based on the mutation result.
+ */
 export const EmailVerificationForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const mutation = useMutation({
-    mutationFn: verifyEmail,
+  /**
+   * TanStack Query mutation for the verifyEmail Server Action.
+   */
+  const mutation = useMutation<
+    SuccessResponse<VerificationData>, // TData: Success response with data
+    ErrorResponse, // TError: Thrown error from 'execute'
+    string // TVariables: The 'token' input
+  >({
+    mutationFn: token =>
+      // Use the execute adapter to call the server action
+      execute(verifyEmail, token) as Promise<SuccessResponse<VerificationData>>,
   });
 
-  const successMessage =
-    mutation.data?.status === Status.Success
-      ? getMessage(mutation.data.message)
-      : undefined;
+  // Extracts success and error messages using the consistent message key pattern
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
 
-  const errorMessage =
-    mutation.data?.status === Status.Error
-      ? getMessage(mutation.data.message)
-      : undefined;
-
+  // Automatically trigger the mutation when the token is available
   useEffect(() => {
-    if (!token || successMessage || errorMessage || mutation.isPending) {
+    // Only proceed if a token exists and the mutation hasn't been run/is not pending
+    if (
+      !token ||
+      mutation.isPending ||
+      mutation.isSuccess ||
+      mutation.isError
+    ) {
       return;
     }
+
+    // Start the verification process
     mutation.mutate(token);
-  }, [token, mutation, successMessage, errorMessage]);
+  }, [
+    token,
+    mutation.mutate,
+    mutation.isPending,
+    mutation.isSuccess,
+    mutation.isError,
+  ]);
 
   let content;
 
   if (!token) {
+    // No token found in the URL
     content = (
       <VerificationError message={AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND} />
     );
-  } else if (successMessage) {
-    content = <VerificationSuccess message={successMessage} />;
-  } else if (errorMessage) {
+  } else if (mutation.isPending) {
+    content = <VerificationLoading />;
+  } else if (mutation.isSuccess) {
+    content = <VerificationSuccess message={successMessage!} />;
+  } else if (mutation.isError) {
+    // Error occurred (error caught by TanStack Query)
     content = (
       <VerificationError
         message={errorMessage || AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR}
       />
     );
   } else {
+    // Default state if token is present but mutation hasn't run yet
     content = <VerificationLoading />;
   }
 
