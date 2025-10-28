@@ -31,83 +31,65 @@ This document establishes a **unified, type-safe error handling pattern** for la
 ### ✅ CORRECT: Unified Response Type with Status Enum
 
 ```typescript
-// File: src/lib/response.ts
+// File: src/lib/result.ts
 
 export enum Status {
-  Idle = 'idle', // Initial state, no action performed yet
   Success = 'success', // Action completed successfully
   Error = 'error', // Action failed with error
-  Pending = 'pending', // Action in progress
   Partial = 'partial', // Some operations succeeded, some failed
 }
 
 /**
  * Message type for i18n support
- * Simple string or i18n key with params for formatted messages
+ * Can be a simple string or an i18n key with optional parameters
  */
-export type Message =
-  | string
-  | { key: string; params?: Record<string, unknown> };
+export type Message = { key: string; params?: Record<string, unknown> };
 
 /**
- * Partial error type for batch operations
+ * Represents an individual error in a partial operation
  */
 export interface PartialError {
   code: string;
-  error: Message;
+  message: Message;
   details?: unknown;
 }
 
 /**
- * Idle response - initial state, no action performed yet
- */
-export interface IdleResponse {
-  status: Status.Idle;
-}
-
-/**
- * Success response - contains data and optional success message
+ * Response when an action is successful
  */
 export interface SuccessResponse<TData> {
   status: Status.Success;
   data: TData;
-  success?: Message;
+  message?: Message;
 }
 
 /**
- * Error response - all error details directly on response
- * No nested objects, simple and clear
+ * Response when an error occurs
  */
 export interface ErrorResponse {
   status: Status.Error;
-  error: Message; // Error message (string or i18n key)
+  message: Message; // Error message as i18n key
   code: string; // Error code for programmatic handling
   httpStatus: number; // HTTP status code
   details?: unknown; // Additional error context
 }
 
 /**
- * Pending response - operation in progress
- */
-export interface PendingResponse {
-  status: Status.Pending;
-}
-
-/**
- * Partial response - some operations succeeded, some failed
+ * Response when some operations succeed and some fail
  */
 export interface PartialResponse<TData> {
   status: Status.Partial;
   data: TData;
-  success?: Message;
+  message?: Message;
   errors: PartialError[];
 }
 
+/**
+ * Union type of all possible server responses
+ */
 export type Response<TData> =
-  | IdleResponse
   | SuccessResponse<TData>
   | ErrorResponse
-  | PendingResponse
   | PartialResponse<TData>;
 ```
 
@@ -136,80 +118,79 @@ export interface BadResponse<T> {
 
 ### ✅ CORRECT: Factory Functions with Status Enum
 
-// File: src/lib/response.ts
+// File: src/lib/result.ts
 
 ```typescript
 /**
- * Create idle response
- */
-export function idle(): IdleResponse {
-  return {
-    status: Status.Idle,
-  };
-}
-
-/**
- * Create success response
- * @param data - The response data
- * @param success - Optional success message (string or i18n key with params)
- *
+ * Create a success response
+ * @param data - The response payload
+ * @param message - Optional success message (i18n object)
+ * @returns {SuccessResponse<TData>}
  * @example
- * success({ userId: '123' })
- * success({ userId: '123' }, 'Registration successful')
- * success({ userId: '123' }, { key: 'auth.success.registered', params: { email: 'user@example.com' } })
+ * success({ data: { userId: '123' } })
+ * success({ data: { userId: '123' }, message: { key: 'auth.success.registered', params: { email: 'user@example.com' } } })
  */
-export function success<TData>(
-  data: TData,
-  success?: Message
-): SuccessResponse<TData> {
+export function success<TData>(options: {
+  data: TData;
+  message?: Message;
+}): SuccessResponse<TData> {
   return {
     status: Status.Success,
-    data,
-    ...(success && { success }),
-  };
+    data: options.data,
+    ...(options.message && { message: options.message }),
+  } as const;
 }
 
 /**
- * Create error response from AppError
+ * Create an error response from an AppError
  * Automatically serializes AppError for client-server communication
  *
  * @example
- * error(AuthErrors.INVALID_CREDENTIALS)
+ * error(invalidCredentials())
  */
 export function error(error: AppError): ErrorResponse {
   return {
     status: Status.Error,
-    error: error.errorMessage,
+    message: error.errorMessage,
     code: error.code,
     httpStatus: error.httpStatus,
     details: error.details,
-  };
+  } as const;
 }
 
 /**
- * Create pending response
+ * Create a partial response - some operations succeeded, some failed
+ * @param data - The successful data
+ * @param errors - List of partial errors
+ * @param message - Optional message
+ * @returns {PartialResponse<TData>}
+ * @example
+ * partial({ data: [{ id: 1 }, { id: 2 }], errors: [{ code: 'FAIL_3', message: { key: 'errors.process_failed' } }] });
  */
-export function pending(): PendingResponse {
-  return {
-    status: Status.Pending,
-  };
-}
-
-/**
- * Create partial response - some operations succeeded, some failed
- */
-export function partial<TData>(
-  data: TData,
-  errors: PartialError[],
-  success?: Message
-): PartialResponse<TData> {
+export function partial<TData>(options: {
+  data: TData;
+  errors: PartialError[];
+  message?: Message;
+}): PartialResponse<TData> {
   return {
     status: Status.Partial,
-    data,
-    errors,
-    ...(success && { success }),
-  };
+    data: options.data,
+    errors: options.errors,
+    ...(options.message && { message: options.message }),
+  } as const;
 }
+
+/**
+ * Convenience object containing all response factory functions
+ * @example
+ * import { response } from '@/lib/result';
+ * return response.success({ data });
+ */
+export const response = {
+  success,
+  error,
+  partial,
+};
 
 /**
  * Extract string from Message type (for display purposes)
@@ -223,36 +204,31 @@ export function getMessage(msg: Message | undefined): string | undefined {
 /**
  * Format a Message with i18n support
  *
- * @param msg - The message to format (string or i18n object)
+ * @param msg - The message to format (i18n object)
  * @param translator - Optional translation function from your i18n library
  * @returns Formatted string message
  *
  * @example
- * // Without i18n (returns plain string or key)
- * formatMessage('Simple error message')
+ * // Without i18n (returns key)
+ * formatMessage({ key: 'auth.success' })
  *
  * @example
  * // With next-intl
  * import { useTranslations } from 'next-intl';
  * const t = useTranslations();
- * formatMessage(response.error, t)
+ * formatMessage(response.message, t)
  *
  * @example
  * // With react-i18next
  * import { useTranslation } from 'react-i18next';
  * const { t } = useTranslation();
- * formatMessage(response.error, t)
+ * formatMessage(response.message, t)
  */
 export function formatMessage(
   msg: Message | undefined,
   translator?: (key: string, params?: Record<string, unknown>) => string
 ): string | undefined {
   if (!msg) return undefined;
-
-  // Simple string message
-  if (typeof msg === 'string') {
-    return msg;
-  }
 
   // i18n object with key and params
   if (translator) {
@@ -475,10 +451,13 @@ export const BadErrors = {
 ```typescript
 'use server';
 
-import { AuthErrorDefinitions as AuthErrors } from '@/features/auth/lib/errors';
+import { invalidFields } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
-import { type Response, error } from '@/lib/response';
+import { type Response, response } from '@/lib/result';
+
+// Defines the expected successful data structure returned by the 'register' action.
+export type RegisterData = { userId: string };
 
 /**
  * Register action - validates input and calls service
@@ -486,11 +465,11 @@ import { type Response, error } from '@/lib/response';
  */
 export async function register(
   values: RegisterInput
-): Promise<Response<{ userId: string }>> {
+): Promise<Response<RegisterData>> {
   // 1. Validate input with Zod
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {
-    return error(AuthErrors.INVALID_FIELDS(validation.error.issues));
+    return response.error(invalidFields(validation.error.issues));
   }
 
   // 2. Call service layer - it returns Response<T>
@@ -512,16 +491,19 @@ export async function registerUser(
   if (siteFeatures.emailVerification) {
     const verificationToken = generateVerificationToken(email);
 
-    // Return success with message (second parameter)
-    return success(
-      { userId: email },
-      { key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT, params: { email } }
+    // Return success with message
+    return response.success({
+      data: { userId: email },
+      message: {
+        key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+        params: { email },
+      },
       // Message shown to user
-    );
+    });
   }
 
   // Return success without message (auto-redirect will happen)
-  return success({ userId: email });
+  return response.success({ data: { userId: email } });
 }
 ```
 
@@ -561,33 +543,40 @@ export async function badLoginAction(formData: FormData) {
 // File: src/features/auth/services/login.ts
 
 ```typescript
+import { invalidCredentials } from '@/features/auth/lib/errors';
+import type { LoginInput } from '@/features/auth/schemas';
 import { comparePasswords } from '@/lib/crypto';
-import { invalidCredentials } from '@/lib/errors';
+import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
-import { fail } from '@/lib/response';
-import type { LoginInput } from '@/schemas/login';
+import { type Response, response } from '@/lib/result';
 import type { User } from '@/types';
 
-export async function loginService(input: LoginInput): Promise<User> {
-  // 1. Find user
-  const user = await db.user.findUnique({
-    where: { email: input.email },
-  });
+export async function loginUser(input: LoginInput): Promise<Response<User>> {
+  try {
+    // 1. Find user
+    const user = await db.user.findUnique({
+      where: { email: input.email },
+    });
 
-  if (!user) {
-    return fail(invalidCredentials());
+    if (!user) {
+      return response.error(invalidCredentials());
+    }
+
+    // 2. Verify password
+    const isValid = await comparePasswords(input.password, user.password);
+
+    if (!isValid) {
+      return response.error(invalidCredentials());
+    }
+
+    // 3. Return success response (without password)
+    const { password, ...userWithoutPassword } = user;
+    return response.success({ data: userWithoutPassword as User });
+  } catch (error) {
+    // Log unexpected errors
+    console.error('Login error:', error);
+    return response.error(internalServerError());
   }
-
-  // 2. Verify password
-  const isValid = await comparePasswords(input.password, user.password);
-
-  if (!isValid) {
-    return fail(invalidCredentials());
-  }
-
-  // 3. Return user (without password)
-  const { password, ...userWithoutPassword } = user;
-  return userWithoutPassword as User;
 }
 ```
 
@@ -617,36 +606,59 @@ export async function badLoginService(email: string, password: string) {
 
 ## 8. Client-Side Handling
 
-### ✅ CORRECT: Using useAction hook with structured messages
+### ✅ CORRECT: Using TanStack Query mutation with execute adapter
 
-// File: src/features/auth/components/register-form.tsx
+// File: src/features/auth/components/login-form.tsx
 
 ```typescript
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
 import { LoadingButton } from '@/components/loading-button';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { register } from '@/features/auth/actions';
-import { useAuthAction } from '@/features/auth/hooks/use-auth-action';
-import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { type LoginData, login } from '@/features/auth/actions';
+import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
-export function RegisterForm() {
-  // useAuthAction wraps useAction with redirect logic
-  const { execute, message, isPending } = useAuthAction();
+export function LoginForm() {
+  const router = useRouter();
 
-  const form = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { email: '', password: '', name: '' },
+  // TanStack Query mutation for the login action
+  const mutation = useMutation<
+    SuccessResponse<LoginData>, // TData: Successful return type
+    ErrorResponse, // TError: Thrown error type (from the 'execute' adapter)
+    LoginInput // TVariables: Input data type
+  >({
+    mutationFn: data =>
+      // Calls the adapter which either returns SuccessResponse or throws ErrorResponse
+      execute(login, data) as Promise<SuccessResponse<LoginData>>,
+
+    onSuccess: () => {
+      // Redirect on successful login
+      router.push(DEFAULT_LOGIN_REDIRECT);
+    },
   });
 
-  const onSubmit = (values: RegisterInput) => {
-    execute(() => register(values));
+  // Extract success and error messages from the mutation state
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
+
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = (values: LoginInput) => {
+    mutation.mutate(values);
   };
 
   return (
@@ -659,18 +671,18 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} type="email" disabled={isPending} />
+                <Input {...field} type="email" disabled={mutation.isPending} />
               </FormControl>
             </FormItem>
           )}
         />
 
         {/* Display success/error messages */}
-        <FormError message={message.error} />
-        <FormSuccess message={message.success} />
+        <FormError message={errorMessage} />
+        <FormSuccess message={successMessage} />
 
-        <LoadingButton type="submit" loading={isPending}>
-          Register
+        <LoadingButton type="submit" loading={mutation.isPending}>
+          Login
         </LoadingButton>
       </form>
     </Form>
@@ -678,137 +690,38 @@ export function RegisterForm() {
 }
 ```
 
-### useAction hook implementation:
+### execute adapter implementation:
 
-File: src/hooks/use-action.ts
-
-```typescript
-'use client';
-
-import { useCallback, useState, useTransition } from 'react';
-
-import type { Message, Response } from '@/lib/response';
-import { Status, getMessage } from '@/lib/response';
-
-export function useAction<TData>() {
-  const [status, setStatus] = useState<Status>(Status.Idle);
-  const [successMsg, setSuccessMsg] = useState<string | undefined>(undefined);
-  const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
-  const [data, setData] = useState<TData | undefined>(undefined);
-  const [isPending, startTransition] = useTransition();
-
-  const execute = useCallback(
-    async (action: () => Promise<Response<TData>>): Promise<void> => {
-      setErrorMsg(undefined);
-      setSuccessMsg(undefined);
-      setStatus(Status.Pending);
-
-      startTransition(async () => {
-        try {
-          const response = await action();
-
-          switch (response.status) {
-            case Status.Success:
-              setData(response.data);
-              setSuccessMsg(getMessage(response.success));
-              setStatus(response.status); // IMPORTANT: Set status LAST
-              break;
-
-            case Status.Error:
-              setErrorMsg(getMessage(response.error));
-              setStatus(response.status); // IMPORTANT: Set status LAST
-              break;
-
-            case Status.Partial:
-              setData(response.data);
-              setSuccessMsg(getMessage(response.success));
-              if (response.errors.length > 0) {
-                setErrorMsg(getMessage(response.errors[0].error));
-              }
-              setStatus(response.status); // IMPORTANT: Set status LAST
-              break;
-
-            case Status.Pending:
-              setStatus(response.status);
-              break;
-          }
-        } catch (err) {
-          setErrorMsg('An unexpected error occurred. Please try again.');
-          setStatus(Status.Error); // IMPORTANT: Set status LAST
-          console.error('useAction error:', err);
-        }
-      });
-    },
-    []
-  );
-
-  const reset = useCallback(() => {
-    setStatus(Status.Idle);
-    setSuccessMsg(undefined);
-    setErrorMsg(undefined);
-    setData(undefined);
-  }, []);
-
-  return {
-    execute,
-    reset,
-    status,
-    message: {
-      success: successMsg,
-      error: errorMsg,
-    },
-    data,
-    isPending: status === Status.Pending || isPending,
-  };
-}
-```
-
-### useAuthAction with redirect logic:
-
-// File: src/features/auth/hooks/use-auth-action.tsx
+File: src/hooks/use-action.tsx
 
 ```typescript
-'use client';
+import {
+  PartialResponse,
+  Response,
+  SuccessResponse,
+  isError,
+} from '@/lib/result';
 
-import { useCallback, useEffect, useRef } from 'react';
+/**
+ * Execute adapter for TanStack Query
+ * Converts Response<T> pattern to TanStack Query's throw-on-error pattern
+ *
+ * @param action - Server action that returns Response<T>
+ * @param args - Arguments to pass to the action
+ * @returns SuccessResponse or PartialResponse on success
+ * @throws ErrorResponse on error (for TanStack Query error handling)
+ */
+export async function execute<TData, TArgs>(
+  action: (args: TArgs) => Promise<Response<TData>>,
+  args: TArgs
+): Promise<SuccessResponse<TData> | PartialResponse<TData>> {
+  const result = await action(args);
 
-import { useRouter } from 'next/navigation';
+  if (isError(result)) {
+    throw result;
+  }
 
-import { useAction } from '@/hooks/use-action';
-import { type Response, Status } from '@/lib/response';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
-
-export function useAuthAction<TData>(options: { redirectTo?: string } = {}) {
-  const router = useRouter();
-  const actionState = useAction<TData>();
-  const hasRedirectedRef = useRef(false);
-
-  const { redirectTo = DEFAULT_LOGIN_REDIRECT } = options;
-
-  const execute = useCallback(
-    async (action: () => Promise<Response<TData>>): Promise<void> => {
-      hasRedirectedRef.current = false;
-      await actionState.execute(action);
-    },
-    [actionState]
-  );
-
-  // Handle redirect on success (only if no success message)
-  useEffect(() => {
-    if (actionState.status === Status.Success && !hasRedirectedRef.current) {
-      hasRedirectedRef.current = true;
-
-      // If success message exists, don't redirect (show message instead)
-      if (actionState.message.success) {
-        return;
-      }
-
-      // No message, redirect to target page
-      router.push(redirectTo);
-    }
-  }, [actionState.status, actionState.message.success, redirectTo, router]);
-
-  return actionState;
+  return result;
 }
 ```
 
@@ -839,40 +752,6 @@ async function badHandleSubmit(formData: FormData) {
 
 ---
 
-### ❌ WRONG: Scattered state management
-
-```typescript
-// DON'T DO THIS
-function BadLoginForm() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [data, setData] = useState(null);
-
-  async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    try {
-      const result = await loginAction(formData);
-      setData(result);
-    } catch (err) {
-      setError('Something went wrong'); // ❌ Generic error
-    } finally {
-      setLoading(false);
-    }
-  }
-  // ...
-}
-```
-
-**Why wrong:**
-
-- Repeated boilerplate in every form
-- No type safety
-- No i18n support
-- No toast notifications
-- Hard to maintain
-
----
-
 ## 9. Batch Operations (Partial Responses)
 
 ### ✅ CORRECT: Using partial status
@@ -883,8 +762,7 @@ function BadLoginForm() {
 'use server';
 
 import { AppError } from '@/lib/errors/app-error';
-import { error, partial, success } from '@/lib/response';
-import type { Response } from '@/lib/response';
+import { type PartialError, type Response, response } from '@/lib/result';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
 
@@ -902,7 +780,7 @@ export async function deleteManyBookmarksAction(
       if (error instanceof AppError) {
         errors.push({
           code: error.code,
-          error: error.errorMessage,
+          message: error.errorMessage,
           details: { id },
         });
       }
@@ -911,16 +789,16 @@ export async function deleteManyBookmarksAction(
 
   // All succeeded
   if (errors.length === 0) {
-    return success({ deletedIds });
+    return response.success({ data: { deletedIds } });
   }
 
   // All failed
   if (deletedIds.length === 0) {
-    return error(errors[0]); // Return first error as AppError
+    return response.error(errors[0]); // Return first error as AppError
   }
 
   // Partial success
-  return partial({ deletedIds }, errors);
+  return response.partial({ data: { deletedIds }, errors });
 }
 ```
 
@@ -955,12 +833,12 @@ export async function badDeleteMany(ids: string[]) {
 5. **Compose error definitions** using spread operator (never modify base file)
 6. **Validate input** with Zod or similar before processing
 7. **Use status checks** (`response.status === Status.Success`) on client
-8. **Throw `AppError` in services**, catch in actions
-9. **Use i18n keys with params** for error messages
+8. **Return `response.error()` in services** for domain errors
+9. **Use i18n keys with params** for error messages (always use `{ key, params }` format)
 10. **Use `partial` status** for batch operations with mixed results
 11. **Log unexpected errors** before returning `INTERNAL_SERVER_ERROR`
-12. **Initialize hook state with `Status.Idle`** to prevent race conditions
-13. **Set status LAST** in state updates (setData/setMsg first, setStatus last)
+12. **Use TanStack Query** with `execute` adapter for client-side mutations
+13. **Use object-based options** for response factory functions (`success({ data, message })`)
 
 ### NEVER DO ❌
 
@@ -971,13 +849,13 @@ export async function badDeleteMany(ids: string[]) {
 5. **Don't modify base error definitions** for new features
 6. **Don't return `null` or `undefined`** to indicate errors
 7. **Don't expose sensitive data** in error details
-8. **Don't use `try/catch` on client** to handle server action errors
+8. **Don't use `try/catch` on client** to handle server action errors (use TanStack Query)
 9. **Don't use `alert()`** or generic error messages
 10. **Don't skip input validation**
 11. **Don't mix error handling patterns** across features
-12. **Don't use positional parameters** in AppError constructor
-13. **Don't start with `Status.Pending`** as initial state (causes disabled forms)
-14. **Don't call `setStatus()` before setting data/messages** (causes race conditions)
+12. **Don't use positional parameters** in AppError constructor or response helpers
+13. **Don't use plain strings for messages** (always use `{ key, params }` format)
+14. **Don't use `Idle` or `Pending` status types** (removed in current implementation)
 
 ---
 
@@ -987,38 +865,47 @@ export async function badDeleteMany(ids: string[]) {
 src/
 ├── lib/
 │   ├── http-status.ts          # HTTP status constants
-│   ├── response.ts              # Response types, Status enum & helpers
+│   ├── result.ts               # Response types, Status enum & helpers
 │   └── errors/
-│       ├── app-error.ts         # AppError class
-│       ├── definitions.ts       # Base error definitions
-│       └── index.ts             # Exports all errors
+│       ├── app-error.ts        # AppError class
+│       ├── codes.ts            # Base error codes (ERROR_CODES)
+│       ├── messages.ts         # Base error messages (ERROR_MESSAGES)
+│       ├── helpers.ts          # Base error factory functions
+│       └── index.ts            # Exports all errors
 │
 ├── features/
 │   ├── auth/
 │   │   ├── actions/
-│   │   │   ├── login.ts         # Server action
+│   │   │   ├── login.ts        # Server action
 │   │   │   └── register.ts
 │   │   ├── services/
-│   │   │   ├── login.ts         # Business logic
+│   │   │   ├── login.ts        # Business logic
 │   │   │   └── register.ts
 │   │   ├── schemas/
-│   │   │   ├── login.ts         # Zod schemas
+│   │   │   ├── login.ts        # Zod schemas
 │   │   │   └── register.ts
 │   │   ├── lib/
-│   │   │   └── errors.ts        # Auth-specific errors
+│   │   │   ├── errors.ts       # Auth-specific error factories
+│   │   │   ├── codes.ts        # Auth error codes
+│   │   │   └── messages.ts     # Auth error messages
 │   │   └── types/
 │   │       └── index.ts
 │   │
 │   ├── posts/
 │   │   ├── lib/
-│   │   │   └── errors.ts        # Post-specific errors
+│   │   │   └── errors.ts       # Post-specific errors
 │   │   └── ...
 │   │
 │   └── bookmarks/
 │       ├── lib/
-│       │   └── errors.ts        # Bookmark-specific errors
+│       │   └── errors.ts       # Bookmark-specific errors
 │       └── ...
+│
+├── hooks/
+│   └── use-action.tsx          # execute adapter for TanStack Query
 ```
+
+````
 
 ---
 
@@ -1036,7 +923,7 @@ Ensure strict mode is enabled:
     "noFallthroughCasesInSwitch": true
   }
 }
-```
+````
 
 ---
 
@@ -1141,6 +1028,6 @@ This pattern provides:
 ✅ **Testability**: Responses are easy to test and mock  
 ✅ **Maintainability**: Single source of truth for errors and statuses  
 ✅ **Future-Proof**: Object-based constructors allow easy extension  
-✅ **Race Condition Free**: State updates ordered correctly (setStatus last)
+✅ **Modern Async Handling**: Seamless integration with TanStack Query
 
 Follow these guidelines for all new features and refactor existing code to match this pattern.
