@@ -1,3 +1,5 @@
+import { type AuthError } from 'next-auth';
+
 import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import { AUTH_ERROR_MESSAGES } from '@/features/auth/lib/messages';
 import { AppError } from '@/lib/errors';
@@ -20,7 +22,7 @@ export const invalidFields = (details: unknown) =>
     code: AUTH_ERROR_CODES.AUTH_INVALID_FIELDS,
     message: { key: AUTH_ERROR_MESSAGES.INVALID_FIELDS },
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
-    details,
+    details: details,
   });
 
 /**
@@ -69,11 +71,12 @@ export const emailAlreadyExists = () =>
  * Generic error for unexpected server issues during the registration process.
  * @returns AppError with status 500.
  */
-export const registrationFailed = () =>
+export const registrationFailed = (error: unknown) =>
   new AppError({
     code: AUTH_ERROR_CODES.AUTH_REGISTRATION_FAILED,
     message: { key: AUTH_ERROR_MESSAGES.REGISTRATION_FAILED },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    details: error,
   });
 
 /**
@@ -81,11 +84,12 @@ export const registrationFailed = () =>
  * Error during external provider (OAuth) or internal callback processing.
  * @returns AppError with status 500.
  */
-export const callbackError = () =>
+export const callbackError = (error: AuthError) =>
   new AppError({
     code: AUTH_ERROR_CODES.AUTH_CALLBACK_ERROR,
     message: { key: AUTH_ERROR_MESSAGES.CALLBACK_ERROR },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    details: error,
   });
 
 /**

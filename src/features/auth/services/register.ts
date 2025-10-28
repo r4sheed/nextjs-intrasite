@@ -81,6 +81,6 @@ export async function registerUser(
 
     return response.success({ data: { userId: createdUser.id } });
   } catch (error) {
-    return response.error(registrationFailed());
+    return response.error(registrationFailed(error));
   }
 }

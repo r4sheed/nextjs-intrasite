@@ -87,7 +87,7 @@ export async function loginUser(
         case 'CredentialsSignin':
           return response.error(invalidCredentials());
         case 'CallbackRouteError':
-          return response.error(callbackError());
+          return response.error(callbackError(error));
       }
     }
 
