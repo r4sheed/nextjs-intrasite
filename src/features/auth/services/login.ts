@@ -1,6 +1,6 @@
 import { AuthError } from 'next-auth';
 
-import { type LoginData } from '@/features/auth/actions/login';
+import { type LoginData } from '@/features/auth/actions';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
