@@ -1,9 +1,7 @@
 import { AuthError } from 'next-auth';
 
-import {
-  getUserByEmail,
-  verifyUserCredentials,
-} from '@/features/auth/data/user';
+import { type LoginData } from '@/features/auth/actions/login';
+import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
   callbackError,
@@ -25,7 +23,7 @@ import { type Response, response } from '@/lib/result';
  */
 export async function loginUser(
   values: LoginInput
-): Promise<Response<{ userId: string }>> {
+): Promise<Response<LoginData>> {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
     return response.error(invalidFields(parsed.error.issues));
