@@ -57,7 +57,7 @@ export async function loginUser(
       );
 
       return response.success({
-        data: { userId: email },
+        data: { userId: verifiedUser.id },
         message: {
           key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
         },
@@ -79,7 +79,7 @@ export async function loginUser(
       return response.error(invalidCredentials());
     }
 
-    return response.success({ data: { userId: email } });
+    return response.success({ data: { userId: verifiedUser.id } });
   } catch (error) {
     if (error instanceof AuthError) {
       // https://authjs.dev/reference/core/errors
