@@ -25,8 +25,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { type NewPasswordData, newPassword } from '@/features/auth/actions';
-import { AuthErrorState } from '@/features/auth/components/auth-error';
+import { AuthState } from '@/features/auth/components/auth-state';
 import { Header } from '@/features/auth/components/header';
+import { LoadState } from '@/features/auth/components/load-state';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
@@ -80,10 +81,21 @@ export const NewPasswordForm = () => {
 
   if (!token) {
     return (
-      <AuthErrorState
-        title="Bad Error :("
+      <AuthState
+        title={AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR}
         message={AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND}
-      ></AuthErrorState>
+        variant="destructive"
+      />
+    );
+  }
+
+  if (mutation.isPending) {
+    // TODO: Add proper title and description
+    return (
+      <LoadState
+        title={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_TITLE}
+        description={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_DESCRIPTION}
+      />
     );
   }
 
@@ -106,7 +118,7 @@ export const NewPasswordForm = () => {
                     {...field}
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     disabled={mutation.isPending}
                   />
                 </FormControl>

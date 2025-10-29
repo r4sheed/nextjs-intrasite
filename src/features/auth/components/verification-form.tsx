@@ -2,90 +2,41 @@
 
 import { useEffect } from 'react';
 
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
-import { CircleCheckBig, TriangleAlert } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
-import { Spinner } from '@/components/ui/spinner';
 import { type VerificationData, verify } from '@/features/auth/actions';
+import { AuthState } from '@/features/auth/components/auth-state';
 import { Header } from '@/features/auth/components/header';
+import { LoadState } from '@/features/auth/components/load-state';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 import { execute } from '@/hooks/use-action';
-import { ROUTES } from '@/lib/navigation';
 import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
-const VerificationResult = ({
-  icon: Icon,
-  title,
-  message,
-}: {
-  icon: React.ElementType;
-  title: string;
-  message: string;
-  success?: boolean;
-}) => (
-  <Empty>
-    <EmptyHeader>
-      <EmptyMedia>
-        <Icon className="size-10" />
-      </EmptyMedia>
-      <EmptyTitle>{title}</EmptyTitle>
-      <EmptyDescription>{message}</EmptyDescription>
-    </EmptyHeader>
-    <EmptyContent>
-      <div className="flex gap-2">
-        <Button asChild>
-          <Link href={ROUTES.AUTH.LOGIN}>
-            {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
-          </Link>
-        </Button>
-      </div>
-    </EmptyContent>
-  </Empty>
+const VerificationLoading = () => (
+  <LoadState
+    title={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_TITLE}
+    description={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_DESCRIPTION}
+  />
 );
 
 const VerificationSuccess = ({ message }: { message: string }) => (
-  <VerificationResult
-    icon={CircleCheckBig}
+  <AuthState
     title={AUTH_UI_MESSAGES.VERIFICATION_SUCCESS_TITLE}
     message={message}
   />
 );
 
 const VerificationError = ({ message }: { message: string }) => (
-  <VerificationResult
-    icon={TriangleAlert}
+  <AuthState
     title={AUTH_UI_MESSAGES.VERIFICATION_FAILED_TITLE}
     message={message}
+    variant="destructive"
   />
-);
-
-const VerificationLoading = () => (
-  <Empty>
-    <EmptyHeader>
-      <EmptyMedia variant="default">
-        <Spinner className="size-10" />
-      </EmptyMedia>
-      <EmptyTitle>{AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_TITLE}</EmptyTitle>
-      <EmptyDescription>
-        {AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_DESCRIPTION}
-      </EmptyDescription>
-    </EmptyHeader>
-  </Empty>
 );
 
 const renderForm = (formContent: React.ReactNode) => (
@@ -156,7 +107,11 @@ export const EmailVerificationForm = () => {
   } else if (mutation.isPending) {
     content = <VerificationLoading />;
   } else if (mutation.isSuccess) {
-    content = <VerificationSuccess message={successMessage!} />;
+    content = (
+      <VerificationSuccess
+        message={successMessage || AUTH_UI_MESSAGES.EMAIL_VERIFIED}
+      />
+    );
   } else if (mutation.isError) {
     // Error occurred (error caught by TanStack Query)
     content = (
