@@ -18,7 +18,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
-import { type VerificationData, verifyEmail } from '@/features/auth/actions';
+import { type VerificationData, verify } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import {
   AUTH_ERROR_MESSAGES,
@@ -117,7 +117,7 @@ export const EmailVerificationForm = () => {
   >({
     mutationFn: token =>
       // Use the execute adapter to call the server action
-      execute(verifyEmail, token) as Promise<SuccessResponse<VerificationData>>,
+      execute(verify, token) as Promise<SuccessResponse<VerificationData>>,
   });
 
   // Extracts success and error messages using the consistent message key pattern
