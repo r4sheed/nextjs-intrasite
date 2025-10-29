@@ -7,6 +7,7 @@ import { API_ROUTES, ROUTES } from '@/lib/navigation';
 export const PUBLIC_ROUTES = Object.freeze([
   ROUTES.HOME,
   ROUTES.ERROR,
+  ROUTES.AUTH.VERIFY_EMAIL,
 ]) as readonly string[];
 
 /**
@@ -17,7 +18,6 @@ export const AUTH_ROUTES = Object.freeze([
   ROUTES.AUTH.LOGIN,
   ROUTES.AUTH.REGISTER,
   ROUTES.AUTH.RESET_PASSWORD,
-  ROUTES.AUTH.VERIFY_EMAIL,
 ]) as readonly string[];
 
 /**
