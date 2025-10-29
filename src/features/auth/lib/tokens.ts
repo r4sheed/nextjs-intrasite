@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { getVerificationTokenByEmail } from '@/features/auth/data/vertification-token';
+import { getVerificationTokenByEmail } from '@/features/auth/data/vertification';
 import { db } from '@/lib/prisma';
 
 const VERIFICATION_TOKEN_LIFETIME_MS = 60 * 60 * 1000;

@@ -1,7 +1,7 @@
 'use server';
 
 import { getUserByEmail } from '@/features/auth/data/user';
-import { getVerificationTokenByToken } from '@/features/auth/data/vertification-token';
+import { getVerificationTokenByToken } from '@/features/auth/data/vertification';
 import {
   tokenExpired,
   tokenNotFound,
