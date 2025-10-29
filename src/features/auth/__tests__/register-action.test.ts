@@ -31,7 +31,7 @@ describe('register action', () => {
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
       expect(response.data).toEqual({ userId: 'newuser@example.com' });
-      expect(response.data.userId).toBe('newuser@example.com');
+      expect(response.data?.userId).toBe('newuser@example.com');
     }
   });
 

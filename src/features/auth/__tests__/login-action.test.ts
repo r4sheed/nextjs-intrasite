@@ -27,7 +27,7 @@ describe('login action', () => {
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
       expect(response.data).toEqual({ userId: 'test@example.com' });
-      expect(response.data.userId).toBe('test@example.com');
+      expect(response.data?.userId).toBe('test@example.com');
     }
   });
 
