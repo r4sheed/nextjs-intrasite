@@ -33,7 +33,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const url = `${BASE_URL}/${ROUTES.AUTH.VERIFY_EMAIL}?token=${token}`;
+  const url = `${BASE_URL}/${ROUTES.AUTH.NEW_PASSWORD}?token=${token}`;
 
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
