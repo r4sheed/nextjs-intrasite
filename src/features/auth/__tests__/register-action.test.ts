@@ -80,7 +80,7 @@ describe('register action', () => {
   });
 
   it('should return error for registration error', async () => {
-    const mockResponse = error(registrationFailed());
+    const mockResponse = error(registrationFailed({}));
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
     const response = await register({
