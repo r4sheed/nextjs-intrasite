@@ -24,7 +24,7 @@ export type Message = { key: string; params?: Record<string, unknown> };
  */
 export interface SuccessResponse<TData> {
   status: Status.Success;
-  data: TData;
+  data?: TData;
   message?: Message;
 }
 
@@ -77,12 +77,12 @@ export type Response<TData> =
  * success({ userId: '123' }, { key: 'auth.success.registered', params: { email: 'user@example.com' } })
  */
 export function success<TData>(options: {
-  data: TData;
+  data?: TData;
   message?: Message;
 }): SuccessResponse<TData> {
   return {
     status: Status.Success,
-    data: options.data,
+    ...(options.data && { data: options.data }),
     ...(options.message && { message: options.message }),
   } as const;
 }
