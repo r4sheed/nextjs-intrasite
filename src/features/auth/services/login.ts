@@ -9,12 +9,12 @@ import {
   invalidCredentials,
   invalidFields,
 } from '@/features/auth/lib/errors';
+import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
 import { internalServerError } from '@/lib/errors';
-import { sendVerificationEmail } from '@/lib/mail';
 import { type Response, response } from '@/lib/result';
 
 /**

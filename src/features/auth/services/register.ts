@@ -8,11 +8,11 @@ import {
   invalidFields,
   registrationFailed,
 } from '@/features/auth/lib/errors';
+import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { siteFeatures } from '@/lib/config';
-import { sendVerificationEmail } from '@/lib/mail';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/result';
 
