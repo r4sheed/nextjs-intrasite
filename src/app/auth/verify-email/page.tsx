@@ -1,5 +1,5 @@
 import { AuthWrapper } from '@/features/auth/components/auth-wrapper';
-import { EmailVerificationForm } from '@/features/auth/components/email-verification-form';
+import { EmailVerificationForm } from '@/features/auth/components/verification-form';
 
 export default function VerifyEmailPage() {
   return (
