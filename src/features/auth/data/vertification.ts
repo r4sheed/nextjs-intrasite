@@ -6,10 +6,10 @@ export const getVerificationTokenByToken = async (
   token: string
 ): Promise<VerificationToken | null> => {
   try {
-    const verificationToken = await db.verificationToken.findUnique({
+    const data = await db.verificationToken.findUnique({
       where: { token },
     });
-    return verificationToken;
+    return data;
   } catch (error) {
     return null;
   }
@@ -19,10 +19,10 @@ export const getVerificationTokenByEmail = async (
   email: string
 ): Promise<VerificationToken | null> => {
   try {
-    const verificationToken = await db.verificationToken.findFirst({
+    const data = await db.verificationToken.findFirst({
       where: { email },
     });
-    return verificationToken;
+    return data;
   } catch (error) {
     return null;
   }
