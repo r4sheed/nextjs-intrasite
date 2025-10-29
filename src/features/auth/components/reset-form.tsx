@@ -21,45 +21,38 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { type ResetData, reset } from '@/features/auth/actions';
 import { Header } from '@/features/auth/components/header';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
-import {
-  type ResetPasswordInput,
-  resetPasswordSchema,
-} from '@/features/auth/schemas';
+import { type ResetInput, resetSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
 import { ROUTES } from '@/lib/navigation';
-import { type Response, Status, getMessage } from '@/lib/result';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
-export const ResetPasswordForm = () => {
-  // Note: This form doesn't have an action implementation yet
-  // When implemented, replace the mutationFn with the actual action
-  const mutation = useMutation<Response<unknown>, Error, ResetPasswordInput>({
-    mutationFn: async (_values: ResetPasswordInput) => {
-      // Placeholder - replace with actual reset password action
-      throw new Error('Reset password action not implemented yet');
-    },
+export const ResetForm = () => {
+  const mutation = useMutation<
+    SuccessResponse<ResetData>,
+    ErrorResponse,
+    ResetInput
+  >({
+    mutationFn: data =>
+      execute(reset, data) as Promise<SuccessResponse<ResetData>>,
   });
 
-  const form = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordSchema),
+  const form = useForm<ResetInput>({
+    resolver: zodResolver(resetSchema),
     defaultValues: {
       email: '',
     },
   });
 
-  const onSubmit = (values: ResetPasswordInput) => {
+  const onSubmit = (values: ResetInput) => {
+    if (mutation.isPending) return;
     mutation.mutate(values);
   };
 
-  const successMessage =
-    mutation.data?.status === Status.Success
-      ? getMessage(mutation.data.message)
-      : undefined;
-
-  const errorMessage =
-    mutation.data?.status === Status.Error
-      ? getMessage(mutation.data.message)
-      : undefined;
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
 
   return (
     <Form {...form}>

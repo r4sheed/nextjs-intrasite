@@ -1,5 +1,5 @@
 import { AuthWrapper } from '@/features/auth/components/auth-wrapper';
-import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
+import { ResetForm } from '@/features/auth/components/reset-form';
 
 export default function VerifyEmailPage() {
   return (
@@ -11,7 +11,7 @@ export default function VerifyEmailPage() {
             alt: 'Forgot Password Illustration',
           }}
         >
-          <ResetPasswordForm />
+          <ResetForm />
         </AuthWrapper>
       </div>
     </div>
