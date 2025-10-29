@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { type NewPasswordData, newPassword } from '@/features/auth/actions';
-import { AuthError } from '@/features/auth/components/auth-error';
+import { AuthErrorState } from '@/features/auth/components/auth-error';
 import { Header } from '@/features/auth/components/header';
 import {
   AUTH_ERROR_MESSAGES,
@@ -80,10 +80,10 @@ export const NewPasswordForm = () => {
 
   if (!token) {
     return (
-      <AuthError
+      <AuthErrorState
         title="Bad Error :("
         message={AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND}
-      ></AuthError>
+      ></AuthErrorState>
     );
   }
 
