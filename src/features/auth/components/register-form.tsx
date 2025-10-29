@@ -63,10 +63,6 @@ export const RegisterForm = () => {
     },
   });
 
-  // The completion status is better checked via mutation.isSuccess if needed for UI logic,
-  // but we can simplify the button disable logic.
-  const isCompleted = mutation.isSuccess;
-
   // Handles the form submission by calling the mutation
   const onSubmit = (values: RegisterInput) => {
     // Prevent multiple submissions while pending
@@ -94,7 +90,7 @@ export const RegisterForm = () => {
                     {...field}
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
                     autoComplete="name"
-                    disabled={mutation.isPending || isCompleted}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -117,7 +113,7 @@ export const RegisterForm = () => {
                     type="email"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
                     autoComplete="email"
-                    disabled={mutation.isPending || isCompleted}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -140,7 +136,7 @@ export const RegisterForm = () => {
                     type="password"
                     placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
                     autoComplete="new-password"
-                    disabled={mutation.isPending || isCompleted}
+                    disabled={mutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -158,7 +154,7 @@ export const RegisterForm = () => {
             <LoadingButton
               type="submit"
               loading={mutation.isPending}
-              disabled={mutation.isPending || isCompleted}
+              disabled={mutation.isPending}
             >
               {AUTH_UI_MESSAGES.REGISTER_BUTTON}
             </LoadingButton>
