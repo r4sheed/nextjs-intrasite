@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getVerificationTokenByEmail } from '@/features/auth/data/vertification';
 import { db } from '@/lib/prisma';
 
-const VERIFICATION_TOKEN_LIFETIME_MS = 60 * 60 * 1000;
+const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
 
 export const generateVerificationToken = async (email: string) => {
   const existingToken = await getVerificationTokenByEmail(email);
@@ -15,7 +15,7 @@ export const generateVerificationToken = async (email: string) => {
     });
   }
 
-  const expiresAt = new Date().getTime() + VERIFICATION_TOKEN_LIFETIME_MS;
+  const expiresAt = new Date().getTime() + TOKEN_LIFETIME_MS;
 
   const verificationToken = await db.verificationToken.create({
     data: {
