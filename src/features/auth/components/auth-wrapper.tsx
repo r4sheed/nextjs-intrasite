@@ -20,21 +20,22 @@ export const AuthWrapper = ({
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
+        <CardContent className={cn('p-0', image ? 'grid md:grid-cols-2' : '')}>
           {children}
-          <div className="bg-muted relative hidden md:block">
-            {image && (
+
+          {image && (
+            <div className="bg-muted relative hidden md:block">
               <Image
                 {...image}
                 src={image.src}
                 alt={image.alt}
                 className="inset-0 h-full w-full object-contain dark:brightness-[0.4] dark:grayscale-50"
-                width={image.height || 500}
-                height={image.width || 500}
+                width={image.width || 500}
+                height={image.height || 500}
                 priority
               />
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
