@@ -86,7 +86,6 @@ export const LoginForm = () => {
   const onSubmit = (values: LoginInput) => {
     // Prevent multiple submissions while pending
     if (mutation.isPending) return;
-
     mutation.mutate(values);
   };
 
