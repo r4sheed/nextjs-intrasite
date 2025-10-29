@@ -18,6 +18,7 @@ export const AUTH_ROUTES = Object.freeze([
   ROUTES.AUTH.LOGIN,
   ROUTES.AUTH.REGISTER,
   ROUTES.AUTH.RESET_PASSWORD,
+  ROUTES.AUTH.NEW_PASSWORD,
 ]) as readonly string[];
 
 /**
