@@ -16,7 +16,7 @@ export const PUBLIC_ROUTES = Object.freeze([
 export const AUTH_ROUTES = Object.freeze([
   ROUTES.AUTH.LOGIN,
   ROUTES.AUTH.REGISTER,
-  ROUTES.AUTH.FORGOT_PASSWORD,
+  ROUTES.AUTH.RESET_PASSWORD,
   ROUTES.AUTH.VERIFY_EMAIL,
 ]) as readonly string[];
 

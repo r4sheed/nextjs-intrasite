@@ -126,7 +126,7 @@ export const LoginForm = () => {
                 <div className="flex items-center">
                   <FormLabel>{AUTH_UI_MESSAGES.PASSWORD_LABEL}</FormLabel>
                   <Link
-                    href={ROUTES.AUTH.FORGOT_PASSWORD}
+                    href={ROUTES.AUTH.RESET_PASSWORD}
                     className="ml-auto text-sm"
                   >
                     {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
