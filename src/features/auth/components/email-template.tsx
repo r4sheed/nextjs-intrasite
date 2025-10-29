@@ -1,20 +1,20 @@
 import * as React from 'react';
 
-interface VerificationTemplateProps {
-  url: string;
+interface EmailTemplateProps {
   companyName: string;
   supportEmail: string;
+  children: React.ReactNode;
 }
 
-export function VerificationTemplate({
-  url,
+export function EmailTemplate({
   companyName,
   supportEmail,
-}: VerificationTemplateProps) {
-  const primaryColor = '#1e293b'; // Dark Gray / Near Black
-  const accentColor = '#6366f1'; // Indigo for links/accents
-  const borderColor = '#e5e7eb'; // Very light gray border
-  const mutedTextColor = '#6b7280'; // Muted text color for context
+  children,
+}: EmailTemplateProps) {
+  const primaryColor = '#1e293b';
+  const accentColor = '#6366f1';
+  const borderColor = '#e5e7eb';
+  const mutedTextColor = '#6b7280';
 
   return (
     <div
@@ -31,7 +31,7 @@ export function VerificationTemplate({
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
       }}
     >
-      {/* Header/Branding Area */}
+      {/* Header */}
       <div
         style={{
           textAlign: 'left',
@@ -51,54 +51,10 @@ export function VerificationTemplate({
         </h1>
       </div>
 
-      {/* Body Content */}
-      <div style={{ padding: '32px 0' }}>
-        <p style={{ fontSize: '16px', margin: '0 0 16px 0', fontWeight: 500 }}>
-          Welcome
-        </p>
+      {/* Dynamic body content */}
+      <div style={{ padding: '32px 0' }}>{children}</div>
 
-        <p style={{ fontSize: '16px', margin: '0 0 24px 0' }}>
-          Thank you for starting your journey with {companyName}! To fully
-          activate your account and start using our services, please click the
-          verification button below.
-        </p>
-
-        {/* Call to Action Button */}
-        <div style={{ textAlign: 'center', margin: '40px 0' }}>
-          <a
-            href={url}
-            target="_blank"
-            style={{
-              display: 'inline-block',
-              padding: '12px 28px',
-              fontSize: '16px',
-              color: '#ffffff',
-              backgroundColor: primaryColor,
-              borderRadius: '0.375rem',
-              textDecoration: 'none',
-              fontWeight: '600',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-          >
-            Confirm Your Email
-          </a>
-        </div>
-
-        {/* Support Context */}
-        <p style={{ fontSize: '16px', margin: '0', color: primaryColor }}>
-          If you run into any issues, you can always contact our support team at{' '}
-          <a
-            href={`mailto:${supportEmail}`}
-            style={{ color: accentColor, textDecoration: 'none' }}
-          >
-            {supportEmail}
-          </a>
-          .
-        </p>
-      </div>
-
-      {/* Footer / Fallback Link */}
+      {/* Footer */}
       <div
         style={{
           textAlign: 'left',
@@ -109,24 +65,18 @@ export function VerificationTemplate({
         }}
       >
         <p style={{ margin: '0 0 8px 0' }}>
-          Trouble clicking the button? Copy and paste the full verification URL
-          into your web browser:
+          If you run into any issues, you can contact our support team at{' '}
+          <a
+            href={`mailto:${supportEmail}`}
+            style={{ color: accentColor, textDecoration: 'none' }}
+          >
+            {supportEmail}
+          </a>
+          .
         </p>
-        <a
-          href={url}
-          target="_blank"
-          style={{
-            color: accentColor,
-            wordBreak: 'break-all',
-            textDecoration: 'underline',
-            fontSize: '12px',
-          }}
-        >
-          {url}
-        </a>
       </div>
 
-      {/* Copyright Line */}
+      {/* Copyright */}
       <div
         style={{
           textAlign: 'center',
