@@ -39,7 +39,7 @@ export const generateVerificationToken = async (email: string) => {
  * Generates a password reset token. Deletes the old one if it exists.
  * @param email - User's email.
  */
-export const generateResetToken = async (email: string) => {
+export const generatePasswordResetToken = async (email: string) => {
   const data = await getPasswordResetTokenByEmail(email);
   if (data) {
     await db.passwordResetToken.delete({
