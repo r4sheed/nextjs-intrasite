@@ -11,7 +11,7 @@ export const FormSuccess = ({ title, message }: FormSuccessProps) => {
   if (!message) return null;
 
   return (
-    <Alert className="bg-emerald-500/10 text-emerald-500">
+    <Alert className="border-emerald-600 text-emerald-600">
       <CheckCircle2Icon />
       {title && <AlertTitle>{title}</AlertTitle>}
       <AlertDescription className='text-emerald-500"'>

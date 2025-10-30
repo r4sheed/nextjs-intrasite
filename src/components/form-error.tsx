@@ -11,7 +11,7 @@ export const FormError = ({ title, message }: FormErrorProps) => {
   if (!message) return null;
 
   return (
-    <Alert variant="destructive" className="bg-destructive/10">
+    <Alert variant="destructive" className="border-destructive">
       <AlertCircleIcon />
       {title && <AlertTitle>{title}</AlertTitle>}
       <AlertDescription>
