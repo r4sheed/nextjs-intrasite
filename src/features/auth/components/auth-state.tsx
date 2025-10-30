@@ -60,11 +60,11 @@ const AuthState = ({
       <EmptyContent>
         <div className="flex flex-col gap-4">
           {children && <EmptyContent>{children}</EmptyContent>}
-          <Button variant="outline" size="sm">
-            <Link href={ROUTES.AUTH.LOGIN}>
+          <Link href={ROUTES.AUTH.LOGIN}>
+            <Button variant="outline" size="sm">
               {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
-            </Link>
-          </Button>
+            </Button>{' '}
+          </Link>
         </div>
       </EmptyContent>
     </Empty>
