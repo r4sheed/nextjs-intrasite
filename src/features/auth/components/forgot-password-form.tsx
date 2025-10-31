@@ -126,7 +126,7 @@ export function ForgotPasswordForm({
             <Image
               src="/assets/svg/forgot-password-amico.svg"
               alt="Security"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
               fill
             />
           </div>
