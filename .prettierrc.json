@@ -7,7 +7,10 @@
   "useTabs": false,
   "arrowParens": "avoid",
   "endOfLine": "lf",
-  "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
   "importOrder": [
     "^react$",
     "^react-dom$",
@@ -23,6 +26,7 @@
     "^@/contexts/(.*)$",
     "^@/components/ui/(.*)$",
     "^@/components/(.*)$",
+    "^@/features/(.*)/components/(.*)$",
     "^@/(.*)$",
 
     "^[./]",
