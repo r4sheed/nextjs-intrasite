@@ -75,33 +75,32 @@ export function ForgotPasswordForm({
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_SUBTITLE}
                 </p>
               </div>
-              <Field>
-                <Controller
-                  name="email"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        {AUTH_UI_MESSAGES.EMAIL_LABEL}
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        id={field.name}
-                        type="email"
-                        autoComplete="email"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                      />
-                      <FieldDescription>
-                        {AUTH_UI_MESSAGES.EMAIL_RESET_DESCRIPTION}
-                      </FieldDescription>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </Field>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {AUTH_UI_MESSAGES.EMAIL_LABEL}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="email"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_UI_MESSAGES.EMAIL_RESET_DESCRIPTION}
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Field>
                 {mutation.isError && <FieldError>{errorMessage}</FieldError>}
                 {mutation.isSuccess && (
