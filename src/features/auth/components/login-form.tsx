@@ -44,18 +44,23 @@ import {
 } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+export function useLoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
       : '';
 
-  const router = useRouter();
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const mutation = useMutation<
     ActionSuccess<typeof login>,
@@ -71,19 +76,34 @@ export function LoginForm({
   const successMessage = mutation.data?.message?.key;
   const errorMessage = mutation.error?.message?.key || urlError;
 
-  const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
   const onSubmit = (values: LoginInput) => {
     if (mutation.isPending) return;
     mutation.mutate(values);
   };
+
+  return {
+    form,
+    onSubmit,
+    mutation,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    successMessage,
+    errorMessage,
+  };
+}
+
+const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
+  const {
+    form,
+    onSubmit,
+    isPending,
+    isSuccess,
+    isError,
+    successMessage,
+    errorMessage,
+  } = useLoginForm();
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -102,6 +122,7 @@ export function LoginForm({
                   {AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
                 </p>
               </div>
+
               <Controller
                 name="email"
                 control={form.control}
@@ -117,7 +138,7 @@ export function LoginForm({
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -129,6 +150,7 @@ export function LoginForm({
                   </Field>
                 )}
               />
+
               <Controller
                 name="password"
                 control={form.control}
@@ -151,7 +173,7 @@ export function LoginForm({
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -163,13 +185,15 @@ export function LoginForm({
                   </Field>
                 )}
               />
+
               <Field>
-                {mutation.isSuccess && <FormSuccess message={successMessage} />}
-                {mutation.isError && <FormError message={errorMessage} />}
-                <LoadingButton type="submit" loading={mutation.isPending}>
+                {isSuccess && <FormSuccess message={successMessage} />}
+                {isError && <FormError message={errorMessage} />}
+                <LoadingButton type="submit" loading={isPending}>
                   {AUTH_UI_MESSAGES.LOGIN_BUTTON}
                 </LoadingButton>
               </Field>
+
               {siteFeatures.socialAuth && (
                 <>
                   <FieldSeparator>
@@ -180,6 +204,7 @@ export function LoginForm({
                   </Field>
                 </>
               )}
+
               <FieldDescription className="text-center">
                 {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
                 <Link href={ROUTES.AUTH.SIGN_UP}>
@@ -188,6 +213,7 @@ export function LoginForm({
               </FieldDescription>
             </FieldGroup>
           </form>
+
           <div className="bg-muted relative hidden md:block">
             <Image
               src="/assets/svg/tablet-login-pana.svg"
@@ -198,9 +224,12 @@ export function LoginForm({
           </div>
         </CardContent>
       </Card>
+
       <FieldDescription className="px-6 text-center">
         <AuthFooter />
       </FieldDescription>
     </div>
   );
-}
+};
+
+export { LoginForm };
