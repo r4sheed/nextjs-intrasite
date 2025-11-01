@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
@@ -56,9 +55,9 @@ const useLoginForm = () => {
       : '';
 
   const isVerifySuccess = searchParams.get('verified') === '1';
-  if (isVerifySuccess) {
-    toast.success(AUTH_UI_MESSAGES.EMAIL_VERIFIED);
-  }
+  const verifySuccessMessage = isVerifySuccess
+    ? AUTH_UI_MESSAGES.EMAIL_VERIFIED
+    : undefined;
 
   const verifyError = searchParams.get('verify_error');
   const verifyErrorMessage = (() => {
@@ -97,7 +96,7 @@ const useLoginForm = () => {
     },
   });
 
-  const successMessage = mutation.data?.message?.key;
+  const successMessage = mutation.data?.message?.key || verifySuccessMessage;
   const errorMessage =
     mutation.error?.message?.key || urlError || verifyErrorMessage;
 
