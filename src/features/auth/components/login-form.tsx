@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
@@ -38,6 +39,7 @@ import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 
 import { login } from '@/features/auth/actions';
+import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
@@ -52,6 +54,28 @@ const useLoginForm = () => {
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
       : '';
+
+  const isVerifySuccess = searchParams.get('verified') === '1';
+  if (isVerifySuccess) {
+    toast.success(AUTH_UI_MESSAGES.EMAIL_VERIFIED);
+  }
+
+  const verifyError = searchParams.get('verify_error');
+  const verifyErrorMessage = (() => {
+    if (!verifyError) return '';
+
+    switch (verifyError) {
+      case AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND:
+        return AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND;
+      case AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED:
+        return AUTH_ERROR_MESSAGES.TOKEN_EXPIRED;
+      default:
+        if (verifyError.startsWith('AUTH_')) {
+          return AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR;
+        }
+        return '';
+    }
+  })();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -74,7 +98,8 @@ const useLoginForm = () => {
   });
 
   const successMessage = mutation.data?.message?.key;
-  const errorMessage = mutation.error?.message?.key || urlError;
+  const errorMessage =
+    mutation.error?.message?.key || urlError || verifyErrorMessage;
 
   const onSubmit = (values: LoginInput) => {
     if (mutation.isPending) return;
@@ -86,8 +111,8 @@ const useLoginForm = () => {
     onSubmit,
     mutation,
     isPending: mutation.isPending,
-    isSuccess: mutation.isSuccess,
-    isError: mutation.isError,
+    isSuccess: mutation.isSuccess || isVerifySuccess,
+    isError: mutation.isError || !!urlError || verifyError,
     successMessage,
     errorMessage,
   };
