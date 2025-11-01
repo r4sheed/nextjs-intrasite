@@ -44,7 +44,7 @@ import {
 } from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
-export function useLoginForm() {
+const useLoginForm = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -91,7 +91,7 @@ export function useLoginForm() {
     successMessage,
     errorMessage,
   };
-}
+};
 
 const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
   const {
