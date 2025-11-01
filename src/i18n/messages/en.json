@@ -70,7 +70,9 @@
       "back_to_login_button": "Back to login",
       "forgot_password_title": "Forgot password",
       "forgot_password_subtitle": "Enter your email address and we'll send instructions to reset your password.",
-      "forgot_password_button": "Reset password"
+      "forgot_password_button": "Reset password",
+      "email_reset_description": "We'll send a password reset link to this email address.",
+      "remember_password_cta": "Remember your password?"
     }
   }
 }

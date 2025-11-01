@@ -70,7 +70,9 @@
       "back_to_login_button": "Vissza a bejelentkezéshez",
       "forgot_password_title": "Elfelejtett jelszó",
       "forgot_password_subtitle": "Add meg az email címedet, és küldünk egy utasításokat tartalmazó e-mailt a jelszó visszaállításához.",
-      "forgot_password_button": "Jelszó visszaállítása"
+      "forgot_password_button": "Jelszó visszaállítása",
+      "email_reset_description": "Egy jelszó-visszaállítási linket küldünk erre az email címre.",
+      "remember_password_cta": "Emlékszel a jelszavadra?"
     }
   }
 }

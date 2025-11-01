@@ -65,4 +65,6 @@ export const AUTH_UI_MESSAGES = {
   NEW_PASSWORD_SUBTITLE: 'auth.ui.new_password_subtitle', // Enter your new password below.
   NEW_PASSWORD_BUTTON: 'auth.ui.new_password_button', // Update password
   PASSWORD_UPDATED_SUCCESS: 'auth.success.password_updated', // Your password has been updated successfully!
+  EMAIL_RESET_DESCRIPTION: 'auth.ui.email_reset_description', // We'll send a password reset link to this email address.
+  REMEMBER_PASSWORD_CTA: 'auth.ui.remember_password_cta', // Remember your password?
 } as const;

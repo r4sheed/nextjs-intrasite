@@ -98,8 +98,7 @@ export function ForgotPasswordForm({
                         <FieldError errors={[fieldState.error]} />
                       )}
                       <FieldDescription>
-                        We&apos;ll send a password reset link to this email
-                        address.
+                        {AUTH_UI_MESSAGES.EMAIL_RESET_DESCRIPTION}
                       </FieldDescription>
                     </Field>
                   )}
@@ -113,7 +112,7 @@ export function ForgotPasswordForm({
                 </LoadingButton>
               </Field>
               <FieldDescription className="text-center">
-                Remember your password?{' '}
+                {AUTH_UI_MESSAGES.REMEMBER_PASSWORD_CTA}{' '}
                 <Link href={ROUTES.AUTH.LOGIN}>
                   {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
                 </Link>
