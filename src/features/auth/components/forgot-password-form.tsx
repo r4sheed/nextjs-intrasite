@@ -81,37 +81,34 @@ export function ForgotPasswordForm({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="form-rhf-forgot-password-email">
+                      <FieldLabel htmlFor={field.name}>
                         {AUTH_UI_MESSAGES.EMAIL_LABEL}
                       </FieldLabel>
                       <Input
                         {...field}
-                        id="form-rhf-forgot-password-email"
+                        id={field.name}
                         type="email"
                         autoComplete="email"
                         aria-invalid={fieldState.invalid}
                         placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                        disabled={mutation.isPending}
                       />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
                       <FieldDescription>
                         {AUTH_UI_MESSAGES.EMAIL_RESET_DESCRIPTION}
                       </FieldDescription>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
                   )}
                 />
               </Field>
               <Field>
+                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
                 {mutation.isSuccess && (
                   <FieldDescription className="text-emerald-600">
                     {successMessage}
                   </FieldDescription>
                 )}
-
-                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
-
                 <LoadingButton type="submit" loading={mutation.isPending}>
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
