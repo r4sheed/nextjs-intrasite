@@ -33,9 +33,11 @@ import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 
-import { login, type LoginData } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
+import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
+
+import { login } from '@/features/auth/actions';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
@@ -143,10 +145,9 @@ export function LoginForm({
                         {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
                       </Link>
                     </div>
-                    <Input
+                    <PasswordInput
                       {...field}
                       id={field.name}
-                      type="password"
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}

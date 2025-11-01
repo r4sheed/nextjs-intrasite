@@ -28,10 +28,11 @@ import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 
-import { register } from '@/features/auth/actions';
-import { type RegisterData } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
+import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
+
+import { register } from '@/features/auth/actions';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
@@ -57,14 +58,8 @@ export function SignupForm({
       name: '',
       email: '',
       password: '',
-      confirmPassword: '',
     },
   });
-
-  const passwordErrors = [
-    form.formState.errors.password,
-    form.formState.errors.confirmPassword,
-  ];
 
   const onSubmit = (values: RegisterInput) => {
     if (mutation.isPending) return;
@@ -142,61 +137,32 @@ export function SignupForm({
                   </Field>
                 )}
               />
-              <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <Controller
-                    name="password"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          {AUTH_UI_MESSAGES.PASSWORD_LABEL}
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id={field.name}
-                          type="password"
-                          autoComplete="new-password"
-                          aria-invalid={fieldState.invalid}
-                          placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                          disabled={mutation.isPending}
-                          required
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                    </FieldLabel>
+                    <PasswordInput
+                      {...field}
+                      id={field.name}
+                      autoComplete="new-password"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      disabled={mutation.isPending}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
-                  />
-                  <Controller
-                    name="confirmPassword"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          {AUTH_UI_MESSAGES.CONFIRM_PASSWORD_LABEL}
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id={field.name}
-                          type="password"
-                          autoComplete="new-password"
-                          aria-invalid={fieldState.invalid}
-                          placeholder={
-                            AUTH_UI_MESSAGES.PLACEHOLDER_CONFIRM_PASSWORD
-                          }
-                          disabled={mutation.isPending}
-                          required
-                        />
-                      </Field>
-                    )}
-                  />
-                </Field>
-                <FieldDescription>
-                  {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
-                </FieldDescription>
-                {passwordErrors && <FieldError errors={passwordErrors} />}
-              </Field>
+                  </Field>
+                )}
+              />
               <Field>
                 {mutation.isSuccess && <FormSuccess message={successMessage} />}
                 {mutation.isError && <FormError message={errorMessage} />}
