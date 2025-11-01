@@ -107,9 +107,8 @@ export function ForgotPasswordForm({
                 />
               </Field>
               <Field>
-                <FormSuccess message={successMessage} />
-                <FormError message={errorMessage} />
-
+                {mutation.isSuccess && <FormSuccess message={successMessage} />}
+                {mutation.isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={mutation.isPending}>
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
