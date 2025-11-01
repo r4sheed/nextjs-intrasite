@@ -31,14 +31,21 @@ import {
 import { Input } from '@/components/ui/input';
 
 import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
 
 import { login, type LoginData } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { SocialProviders } from '@/features/auth/components/social-providers';
-import { AUTH_ERROR_MESSAGES, AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import {
+  AUTH_ERROR_MESSAGES,
+  AUTH_UI_MESSAGES,
+} from '@/features/auth/lib/messages';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
-export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
   const searchParams = useSearchParams();
 
   const urlError =
@@ -48,8 +55,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
   const router = useRouter();
 
-  const mutation = useMutation<SuccessResponse<LoginData>, ErrorResponse, LoginInput>({
-    mutationFn: data => execute(login, data) as Promise<SuccessResponse<LoginData>>,
+  const mutation = useMutation<
+    SuccessResponse<LoginData>,
+    ErrorResponse,
+    LoginInput
+  >({
+    mutationFn: data =>
+      execute(login, data) as Promise<SuccessResponse<LoginData>>,
     onSuccess: () => {
       router.push(DEFAULT_LOGIN_REDIRECT);
     },
@@ -82,7 +94,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">{AUTH_UI_MESSAGES.LOGIN_TITLE}</h1>
+                <h1 className="text-2xl font-bold">
+                  {AUTH_UI_MESSAGES.LOGIN_TITLE}
+                </h1>
                 <p className="text-muted-foreground text-balance">
                   {AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
                 </p>
@@ -108,7 +122,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                     <FieldDescription>
                       {AUTH_UI_MESSAGES.EMAIL_DESCRIPTION}
                     </FieldDescription>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
@@ -141,24 +157,24 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                     <FieldDescription>
                       {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
                     </FieldDescription>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Field>
-                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
-                {mutation.isSuccess && (
-                  <FieldDescription className="text-emerald-600">
-                    {successMessage}
-                  </FieldDescription>
-                )}
+                {mutation.isSuccess && <FormSuccess message={successMessage} />}
+                {mutation.isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={mutation.isPending}>
                   {AUTH_UI_MESSAGES.LOGIN_BUTTON}
                 </LoadingButton>
               </Field>
               {siteFeatures.socialAuth && (
                 <>
-                  <FieldSeparator>{AUTH_UI_MESSAGES.OR_CONTINUE_WITH}</FieldSeparator>
+                  <FieldSeparator>
+                    {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
+                  </FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders />
                   </Field>
