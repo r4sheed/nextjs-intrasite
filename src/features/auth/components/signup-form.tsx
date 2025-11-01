@@ -84,10 +84,10 @@ export function SignupForm({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.REGISTER_TITLE}
+                  {AUTH_UI_MESSAGES.SIGNUP_TITLE}
                 </h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  {AUTH_UI_MESSAGES.REGISTER_SUBTITLE}
+                  {AUTH_UI_MESSAGES.SIGNUP_SUBTITLE}
                 </p>
               </div>
               <Controller
@@ -175,7 +175,7 @@ export function SignupForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>
-                          Confirm password
+                          {AUTH_UI_MESSAGES.CONFIRM_PASSWORD_LABEL}
                         </FieldLabel>
                         <Input
                           {...field}
@@ -183,7 +183,9 @@ export function SignupForm({
                           type="password"
                           autoComplete="new-password"
                           aria-invalid={fieldState.invalid}
-                          placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                          placeholder={
+                            AUTH_UI_MESSAGES.PLACEHOLDER_CONFIRM_PASSWORD
+                          }
                           disabled={mutation.isPending}
                           required
                         />
@@ -200,7 +202,7 @@ export function SignupForm({
                 {mutation.isSuccess && <FormSuccess message={successMessage} />}
                 {mutation.isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={mutation.isPending}>
-                  {AUTH_UI_MESSAGES.REGISTER_BUTTON}
+                  {AUTH_UI_MESSAGES.SIGNUP_BUTTON}
                 </LoadingButton>
               </Field>
               {siteFeatures.socialAuth && (
