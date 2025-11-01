@@ -9,7 +9,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
-import { LoadingButton } from '@/components/loading-button';
+import { ROUTES } from '@/lib/navigation';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { cn } from '@/lib/utils';
+
+import { execute } from '@/hooks/use-action';
+
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
@@ -19,14 +24,14 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { type ResetData, reset } from '@/features/auth/actions';
+
+import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
+
+import { reset, type ResetData } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
-import { execute } from '@/hooks/use-action';
-import { ROUTES } from '@/lib/navigation';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
-import { cn } from '@/lib/utils';
 
 export function ForgotPasswordForm({
   className,
@@ -62,7 +67,7 @@ export function ForgotPasswordForm({
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form
-            id="form-rhf-reset-password"
+            id="form-rhf-forgot-password"
             onSubmit={form.handleSubmit(onSubmit)}
             className="p-6 md:p-8"
           >
@@ -90,6 +95,7 @@ export function ForgotPasswordForm({
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      disabled={mutation.isPending}
                       required
                     />
                     <FieldDescription>
@@ -102,12 +108,8 @@ export function ForgotPasswordForm({
                 )}
               />
               <Field>
-                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
-                {mutation.isSuccess && (
-                  <FieldDescription className="text-emerald-600">
-                    {successMessage}
-                  </FieldDescription>
-                )}
+                {mutation.isSuccess && <FormSuccess message={successMessage} />}
+                {mutation.isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={mutation.isPending}>
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
