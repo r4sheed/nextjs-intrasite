@@ -28,23 +28,13 @@ import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 
-import { reset, type ResetData } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
+
+import { reset } from '@/features/auth/actions';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 
-export function ForgotPasswordForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
-  const mutation = useMutation<
-    ActionSuccess<typeof reset>,
-    ErrorResponse,
-    ResetInput
-  >({
-    mutationFn: data => execute(reset, data),
-  });
-
+const useForgotPasswordForm = () => {
   const form = useForm<ResetInput>({
     resolver: zodResolver(resetSchema),
     mode: 'onTouched',
@@ -53,13 +43,46 @@ export function ForgotPasswordForm({
     },
   });
 
+  const mutation = useMutation<
+    ActionSuccess<typeof reset>,
+    ErrorResponse,
+    ResetInput
+  >({
+    mutationFn: data => execute(reset, data),
+  });
+
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = mutation.error?.message?.key;
+
   const onSubmit = (values: ResetInput) => {
     if (mutation.isPending) return;
     mutation.mutate(values);
   };
 
-  const successMessage = mutation.data?.message?.key;
-  const errorMessage = mutation.error?.message?.key;
+  return {
+    form,
+    onSubmit,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    successMessage,
+    errorMessage,
+  };
+};
+
+const ForgotPasswordForm = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => {
+  const {
+    form,
+    onSubmit,
+    isPending,
+    isSuccess,
+    isError,
+    successMessage,
+    errorMessage,
+  } = useForgotPasswordForm();
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -94,7 +117,7 @@ export function ForgotPasswordForm({
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -107,9 +130,9 @@ export function ForgotPasswordForm({
                 )}
               />
               <Field>
-                {mutation.isSuccess && <FormSuccess message={successMessage} />}
-                {mutation.isError && <FormError message={errorMessage} />}
-                <LoadingButton type="submit" loading={mutation.isPending}>
+                {isSuccess && <FormSuccess message={successMessage} />}
+                {isError && <FormError message={errorMessage} />}
+                <LoadingButton type="submit" loading={isPending}>
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
               </Field>
@@ -136,4 +159,6 @@ export function ForgotPasswordForm({
       </FieldDescription>
     </div>
   );
-}
+};
+
+export { ForgotPasswordForm };
