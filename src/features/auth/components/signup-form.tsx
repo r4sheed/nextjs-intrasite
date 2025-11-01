@@ -36,10 +36,17 @@ import { register } from '@/features/auth/actions';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+const useSignupForm = () => {
+  const form = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
+
   const mutation = useMutation<
     ActionSuccess<typeof register>,
     ErrorResponse,
@@ -51,20 +58,32 @@ export function SignupForm({
   const successMessage = mutation.data?.message?.key;
   const errorMessage = mutation.error?.message?.key;
 
-  const form = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-    },
-  });
-
   const onSubmit = (values: RegisterInput) => {
     if (mutation.isPending) return;
     mutation.mutate(values);
   };
+
+  return {
+    form,
+    onSubmit,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    successMessage,
+    errorMessage,
+  };
+};
+
+const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
+  const {
+    form,
+    onSubmit,
+    isPending,
+    isSuccess,
+    isError,
+    successMessage,
+    errorMessage,
+  } = useSignupForm();
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -98,7 +117,7 @@ export function SignupForm({
                       autoComplete="name"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -125,7 +144,7 @@ export function SignupForm({
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -151,7 +170,7 @@ export function SignupForm({
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                      disabled={mutation.isPending}
+                      disabled={isPending}
                       required
                     />
                     <FieldDescription>
@@ -164,9 +183,9 @@ export function SignupForm({
                 )}
               />
               <Field>
-                {mutation.isSuccess && <FormSuccess message={successMessage} />}
-                {mutation.isError && <FormError message={errorMessage} />}
-                <LoadingButton type="submit" loading={mutation.isPending}>
+                {isSuccess && <FormSuccess message={successMessage} />}
+                {isError && <FormError message={errorMessage} />}
+                <LoadingButton type="submit" loading={isPending}>
                   {AUTH_UI_MESSAGES.SIGNUP_BUTTON}
                 </LoadingButton>
               </Field>
@@ -203,4 +222,6 @@ export function SignupForm({
       </FieldDescription>
     </div>
   );
-}
+};
+
+export { SignupForm };
