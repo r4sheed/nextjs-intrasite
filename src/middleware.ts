@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 
-import { auth } from '@/features/auth/lib/auth';
 import { ROUTES } from '@/lib/navigation';
 import {
-  AUTH_ROUTES,
   AUTH_ROUTE_PREFIX,
+  AUTH_ROUTES,
   DEFAULT_LOGIN_REDIRECT,
   PUBLIC_ROUTES,
 } from '@/lib/routes';
+
+import { auth } from '@/features/auth/lib/auth';
 
 export default auth(req => {
   const isLoggedIn = !!req.auth;
@@ -29,7 +30,7 @@ export default auth(req => {
     return NextResponse.next();
   }
 
-  // Redirect Logged-in Users from Auth Routes (e.g /login or /register pages)
+  // Redirect Logged-in Users from Auth Routes (e.g /login or /signup pages)
   if (isLoggedIn && isAuthRoute) {
     console.log(
       `Redirecting authenticated user from ${pathname} to ${DEFAULT_LOGIN_REDIRECT}`

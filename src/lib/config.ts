@@ -13,7 +13,7 @@ export const siteConfig = {
   },
   navItems: [
     { label: 'Login', href: ROUTES.AUTH.LOGIN, protected: false },
-    { label: 'Register', href: ROUTES.AUTH.REGISTER, protected: false },
+    { label: 'Register', href: ROUTES.AUTH.SIGN_UP, protected: false },
     { label: 'Settings', href: ROUTES.SETTINGS, protected: true },
   ],
 } as const;
