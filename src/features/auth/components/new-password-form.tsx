@@ -9,10 +9,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
-import { FormError } from '@/components/form-error';
-import { FormSuccess } from '@/components/form-success';
-import { LinkUnderline } from '@/components/link-underline';
-import { LoadingButton } from '@/components/loading-button';
+import { ROUTES } from '@/lib/navigation';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+
+import { execute } from '@/hooks/use-action';
+
 import { FieldGroup } from '@/components/ui/field';
 import {
   Form,
@@ -24,7 +25,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { type NewPasswordData, newPassword } from '@/features/auth/actions';
+
+import { FormError } from '@/components/form-error';
+import { FormSuccess } from '@/components/form-success';
+import { LinkUnderline } from '@/components/link-underline';
+import { LoadingButton } from '@/components/loading-button';
+
+import { newPassword, type NewPasswordData } from '@/features/auth/actions';
 import { AuthState } from '@/features/auth/components/auth-state';
 import { Header } from '@/features/auth/components/header';
 import { LoadState } from '@/features/auth/components/load-state';
@@ -36,9 +43,6 @@ import {
   type NewPasswordInput,
   newPasswordSchema,
 } from '@/features/auth/schemas';
-import { execute } from '@/hooks/use-action';
-import { ROUTES } from '@/lib/navigation';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
 export const NewPasswordForm = () => {
   const form = useForm<NewPasswordInput>({
@@ -61,12 +65,11 @@ export const NewPasswordForm = () => {
   }, [searchParams, token]);
 
   const mutation = useMutation<
-    SuccessResponse<NewPasswordData>,
+    ActionSuccess<typeof newPassword>,
     ErrorResponse,
     NewPasswordInput
   >({
-    mutationFn: data =>
-      execute(newPassword, data) as Promise<SuccessResponse<NewPasswordData>>,
+    mutationFn: data => execute(newPassword, data),
   });
 
   const onSubmit = (values: NewPasswordInput) => {

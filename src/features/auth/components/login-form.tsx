@@ -13,7 +13,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 
@@ -56,12 +56,11 @@ export function LoginForm({
   const router = useRouter();
 
   const mutation = useMutation<
-    SuccessResponse<LoginData>,
+    ActionSuccess<typeof login>,
     ErrorResponse,
     LoginInput
   >({
-    mutationFn: data =>
-      execute(login, data) as Promise<SuccessResponse<LoginData>>,
+    mutationFn: data => execute(login, data),
     onSuccess: () => {
       router.push(DEFAULT_LOGIN_REDIRECT);
     },

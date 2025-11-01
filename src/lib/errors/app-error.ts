@@ -1,5 +1,5 @@
 import { HTTP_STATUS, type HttpStatusCode } from '@/lib/http-status';
-import { Message } from '@/lib/result';
+import { Message } from '@/lib/response';
 
 interface AppErrorParams {
   code: string;
@@ -25,7 +25,7 @@ export class AppError extends Error {
     details,
   }: AppErrorParams) {
     // Call Error constructor with string representation for stack traces
-    super(typeof message === 'string' ? message : message.key);
+    super(message.key);
     this.code = code;
     this.errorMessage = message; // Store full Message type (string or i18n object)
     this.httpStatus = httpStatus;

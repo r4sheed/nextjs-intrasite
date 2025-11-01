@@ -3,55 +3,53 @@ import { describe, expect, it } from 'vitest';
 import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 import {
-  Status,
-  error,
   getMessage,
-  isError,
+  isFailure,
   isPartial,
   isSuccess,
-  partial,
-  success,
-} from '@/lib/result';
+  response,
+  Status,
+} from '@/lib/response';
 
 describe('Response Helpers', () => {
   describe('success', () => {
     it('should create a success response without message', () => {
       const data = { userId: '123' };
-      const response = success({
+      const result = response.success({
         data: data,
       });
 
-      expect(response.status).toBe(Status.Success);
-      expect(response.data).toEqual(data);
-      expect(response.message).toBeUndefined();
+      expect(result.status).toBe(Status.Success);
+      expect(result.data).toEqual(data);
+      expect(result.message).toBeUndefined();
     });
 
     it('should create a success response with string message', () => {
       const data = { userId: '123' };
       const message = 'Registration successful!';
-      const response = success({
+      const result = response.success({
         data: data,
         message: {
           key: message,
         },
       });
 
-      expect(response.status).toBe(Status.Success);
-      expect(response.data).toEqual(data);
-      expect(response.message?.key).toBe(message);
+      expect(result.status).toBe(Status.Success);
+      expect(result.data).toEqual(data);
+      expect(result.message?.key).toBe(message);
     });
 
     it('should create a success response with i18n message', () => {
       const data = { userId: '123' };
       const message = { key: 'auth.success.login', params: { name: 'John' } };
-      const response = success({
+      const result = response.success({
         data: data,
         message: message,
       });
 
-      expect(response.status).toBe(Status.Success);
-      expect(response.data).toEqual(data);
-      expect(response.message).toEqual(message);
+      expect(result.status).toBe(Status.Success);
+      expect(result.data).toEqual(data);
+      expect(result.message).toEqual(message);
     });
 
     it('should create success with formatted i18n message', () => {
@@ -60,15 +58,13 @@ describe('Response Helpers', () => {
         key: 'auth.success.verification_sent',
         params: { email: 'user@example.com' },
       };
-      const response = success({
+      const result = response.success({
         data: data,
         message: message,
       });
 
-      expect(response.message).toEqual(message);
-      expect(getMessage(response.message)).toBe(
-        'auth.success.verification_sent'
-      );
+      expect(result.message).toEqual(message);
+      expect(getMessage(result.message)).toBe('auth.success.verification_sent');
     });
   });
 
@@ -80,13 +76,13 @@ describe('Response Helpers', () => {
         httpStatus: HTTP_STATUS.BAD_REQUEST,
       });
 
-      const response = error(data);
+      const result = response.failure(data);
 
-      expect(response.status).toBe(Status.Error);
-      expect(response.message.key).toBe('Test error message');
-      expect(response.code).toBe('TEST_ERROR');
-      expect(response.httpStatus).toBe(HTTP_STATUS.BAD_REQUEST);
-      expect(response.details).toBeUndefined();
+      expect(result.status).toBe(Status.Error);
+      expect(result.message?.key).toBe('Test error message');
+      expect(result.code).toBe('TEST_ERROR');
+      expect(result.httpStatus).toBe(HTTP_STATUS.BAD_REQUEST);
+      expect(result.details).toBeUndefined();
     });
 
     it('should handle i18n error messages', () => {
@@ -96,13 +92,13 @@ describe('Response Helpers', () => {
         httpStatus: HTTP_STATUS.UNAUTHORIZED,
       });
 
-      const response = error(data);
+      const result = response.failure(data);
 
-      expect(response.status).toBe(Status.Error);
-      expect(response.message).toEqual({
+      expect(result.status).toBe(Status.Error);
+      expect(result.message).toEqual({
         key: 'auth.errors.invalid_credentials',
       });
-      expect(getMessage(response.message)).toBe(
+      expect(getMessage(result.message)).toBe(
         'auth.errors.invalid_credentials'
       );
     });
@@ -115,9 +111,9 @@ describe('Response Helpers', () => {
         details: { field: 'email', reason: 'invalid format' },
       });
 
-      const response = error(data);
+      const result = response.failure(data);
 
-      expect(response.details).toEqual({
+      expect(result.details).toEqual({
         field: 'email',
         reason: 'invalid format',
       });
@@ -137,15 +133,15 @@ describe('Response Helpers', () => {
         },
       ];
 
-      const response = partial({
+      const result = response.partial({
         data: data,
         errors: errors,
       });
 
-      expect(response.status).toBe(Status.Partial);
-      expect(response.data).toEqual(data);
-      expect(response.errors).toEqual(errors);
-      expect(response.message).toBeUndefined();
+      expect(result.status).toBe(Status.Partial);
+      expect(result.data).toEqual(data);
+      expect(result.errors).toEqual(errors);
+      expect(result.message).toBeUndefined();
     });
 
     it('should create a partial response with success message', () => {
@@ -161,21 +157,21 @@ describe('Response Helpers', () => {
         params: { count: 2 },
       };
 
-      const response = partial({
+      const result = response.partial({
         data: data,
         errors: errors,
         message: message,
       });
 
-      expect(response.message).toEqual(message);
-      expect(response.errors).toHaveLength(1);
+      expect(result.message).toEqual(message);
+      expect(result.errors).toHaveLength(1);
     });
   });
 
   describe('Type Guards', () => {
     it('isSuccess should identify success responses', () => {
-      const successResponse = success({ data: 'test' });
-      const errorResponse = error(
+      const successResponse = response.success({ data: 'test' });
+      const errorResponse = response.failure(
         new AppError({
           code: 'TEST',
           message: {
@@ -189,8 +185,8 @@ describe('Response Helpers', () => {
       expect(isSuccess(errorResponse)).toBe(false);
     });
 
-    it('isError should identify error responses', () => {
-      const errorResponse = error(
+    it('isFailure should identify error responses', () => {
+      const errorResponse = response.failure(
         new AppError({
           code: 'TEST',
           message: {
@@ -199,15 +195,18 @@ describe('Response Helpers', () => {
           httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         })
       );
-      const successResponse = success({ data: 'test' });
+      const successResponse = response.success({ data: 'test' });
 
-      expect(isError(errorResponse)).toBe(true);
-      expect(isError(successResponse)).toBe(false);
+      expect(isFailure(errorResponse)).toBe(true);
+      expect(isFailure(successResponse)).toBe(false);
     });
 
     it('isPartial should identify partial responses', () => {
-      const partialResponse = partial({ data: { data: 'test' }, errors: [] });
-      const successResponse = success({ data: 'test' });
+      const partialResponse = response.partial({
+        data: { data: 'test' },
+        errors: [],
+      });
+      const successResponse = response.success({ data: 'test' });
 
       expect(isPartial(partialResponse)).toBe(true);
       expect(isPartial(successResponse)).toBe(false);
@@ -216,7 +215,7 @@ describe('Response Helpers', () => {
 
   describe('JSON Serialization', () => {
     it('should serialize and deserialize success response', () => {
-      const original = success({
+      const original = response.success({
         data: { userId: '123' },
         message: { key: 'Success!' },
       });
@@ -236,7 +235,7 @@ describe('Response Helpers', () => {
         details: { field: 'email' },
       });
 
-      const original = error(data);
+      const original = response.failure(data);
       const json = JSON.stringify(original);
       const parsed = JSON.parse(json);
 
@@ -257,7 +256,7 @@ describe('Response Helpers', () => {
         },
       ];
 
-      const original = partial({
+      const original = response.partial({
         data: data,
         errors: errors,
         message: {
@@ -278,7 +277,7 @@ describe('Response Helpers', () => {
   describe('i18n Formatted Messages', () => {
     it('should support formatted success messages', () => {
       const email = 'user@example.com';
-      const response = success({
+      const formattedSuccess = response.success({
         data: { userId: '123' },
         message: {
           key: 'auth.success.verification_sent',
@@ -286,7 +285,7 @@ describe('Response Helpers', () => {
         },
       });
 
-      expect(response.message).toEqual({
+      expect(formattedSuccess.message).toEqual({
         key: 'auth.success.verification_sent',
         params: { email },
       });
@@ -302,9 +301,9 @@ describe('Response Helpers', () => {
         httpStatus: HTTP_STATUS.NOT_FOUND,
       });
 
-      const response = error(data);
+      const formattedError = response.failure(data);
 
-      expect(response.message).toEqual({
+      expect(formattedError.message).toEqual({
         key: 'auth.errors.user_not_found',
         params: { email: 'test@example.com' },
       });

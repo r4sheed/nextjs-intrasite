@@ -1,5 +1,9 @@
 import { AuthError } from 'next-auth';
 
+import { siteFeatures } from '@/lib/config';
+import { internalServerError } from '@/lib/errors';
+import { type Response, response } from '@/lib/response';
+
 import { type LoginData } from '@/features/auth/actions';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
@@ -13,9 +17,6 @@ import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
-import { siteFeatures } from '@/lib/config';
-import { internalServerError } from '@/lib/errors';
-import { type Response, response } from '@/lib/result';
 
 /**
  * Login service - handles user authentication
@@ -26,7 +27,7 @@ export async function loginUser(
 ): Promise<Response<LoginData>> {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
-    return response.error(invalidFields(parsed.error.issues));
+    return response.failure(invalidFields(parsed.error.issues));
   }
 
   const { email, password } = parsed.data;
@@ -39,7 +40,7 @@ export async function loginUser(
 
     // Invalid credentials (either user not found or wrong password)
     if (!verifiedUser) {
-      return response.error(invalidCredentials());
+      return response.failure(invalidCredentials());
     }
 
     // If verification is enabled and the account is not verified, send a
@@ -74,7 +75,7 @@ export async function loginUser(
     if (!result || result.error) {
       // If signIn fails at this point, map to invalid credentials to avoid
       // leaking internal details.
-      return response.error(invalidCredentials());
+      return response.failure(invalidCredentials());
     }
 
     return response.success({ data: { userId: verifiedUser.id } });
@@ -83,11 +84,11 @@ export async function loginUser(
       // https://authjs.dev/reference/core/errors
       switch (error.type) {
         case 'AccessDenied': // Thrown when the execution of the signIn callback fails or if it returns false.
-          return response.error(emailVerificationRequired());
+          return response.failure(emailVerificationRequired());
         case 'CredentialsSignin':
-          return response.error(invalidCredentials());
+          return response.failure(invalidCredentials());
         case 'CallbackRouteError':
-          return response.error(callbackError(error));
+          return response.failure(callbackError(error));
       }
     }
 
@@ -95,6 +96,6 @@ export async function loginUser(
     console.error('Unexpected login error:', error);
 
     // Return generic error for unexpected errors
-    return response.error(internalServerError());
+    return response.failure(internalServerError());
   }
 }

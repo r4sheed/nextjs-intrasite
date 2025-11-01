@@ -1,5 +1,5 @@
 import { internalServerError } from '@/lib/errors/helpers';
-import { type Response, response } from '@/lib/result';
+import { type Response, response } from '@/lib/response';
 
 import { type ResetData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
@@ -9,13 +9,15 @@ import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generatePasswordResetToken } from '@/features/auth/lib/tokens';
 import { ResetInput } from '@/features/auth/schemas';
 
-export const resetPassword = async (values: ResetInput): Promise<Response<ResetData>> => {
+export const resetPassword = async (
+  values: ResetInput
+): Promise<Response<ResetData>> => {
   const { email } = values;
 
   // TODO: Do not reveal whether the email exists for security reasons
   const user = await getUserByEmail(email);
   if (!user) {
-    return response.error(userNotFound(email));
+    return response.failure(userNotFound(email));
   }
 
   // TODO: Check email verified status if applicable
@@ -32,6 +34,6 @@ export const resetPassword = async (values: ResetInput): Promise<Response<ResetD
     // TODO: Log the error properly
     console.log('Error in resetPassword:', error);
 
-    return response.error(internalServerError());
+    return response.failure(internalServerError());
   }
 };

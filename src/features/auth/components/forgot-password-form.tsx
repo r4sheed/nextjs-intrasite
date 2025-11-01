@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
 import { ROUTES } from '@/lib/navigation';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -38,12 +38,11 @@ export function ForgotPasswordForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const mutation = useMutation<
-    SuccessResponse<ResetData>,
+    ActionSuccess<typeof reset>,
     ErrorResponse,
     ResetInput
   >({
-    mutationFn: data =>
-      execute(reset, data) as Promise<SuccessResponse<ResetData>>,
+    mutationFn: data => execute(reset, data),
   });
 
   const form = useForm<ResetInput>({

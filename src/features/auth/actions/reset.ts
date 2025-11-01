@@ -1,9 +1,10 @@
 'use server';
 
+import { type Response, response } from '@/lib/response';
+
 import { invalidFields } from '@/features/auth/lib/errors';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 import { resetPassword } from '@/features/auth/services';
-import { type Response, response } from '@/lib/result';
 
 export type ResetData = { email: string };
 
@@ -15,7 +16,7 @@ export const reset = async (
 ): Promise<Response<ResetData>> => {
   const result = resetSchema.safeParse(values);
   if (!result.success) {
-    return response.error(invalidFields(result.error.issues));
+    return response.failure(invalidFields(result.error.issues));
   }
 
   return await resetPassword(result.data);

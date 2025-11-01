@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -40,12 +40,11 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const mutation = useMutation<
-    SuccessResponse<RegisterData>,
+    ActionSuccess<typeof register>,
     ErrorResponse,
     RegisterInput
   >({
-    mutationFn: data =>
-      execute(register, data) as Promise<SuccessResponse<RegisterData>>,
+    mutationFn: data => execute(register, data),
   });
 
   const successMessage = mutation.data?.message?.key;

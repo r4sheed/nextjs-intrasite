@@ -6,6 +6,10 @@ import { useSearchParams } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
 
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+
+import { execute } from '@/hooks/use-action';
+
 import { type VerificationData, verify } from '@/features/auth/actions';
 import { AuthState } from '@/features/auth/components/auth-state';
 import { Header } from '@/features/auth/components/header';
@@ -14,8 +18,6 @@ import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
-import { execute } from '@/hooks/use-action';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 
 const VerificationLoading = () => (
   <LoadState
@@ -62,13 +64,11 @@ export const EmailVerificationForm = () => {
    * TanStack Query mutation for the verifyEmail Server Action.
    */
   const mutation = useMutation<
-    SuccessResponse<VerificationData>, // TData: Success response with data
+    ActionSuccess<typeof verify>, // TData: Success or partial response
     ErrorResponse, // TError: Thrown error from 'execute'
     string // TVariables: The 'token' input
   >({
-    mutationFn: token =>
-      // Use the execute adapter to call the server action
-      execute(verify, token) as Promise<SuccessResponse<VerificationData>>,
+    mutationFn: token => execute(verify, token),
   });
 
   // Extracts success and error messages using the consistent message key pattern

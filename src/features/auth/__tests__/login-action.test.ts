@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { response as responseFactory, Status } from '@/lib/response';
+
 import { login } from '@/features/auth/actions';
 import { invalidCredentials } from '@/features/auth/lib/errors';
 import { loginUser } from '@/features/auth/services';
-import { Status, error, success } from '@/lib/result';
 
 // Mock the service layer
 vi.mock('@/features/auth/services', () => ({
@@ -16,7 +17,9 @@ describe('login action', () => {
   });
 
   it('should return success for valid credentials', async () => {
-    const mockResponse = success({ data: { userId: 'test@example.com' } });
+    const mockResponse = responseFactory.success({
+      data: { userId: 'test@example.com' },
+    });
     vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
     const response = await login({
@@ -58,7 +61,7 @@ describe('login action', () => {
   });
 
   it('should return error for invalid credentials', async () => {
-    const mockResponse = error(invalidCredentials());
+    const mockResponse = responseFactory.failure(invalidCredentials());
     vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
     const response = await login({

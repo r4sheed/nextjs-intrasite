@@ -183,7 +183,7 @@ export function partial<TData>(options: {
 /**
  * Convenience object containing all response factory functions
  * @example
- * import { response } from '@/lib/result';
+ * import { response } from '@/lib/response';
  * return response.success({ data });
  */
 export const response = {
@@ -451,10 +451,11 @@ export const BadErrors = {
 ```typescript
 'use server';
 
+import { type Response, response } from '@/lib/response';
+
 import { invalidFields } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
-import { type Response, response } from '@/lib/result';
 
 // Defines the expected successful data structure returned by the 'register' action.
 export type RegisterData = { userId: string };
@@ -543,12 +544,13 @@ export async function badLoginAction(formData: FormData) {
 // File: src/features/auth/services/login.ts
 
 ```typescript
-import { invalidCredentials } from '@/features/auth/lib/errors';
-import type { LoginInput } from '@/features/auth/schemas';
 import { comparePasswords } from '@/lib/crypto';
 import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
-import { type Response, response } from '@/lib/result';
+import { type Response, response } from '@/lib/response';
+
+import { invalidCredentials } from '@/features/auth/lib/errors';
+import type { LoginInput } from '@/features/auth/schemas';
 import type { User } from '@/types';
 
 export async function loginUser(input: LoginInput): Promise<Response<User>> {
@@ -626,7 +628,7 @@ import { Input } from '@/components/ui/input';
 import { type LoginData, login } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { execute } from '@/hooks/use-action';
-import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
+import { type ErrorResponse, type SuccessResponse } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 export function LoginForm() {
@@ -696,11 +698,11 @@ File: src/hooks/use-action.tsx
 
 ```typescript
 import {
+  isError,
   PartialResponse,
   Response,
   SuccessResponse,
-  isError,
-} from '@/lib/result';
+} from '@/lib/response';
 
 /**
  * Execute adapter for TanStack Query
@@ -762,7 +764,7 @@ async function badHandleSubmit(formData: FormData) {
 'use server';
 
 import { AppError } from '@/lib/errors/app-error';
-import { type PartialError, type Response, response } from '@/lib/result';
+import { type PartialError, type Response, response } from '@/lib/response';
 
 import { deleteBookmarkService } from '../services/delete-bookmark';
 

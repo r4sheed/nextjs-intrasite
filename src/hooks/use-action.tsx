@@ -1,19 +1,14 @@
-import {
-  PartialResponse,
-  Response,
-  SuccessResponse,
-  isError,
-} from '@/lib/result';
+import { ErrorResponse, isFailure, Response } from '@/lib/response';
 
-export async function execute<TData, TArgs>(
-  action: (args: TArgs) => Promise<Response<TData>>,
+export async function execute<TArgs, TResponse extends Response<unknown>>(
+  action: (args: TArgs) => Promise<TResponse>,
   args: TArgs
-): Promise<SuccessResponse<TData> | PartialResponse<TData>> {
+): Promise<Exclude<TResponse, ErrorResponse>> {
   const result = await action(args);
 
-  if (isError(result)) {
+  if (isFailure(result)) {
     throw result;
   }
 
-  return result;
+  return result as Exclude<TResponse, ErrorResponse>;
 }
