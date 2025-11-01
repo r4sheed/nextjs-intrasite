@@ -29,7 +29,6 @@ describe('register action', () => {
       name: 'Test User',
       email: 'newuser@example.com',
       password: 'Password123!',
-      confirmPassword: 'Password123!',
     });
 
     expect(response.status).toBe(Status.Success);
@@ -44,7 +43,6 @@ describe('register action', () => {
       name: 'Test User',
       email: 'invalid-email',
       password: 'Password123!',
-      confirmPassword: 'Password123!',
     });
 
     expect(response.status).toBe(Status.Error);
@@ -59,7 +57,6 @@ describe('register action', () => {
       name: '',
       email: 'test@example.com',
       password: 'Password123!',
-      confirmPassword: 'Password123!',
     });
 
     expect(response.status).toBe(Status.Error);
@@ -77,7 +74,6 @@ describe('register action', () => {
       name: 'Test User',
       email: 'existing@example.com',
       password: 'Password123!',
-      confirmPassword: 'Password123!',
     });
 
     expect(response.status).toBe(Status.Error);
@@ -94,7 +90,6 @@ describe('register action', () => {
       name: 'Test User',
       email: 'test@example.com',
       password: 'Password123!',
-      confirmPassword: 'Password123!',
     });
 
     expect(response.status).toBe(Status.Error);
