@@ -9,8 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
-import { FormError } from '@/components/form-error';
-import { FormSuccess } from '@/components/form-success';
 import { LoadingButton } from '@/components/loading-button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -45,6 +43,7 @@ export function ForgotPasswordForm({
 
   const form = useForm<ResetInput>({
     resolver: zodResolver(resetSchema),
+    mode: 'onTouched',
     defaultValues: {
       email: '',
     },
@@ -105,8 +104,14 @@ export function ForgotPasswordForm({
                 />
               </Field>
               <Field>
-                {mutation.isSuccess && <FormSuccess message={successMessage} />}
-                {mutation.isError && <FormError message={errorMessage} />}
+                {mutation.isSuccess && (
+                  <FieldDescription className="text-emerald-600">
+                    {successMessage}
+                  </FieldDescription>
+                )}
+
+                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
+
                 <LoadingButton type="submit" loading={mutation.isPending}>
                   {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
@@ -123,7 +128,7 @@ export function ForgotPasswordForm({
             <Image
               src="/assets/svg/forgot-password-amico.svg"
               alt="Security"
-              className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
               fill
             />
           </div>
