@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { db } from '@/lib/prisma';
+
 import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset';
 import { getVerificationTokenByEmail } from '@/features/auth/data/vertification';
-import { db } from '@/lib/prisma';
 
 const TOKEN_LIFETIME_MS = 60 * 60 * 1000; // 60 minutes
 
