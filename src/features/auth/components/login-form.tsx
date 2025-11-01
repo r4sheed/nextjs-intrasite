@@ -1,50 +1,46 @@
 'use client';
 
+import type React from 'react';
+
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
-import { FormError } from '@/components/form-error';
-import { FormSuccess } from '@/components/form-success';
-import { LinkUnderline } from '@/components/link-underline';
-import { LoadingButton } from '@/components/loading-button';
-import { Field, FieldGroup, FieldSeparator } from '@/components/ui/field';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { type LoginData, login } from '@/features/auth/actions';
-import { Header } from '@/features/auth/components/header';
-import { SocialProviders } from '@/features/auth/components/social-providers';
-import {
-  AUTH_ERROR_MESSAGES,
-  AUTH_UI_MESSAGES,
-} from '@/features/auth/lib/messages';
-import { type LoginInput, loginSchema } from '@/features/auth/schemas';
-import { execute } from '@/hooks/use-action';
 import { siteFeatures } from '@/lib/config';
 import { ROUTES } from '@/lib/navigation';
 import { type ErrorResponse, type SuccessResponse } from '@/lib/result';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
-/**
- * @name LoginForm
- * @description Handles user login, form validation, and calls the server action via TanStack Query.
- */
-export const LoginForm = () => {
+import { execute } from '@/hooks/use-action';
+
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+
+import { LoadingButton } from '@/components/loading-button';
+
+import { login, type LoginData } from '@/features/auth/actions';
+import { AuthFooter } from '@/features/auth/components/auth-footer';
+import { SocialProviders } from '@/features/auth/components/social-providers';
+import { AUTH_ERROR_MESSAGES, AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+
+export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
   const searchParams = useSearchParams();
 
-  // Checks for OAuth errors in the URL
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
@@ -52,130 +48,143 @@ export const LoginForm = () => {
 
   const router = useRouter();
 
-  // TanStack Query mutation for the login action.
-  const mutation = useMutation<
-    SuccessResponse<LoginData>, // TData: Successful return type
-    ErrorResponse, // TError: Thrown error type (from the 'execute' adapter)
-    LoginInput // TVariables: Input data type
-  >({
-    mutationFn: data =>
-      // Calls the adapter which either returns SuccessResponse or throws ErrorResponse.
-      // Type casting is used to narrow the successful return type for TData.
-      execute(login, data) as Promise<SuccessResponse<LoginData>>,
-
+  const mutation = useMutation<SuccessResponse<LoginData>, ErrorResponse, LoginInput>({
+    mutationFn: data => execute(login, data) as Promise<SuccessResponse<LoginData>>,
     onSuccess: () => {
-      // Redirect on successful login
       router.push(DEFAULT_LOGIN_REDIRECT);
     },
   });
 
-  // Extracts success and error messages from the mutation state (using i18n message keys)
   const successMessage = mutation.data?.message?.key;
-  const errorMessage = mutation.error?.message?.key;
+  const errorMessage = mutation.error?.message?.key || urlError;
 
-  // React Hook Form initialization with Zod resolver
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  // Handles the form submission by calling the mutation
   const onSubmit = (values: LoginInput) => {
-    // Prevent multiple submissions while pending
     if (mutation.isPending) return;
     mutation.mutate(values);
   };
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
-        <FieldGroup>
-          <Header
-            title={AUTH_UI_MESSAGES.LOGIN_TITLE}
-            description={AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
-          />
-          {/* Email Field */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{AUTH_UI_MESSAGES.EMAIL_LABEL}</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="email"
-                    placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
-                    autoComplete="email"
-                    disabled={mutation.isPending}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Password Field */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center">
-                  <FormLabel>{AUTH_UI_MESSAGES.PASSWORD_LABEL}</FormLabel>
-                  <Link
-                    href={ROUTES.AUTH.FORGOT_PASSWORD}
-                    className="ml-auto text-sm"
-                  >
-                    {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
-                  </Link>
-                </div>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                    autoComplete="current-password"
-                    disabled={mutation.isPending}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <>
-            {/* Display success/error messages */}
-            <FormSuccess message={successMessage} />
-            <FormError message={errorMessage || urlError} />
-
-            <LoadingButton type="submit" loading={mutation.isPending}>
-              {AUTH_UI_MESSAGES.LOGIN_BUTTON}
-            </LoadingButton>
-          </>
-          {/* Social Auth Providers (if enabled) */}
-          {siteFeatures.socialAuth && (
-            <>
-              <FieldSeparator>
-                {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
-              </FieldSeparator>
-              <Field className="grid grid-cols-2 gap-4">
-                <SocialProviders />
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <Card className="overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form
+            id="form-rhf-login"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="p-6 md:p-8"
+          >
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">{AUTH_UI_MESSAGES.LOGIN_TITLE}</h1>
+                <p className="text-muted-foreground text-balance">
+                  {AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
+                </p>
+              </div>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {AUTH_UI_MESSAGES.EMAIL_LABEL}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="email"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      disabled={mutation.isPending}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_UI_MESSAGES.EMAIL_DESCRIPTION}
+                    </FieldDescription>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor="password">
+                        {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                      </FieldLabel>
+                      <Link
+                        href={ROUTES.AUTH.FORGOT_PASSWORD}
+                        className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
+                      >
+                        {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
+                      </Link>
+                    </div>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="password"
+                      autoComplete="current-password"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      disabled={mutation.isPending}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                    </FieldDescription>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Field>
+                {mutation.isError && <FieldError>{errorMessage}</FieldError>}
+                {mutation.isSuccess && (
+                  <FieldDescription className="text-emerald-600">
+                    {successMessage}
+                  </FieldDescription>
+                )}
+                <LoadingButton type="submit" loading={mutation.isPending}>
+                  {AUTH_UI_MESSAGES.LOGIN_BUTTON}
+                </LoadingButton>
               </Field>
-            </>
-          )}
-          {/* Sign Up CTA */}
-          <FormDescription className="text-center">
-            {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
-            <LinkUnderline>
-              <Link href={ROUTES.AUTH.REGISTER}>
-                {AUTH_UI_MESSAGES.SIGNUP_CTA_LINK}
-              </Link>
-            </LinkUnderline>
-          </FormDescription>
-        </FieldGroup>
-      </form>
-    </Form>
+              {siteFeatures.socialAuth && (
+                <>
+                  <FieldSeparator>{AUTH_UI_MESSAGES.OR_CONTINUE_WITH}</FieldSeparator>
+                  <Field className="grid grid-cols-2 gap-4">
+                    <SocialProviders />
+                  </Field>
+                </>
+              )}
+              <FieldDescription className="text-center">
+                {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
+                <Link href={ROUTES.AUTH.REGISTER}>
+                  {AUTH_UI_MESSAGES.SIGNUP_CTA_LINK}
+                </Link>
+              </FieldDescription>
+            </FieldGroup>
+          </form>
+          <div className="bg-muted relative hidden md:block">
+            <Image
+              src="/assets/svg/tablet-login-pana.svg"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
+              fill
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <FieldDescription className="px-6 text-center">
+        <AuthFooter />
+      </FieldDescription>
+    </div>
   );
-};
+}
