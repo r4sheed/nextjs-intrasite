@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { type ResetData, reset } from '@/features/auth/actions';
+import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 import { execute } from '@/hooks/use-action';
@@ -53,8 +54,6 @@ export function ForgotPasswordForm({
     if (mutation.isPending) return;
     mutation.mutate(values);
   };
-
-  const { errors } = form.formState;
 
   const successMessage = mutation.data?.message?.key;
   const errorMessage = mutation.error?.message?.key;
@@ -132,8 +131,7 @@ export function ForgotPasswordForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
-        and <a href="#">Privacy Policy</a>.
+        <AuthFooter />
       </FieldDescription>
     </div>
   );
