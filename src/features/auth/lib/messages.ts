@@ -57,9 +57,9 @@ export const AUTH_UI_MESSAGES = {
   VERIFICATION_PROCESSING_DESCRIPTION:
     'auth.ui.verification_processing_description', // Please wait while we verify your email...
   BACK_TO_LOGIN_BUTTON: 'auth.ui.back_to_login_button', // Back to login
-  RESET_PASSWORD_TITLE: 'auth.ui.reset_password_title', // Reset password
-  RESET_PASSWORD_SUBTITLE: 'auth.ui.reset_password_subtitle', // Enter your email to get reset instructions
-  RESET_PASSWORD_BUTTON: 'auth.ui.reset_password_button', // Reet password
+  FORGOT_PASSWORD_TITLE: 'auth.ui.forgot_password_title', // Forgot password
+  FORGOT_PASSWORD_SUBTITLE: 'auth.ui.forgot_password_subtitle', // Enter your email to get reset instructions
+  FORGOT_PASSWORD_BUTTON: 'auth.ui.forgot_password_button', // Reset password
   RESET_EMAIL_SENT: 'auth.success.reset_email_sent', // If an account with that email exists, a password reset link has been sent.
   NEW_PASSWORD_TITLE: 'auth.ui.new_password_title', // Create a new password
   NEW_PASSWORD_SUBTITLE: 'auth.ui.new_password_subtitle', // Enter your new password below.

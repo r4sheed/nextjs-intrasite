@@ -68,9 +68,9 @@
       "verification_processing_title": "Kérés feldolgozása",
       "verification_processing_description": "Kérjük, várj, amíg ellenőrizzük az email címedet...",
       "back_to_login_button": "Vissza a bejelentkezéshez",
-      "reset_password_title": "Jelszó visszaállítása",
-      "reset_password_subtitle": "Add meg az email címedet, és küldünk egy utasításokat tartalmazó e-mailt a jelszó visszaállításához.",
-      "reset_password_button": "Jelszó visszaállítása"
+      "forgot_password_title": "Elfelejtett jelszó",
+      "forgot_password_subtitle": "Add meg az email címedet, és küldünk egy utasításokat tartalmazó e-mailt a jelszó visszaállításához.",
+      "forgot_password_button": "Jelszó visszaállítása"
     }
   }
 }

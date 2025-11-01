@@ -71,10 +71,10 @@ export function ForgotPasswordForm({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.RESET_PASSWORD_TITLE}
+                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_TITLE}
                 </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_UI_MESSAGES.RESET_PASSWORD_SUBTITLE}
+                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_SUBTITLE}
                 </p>
               </div>
               <Field>
@@ -111,7 +111,7 @@ export function ForgotPasswordForm({
                 <FormError message={errorMessage} />
 
                 <LoadingButton type="submit" loading={mutation.isPending}>
-                  {AUTH_UI_MESSAGES.RESET_PASSWORD_BUTTON}
+                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
                 </LoadingButton>
               </Field>
               <FieldDescription className="text-center">

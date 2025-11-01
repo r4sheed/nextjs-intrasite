@@ -59,8 +59,8 @@ export const ResetForm = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
         <FieldGroup>
           <Header
-            title={AUTH_UI_MESSAGES.RESET_PASSWORD_TITLE}
-            description={AUTH_UI_MESSAGES.RESET_PASSWORD_SUBTITLE}
+            title={AUTH_UI_MESSAGES.FORGOT_PASSWORD_TITLE}
+            description={AUTH_UI_MESSAGES.FORGOT_PASSWORD_SUBTITLE}
           />
           <FormField
             control={form.control}
@@ -85,7 +85,7 @@ export const ResetForm = () => {
             <FormSuccess message={successMessage} />
             <FormError message={errorMessage} />
             <LoadingButton type="submit" loading={mutation.isPending}>
-              {AUTH_UI_MESSAGES.RESET_PASSWORD_BUTTON}
+              {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
             </LoadingButton>
           </>
           <FormDescription className="text-center">
