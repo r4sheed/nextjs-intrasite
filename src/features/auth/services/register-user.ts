@@ -4,7 +4,6 @@ import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
-import { type RegisterData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -15,15 +14,36 @@ import {
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
+
+import { type RegisterUserData } from '@/features/auth/actions';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
 /**
- * Register service - handles user registration and auto-login
- * Returns Response<T> with user data on success, error response on error
+ * Core service to register a new user account with email, password, and name.
+ *
+ * This service handles the complete user registration flow including duplicate
+ * email validation, password hashing, database persistence, and optional email
+ * verification. When email verification is disabled, it automatically signs in
+ * the newly created user.
+ *
+ * @param values - Validated registration input containing email, password, and name.
+ * @returns Response with user ID on success, or structured error on failure.
+ *
+ * @throws Never throws - all errors are returned as Response<T> error objects.
+ *
+ * @example
+ * const result = await registerUser({
+ *   email: 'newuser@example.com',
+ *   password: 'securePass123',
+ *   name: 'John Doe'
+ * });
+ * if (result.status === Status.Success) {
+ *   console.log('User created:', result.data.userId);
+ * }
  */
-export async function registerUser(
+export const registerUser = async (
   values: RegisterInput
-): Promise<Response<RegisterData>> {
+): Promise<Response<RegisterUserData>> => {
   // Validate input
   const parsed = registerSchema.safeParse(values);
   if (!parsed.success) {
@@ -84,4 +104,4 @@ export async function registerUser(
   } catch (error) {
     return response.failure(registrationFailed(error));
   }
-}
+};

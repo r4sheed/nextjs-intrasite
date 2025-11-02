@@ -2,8 +2,7 @@ import bcrypt from 'bcryptjs';
 
 import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
-import { type Response } from '@/lib/response';
-import { response } from '@/lib/response';
+import { type Response, response } from '@/lib/response';
 
 import { getPasswordResetTokenByToken } from '@/features/auth/data/reset-token';
 import { getUserByEmail } from '@/features/auth/data/user';
@@ -14,21 +13,34 @@ import {
 } from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 
-import { NewPasswordData } from '@/features/auth/actions';
+import { type UpdatePasswordData } from '@/features/auth/actions';
 import { type NewPasswordInput } from '@/features/auth/schemas';
 
 /**
- * Handles setting a new password for a user after a successful password reset token validation.
+ * Core service to update a user's password after validating a reset token.
  *
- * This function performs token lookup, expiration check, user retrieval, password hashing,
- * and finally executes an atomic database transaction to update the password and delete the token.
+ * This service handles the complete password reset flow including token validation,
+ * expiration checks, user lookup, password hashing, and executes an atomic database
+ * transaction to update the password and delete the consumed token. Uses bcrypt
+ * with salt rounds of 10 for secure password hashing.
  *
- * @param values - Contains the reset token and the new password.
- * @returns A Response object indicating success or failure with a specific error.
+ * @param values - Validated input containing the reset token and new password.
+ * @returns Response indicating success with confirmation message, or error details.
+ *
+ * @throws Never throws - all errors are returned as Response<T> error objects.
+ *
+ * @example
+ * const result = await updatePassword({
+ *   token: 'reset-token-123',
+ *   password: 'newSecurePass123'
+ * });
+ * if (result.status === Status.Success) {
+ *   console.log('Password updated successfully');
+ * }
  */
-export const setNewPassword = async (
+export const updatePassword = async (
   values: NewPasswordInput
-): Promise<Response<NewPasswordData>> => {
+): Promise<Response<UpdatePasswordData>> => {
   const { token, password } = values;
 
   // Token validation
@@ -46,7 +58,7 @@ export const setNewPassword = async (
   const { email } = existingToken;
   const existingUser = await getUserByEmail(email);
   if (!existingUser) {
-    // Should generally not happen if token was created correctly, but handles edge cases.
+    // Should generally not happen if token was created correctly, but handles edge cases
     return response.failure(userNotFound(email));
   }
 
@@ -68,6 +80,7 @@ export const setNewPassword = async (
     ]);
 
     return response.success({
+      data: {},
       message: { key: AUTH_UI_MESSAGES.PASSWORD_UPDATED_SUCCESS },
     });
   } catch (error) {

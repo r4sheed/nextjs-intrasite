@@ -32,8 +32,9 @@ import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 
-import { register } from '@/features/auth/actions';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+
+import { registerUser } from '@/features/auth/actions';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
 const useSignupForm = () => {
@@ -48,11 +49,11 @@ const useSignupForm = () => {
   });
 
   const mutation = useMutation<
-    ActionSuccess<typeof register>,
+    ActionSuccess<typeof registerUser>,
     ErrorResponse,
     RegisterInput
   >({
-    mutationFn: data => execute(register, data),
+    mutationFn: data => execute(registerUser, data),
   });
 
   const successMessage = mutation.data?.message?.key;

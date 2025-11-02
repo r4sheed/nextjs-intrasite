@@ -37,12 +37,13 @@ import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 
-import { login } from '@/features/auth/actions';
 import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
+
+import { loginUser } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
 const useLoginForm = () => {
@@ -86,11 +87,11 @@ const useLoginForm = () => {
   });
 
   const mutation = useMutation<
-    ActionSuccess<typeof login>,
+    ActionSuccess<typeof loginUser>,
     ErrorResponse,
     LoginInput
   >({
-    mutationFn: data => execute(login, data),
+    mutationFn: data => execute(loginUser, data),
     onSuccess: () => {
       router.push(DEFAULT_LOGIN_REDIRECT);
     },

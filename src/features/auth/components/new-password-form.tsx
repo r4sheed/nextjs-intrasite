@@ -37,7 +37,7 @@ import {
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
 
-import { newPassword } from '@/features/auth/actions';
+import { updatePassword } from '@/features/auth/actions';
 import {
   type NewPasswordInput,
   newPasswordSchema,
@@ -67,11 +67,11 @@ const useNewPasswordForm = () => {
   const isTokenMissing = !token;
 
   const mutation = useMutation<
-    ActionSuccess<typeof newPassword>,
+    ActionSuccess<typeof updatePassword>,
     ErrorResponse,
     NewPasswordInput
   >({
-    mutationFn: data => execute(newPassword, data),
+    mutationFn: data => execute(updatePassword, data),
     onSuccess: () => {
       const timer = setTimeout(() => {
         router.replace(ROUTES.AUTH.LOGIN);

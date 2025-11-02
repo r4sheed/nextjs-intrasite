@@ -2,11 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
-import { register } from '@/features/auth/actions';
 import {
   emailAlreadyExists,
   registrationFailed,
 } from '@/features/auth/lib/errors';
+
+import { registerUser as registerUserAction } from '@/features/auth/actions';
 import { registerUser } from '@/features/auth/services';
 
 // Mock the service layer
@@ -14,7 +15,7 @@ vi.mock('@/features/auth/services', () => ({
   registerUser: vi.fn(),
 }));
 
-describe('register action', () => {
+describe('registerUser action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -25,7 +26,7 @@ describe('register action', () => {
     });
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
-    const response = await register({
+    const response = await registerUserAction({
       name: 'Test User',
       email: 'newuser@example.com',
       password: 'Password123!',
@@ -39,7 +40,7 @@ describe('register action', () => {
   });
 
   it('should return error for invalid email format', async () => {
-    const response = await register({
+    const response = await registerUserAction({
       name: 'Test User',
       email: 'invalid-email',
       password: 'Password123!',
@@ -53,7 +54,7 @@ describe('register action', () => {
   });
 
   it('should return error for missing name', async () => {
-    const response = await register({
+    const response = await registerUserAction({
       name: '',
       email: 'test@example.com',
       password: 'Password123!',
@@ -70,7 +71,7 @@ describe('register action', () => {
     const mockResponse = responseFactory.failure(emailAlreadyExists());
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
-    const response = await register({
+    const response = await registerUserAction({
       name: 'Test User',
       email: 'existing@example.com',
       password: 'Password123!',
@@ -86,7 +87,7 @@ describe('register action', () => {
     const mockResponse = responseFactory.failure(registrationFailed({}));
     vi.mocked(registerUser).mockResolvedValue(mockResponse);
 
-    const response = await register({
+    const response = await registerUserAction({
       name: 'Test User',
       email: 'test@example.com',
       password: 'Password123!',

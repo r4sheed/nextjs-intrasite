@@ -30,8 +30,9 @@ import { FormError, FormSuccess } from '@/components/shared/form-status';
 
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 
-import { reset } from '@/features/auth/actions';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+
+import { resetPassword } from '@/features/auth/actions';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 
 const useForgotPasswordForm = () => {
@@ -44,11 +45,11 @@ const useForgotPasswordForm = () => {
   });
 
   const mutation = useMutation<
-    ActionSuccess<typeof reset>,
+    ActionSuccess<typeof resetPassword>,
     ErrorResponse,
     ResetInput
   >({
-    mutationFn: data => execute(reset, data),
+    mutationFn: data => execute(resetPassword, data),
   });
 
   const successMessage = mutation.data?.message?.key;

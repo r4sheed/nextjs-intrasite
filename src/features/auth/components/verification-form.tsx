@@ -17,7 +17,7 @@ import { LoadState } from '@/features/auth/components/load-state';
 import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 
-import { verify } from '@/features/auth/actions';
+import { verifyEmail } from '@/features/auth/actions';
 
 AUTH_ERROR_CODES;
 export const EmailVerificationForm = () => {
@@ -26,11 +26,11 @@ export const EmailVerificationForm = () => {
   const token = searchParams.get('token');
 
   const mutation = useMutation<
-    ActionSuccess<typeof verify>,
+    ActionSuccess<typeof verifyEmail>,
     ErrorResponse,
     string
   >({
-    mutationFn: token => execute(verify, token),
+    mutationFn: token => execute(verifyEmail, token),
   });
 
   useEffect(() => {

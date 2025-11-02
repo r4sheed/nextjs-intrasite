@@ -1,5 +1,5 @@
-export { type LoginData, login } from './login';
-export { type RegisterData, register } from './register';
-export { type VerificationData, verify } from './verification';
-export { type ResetData, reset } from './reset';
-export { type NewPasswordData, newPassword } from './new-password';
+export { type LoginUserData, loginUser } from './login-user';
+export { type RegisterUserData, registerUser } from './register-user';
+export { type VerifyEmailData, verifyEmail } from './verify-email';
+export { type ResetPasswordData, resetPassword } from './reset-password';
+export { type UpdatePasswordData, updatePassword } from './update-password';

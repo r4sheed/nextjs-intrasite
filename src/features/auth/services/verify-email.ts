@@ -1,5 +1,3 @@
-'use server';
-
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
@@ -12,33 +10,45 @@ import {
 } from '@/features/auth/lib/errors';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 
-export type VerificationData = {};
+import type { VerifyEmailData } from '@/features/auth/actions';
 
 /**
- * Verify email action - validates token and calls service layer
+ * Core service to verify a user's email address using a verification token.
+ *
+ * This service handles token lookup, expiration validation, user retrieval,
+ * and executes an atomic database transaction to update the user's email
+ * verification status and delete the consumed token. Ensures data consistency
+ * by using Prisma transactions.
+ *
+ * @param token - The verification token string from the email link or URL.
+ * @returns Response indicating success with verification message, or error details.
+ *
+ * @throws Never throws - all errors are returned as Response<T> error objects.
+ *
+ * @example
+ * const result = await verifyEmail('verification-token-123');
+ * if (result.status === Status.Success) {
+ *   console.log('Email verified for:', result.data.email);
+ * }
  */
-export const verify = async (
+export const verifyEmail = async (
   token: string
-): Promise<Response<VerificationData>> => {
-  // Check token existence
+): Promise<Response<VerifyEmailData>> => {
   const existingToken = await getVerificationTokenByToken(token);
   if (!existingToken) {
     return response.failure(tokenNotFound());
   }
 
-  // Check expiration
   const hasExpired = existingToken.expires.getTime() <= Date.now();
   if (hasExpired) {
     return response.failure(tokenExpired());
   }
 
-  // Find user
   const user = await getUserByEmail(existingToken.email);
   if (!user) {
     return response.failure(userNotFound(existingToken.email));
   }
 
-  // Transaction: update user and delete token atomically
   await db.$transaction([
     db.user.update({
       where: { id: user.id },
@@ -53,6 +63,7 @@ export const verify = async (
   ]);
 
   return response.success({
+    data: {},
     message: {
       key: AUTH_UI_MESSAGES.EMAIL_VERIFIED,
     },

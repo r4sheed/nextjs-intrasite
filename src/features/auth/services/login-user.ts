@@ -4,7 +4,6 @@ import { siteFeatures } from '@/lib/config';
 import { internalServerError } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { type LoginData } from '@/features/auth/actions';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -16,15 +15,33 @@ import {
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
+
+import { type LoginUserData } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
 /**
- * Login service - handles user authentication
- * Returns Response<T> with user data on success, error response on error
+ * Core service to authenticate a user with email and password credentials.
+ *
+ * This service validates credentials via the data layer, handles email verification
+ * flows (sending verification emails for unverified accounts), and delegates session
+ * creation to NextAuth's signIn function. It implements security best practices by
+ * separating credential validation from session creation.
+ *
+ * @param values - Validated login input containing email and password.
+ * @returns Response with user ID on success, or structured error on failure.
+ *
+ * @throws Never throws - all errors are returned as Response<T> error objects.
+ *
+ * @example
+ * const result = await loginUser({ email: 'user@example.com', password: 'pass123' });
+ * if (result.status === Status.Success) {
+ *   // User authenticated, session created
+ *   console.log(result.data.userId);
+ * }
  */
-export async function loginUser(
+export const loginUser = async (
   values: LoginInput
-): Promise<Response<LoginData>> {
+): Promise<Response<LoginUserData>> => {
   const parsed = loginSchema.safeParse(values);
   if (!parsed.success) {
     return response.failure(invalidFields(parsed.error.issues));
@@ -98,4 +115,4 @@ export async function loginUser(
     // Return generic error for unexpected errors
     return response.failure(internalServerError());
   }
-}
+};

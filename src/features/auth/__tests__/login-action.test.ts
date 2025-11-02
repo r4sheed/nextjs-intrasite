@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
-import { login } from '@/features/auth/actions';
 import { invalidCredentials } from '@/features/auth/lib/errors';
+
+import { loginUser as loginUserAction } from '@/features/auth/actions';
 import { loginUser } from '@/features/auth/services';
 
 // Mock the service layer
@@ -11,7 +12,7 @@ vi.mock('@/features/auth/services', () => ({
   loginUser: vi.fn(),
 }));
 
-describe('login action', () => {
+describe('loginUser action', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -22,7 +23,7 @@ describe('login action', () => {
     });
     vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
-    const response = await login({
+    const response = await loginUserAction({
       email: 'test@example.com',
       password: 'password123',
     });
@@ -35,7 +36,7 @@ describe('login action', () => {
   });
 
   it('should return error for invalid email format', async () => {
-    const response = await login({
+    const response = await loginUserAction({
       email: 'invalid-email',
       password: 'password123',
     });
@@ -48,7 +49,7 @@ describe('login action', () => {
   });
 
   it('should return error for missing password', async () => {
-    const response = await login({
+    const response = await loginUserAction({
       email: 'test@example.com',
       password: '',
     });
@@ -64,7 +65,7 @@ describe('login action', () => {
     const mockResponse = responseFactory.failure(invalidCredentials());
     vi.mocked(loginUser).mockResolvedValue(mockResponse);
 
-    const response = await login({
+    const response = await loginUserAction({
       email: 'test@example.com',
       password: 'wrongpassword',
     });
