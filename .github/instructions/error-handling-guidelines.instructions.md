@@ -23,6 +23,30 @@ This document establishes a **unified, type-safe error handling pattern** for la
 6. **i18n Ready**: Error messages use translation keys with parameters
 7. **Future-Proof**: Object-based constructors allow easy extension
 8. **Race Condition Free**: State updates ordered correctly (setStatus last)
+9. **Data Layer Never Throws**: Data access layer returns `null` on errors and logs them; service layer handles all error responses
+
+### Layer Responsibilities
+
+**Data Layer** (`features/*/data/*.ts`):
+
+- ✅ Returns `null` when entity not found (expected case)
+- ✅ Returns `null` on database errors (logs error to console)
+- ✅ Never throws errors
+- ✅ Pure data access functions
+
+**Service Layer** (`features/*/services/*.ts`):
+
+- ✅ Calls data layer functions
+- ✅ Returns `Response<T>` with domain errors (`response.error()`)
+- ✅ Handles business logic validation
+- ✅ May use try-catch for unexpected errors only
+
+**Action Layer** (`features/*/actions/*.ts`):
+
+- ✅ Always returns `Response<T>`
+- ✅ Validates input with Zod schemas
+- ✅ Calls service layer
+- ✅ Never throws errors to client
 
 ---
 
@@ -454,6 +478,7 @@ export const BadErrors = {
 import { type Response, response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
+
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 
@@ -550,6 +575,7 @@ import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
 import { invalidCredentials } from '@/features/auth/lib/errors';
+
 import type { LoginInput } from '@/features/auth/schemas';
 import type { User } from '@/types';
 
@@ -878,11 +904,14 @@ src/
 ├── features/
 │   ├── auth/
 │   │   ├── actions/
-│   │   │   ├── login.ts        # Server action
-│   │   │   └── register.ts
+│   │   │   ├── login-user.ts   # Server action
+│   │   │   └── register-user.ts
 │   │   ├── services/
-│   │   │   ├── login.ts        # Business logic
-│   │   │   └── register.ts
+│   │   │   ├── login-user.ts   # Business logic
+│   │   │   └── register-user.ts
+│   │   ├── data/
+│   │   │   ├── user.ts         # Data access layer (returns null on errors)
+│   │   │   └── verification-token.ts
 │   │   ├── schemas/
 │   │   │   ├── login.ts        # Zod schemas
 │   │   │   └── register.ts
