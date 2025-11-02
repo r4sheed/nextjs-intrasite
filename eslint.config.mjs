@@ -32,15 +32,6 @@ export default [
       },
     },
 
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
-      'next-env.d.ts',
-      'dist/**',
-    ],
-
     rules: {
       'import/order': [
         'error',
@@ -62,22 +53,19 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'off',
 
       '@next/next/no-img-element': 'warn',
-
-      'prettier/prettier': [
-        'error',
-        {
-          singleQuote: true,
-          semi: true,
-          trailingComma: 'es5',
-          printWidth: 90,
-          tabWidth: 2,
-          useTabs: false,
-          arrowParens: 'avoid',
-          endOfLine: 'lf',
-        },
-      ],
     },
   },
 
   prettier,
+
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'dist/**',
+    ],
+  },
 ];

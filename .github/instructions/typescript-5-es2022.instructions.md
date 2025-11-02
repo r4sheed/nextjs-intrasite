@@ -30,9 +30,15 @@ applyTo: '**'
 
 ## Naming & Style
 
+> **Important:** For detailed naming conventions, see [nextjs.instructions.md](nextjs.instructions.md) and [messages-and-codes.instructions.md](messages-and-codes.instructions.md).
+
 - Use PascalCase for classes, interfaces, enums, and type aliases; camelCase for everything else.
 - Skip interface prefixes like `I`; rely on descriptive names.
 - Name things for their behavior or domain meaning, not implementation.
+- **Constants:**
+  - Use `UPPER_SNAKE_CASE` for primitive constants only (e.g., `const MAX_COUNT = 10;`)
+  - Use `camelCase` for object/array constants (e.g., `const publicRoutes = [...];`)
+  - Use `camelCase` for object properties (e.g., `AUTH_CODES.invalidCredentials`)
 
 ## Formatting & Style
 

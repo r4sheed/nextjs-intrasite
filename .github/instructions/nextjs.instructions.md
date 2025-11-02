@@ -96,11 +96,42 @@ Always move client-only UI into a Client Component and import it directly in you
 
 ## 3. Naming Conventions (General)
 
+> **Important:** For detailed error code/message naming conventions, see [messages-and-codes.instructions.md](messages-and-codes.instructions.md).
+
 - **Folders:** `kebab-case` (e.g., `user-profile/`)
 - **Files:** `kebab-case` for components, `kebab-case` for utilities/hooks, `kebab-case` for static assets
 - **Variables/Functions:** `camelCase`
 - **Types/Interfaces:** `PascalCase`
-- **Constants:** `UPPER_SNAKE_CASE`
+- **Constants:**
+  - **Primitive values:** `UPPER_SNAKE_CASE` (e.g., `const MAX_RETRY_COUNT = 3;`)
+  - **Objects/Arrays:** `camelCase` for the variable name (e.g., `const siteConfig = { ... } as const;`)
+  - **Object properties:** `camelCase` (e.g., `AUTH_CODES.invalidCredentials`)
+
+### Examples
+
+```typescript
+// ✅ CORRECT - Primitive constants
+const MAX_RETRY_COUNT = 3;
+const API_TIMEOUT_MS = 5000;
+const DEFAULT_LOGIN_REDIRECT = '/dashboard';
+
+// ✅ CORRECT - Object/Array constants
+const siteConfig = {
+  name: 'MyApp',
+  version: '1.0.0',
+} as const;
+
+const publicRoutes = Object.freeze(['/home', '/about']) as readonly string[];
+
+const AUTH_CODES = {
+  invalidCredentials: 'invalid-credentials', // camelCase property
+  emailRequired: 'email-required',
+} as const;
+
+// ❌ WRONG - Array/Object with SCREAMING_SNAKE_CASE
+const PUBLIC_ROUTES = ['/home', '/about']; // Should be: publicRoutes
+const SITE_CONFIG = { name: 'MyApp' }; // Should be: siteConfig
+```
 
 ## 4. API Routes (Route Handlers)
 
