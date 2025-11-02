@@ -54,8 +54,17 @@ npm run lint         # Run ESLint
 npm run format       # Format code with Prettier
 npm run test         # Run all tests
 npm run test:watch   # Run tests in watch mode
+
+# Feature scaffolding
 npm run feature:create <name>  # Generate new feature scaffold
+
+# i18n management
+npm run i18n:add <key> <en> <hu>  # Add new translation
+npm run i18n:validate             # Validate translations
+npm run i18n:sync                 # Sync translations
 ```
+
+**See [scripts/README.md](scripts/README.md) for i18n management details.**
 
 ---
 

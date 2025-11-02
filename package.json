@@ -12,7 +12,10 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "feature:create": "tsx scripts/create-feature.ts"
+    "feature:create": "tsx scripts/create-feature.ts",
+    "i18n:add": "tsx scripts/i18n-add.ts",
+    "i18n:validate": "tsx scripts/i18n-validate.ts",
+    "i18n:sync": "tsx scripts/i18n-sync.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
