@@ -14,9 +14,10 @@ import { execute } from '@/hooks/use-action';
 import { AuthState } from '@/features/auth/components/auth-state';
 import { LoadState } from '@/features/auth/components/load-state';
 
-import { verify } from '@/features/auth/actions';
 import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+
+import { verify } from '@/features/auth/actions';
 
 AUTH_ERROR_CODES;
 export const EmailVerificationForm = () => {
@@ -49,7 +50,7 @@ export const EmailVerificationForm = () => {
     if (mutation.isSuccess) {
       const timer = setTimeout(() => {
         router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
-      }, 2000);
+      }, 2500);
       return () => clearTimeout(timer);
     }
 

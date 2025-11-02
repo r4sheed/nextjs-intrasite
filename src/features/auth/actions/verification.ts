@@ -4,7 +4,7 @@ import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
 import { getUserByEmail } from '@/features/auth/data/user';
-import { getVerificationTokenByToken } from '@/features/auth/data/vertification';
+import { getVerificationTokenByToken } from '@/features/auth/data/verification-token';
 import {
   tokenExpired,
   tokenNotFound,
