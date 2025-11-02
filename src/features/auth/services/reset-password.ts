@@ -21,13 +21,6 @@ import { type ResetInput } from '@/features/auth/schemas';
  * @returns Response with success message (even if user doesn't exist), or internal error.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await resetPassword({ email: 'user@example.com' });
- * // Always returns success message to prevent email enumeration
- * if (result.status === Status.Success) {
- *   console.log('Password reset email sent (if user exists)');
- * }
  */
 export const resetPassword = async (
   values: ResetInput
@@ -69,5 +62,3 @@ export const resetPassword = async (
     return response.failure(internalServerError());
   }
 };
-
-

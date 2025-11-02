@@ -22,12 +22,6 @@ export type ResetPasswordData = Record<string, never>;
  *
  * @param values - The input containing the user's email address.
  * @returns A Response object containing success status or validation/service error.
- *
- * @example
- * const result = await resetPassword({ email: 'user@example.com' });
- * if (result.status === Status.Success) {
- *   console.log('Password reset email sent');
- * }
  */
 export const resetPassword = async (
   values: ResetInput

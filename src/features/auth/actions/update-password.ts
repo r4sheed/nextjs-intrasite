@@ -25,15 +25,6 @@ export type UpdatePasswordData = Record<string, never>;
  *
  * @param values - The password reset data containing the token and new password.
  * @returns A Response object indicating success or validation/reset errors.
- *
- * @example
- * const result = await updatePassword({
- *   token: 'reset-token-123',
- *   password: 'newSecurePass123'
- * });
- * if (result.status === Status.Success) {
- *   console.log('Password updated successfully');
- * }
  */
 export const updatePassword = async (
   values: NewPasswordInput

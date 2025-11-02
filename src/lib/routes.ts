@@ -4,7 +4,7 @@ import { API_ROUTES, ROUTES } from '@/lib/navigation';
  * Publicly accessible routes.
  * These do not require authentication.
  */
-export const PUBLIC_ROUTES = Object.freeze([
+export const publicRoutes = Object.freeze([
   ROUTES.HOME,
   ROUTES.ERROR,
   ROUTES.AUTH.VERIFY_EMAIL,
@@ -14,7 +14,7 @@ export const PUBLIC_ROUTES = Object.freeze([
  * Authentication-related routes.
  * Logged-in users should not access these.
  */
-export const AUTH_ROUTES = Object.freeze([
+export const authRoutes = Object.freeze([
   ROUTES.AUTH.LOGIN,
   ROUTES.AUTH.SIGN_UP,
   ROUTES.AUTH.FORGOT_PASSWORD,

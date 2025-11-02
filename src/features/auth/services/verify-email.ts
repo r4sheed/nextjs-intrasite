@@ -24,12 +24,6 @@ import type { VerifyEmailData } from '@/features/auth/actions';
  * @returns Response indicating success with verification message, or error details.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await verifyEmail('verification-token-123');
- * if (result.status === Status.Success) {
- *   console.log('Email verified for:', result.data.email);
- * }
  */
 export const verifyEmail = async (
   token: string
@@ -69,5 +63,3 @@ export const verifyEmail = async (
     },
   });
 };
-
-

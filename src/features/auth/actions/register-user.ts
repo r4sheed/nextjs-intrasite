@@ -22,16 +22,6 @@ export type RegisterUserData = { userId: string };
  *
  * @param values - The user's registration data (email, password, name).
  * @returns A Response object containing the user ID on success, or validation/registration errors.
- *
- * @example
- * const result = await registerUser({
- *   email: 'newuser@example.com',
- *   password: 'securePass123',
- *   name: 'John Doe'
- * });
- * if (result.status === Status.Success) {
- *   console.log('User registered:', result.data.userId);
- * }
  */
 export const registerUser = async (
   values: RegisterInput

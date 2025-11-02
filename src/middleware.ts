@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 import { ROUTES } from '@/lib/navigation';
 import {
   AUTH_ROUTE_PREFIX,
-  AUTH_ROUTES,
+  authRoutes,
   DEFAULT_LOGIN_REDIRECT,
-  PUBLIC_ROUTES,
+  publicRoutes,
 } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';
@@ -19,8 +19,8 @@ export default auth(req => {
 
   // Determine the type of route
   const isApiAuthRoute = pathname.startsWith(AUTH_ROUTE_PREFIX);
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-  const isAuthRoute = AUTH_ROUTES.includes(pathname);
+  const isPublicRoute = publicRoutes.includes(pathname);
+  const isAuthRoute = authRoutes.includes(pathname);
 
   // A route is protected if it is neither public nor an authentication route.
   const isProtectedRoute = !isPublicRoute && !isAuthRoute;

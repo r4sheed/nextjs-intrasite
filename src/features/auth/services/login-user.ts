@@ -31,13 +31,6 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
  * @returns Response with user ID on success, or structured error on failure.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await loginUser({ email: 'user@example.com', password: 'pass123' });
- * if (result.status === Status.Success) {
- *   // User authenticated, session created
- *   console.log(result.data.userId);
- * }
  */
 export const loginUser = async (
   values: LoginInput
@@ -116,5 +109,3 @@ export const loginUser = async (
     return response.failure(internalServerError());
   }
 };
-
-

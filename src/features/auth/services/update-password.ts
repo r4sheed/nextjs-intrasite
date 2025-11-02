@@ -29,15 +29,6 @@ import { type NewPasswordInput } from '@/features/auth/schemas';
  * @returns Response indicating success with confirmation message, or error details.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await updatePassword({
- *   token: 'reset-token-123',
- *   password: 'newSecurePass123'
- * });
- * if (result.status === Status.Success) {
- *   console.log('Password updated successfully');
- * }
  */
 export const updatePassword = async (
   values: NewPasswordInput
@@ -91,5 +82,3 @@ export const updatePassword = async (
     return response.failure(internalServerError());
   }
 };
-
-

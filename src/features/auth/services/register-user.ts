@@ -31,16 +31,6 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
  * @returns Response with user ID on success, or structured error on failure.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await registerUser({
- *   email: 'newuser@example.com',
- *   password: 'securePass123',
- *   name: 'John Doe'
- * });
- * if (result.status === Status.Success) {
- *   console.log('User created:', result.data.userId);
- * }
  */
 export const registerUser = async (
   values: RegisterInput
@@ -106,5 +96,3 @@ export const registerUser = async (
     return response.failure(registrationFailed(error));
   }
 };
-
-

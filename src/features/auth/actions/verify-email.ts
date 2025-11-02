@@ -20,12 +20,6 @@ export type VerifyEmailData = Record<string, never>;
  *
  * @param token - The verification token received from the client URL or email link.
  * @returns A Response object indicating success or failure with specific error details.
- *
- * @example
- * const result = await verifyEmail('verification-token-123');
- * if (result.status === Status.Success) {
- *   console.log('Email verified successfully');
- * }
  */
 export const verifyEmail = async (
   token: string

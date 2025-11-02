@@ -22,12 +22,6 @@ export type LoginUserData = { userId: string };
  *
  * @param values - The user's login credentials (email and password).
  * @returns A Response object containing the user ID on success, or validation/authentication errors.
- *
- * @example
- * const result = await loginUser({ email: 'user@example.com', password: 'securePass123' });
- * if (result.status === Status.Success) {
- *   console.log('User logged in:', result.data.userId);
- * }
  */
 export const loginUser = async (
   values: LoginInput
