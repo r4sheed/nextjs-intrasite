@@ -5,13 +5,31 @@
 Create a new feature using the scaffolding script:
 
 ```bash
-npm run feature:create <feature-name>
+npm run feature:create <feature-name> [category]
 ```
 
-**Example:**
+### Categories
+
+- **`crud`** (default): Full CRUD operations with domain models
+  - Use for: posts, products, bookmarks, users, orders
+  - Includes: `models/` folder with business entity classes
+  - Template: Complete CRUD data layer + domain model examples
+
+- **`simple`**: Lightweight features without domain models
+  - Use for: settings, notifications, preferences, utilities
+  - Excludes: `models/` folder (no complex domain logic needed)
+  - Template: Basic service and data layer examples
+
+### Examples
 
 ```bash
-npm run feature:create bookmarks
+# CRUD feature with domain model (default)
+npm run feature:create posts
+npm run feature:create posts crud
+
+# Simple feature without domain model
+npm run feature:create settings simple
+npm run feature:create notifications simple
 ```
 
 This automatically creates the complete folder structure following project guidelines.
@@ -20,33 +38,51 @@ This automatically creates the complete folder structure following project guide
 
 ## Generated Structure
 
+### CRUD Category (with domain models)
+
 ```
 src/features/<feature-name>/
 ├── actions/          # Server Actions (Next.js 'use server')
-│   └── index.ts      # Barrel exports
+│   ├── index.ts      # Barrel exports
+│   └── create-example.ts   # Example server action template
 ├── components/       # React components specific to this feature
+│   └── example.tsx   # Example component template
 ├── data/             # Database/data access layer
+│   └── example.ts    # Full CRUD operations template
+├── models/           # Domain models (business entities) ⭐ CRUD only
+│   └── index.ts      # Domain entity class with business logic
 ├── hooks/            # Custom React hooks
+│   └── index.ts      # TanStack Query hook examples
 ├── lib/              # Utilities, errors, and constants
 │   ├── errors.ts     # Feature-specific AppError factories
-│   └── strings.ts    # Error codes, messages, UI labels (i18n keys)
+│   ├── strings.ts    # Error codes, messages, UI labels (i18n keys)
+│   └── utils.ts      # Feature-specific utilities
 ├── schemas/          # Zod validation schemas
-│   └── index.ts      # Barrel exports
+│   ├── index.ts      # Barrel exports
+│   └── create-example.ts   # Example Zod schema
 ├── services/         # Business logic layer
-│   └── index.ts      # Barrel exports
+│   ├── index.ts      # Barrel exports
+│   └── create-example.ts   # Example service with model usage
 ├── types/            # TypeScript type definitions
 │   └── index.ts      # Shared types
 ├── __tests__/        # Unit and integration tests
-└── README.md         # Feature documentation
+│   └── example.test.ts     # Example test template
+└── README.md         # Feature documentation (category-specific)
 
 src/locales/
-├── en/<feature-name>.json   # English translations
-└── hu/<feature-name>.json   # Hungarian translations
+├── en/<feature-name>.json   # English translations (pre-populated)
+└── hu/<feature-name>.json   # Hungarian translations (pre-populated)
 ```
+
+### Simple Category (lightweight)
+
+Same as CRUD, but **without** the `models/` folder. Best for features that don't require complex domain logic or business entity representations.
 
 ---
 
 ## Layer Responsibilities
+
+> **Note:** CRUD features include a `models/` layer; simple features do not.
 
 ### 1. **Actions Layer** (`actions/`)
 
@@ -59,6 +95,8 @@ src/locales/
 - ✅ Call service layer for business logic
 - ❌ Never throw errors (return `response.error()` instead)
 - ❌ Never access database directly
+
+**Template includes:** Example server action with validation and service call
 
 **Example:**
 
@@ -75,6 +113,10 @@ import {
   createBookmarkSchema,
 } from '@/features/bookmarks/schemas';
 import { createBookmark as createBookmarkService } from '@/features/bookmarks/services';
+
+// actions/create-bookmark.ts
+
+// actions/create-bookmark.ts
 
 // actions/create-bookmark.ts
 
@@ -103,11 +145,50 @@ export const createBookmark = async (
 
 - ✅ Return `Response<T>`
 - ✅ Call data layer for database operations
+- ✅ Use domain models (CRUD features) for business logic
 - ✅ Handle all business rules and validation
 - ✅ Use try-catch for unexpected errors only
 - ❌ Never throw domain errors (return `response.error()`)
 
-**Example:**
+**Template includes:** Example service with model usage (CRUD) or direct data access (simple)
+
+**Example (CRUD with model):**
+
+```typescript
+// services/create-post.ts
+import { internalServerError } from '@/lib/errors';
+import { response, type Response } from '@/lib/response';
+
+import { createPost as createPostData } from '@/features/posts/data/post';
+
+import { Post } from '@/features/posts/models';
+
+export const createPost = async (
+  input: CreatePostInput
+): Promise<Response<CreatePostData>> => {
+  try {
+    // 1. Validate business rules using domain model
+    if (!Post.isValidTitle(input.title)) {
+      return response.error(invalidTitle());
+    }
+
+    // 2. Create entity in database
+    const postData = await createPostData(input);
+
+    if (!postData) {
+      return response.error(internalServerError());
+    }
+
+    // 3. Return success
+    return response.success({ data: { id: postData.id } });
+  } catch (error) {
+    console.error('[createPostService]', error);
+    return response.error(internalServerError());
+  }
+};
+```
+
+**Example (simple without model):**
 
 ```typescript
 // services/create-bookmark.ts
@@ -148,6 +229,8 @@ export const createBookmark = async (
 - ❌ Never throw errors
 - ❌ No business logic
 
+**Template includes:** Full CRUD operations (create, get, update, delete, list)
+
 **Example:**
 
 ```typescript
@@ -171,9 +254,149 @@ export const getBookmarkById = async (id: string) => {
     return null;
   }
 };
+
+export const updateBookmark = async (
+  id: string,
+  data: Partial<CreateBookmarkInput>
+) => {
+  try {
+    return await db.bookmark.update({ where: { id }, data });
+  } catch (error) {
+    console.error('[updateBookmark] Database error:', error);
+    return null;
+  }
+};
+
+export const deleteBookmark = async (id: string) => {
+  try {
+    return await db.bookmark.delete({ where: { id } });
+  } catch (error) {
+    console.error('[deleteBookmark] Database error:', error);
+    return null;
+  }
+};
+
+export const getAllBookmarks = async () => {
+  try {
+    return await db.bookmark.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error('[getAllBookmarks] Database error:', error);
+    return null;
+  }
+};
 ```
 
-### 4. **Schemas Layer** (`schemas/`)
+### 4. **Models Layer** (`models/`) - CRUD Category Only ⭐
+
+**Purpose:** Domain entity classes with business logic
+
+**Rules:**
+
+- ✅ Class-based entity representations
+- ✅ Contain core business logic and rules
+- ✅ Validate entity state and invariants
+- ✅ Transform between database and domain representations
+- ❌ No database access (use data layer)
+- ❌ No framework dependencies
+
+**Template includes:** Complete domain model class with factory methods and business logic
+
+**Example:**
+
+```typescript
+// models/index.ts
+import type { Post as PrismaPost } from '@prisma/client';
+
+// Business rule constants
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+const DEFAULT_RECENT_DAYS = 7;
+const MIN_TITLE_LENGTH = 3;
+const MAX_TITLE_LENGTH = 200;
+
+/**
+ * Post domain entity
+ * Wraps database entity with business logic
+ */
+export class Post {
+  private constructor(
+    public readonly id: string,
+    public readonly title: string,
+    public readonly content: string,
+    public readonly published: boolean,
+    public readonly createdAt: Date,
+    public readonly updatedAt: Date
+  ) {}
+
+  /**
+   * Create a new Post instance from database entity
+   */
+  static fromDatabase(data: PrismaPost): Post {
+    return new Post(
+      data.id,
+      data.title,
+      data.content,
+      data.published,
+      data.createdAt,
+      data.updatedAt
+    );
+  }
+
+  /**
+   * Convert to database representation
+   */
+  toDatabase(): Omit<PrismaPost, 'id' | 'createdAt' | 'updatedAt'> {
+    return {
+      title: this.title,
+      content: this.content,
+      published: this.published,
+    };
+  }
+
+  /**
+   * Business logic: Check if post is recent
+   */
+  isRecent(days: number = DEFAULT_RECENT_DAYS): boolean {
+    const daysSinceCreation =
+      (Date.now() - this.createdAt.getTime()) / MILLISECONDS_PER_DAY;
+    return daysSinceCreation <= days;
+  }
+
+  /**
+   * Business logic: Validate title
+   */
+  static isValidTitle(title: string): boolean {
+    const trimmedLength = title.trim().length;
+    return (
+      trimmedLength >= MIN_TITLE_LENGTH && trimmedLength <= MAX_TITLE_LENGTH
+    );
+  }
+
+  /**
+   * Business logic: Publish post
+   */
+  publish(): Post {
+    return new Post(
+      this.id,
+      this.title,
+      this.content,
+      true,
+      this.createdAt,
+      new Date()
+    );
+  }
+}
+```
+
+**When to use models:**
+
+- ✅ Complex business rules (order calculations, post publishing, user roles)
+- ✅ Entity state validation (email formats, price ranges, status transitions)
+- ✅ Transformations between layers (API ↔ database ↔ domain)
+- ❌ Simple CRUD with no business logic (use simple category)
+
+### 5. **Schemas Layer** (`schemas/`)
 
 **Purpose:** Zod validation schemas and input types
 
@@ -183,6 +406,8 @@ export const getBookmarkById = async (id: string) => {
 - ✅ Export schema and inferred type
 - ✅ Use i18n keys for error messages
 - ❌ No business logic
+
+**Template includes:** Example Zod schema with i18n error messages
 
 **Example:**
 
@@ -200,7 +425,7 @@ export const createBookmarkSchema = z.object({
 export type CreateBookmarkInput = z.infer<typeof createBookmarkSchema>;
 ```
 
-### 5. **Lib Layer** (`lib/`)
+### 6. **Lib Layer** (`lib/`)
 
 **Purpose:** Feature-specific utilities, errors, and constants
 
@@ -208,15 +433,27 @@ export type CreateBookmarkInput = z.infer<typeof createBookmarkSchema>;
 
 - `strings.ts` - All string constants (codes, messages, labels)
 - `errors.ts` - AppError factory functions
+- `utils.ts` - Feature-specific helper functions
+
+**Template includes:** Complete strings.ts with all constant categories, error factories, and utility placeholder
 
 **Example (`lib/strings.ts`):**
 
 ```typescript
+// lib/strings.ts
+
+// Note: For kebab-case feature names (e.g., user-settings):
+// - Constant name: USER_SETTINGS_CODES (UPPER_SNAKE_CASE)
+// - i18n keys: user-settings.errors.not-found (kebab-case)
+// - Prisma model: userSettings (camelCase)
+
 export const BOOKMARK_CODES = {
   notFound: 'not-found',
   invalidUrl: 'invalid-url',
   titleRequired: 'title-required',
 } as const;
+
+export type BookmarkCode = (typeof BOOKMARK_CODES)[keyof typeof BOOKMARK_CODES];
 
 export const BOOKMARK_ERRORS = {
   notFound: 'bookmarks.errors.not-found',
@@ -227,6 +464,7 @@ export const BOOKMARK_ERRORS = {
 export const BOOKMARK_SUCCESS = {
   created: 'bookmarks.success.created',
   updated: 'bookmarks.success.updated',
+  deleted: 'bookmarks.success.deleted',
 } as const;
 
 export const BOOKMARK_LABELS = {
@@ -341,16 +579,71 @@ describe('createBookmark', () => {
 
 After generating a feature:
 
-- [ ] Add translations to `src/locales/en/<feature>.json`
-- [ ] Add translations to `src/locales/hu/<feature>.json`
-- [ ] Define error codes in `lib/strings.ts`
-- [ ] Create Zod schemas in `schemas/`
-- [ ] Implement data access functions in `data/`
-- [ ] Write business logic in `services/`
-- [ ] Create server actions in `actions/`
+### 1. Database Setup
+
+- [ ] Add Prisma schema model to `prisma/schema.prisma`
+- [ ] Run migration: `npx prisma migrate dev --name create-<feature>`
+- [ ] Verify database structure
+
+### 2. Translations
+
+- [ ] Review generated `src/locales/en/<feature>.json`
+- [ ] Review generated `src/locales/hu/<feature>.json`
+- [ ] Add more translations: `npm run i18n:add <feature>.errors.custom "Text" "Szöveg"`
+- [ ] Validate i18n files: `npm run i18n:validate`
+
+### 3. Implementation
+
+- [ ] **Data layer**: Customize CRUD operations in `data/example.ts`
+- [ ] **Models layer** (CRUD only): Implement business logic in `models/index.ts`
+- [ ] **Schemas**: Define validation rules in `schemas/create-example.ts`
+- [ ] **Services**: Implement business logic in `services/create-example.ts`
+- [ ] **Actions**: Customize server actions in `actions/create-example.ts`
+- [ ] **Error handling**: Add domain-specific errors in `lib/errors.ts`
+- [ ] **String constants**: Expand codes/messages in `lib/strings.ts`
+
+### 4. UI & Integration
+
 - [ ] Build UI components in `components/`
-- [ ] Write tests in `__tests__/`
+- [ ] Create custom hooks in `hooks/` (TanStack Query)
 - [ ] Update feature `README.md` with usage examples
+- [ ] Add route handlers if needed
+
+### 5. Testing & Validation
+
+- [ ] Write tests in `__tests__/`
+- [ ] Run tests: `npm test`
+- [ ] Run type check: `npm run typecheck`
+- [ ] Test end-to-end functionality
+
+### 6. Cleanup
+
+- [ ] Remove example files if not needed:
+  - `data/example.ts` → rename to actual entity (e.g., `bookmark.ts`)
+  - `actions/create-example.ts` → rename to actual action
+  - `services/create-example.ts` → rename to actual service
+  - etc.
+- [ ] Update barrel exports in `index.ts` files
+
+---
+
+## Category Decision Guide
+
+**Choose CRUD when:**
+
+- ✅ Complex business rules (pricing, permissions, workflows)
+- ✅ Entity state management (published/draft, active/inactive)
+- ✅ Domain transformations (API ↔ database ↔ UI)
+- ✅ Reusable business logic across multiple features
+- ✅ Examples: posts, products, orders, bookmarks, users
+
+**Choose Simple when:**
+
+- ✅ Basic CRUD with minimal logic
+- ✅ Configuration or settings storage
+- ✅ Simple data transformations
+- ✅ No complex business rules
+- ✅ Examples: settings, notifications, preferences, tags
 
 ---
 
