@@ -181,7 +181,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <div className="flex items-center">
-                      <FieldLabel htmlFor="password">
+                      <FieldLabel htmlFor={field.name}>
                         {AUTH_UI_MESSAGES.PASSWORD_LABEL}
                       </FieldLabel>
                       <Link
