@@ -3,12 +3,11 @@
  *
  * Tests for i18n management utilities (add, validate, sync)
  */
-
-import { beforeEach, describe, expect, it } from 'vitest';
-import { existsSync } from 'node:fs';
-import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
-import { join } from 'node:path';
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 const TEST_DIR = join(process.cwd(), '__test_i18n__');
 const LOCALES_DIR = join(TEST_DIR, 'src/locales');

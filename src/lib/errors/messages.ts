@@ -2,10 +2,10 @@
  * Core error messages (i18n keys) for application-wide errors
  */
 export const CORE_ERRORS = {
-  internalServerError: 'errors.internal-server-error',
-  validationFailed: 'errors.validation-failed',
-  unauthorized: 'errors.unauthorized',
-  forbidden: 'errors.forbidden',
-  notFound: 'errors.not-found',
   databaseError: 'errors.database-error',
+  forbidden: 'errors.forbidden',
+  internalServerError: 'errors.internal-server-error',
+  notFound: 'errors.not-found',
+  unauthorized: 'errors.unauthorized',
+  validationFailed: 'errors.validation-failed',
 } as const;

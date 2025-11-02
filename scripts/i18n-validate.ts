@@ -96,11 +96,12 @@ async function compareLocaleFiles(
  */
 function extractConstantValues(content: string): string[] {
   const values: string[] = [];
-  
+
   // Match i18n constants (exclude CODES constants)
   // Pattern: export const {DOMAIN}_{CATEGORY} = { ... }
   // where CATEGORY is not "CODES"
-  const constantRegex = /export const (?!.*_CODES)(\w+) = \{([^}]+)\} as const;/g;
+  const constantRegex =
+    /export const (?!.*_CODES)(\w+) = \{([^}]+)\} as const;/g;
   let match;
 
   while ((match = constantRegex.exec(content)) !== null) {
