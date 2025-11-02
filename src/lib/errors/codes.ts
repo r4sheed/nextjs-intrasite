@@ -13,8 +13,3 @@ export const CORE_CODES = {
 } as const;
 
 export type CoreCode = (typeof CORE_CODES)[keyof typeof CORE_CODES];
-
-/**
- * @deprecated Use CORE_CODES instead
- */
-export const ERROR_CODES = CORE_CODES;
