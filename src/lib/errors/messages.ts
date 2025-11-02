@@ -9,8 +9,3 @@ export const CORE_ERRORS = {
   notFound: 'errors.not-found',
   databaseError: 'errors.database-error',
 } as const;
-
-/**
- * @deprecated Use CORE_ERRORS instead
- */
-export const ERROR_MESSAGES = CORE_ERRORS;
