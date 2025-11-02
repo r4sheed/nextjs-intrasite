@@ -1,12 +1,9 @@
-import bcrypt from 'bcryptjs';
-
 import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
-import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
 import {
   emailAlreadyExists,
   invalidFields,
@@ -17,6 +14,7 @@ import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 
 import { type RegisterUserData } from '@/features/auth/actions';
+import { User } from '@/features/auth/models';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
 /**
@@ -49,8 +47,8 @@ export const registerUser = async (
     return response.failure(emailAlreadyExists());
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  // Hash password using User model
+  const hashedPassword = await User.hashPassword(password);
 
   // Create user
   try {

@@ -1,7 +1,8 @@
-import type { User } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import type { User as PrismaUser } from '@prisma/client';
 
 import { db } from '@/lib/prisma';
+
+import { User } from '@/features/auth/models';
 
 /**
  * Data access layer for User entity
@@ -26,7 +27,7 @@ const USER_WITHOUT_PASSWORD_SELECT = {
 /**
  * Type for user without password
  */
-export type UserWithoutPassword = Omit<User, 'password'>;
+export type UserWithoutPassword = Omit<PrismaUser, 'password'>;
 
 /**
  * Options for user lookup
@@ -43,7 +44,7 @@ export type UserLookupOptions = {
  * @param select - Optional select clause for specific fields
  * @returns User object if found, null if not found or on database error
  */
-const findUser = async <T = User>(
+const findUser = async <T = PrismaUser>(
   where: { id: string } | { email: string },
   select?: Record<string, boolean>
 ): Promise<T | null> => {
@@ -68,7 +69,7 @@ const findUser = async <T = User>(
  */
 export const getUser = async (
   options: UserLookupOptions
-): Promise<User | UserWithoutPassword | null> => {
+): Promise<PrismaUser | UserWithoutPassword | null> => {
   const { id, email, includePassword = true } = options;
 
   // Prioritize ID if provided
@@ -100,7 +101,9 @@ export const getUser = async (
  * @param userId - The user's unique identifier
  * @returns User object if found, null if not found or on database error
  */
-export const getUserById = async (userId: string): Promise<User | null> => {
+export const getUserById = async (
+  userId: string
+): Promise<PrismaUser | null> => {
   return await findUser({ id: userId });
 };
 
@@ -109,7 +112,9 @@ export const getUserById = async (userId: string): Promise<User | null> => {
  * @param email - The user's email address
  * @returns User object if found, null if not found or on database error
  */
-export const getUserByEmail = async (email: string): Promise<User | null> => {
+export const getUserByEmail = async (
+  email: string
+): Promise<PrismaUser | null> => {
   return await findUser({ email });
 };
 
@@ -146,22 +151,26 @@ export const getUserByEmailWithoutPassword = async (
  * @param email - The user's email address
  * @param password - The plain text password to verify
  * @returns User object without password if credentials are valid, null otherwise (including on database errors)
+ *
+ * @remarks
+ * This function uses the User model's verifyPassword method for business logic.
+ * The data layer fetches the raw Prisma user, then wraps it in the User model.
  */
 export const verifyUserCredentials = async (
   email: string,
   password: string
 ): Promise<UserWithoutPassword | null> => {
-  // Fetch user with password
-  const user = await getUserByEmail(email);
+  // Fetch user with password (includes password field)
+  const prismaUser = await getUserByEmail(email);
 
-  if (!user || !user.password) return null;
+  if (!prismaUser) return null;
 
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  // Wrap in User model and verify password (business logic)
+  const user = new User(prismaUser);
+  const isPasswordValid = await user.verifyPassword(password);
 
   if (!isPasswordValid) return null;
 
-  // Return user without password
-  const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+  // Return user without password using model method
+  return user.toSafeObject();
 };

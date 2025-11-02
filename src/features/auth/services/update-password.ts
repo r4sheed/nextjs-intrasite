@@ -1,12 +1,9 @@
-import bcrypt from 'bcryptjs';
-
 import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
 import { getPasswordResetTokenByToken } from '@/features/auth/data/reset-token';
 import { getUserByEmail } from '@/features/auth/data/user';
-import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
 import {
   tokenExpired,
   tokenNotFound,
@@ -15,6 +12,7 @@ import {
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
 import { type UpdatePasswordData } from '@/features/auth/actions';
+import { User } from '@/features/auth/models';
 import { type NewPasswordInput } from '@/features/auth/schemas';
 
 /**
@@ -22,8 +20,8 @@ import { type NewPasswordInput } from '@/features/auth/schemas';
  *
  * This service handles the complete password reset flow including token validation,
  * expiration checks, user lookup, password hashing, and executes an atomic database
- * transaction to update the password and delete the consumed token. Uses bcrypt
- * with configured BCRYPT_SALT_ROUNDS for secure password hashing.
+ * transaction to update the password and delete the consumed token. Uses the User
+ * model's hashPassword method for secure password hashing.
  *
  * @param values - Validated input containing the reset token and new password.
  * @returns Response indicating success with confirmation message, or error details.
@@ -54,8 +52,8 @@ export const updatePassword = async (
     return response.failure(userNotFound(email));
   }
 
-  // Hash the new password with configured salt rounds
-  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  // Hash the new password using User model
+  const hashedPassword = await User.hashPassword(password);
 
   // Database Transaction: Update password and delete the used token atomically
   try {

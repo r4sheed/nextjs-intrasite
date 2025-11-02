@@ -122,6 +122,8 @@ import { createBookmark as createBookmarkService } from '@/features/bookmarks/se
 
 // actions/create-bookmark.ts
 
+// actions/create-bookmark.ts
+
 export type CreateBookmarkData = { id: string };
 
 export const createBookmark = async (
@@ -644,6 +646,108 @@ After generating a feature:
 - ✅ Simple data transformations
 - ✅ No complex business rules
 - ✅ Examples: settings, notifications, preferences, tags
+
+---
+
+## Retrofitting Existing Features with Models
+
+Older features (like `auth`) may not have a `models/` folder. Here's when and how to add one:
+
+### When to Add Models to Existing Features
+
+**✅ Add models when you find:**
+
+1. **Business Logic in Data Layer**
+
+   ```typescript
+   // ❌ BAD: Business logic (bcrypt) in data layer
+   export const verifyUserCredentials = async (
+     email: string,
+     password: string
+   ) => {
+     const user = await getUserByEmail(email);
+     const isValid = await bcrypt.compare(password, user.password); // Business logic!
+     return isValid ? user : null;
+   };
+   ```
+
+2. **Business Logic in Services**
+
+   ```typescript
+   // ❌ BAD: Password hashing scattered in multiple services
+   export const registerUser = async (values: RegisterInput) => {
+     const hashedPassword = await bcrypt.hash(password, 10); // Duplication!
+     // ...
+   };
+   ```
+
+3. **Domain Validation Scattered**
+   ```typescript
+   // ❌ BAD: Email validation copy-pasted across files
+   if (!email.includes('@')) return error(); // Scattered validation
+   ```
+
+**❌ Don't add models when:**
+
+1. Feature has simple CRUD with no complex business logic
+2. Data layer only does database access (no transformations/validation)
+3. Services only orchestrate calls (no domain logic)
+
+### Migration Example: Auth Feature
+
+See `docs/auth-user-model-migration.md` for complete case study.
+
+**Summary:**
+
+```typescript
+// Before: Business logic in data/services
+// data/user.ts
+export const verifyUserCredentials = async (email, password) => {
+  const user = await getUserByEmail(email);
+  const isValid = await bcrypt.compare(password, user.password); // ❌ Business logic
+  return isValid ? user : null;
+};
+
+// services/register-user.ts
+const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS); // ❌ Business logic
+
+// After: Business logic in User model
+// models/user.ts
+export class User {
+  async verifyPassword(plainPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, this.data.password);
+  }
+
+  static async hashPassword(plainPassword: string): Promise<string> {
+    return await bcrypt.hash(plainPassword, BCRYPT_SALT_ROUNDS);
+  }
+}
+
+// data/user.ts - Pure database access
+export const verifyUserCredentials = async (email, password) => {
+  const prismaUser = await getUserByEmail(email);
+  if (!prismaUser) return null;
+
+  const user = new User(prismaUser); // ✅ Use model
+  const isValid = await user.verifyPassword(password);
+  return isValid ? user.toSafeObject() : null;
+};
+
+// services/register-user.ts - Uses model
+const hashedPassword = await User.hashPassword(password); // ✅ Use model
+```
+
+### Retrofit Checklist
+
+- [ ] Identify business logic in data/services layers
+- [ ] Create `models/` folder
+- [ ] Create domain entity class (e.g., `User`, `Post`)
+- [ ] Move business logic to model methods
+- [ ] Update data layer to use model for business operations
+- [ ] Update services to use model static methods
+- [ ] Rename Prisma type imports: `User` → `User as PrismaUser`
+- [ ] Run tests to ensure no regressions
+- [ ] Create migration documentation
 
 ---
 
