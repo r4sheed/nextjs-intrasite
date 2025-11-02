@@ -36,7 +36,11 @@ export default [
       'import/order': [
         'error',
         {
-          groups: [['builtin', 'external'], ['internal'], ['parent', 'sibling', 'index']],
+          groups: [
+            ['builtin', 'external'],
+            ['internal'],
+            ['parent', 'sibling', 'index'],
+          ],
           pathGroups: [
             { pattern: 'react', group: 'external', position: 'before' },
             { pattern: 'next/**', group: 'external', position: 'after' },
@@ -49,7 +53,10 @@ export default [
       ],
 
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
 
       '@next/next/no-img-element': 'warn',
