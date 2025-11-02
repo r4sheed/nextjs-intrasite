@@ -5,14 +5,21 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
+import { CircleCheck } from 'lucide-react';
 
 import { ROUTES } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';
 
-import { AuthState } from '@/features/auth/components/auth-state';
-import { LoadState } from '@/features/auth/components/load-state';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Spinner } from '@/components/ui/spinner';
 
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
 import { AUTH_CODES, AUTH_LABELS } from '@/features/auth/lib/strings';
@@ -45,37 +52,51 @@ export const EmailVerificationForm = () => {
     }
   }, [token, mutation, router]);
 
-  useEffect(() => {
-    if (mutation.isSuccess) {
-      const timer = setTimeout(() => {
-        router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
-      }, REDIRECT_TIMEOUT_MS);
-      return () => clearTimeout(timer);
-    }
+  // useEffect(() => {
+  //   if (mutation.isSuccess) {
+  //     const timer = setTimeout(() => {
+  //       router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
+  //     }, REDIRECT_TIMEOUT_MS);
+  //     return () => clearTimeout(timer);
+  //   }
 
-    if (mutation.isError) {
-      const code = mutation.error?.code;
-      router.replace(
-        `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
-      );
-    }
-  }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
+  //   if (mutation.isError) {
+  //     const code = mutation.error?.code;
+  //     router.replace(
+  //       `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
+  //     );
+  //   }
+  // }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
 
   const successMessage = mutation.data?.message?.key;
 
   if (mutation.isSuccess) {
     return (
-      <AuthState
-        title={AUTH_LABELS.verificationSuccessTitle}
-        message={successMessage || AUTH_LABELS.verificationSuccessSubtitle}
-      />
+      <Empty className="border border-dashed">
+        <EmptyHeader>
+          <EmptyMedia>
+            <CircleCheck className="size-10" />
+          </EmptyMedia>
+          <EmptyTitle>{AUTH_LABELS.verificationSuccessTitle}</EmptyTitle>
+          <EmptyDescription>
+            {successMessage || AUTH_LABELS.verificationSuccessSubtitle}
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
-    <LoadState
-      title={AUTH_LABELS.verificationProcessingTitle}
-      description={AUTH_LABELS.verificationProcessingSubtitle}
-    />
+    <Empty className="border border-dashed">
+      <EmptyHeader>
+        <EmptyMedia>
+          <Spinner className="size-10" />
+        </EmptyMedia>
+        <EmptyTitle>{AUTH_LABELS.verificationProcessingTitle}</EmptyTitle>
+        <EmptyDescription>
+          {AUTH_LABELS.verificationProcessingSubtitle}
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 };
