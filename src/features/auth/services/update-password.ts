@@ -12,7 +12,7 @@ import {
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
 import { type UpdatePasswordData } from '@/features/auth/actions';
 import { type NewPasswordInput } from '@/features/auth/schemas';
@@ -82,7 +82,7 @@ export const updatePassword = async (
 
     return response.success({
       data: {},
-      message: { key: AUTH_UI_MESSAGES.PASSWORD_UPDATED_SUCCESS },
+      message: { key: AUTH_SUCCESS.passwordUpdated },
     });
   } catch (error) {
     // Catch any Prisma errors related to the transaction (e.g., connection failure, constraint violation)
@@ -91,3 +91,5 @@ export const updatePassword = async (
     return response.failure(internalServerError());
   }
 };
+
+

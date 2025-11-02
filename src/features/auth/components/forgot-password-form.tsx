@@ -30,7 +30,7 @@ import { FormError, FormSuccess } from '@/components/shared/form-status';
 
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { resetPassword } from '@/features/auth/actions';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
@@ -97,10 +97,10 @@ const ForgotPasswordForm = ({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_TITLE}
+                  {AUTH_LABELS.forgotPasswordTitle}
                 </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_SUBTITLE}
+                  {AUTH_LABELS.forgotPasswordSubtitle}
                 </p>
               </div>
               <Controller
@@ -109,7 +109,7 @@ const ForgotPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.EMAIL_LABEL}
+                      {AUTH_LABELS.emailLabel}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -117,12 +117,12 @@ const ForgotPasswordForm = ({
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      placeholder={AUTH_LABELS.emailPlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.EMAIL_RESET_DESCRIPTION}
+                      {AUTH_LABELS.emailResetDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -134,13 +134,13 @@ const ForgotPasswordForm = ({
                 {isSuccess && <FormSuccess message={successMessage} />}
                 {isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={isPending}>
-                  {AUTH_UI_MESSAGES.FORGOT_PASSWORD_BUTTON}
+                  {AUTH_LABELS.forgotPasswordButton}
                 </LoadingButton>
               </Field>
               <FieldDescription className="text-center">
-                {AUTH_UI_MESSAGES.REMEMBER_PASSWORD_CTA}{' '}
+                {AUTH_LABELS.rememberPasswordCta}{' '}
                 <Link href={ROUTES.AUTH.LOGIN}>
-                  {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
+                  {AUTH_LABELS.backToLoginButton}
                 </Link>
               </FieldDescription>
             </FieldGroup>
@@ -163,3 +163,5 @@ const ForgotPasswordForm = ({
 };
 
 export { ForgotPasswordForm };
+
+

@@ -33,10 +33,7 @@ import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
-import {
-  AUTH_ERROR_MESSAGES,
-  AUTH_UI_MESSAGES,
-} from '@/features/auth/lib/messages';
+import { AUTH_ERRORS, AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { updatePassword } from '@/features/auth/actions';
 import {
@@ -83,7 +80,7 @@ const useNewPasswordForm = () => {
 
   const successMessage = mutation.data?.message?.key;
   const errorMessage = isTokenMissing
-    ? AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND
+    ? AUTH_ERRORS.tokenInvalid
     : mutation.error?.message?.key || '';
 
   const onSubmit = (values: NewPasswordInput) => {
@@ -128,10 +125,10 @@ const NewPasswordForm = ({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.NEW_PASSWORD_TITLE}
+                  {AUTH_LABELS.newPasswordTitle}
                 </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_UI_MESSAGES.NEW_PASSWORD_SUBTITLE}
+                  {AUTH_LABELS.newPasswordSubtitle}
                 </p>
               </div>
 
@@ -141,19 +138,19 @@ const NewPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                      {AUTH_LABELS.passwordLabel}
                     </FieldLabel>
                     <PasswordInput
                       {...field}
                       id={field.name}
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      placeholder={AUTH_LABELS.passwordPlaceholder}
                       disabled={isPending || isSuccess || isError}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                      {AUTH_LABELS.passwordDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -170,14 +167,14 @@ const NewPasswordForm = ({
                   loading={isPending}
                   disabled={isSuccess || isError}
                 >
-                  {AUTH_UI_MESSAGES.NEW_PASSWORD_BUTTON}
+                  {AUTH_LABELS.newPasswordButton}
                 </LoadingButton>
               </Field>
 
               <FieldDescription className="text-center">
-                {AUTH_UI_MESSAGES.REMEMBER_PASSWORD_CTA}{' '}
+                {AUTH_LABELS.rememberPasswordCta}{' '}
                 <Link href={ROUTES.AUTH.LOGIN}>
-                  {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
+                  {AUTH_LABELS.backToLoginButton}
                 </Link>
               </FieldDescription>
             </FieldGroup>

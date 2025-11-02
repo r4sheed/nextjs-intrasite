@@ -13,7 +13,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
 import { ROUTES } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
@@ -62,7 +62,7 @@ const AuthState = ({
           {children && <EmptyContent>{children}</EmptyContent>}
           <Link href={ROUTES.AUTH.LOGIN}>
             <Button variant="outline" size="sm">
-              {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
+              {AUTH_LABELS.backToLoginButton}
             </Button>{' '}
           </Link>
         </div>
@@ -72,3 +72,5 @@ const AuthState = ({
 };
 
 export { AuthState };
+
+

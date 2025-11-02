@@ -1,8 +1,8 @@
 import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
-import { ERROR_CODES } from './codes';
-import { ERROR_MESSAGES } from './messages';
+import { CORE_CODES } from './codes';
+import { CORE_ERRORS } from './messages';
 
 /**
  * These functional helpers create AppError instances for common, core application issues.
@@ -14,8 +14,8 @@ import { ERROR_MESSAGES } from './messages';
  */
 export const internalServerError = () =>
   new AppError({
-    code: ERROR_CODES.INTERNAL_SERVER_ERROR,
-    message: { key: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
+    code: CORE_CODES.internalServerError,
+    message: { key: CORE_ERRORS.internalServerError },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   });
 
@@ -27,8 +27,8 @@ export const internalServerError = () =>
  */
 export const validationFailed = (details: unknown) =>
   new AppError({
-    code: ERROR_CODES.VALIDATION_FAILED,
-    message: { key: ERROR_MESSAGES.VALIDATION_FAILED },
+    code: CORE_CODES.validationFailed,
+    message: { key: CORE_ERRORS.validationFailed },
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
     details,
   });
@@ -40,8 +40,8 @@ export const validationFailed = (details: unknown) =>
  */
 export const unauthorized = () =>
   new AppError({
-    code: ERROR_CODES.UNAUTHORIZED,
-    message: { key: ERROR_MESSAGES.UNAUTHORIZED },
+    code: CORE_CODES.unauthorized,
+    message: { key: CORE_ERRORS.unauthorized },
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
   });
 
@@ -52,8 +52,8 @@ export const unauthorized = () =>
  */
 export const forbidden = () =>
   new AppError({
-    code: ERROR_CODES.FORBIDDEN,
-    message: { key: ERROR_MESSAGES.FORBIDDEN },
+    code: CORE_CODES.forbidden,
+    message: { key: CORE_ERRORS.forbidden },
     httpStatus: HTTP_STATUS.FORBIDDEN,
   });
 
@@ -64,8 +64,8 @@ export const forbidden = () =>
  */
 export const notFound = (resource: string) =>
   new AppError({
-    code: ERROR_CODES.NOT_FOUND,
-    message: { key: ERROR_MESSAGES.NOT_FOUND, params: { resource } },
+    code: CORE_CODES.notFound,
+    message: { key: CORE_ERRORS.notFound, params: { resource } },
     httpStatus: HTTP_STATUS.NOT_FOUND,
     details: { resource },
   });
@@ -78,8 +78,8 @@ export const notFound = (resource: string) =>
  */
 export const databaseError = (details?: unknown) =>
   new AppError({
-    code: ERROR_CODES.DATABASE_ERROR,
-    message: { key: ERROR_MESSAGES.DATABASE_ERROR },
+    code: CORE_CODES.databaseError,
+    message: { key: CORE_ERRORS.databaseError },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details,
   });

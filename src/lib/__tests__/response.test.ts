@@ -87,8 +87,8 @@ describe('Response Helpers', () => {
 
     it('should handle i18n error messages', () => {
       const data = new AppError({
-        code: 'AUTH_INVALID_CREDENTIALS',
-        message: { key: 'auth.errors.invalid_credentials' },
+        code: 'invalidCredentials',
+        message: { key: 'auth.errors.invalidCredentials' },
         httpStatus: HTTP_STATUS.UNAUTHORIZED,
       });
 
@@ -96,11 +96,9 @@ describe('Response Helpers', () => {
 
       expect(result.status).toBe(Status.Error);
       expect(result.message).toEqual({
-        key: 'auth.errors.invalid_credentials',
+        key: 'auth.errors.invalidCredentials',
       });
-      expect(getMessage(result.message)).toBe(
-        'auth.errors.invalid_credentials'
-      );
+      expect(getMessage(result.message)).toBe('auth.errors.invalidCredentials');
     });
 
     it('should include error details', () => {
@@ -293,9 +291,9 @@ describe('Response Helpers', () => {
 
     it('should support formatted error messages', () => {
       const data = new AppError({
-        code: 'AUTH_USER_NOT_FOUND',
+        code: 'userNotFound',
         message: {
-          key: 'auth.errors.user_not_found',
+          key: 'auth.errors.userNotFound',
           params: { email: 'test@example.com' },
         },
         httpStatus: HTTP_STATUS.NOT_FOUND,
@@ -304,7 +302,7 @@ describe('Response Helpers', () => {
       const formattedError = response.failure(data);
 
       expect(formattedError.message).toEqual({
-        key: 'auth.errors.user_not_found',
+        key: 'auth.errors.userNotFound',
         params: { email: 'test@example.com' },
       });
     });

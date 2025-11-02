@@ -8,7 +8,7 @@ import {
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
 import type { VerifyEmailData } from '@/features/auth/actions';
 
@@ -65,7 +65,9 @@ export const verifyEmail = async (
   return response.success({
     data: {},
     message: {
-      key: AUTH_UI_MESSAGES.EMAIL_VERIFIED,
+      key: AUTH_SUCCESS.emailVerified,
     },
   });
 };
+
+

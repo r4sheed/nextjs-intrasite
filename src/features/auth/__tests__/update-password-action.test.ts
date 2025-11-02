@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
-import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import {
   tokenExpired,
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
+import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
 import { updatePassword as updatePasswordAction } from '@/features/auth/actions';
 import { updatePassword } from '@/features/auth/services';
@@ -25,7 +25,7 @@ describe('updatePassword action', () => {
   it('should return success for valid token and password', async () => {
     const mockResponse = responseFactory.success({
       data: {},
-      message: { key: 'auth.success.password_updated' },
+      message: { key: AUTH_SUCCESS.passwordUpdated },
     });
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
@@ -36,7 +36,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
-      expect(response.message?.key).toBe('auth.success.password_updated');
+      expect(response.message?.key).toBe(AUTH_SUCCESS.passwordUpdated);
     }
     expect(updatePassword).toHaveBeenCalledWith({
       token: 'valid-token-123',
@@ -52,7 +52,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_INVALID_FIELDS);
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       expect(response.details).toBeDefined();
     }
     expect(updatePassword).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_INVALID_FIELDS);
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
     }
     expect(updatePassword).not.toHaveBeenCalled();
   });
@@ -79,7 +79,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_INVALID_FIELDS);
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
     }
     expect(updatePassword).not.toHaveBeenCalled();
   });
@@ -95,7 +95,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND);
+      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
     }
   });
 
@@ -110,7 +110,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED);
+      expect(response.code).toBe(AUTH_CODES.tokenExpired);
     }
   });
 
@@ -127,14 +127,14 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_USER_NOT_FOUND);
+      expect(response.code).toBe(AUTH_CODES.userNotFound);
     }
   });
 
   it('should accept various valid password formats', async () => {
     const mockResponse = responseFactory.success({
       data: {},
-      message: { key: 'auth.success.password_updated' },
+      message: { key: AUTH_SUCCESS.passwordUpdated },
     });
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
@@ -164,7 +164,7 @@ describe('updatePassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_ERROR_CODES.AUTH_INVALID_FIELDS);
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       // Should have validation errors for both fields
       expect(response.details).toBeDefined();
     }

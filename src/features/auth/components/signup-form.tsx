@@ -32,7 +32,7 @@ import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { registerUser } from '@/features/auth/actions';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
@@ -98,10 +98,10 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.SIGNUP_TITLE}
+                  {AUTH_LABELS.signupTitle}
                 </h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  {AUTH_UI_MESSAGES.SIGNUP_SUBTITLE}
+                  {AUTH_LABELS.signupSubtitle}
                 </p>
               </div>
               <Controller
@@ -110,19 +110,19 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.NAME_LABEL}
+                      {AUTH_LABELS.nameLabel}
                     </FieldLabel>
                     <Input
                       {...field}
                       id={field.name}
                       autoComplete="name"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_NAME}
+                      placeholder={AUTH_LABELS.namePlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.NAME_DESCRIPTION}
+                      {AUTH_LABELS.nameDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -136,7 +136,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.EMAIL_LABEL}
+                      {AUTH_LABELS.emailLabel}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -144,12 +144,12 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      placeholder={AUTH_LABELS.emailPlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.EMAIL_DESCRIPTION}
+                      {AUTH_LABELS.emailDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -163,19 +163,19 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                      {AUTH_LABELS.passwordLabel}
                     </FieldLabel>
                     <PasswordInput
                       {...field}
                       id={field.name}
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      placeholder={AUTH_LABELS.passwordPlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                      {AUTH_LABELS.passwordDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -187,13 +187,13 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 {isSuccess && <FormSuccess message={successMessage} />}
                 {isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={isPending}>
-                  {AUTH_UI_MESSAGES.SIGNUP_BUTTON}
+                  {AUTH_LABELS.signupButton}
                 </LoadingButton>
               </Field>
               {siteFeatures.socialAuth && (
                 <>
                   <FieldSeparator>
-                    {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
+                    {AUTH_LABELS.orContinueWith}
                   </FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders />
@@ -201,9 +201,9 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 </>
               )}
               <FieldDescription className="text-center">
-                {AUTH_UI_MESSAGES.LOGIN_CTA_TEXT}{' '}
+                {AUTH_LABELS.loginCtaText}{' '}
                 <Link href={ROUTES.AUTH.LOGIN}>
-                  {AUTH_UI_MESSAGES.LOGIN_CTA_LINK}
+                  {AUTH_LABELS.loginCtaLink}
                 </Link>
               </FieldDescription>
             </FieldGroup>
@@ -226,3 +226,4 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 };
 
 export { SignupForm };
+

@@ -37,11 +37,11 @@ import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 
-import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import {
-  AUTH_ERROR_MESSAGES,
-  AUTH_UI_MESSAGES,
-} from '@/features/auth/lib/messages';
+  AUTH_CODES,
+  AUTH_ERRORS,
+  AUTH_LABELS,
+} from '@/features/auth/lib/strings';
 
 import { loginUser } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
@@ -52,12 +52,12 @@ const useLoginForm = () => {
 
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
-      ? AUTH_ERROR_MESSAGES.OAUTH_ACCOUNT_NOT_LINKED
+      ? AUTH_ERRORS.oauthNotLinked
       : '';
 
   const isVerifySuccess = searchParams.get('verified') === '1';
   const verifySuccessMessage = isVerifySuccess
-    ? AUTH_UI_MESSAGES.EMAIL_VERIFIED
+    ? AUTH_LABELS.verificationSuccessSubtitle
     : undefined;
 
   const verifyError = searchParams.get('verify_error');
@@ -65,13 +65,13 @@ const useLoginForm = () => {
     if (!verifyError) return '';
 
     switch (verifyError) {
-      case AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND:
-        return AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND;
-      case AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED:
-        return AUTH_ERROR_MESSAGES.TOKEN_EXPIRED;
+      case AUTH_CODES.tokenInvalid:
+        return AUTH_ERRORS.tokenInvalid;
+      case AUTH_CODES.tokenExpired:
+        return AUTH_ERRORS.tokenExpired;
       default:
         if (verifyError.startsWith('AUTH_')) {
-          return AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR;
+          return AUTH_ERRORS.verificationFailed;
         }
         return '';
     }
@@ -140,11 +140,9 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">
-                  {AUTH_UI_MESSAGES.LOGIN_TITLE}
-                </h1>
+                <h1 className="text-2xl font-bold">{AUTH_LABELS.loginTitle}</h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_UI_MESSAGES.LOGIN_SUBTITLE}
+                  {AUTH_LABELS.loginSubtitle}
                 </p>
               </div>
 
@@ -154,7 +152,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_UI_MESSAGES.EMAIL_LABEL}
+                      {AUTH_LABELS.emailLabel}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -162,12 +160,12 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_EMAIL}
+                      placeholder={AUTH_LABELS.emailPlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.EMAIL_DESCRIPTION}
+                      {AUTH_LABELS.emailDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -183,13 +181,13 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                   <Field data-invalid={fieldState.invalid}>
                     <div className="flex items-center">
                       <FieldLabel htmlFor={field.name}>
-                        {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                        {AUTH_LABELS.passwordLabel}
                       </FieldLabel>
                       <Link
                         href={ROUTES.AUTH.FORGOT_PASSWORD}
                         className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
                       >
-                        {AUTH_UI_MESSAGES.FORGOT_PASSWORD}
+                        {AUTH_LABELS.forgotPasswordLink}
                       </Link>
                     </div>
                     <PasswordInput
@@ -197,12 +195,12 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       id={field.name}
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      placeholder={AUTH_LABELS.passwordPlaceholder}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                      {AUTH_LABELS.passwordDescription}
                     </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -215,15 +213,13 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 {isSuccess && <FormSuccess message={successMessage} />}
                 {isError && <FormError message={errorMessage} />}
                 <LoadingButton type="submit" loading={isPending}>
-                  {AUTH_UI_MESSAGES.LOGIN_BUTTON}
+                  {AUTH_LABELS.loginButton}
                 </LoadingButton>
               </Field>
 
               {siteFeatures.socialAuth && (
                 <>
-                  <FieldSeparator>
-                    {AUTH_UI_MESSAGES.OR_CONTINUE_WITH}
-                  </FieldSeparator>
+                  <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders />
                   </Field>
@@ -231,9 +227,9 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               )}
 
               <FieldDescription className="text-center">
-                {AUTH_UI_MESSAGES.SIGNUP_CTA_TEXT}{' '}
+                {AUTH_LABELS.signupCtaText}{' '}
                 <Link href={ROUTES.AUTH.SIGN_UP}>
-                  {AUTH_UI_MESSAGES.SIGNUP_CTA_LINK}
+                  {AUTH_LABELS.signupCtaLink}
                 </Link>
               </FieldDescription>
             </FieldGroup>

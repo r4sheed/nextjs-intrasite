@@ -3,7 +3,7 @@ import { type Response, response } from '@/lib/response';
 
 import { getUserByEmail } from '@/features/auth/data/user';
 import { sendResetPasswordEmail } from '@/features/auth/lib/mail';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generatePasswordResetToken } from '@/features/auth/lib/tokens';
 
 import { type ResetPasswordData } from '@/features/auth/actions';
@@ -46,7 +46,7 @@ export const resetPassword = async (
   if (!user) {
     return response.success({
       data: {},
-      message: { key: AUTH_UI_MESSAGES.RESET_EMAIL_SENT },
+      message: { key: AUTH_SUCCESS.passwordResetSent },
     });
   }
 
@@ -59,7 +59,7 @@ export const resetPassword = async (
 
     return response.success({
       data: {},
-      message: { key: AUTH_UI_MESSAGES.RESET_EMAIL_SENT },
+      message: { key: AUTH_SUCCESS.passwordResetSent },
     });
   } catch (error) {
     // TODO: Log the error properly using a centralized logger
@@ -69,3 +69,5 @@ export const resetPassword = async (
     return response.failure(internalServerError());
   }
 };
+
+

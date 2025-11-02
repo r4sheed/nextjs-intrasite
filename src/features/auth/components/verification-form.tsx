@@ -14,13 +14,11 @@ import { execute } from '@/hooks/use-action';
 import { AuthState } from '@/features/auth/components/auth-state';
 import { LoadState } from '@/features/auth/components/load-state';
 
-import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_CODES, AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { verifyEmail } from '@/features/auth/actions';
 
-AUTH_ERROR_CODES;
 export const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,7 +35,7 @@ export const EmailVerificationForm = () => {
   useEffect(() => {
     if (!token) {
       router.replace(
-        `${ROUTES.AUTH.LOGIN}?&verify_error=${AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND}`
+        `${ROUTES.AUTH.LOGIN}?&verify_error=${AUTH_CODES.tokenInvalid}`
       );
       return;
     }
@@ -68,16 +66,16 @@ export const EmailVerificationForm = () => {
   if (mutation.isSuccess) {
     return (
       <AuthState
-        title={AUTH_UI_MESSAGES.VERIFICATION_SUCCESS_TITLE}
-        message={successMessage || AUTH_UI_MESSAGES.EMAIL_VERIFIED}
+        title={AUTH_LABELS.verificationSuccessTitle}
+        message={successMessage || AUTH_LABELS.verificationSuccessSubtitle}
       />
     );
   }
 
   return (
     <LoadState
-      title={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_TITLE}
-      description={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_DESCRIPTION}
+      title={AUTH_LABELS.verificationProcessingTitle}
+      description={AUTH_LABELS.verificationProcessingSubtitle}
     />
   );
 };

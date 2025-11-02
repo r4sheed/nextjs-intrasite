@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { invalidCredentials } from '@/features/auth/lib/errors';
+import { AUTH_CODES } from '@/features/auth/lib/strings';
 
 import { loginUser as loginUserAction } from '@/features/auth/actions';
 import { loginUser } from '@/features/auth/services';
@@ -43,7 +44,7 @@ describe('loginUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       expect(response.details).toBeDefined();
     }
   });
@@ -56,7 +57,7 @@ describe('loginUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       expect(response.details).toBeDefined();
     }
   });
@@ -72,7 +73,7 @@ describe('loginUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_INVALID_CREDENTIALS');
+      expect(response.code).toBe(AUTH_CODES.invalidCredentials);
     }
   });
 });

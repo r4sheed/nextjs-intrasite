@@ -1,16 +1,17 @@
 import { z } from 'zod';
 
-import { AUTH_ERROR_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 export const newPasswordSchema = z.object({
   token: z
-    .string({ message: AUTH_ERROR_MESSAGES.INVALID_FIELDS })
-    .min(1, { message: AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND }),
+    .string({ message: AUTH_ERRORS.invalidFields })
+    .min(1, { message: AUTH_ERRORS.tokenInvalid }),
 
   password: z
-    .string({ message: AUTH_ERROR_MESSAGES.INVALID_FIELDS })
-    .min(1, { message: AUTH_ERROR_MESSAGES.PASSWORD_REQUIRED })
-    .min(8, { message: AUTH_ERROR_MESSAGES.PASSWORD_TOO_SHORT }),
+    .string({ message: AUTH_ERRORS.invalidFields })
+    .min(1, { message: AUTH_ERRORS.passwordRequired })
+    .min(8, { message: AUTH_ERRORS.passwordTooShort }),
 });
 
 export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
+

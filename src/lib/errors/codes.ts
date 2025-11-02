@@ -1,14 +1,20 @@
 /**
- * Centralized error code constants used across the app
+ * Core error codes for application-wide errors
+ * Format: camelCase for URL-friendly usage
  */
-export const ERROR_CODES = {
-  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  FORBIDDEN: 'FORBIDDEN',
-  NOT_FOUND: 'NOT_FOUND',
-  DATABASE_ERROR: 'DATABASE_ERROR',
-  UNCAUGHT_EXCEPTION: 'UNCAUGHT_EXCEPTION',
+export const CORE_CODES = {
+  internalServerError: 'internalServerError',
+  validationFailed: 'validationFailed',
+  unauthorized: 'unauthorized',
+  forbidden: 'forbidden',
+  notFound: 'notFound',
+  databaseError: 'databaseError',
+  uncaughtException: 'uncaughtException',
 } as const;
 
-export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+export type CoreCode = (typeof CORE_CODES)[keyof typeof CORE_CODES];
+
+/**
+ * @deprecated Use CORE_CODES instead
+ */
+export const ERROR_CODES = CORE_CODES;

@@ -6,6 +6,7 @@ import {
   emailAlreadyExists,
   registrationFailed,
 } from '@/features/auth/lib/errors';
+import { AUTH_CODES } from '@/features/auth/lib/strings';
 
 import { registerUser as registerUserAction } from '@/features/auth/actions';
 import { registerUser } from '@/features/auth/services';
@@ -48,7 +49,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       expect(response.details).toBeDefined();
     }
   });
@@ -62,7 +63,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_INVALID_FIELDS');
+      expect(response.code).toBe(AUTH_CODES.invalidFields);
       expect(response.details).toBeDefined();
     }
   });
@@ -79,7 +80,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_EMAIL_ALREADY_EXISTS');
+      expect(response.code).toBe(AUTH_CODES.emailExists);
     }
   });
 
@@ -95,7 +96,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_REGISTRATION_FAILED');
+      expect(response.code).toBe(AUTH_CODES.registrationFailed);
     }
   });
 });

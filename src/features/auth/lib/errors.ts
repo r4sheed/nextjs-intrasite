@@ -1,13 +1,13 @@
 import { type AuthError } from 'next-auth';
 
-import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
-import { AUTH_ERROR_MESSAGES } from '@/features/auth/lib/messages';
 import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
+import { AUTH_CODES, AUTH_ERRORS } from './strings';
+
 /**
  * --- AUTHENTICATION ERROR HELPERS ---
- * * These functional helpers create feature-specific AppError instances for authentication flows.
+ * These functional helpers create feature-specific AppError instances for authentication flows.
  * They should be imported and used directly within auth-related Server Actions or Route Handlers.
  */
 
@@ -19,8 +19,8 @@ import { HTTP_STATUS } from '@/lib/http-status';
  */
 export const invalidFields = (details: unknown) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_INVALID_FIELDS,
-    message: { key: AUTH_ERROR_MESSAGES.INVALID_FIELDS },
+    code: AUTH_CODES.invalidFields,
+    message: { key: AUTH_ERRORS.invalidFields },
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
     details: details,
   });
@@ -32,8 +32,8 @@ export const invalidFields = (details: unknown) =>
  */
 export const invalidCredentials = () =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_INVALID_CREDENTIALS,
-    message: { key: AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS },
+    code: AUTH_CODES.invalidCredentials,
+    message: { key: AUTH_ERRORS.invalidCredentials },
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
   });
 
@@ -45,9 +45,9 @@ export const invalidCredentials = () =>
  */
 export const userNotFound = (email: string) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_USER_NOT_FOUND,
+    code: AUTH_CODES.userNotFound,
     message: {
-      key: AUTH_ERROR_MESSAGES.USER_NOT_FOUND,
+      key: AUTH_ERRORS.userNotFound,
       params: { email },
     },
     httpStatus: HTTP_STATUS.NOT_FOUND,
@@ -61,8 +61,8 @@ export const userNotFound = (email: string) =>
  */
 export const emailAlreadyExists = () =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_EMAIL_ALREADY_EXISTS,
-    message: { key: AUTH_ERROR_MESSAGES.EMAIL_ALREADY_EXISTS },
+    code: AUTH_CODES.emailExists,
+    message: { key: AUTH_ERRORS.emailExists },
     httpStatus: HTTP_STATUS.CONFLICT,
   });
 
@@ -73,8 +73,8 @@ export const emailAlreadyExists = () =>
  */
 export const registrationFailed = (error: unknown) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_REGISTRATION_FAILED,
-    message: { key: AUTH_ERROR_MESSAGES.REGISTRATION_FAILED },
+    code: AUTH_CODES.registrationFailed,
+    message: { key: AUTH_ERRORS.registrationFailed },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details: error,
   });
@@ -86,8 +86,8 @@ export const registrationFailed = (error: unknown) =>
  */
 export const callbackError = (error: AuthError) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_CALLBACK_ERROR,
-    message: { key: AUTH_ERROR_MESSAGES.CALLBACK_ERROR },
+    code: AUTH_CODES.callbackError,
+    message: { key: AUTH_ERRORS.callbackError },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details: error,
   });
@@ -99,8 +99,8 @@ export const callbackError = (error: AuthError) =>
  */
 export const emailVerificationRequired = () =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_EMAIL_VERIFICATION_REQUIRED,
-    message: { key: AUTH_ERROR_MESSAGES.EMAIL_VERIFICATION_REQUIRED },
+    code: AUTH_CODES.verificationRequired,
+    message: { key: AUTH_ERRORS.verificationRequired },
     httpStatus: HTTP_STATUS.UNAUTHORIZED,
   });
 
@@ -111,8 +111,8 @@ export const emailVerificationRequired = () =>
  */
 export const tokenNotFound = (tokenId?: string) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_TOKEN_NOT_FOUND,
-    message: { key: AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND },
+    code: AUTH_CODES.tokenInvalid,
+    message: { key: AUTH_ERRORS.tokenInvalid },
     httpStatus: HTTP_STATUS.NOT_FOUND,
     details: tokenId ? { tokenId } : undefined,
   });
@@ -124,26 +124,8 @@ export const tokenNotFound = (tokenId?: string) =>
  */
 export const tokenExpired = (tokenId?: string) =>
   new AppError({
-    code: AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED,
-    message: { key: AUTH_ERROR_MESSAGES.TOKEN_EXPIRED },
+    code: AUTH_CODES.tokenExpired,
+    message: { key: AUTH_ERRORS.tokenExpired },
     httpStatus: HTTP_STATUS.GONE,
     details: tokenId ? { tokenId } : undefined,
   });
-
-/**
- * Convenience object containing all auth error factory functions
- * @example
- * import { errors } from '@/features/auth/lib/errors';
- * throw errors.invalidCredentials();
- */
-export const errors = {
-  invalidFields,
-  invalidCredentials,
-  userNotFound,
-  emailAlreadyExists,
-  registrationFailed,
-  callbackError,
-  emailVerificationRequired,
-  tokenNotFound,
-  tokenExpired,
-};

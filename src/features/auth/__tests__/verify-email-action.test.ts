@@ -7,6 +7,7 @@ import {
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
+import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
 import { verifyEmail as verifyEmailAction } from '@/features/auth/actions';
 import { verifyEmail } from '@/features/auth/services';
@@ -24,7 +25,7 @@ describe('verifyEmail action', () => {
   it('should return success for valid token', async () => {
     const mockResponse = responseFactory.success({
       data: {},
-      message: { key: 'auth.success.email_verified' },
+      message: { key: AUTH_SUCCESS.emailVerified },
     });
     vi.mocked(verifyEmail).mockResolvedValue(mockResponse);
 
@@ -32,7 +33,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
-      expect(response.message?.key).toBe('auth.success.email_verified');
+      expect(response.message?.key).toBe(AUTH_SUCCESS.emailVerified);
     }
     expect(verifyEmail).toHaveBeenCalledWith('valid-token-123');
   });
@@ -42,7 +43,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_TOKEN_NOT_FOUND');
+      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
     }
     // Service should not be called for empty token
     expect(verifyEmail).not.toHaveBeenCalled();
@@ -53,7 +54,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_TOKEN_NOT_FOUND');
+      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
     }
     expect(verifyEmail).not.toHaveBeenCalled();
   });
@@ -66,7 +67,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_TOKEN_NOT_FOUND');
+      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
     }
   });
 
@@ -78,7 +79,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_TOKEN_EXPIRED');
+      expect(response.code).toBe(AUTH_CODES.tokenExpired);
     }
   });
 
@@ -92,7 +93,7 @@ describe('verifyEmail action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('AUTH_USER_NOT_FOUND');
+      expect(response.code).toBe(AUTH_CODES.userNotFound);
     }
   });
 });

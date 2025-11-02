@@ -13,7 +13,7 @@ import {
   invalidFields,
 } from '@/features/auth/lib/errors';
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
-import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 
 import { type LoginUserData } from '@/features/auth/actions';
@@ -75,7 +75,7 @@ export const loginUser = async (
       return response.success({
         data: { userId: verifiedUser.id },
         message: {
-          key: AUTH_UI_MESSAGES.EMAIL_VERIFICATION_SENT,
+          key: AUTH_SUCCESS.verificationSent,
         },
       });
     }
@@ -116,3 +116,5 @@ export const loginUser = async (
     return response.failure(internalServerError());
   }
 };
+
+
