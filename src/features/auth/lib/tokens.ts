@@ -4,8 +4,7 @@ import { db } from '@/lib/prisma';
 
 import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset-token';
 import { getVerificationTokenByEmail } from '@/features/auth/data/verification-token';
-
-const TOKEN_LIFETIME_MS = 60 * 60 * 1000; // 60 minutes
+import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/constants';
 
 /**
  * Generates a verification token. Deletes the old one if it exists.

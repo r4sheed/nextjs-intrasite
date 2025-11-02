@@ -6,6 +6,7 @@ import { type Response, response } from '@/lib/response';
 
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
+import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
 import {
   emailAlreadyExists,
   invalidFields,
@@ -59,7 +60,7 @@ export const registerUser = async (
   }
 
   // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
   // Create user
   try {

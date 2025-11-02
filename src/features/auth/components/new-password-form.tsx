@@ -32,6 +32,7 @@ import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 
+import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
@@ -75,7 +76,7 @@ const useNewPasswordForm = () => {
     onSuccess: () => {
       const timer = setTimeout(() => {
         router.replace(ROUTES.AUTH.LOGIN);
-      }, 2500);
+      }, REDIRECT_TIMEOUT_MS);
       return () => clearTimeout(timer);
     },
   });

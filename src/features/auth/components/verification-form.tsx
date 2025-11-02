@@ -15,6 +15,7 @@ import { AuthState } from '@/features/auth/components/auth-state';
 import { LoadState } from '@/features/auth/components/load-state';
 
 import { AUTH_ERROR_CODES } from '@/features/auth/lib/codes';
+import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
 import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 
 import { verifyEmail } from '@/features/auth/actions';
@@ -50,7 +51,7 @@ export const EmailVerificationForm = () => {
     if (mutation.isSuccess) {
       const timer = setTimeout(() => {
         router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
-      }, 2500);
+      }, REDIRECT_TIMEOUT_MS);
       return () => clearTimeout(timer);
     }
 

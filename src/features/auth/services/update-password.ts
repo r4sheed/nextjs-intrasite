@@ -6,6 +6,7 @@ import { type Response, response } from '@/lib/response';
 
 import { getPasswordResetTokenByToken } from '@/features/auth/data/reset-token';
 import { getUserByEmail } from '@/features/auth/data/user';
+import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
 import {
   tokenExpired,
   tokenNotFound,
@@ -22,7 +23,7 @@ import { type NewPasswordInput } from '@/features/auth/schemas';
  * This service handles the complete password reset flow including token validation,
  * expiration checks, user lookup, password hashing, and executes an atomic database
  * transaction to update the password and delete the consumed token. Uses bcrypt
- * with salt rounds of 10 for secure password hashing.
+ * with configured BCRYPT_SALT_ROUNDS for secure password hashing.
  *
  * @param values - Validated input containing the reset token and new password.
  * @returns Response indicating success with confirmation message, or error details.
@@ -62,8 +63,8 @@ export const updatePassword = async (
     return response.failure(userNotFound(email));
   }
 
-  // Hash the new password with a salt round of 10
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Hash the new password with configured salt rounds
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
   // Database Transaction: Update password and delete the used token atomically
   try {
