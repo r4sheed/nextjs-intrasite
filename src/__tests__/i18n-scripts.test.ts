@@ -143,7 +143,7 @@ describe('i18n Scripts', () => {
   });
 
   describe('parseKey utility', () => {
-    it('should parse valid i18n key', () => {
+    it('should parse valid nested i18n key', () => {
       interface ParsedKey {
         domain: string;
         category: string;
@@ -153,6 +153,29 @@ describe('i18n Scripts', () => {
 
       function parseKey(key: string): ParsedKey {
         const parts = key.split('.');
+
+        // Special handling for 'errors' domain (flat structure)
+        if (parts[0] === 'errors') {
+          if (parts.length < 2) {
+            throw new Error('Invalid key format for errors domain');
+          }
+
+          const domain = parts[0];
+          const keyName = parts.slice(1).join('.');
+
+          if (!domain) {
+            throw new Error('Domain is required');
+          }
+
+          return {
+            domain,
+            category: 'errors',
+            key: keyName,
+            fullPath: parts,
+          };
+        }
+
+        // Standard nested structure
         if (parts.length < 3) {
           throw new Error('Invalid key format');
         }
@@ -180,6 +203,67 @@ describe('i18n Scripts', () => {
         category: 'errors',
         key: 'invalid-email',
         fullPath: ['auth', 'errors', 'invalid-email'],
+      });
+    });
+
+    it('should parse flat errors domain key', () => {
+      interface ParsedKey {
+        domain: string;
+        category: string;
+        key: string;
+        fullPath: string[];
+      }
+
+      function parseKey(key: string): ParsedKey {
+        const parts = key.split('.');
+
+        if (parts[0] === 'errors') {
+          if (parts.length < 2) {
+            throw new Error('Invalid key format for errors domain');
+          }
+
+          const domain = parts[0];
+          const keyName = parts.slice(1).join('.');
+
+          if (!domain) {
+            throw new Error('Domain is required');
+          }
+
+          return {
+            domain,
+            category: 'errors',
+            key: keyName,
+            fullPath: parts,
+          };
+        }
+
+        if (parts.length < 3) {
+          throw new Error('Invalid key format');
+        }
+
+        const domain = parts[0];
+        const category = parts[1];
+        const rest = parts.slice(2);
+
+        if (!domain || !category) {
+          throw new Error('Domain and category are required');
+        }
+
+        return {
+          domain,
+          category,
+          key: rest.join('.'),
+          fullPath: parts,
+        };
+      }
+
+      const parsed = parseKey('errors.not-found');
+
+      expect(parsed).toEqual({
+        domain: 'errors',
+        category: 'errors',
+        key: 'not-found',
+        fullPath: ['errors', 'not-found'],
       });
     });
 

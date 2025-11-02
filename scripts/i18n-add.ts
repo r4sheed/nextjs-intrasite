@@ -61,9 +61,35 @@ interface ParsedKey {
 /**
  * Parse i18n key into components
  * Example: "auth.errors.new-error" → { domain: "auth", category: "errors", key: "new-error" }
+ * Special case: "errors.not-found" → { domain: "errors", category: "errors", key: "not-found" }
  */
 function parseKey(key: string): ParsedKey {
   const parts = key.split('.');
+
+  // Special handling for 'errors' domain (flat structure)
+  if (parts[0] === 'errors') {
+    if (parts.length < 2) {
+      throw new Error(
+        `Invalid key format for errors domain. Expected: errors.key (e.g., errors.not-found)`
+      );
+    }
+
+    const domain = parts[0];
+    const keyName = parts.slice(1).join('.');
+
+    if (!domain) {
+      throw new Error(`Domain is required.`);
+    }
+
+    return {
+      domain,
+      category: 'errors', // Use 'errors' as pseudo-category for flat structure
+      key: keyName,
+      fullPath: parts,
+    };
+  }
+
+  // Standard nested structure (auth, bookmarks, etc.)
   if (parts.length < 3) {
     throw new Error(
       `Invalid key format. Expected: domain.category.key (e.g., auth.errors.invalid-email)`
@@ -97,8 +123,14 @@ function kebabToCamel(str: string): string {
 /**
  * Convert domain.category to constant name
  * Example: "auth.errors" → "AUTH_ERRORS"
+ * Special: "errors.errors" → "CORE_ERRORS" (flat errors domain)
  */
 function getConstantName(domain: string, category: string): string {
+  // Special handling for 'errors' domain
+  if (domain === 'errors') {
+    return 'CORE_ERRORS';
+  }
+
   const categoryName = CATEGORY_MAPPING[category] || category.toUpperCase();
   return `${domain.toUpperCase()}_${categoryName}`;
 }
@@ -212,25 +244,36 @@ export const ${constantName} = {
   if (!propsContent) {
     throw new Error(`Could not parse constant ${constantName} in ${filePath}`);
   }
-  const props = propsContent
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith('//'));
+
+  // Extract property definitions (key: value pairs)
+  const existingProps: Array<{ key: string; value: string }> = [];
+  const lines = propsContent.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('//')) continue;
+
+    const match = trimmed.match(/^(\w+):\s*'([^']+)',?$/);
+    if (match) {
+      const [, key, value] = match;
+      if (key && value) {
+        existingProps.push({ key, value });
+      }
+    }
+  }
 
   // Add new property
-  const newProp = `  ${propertyName}: '${fullKey}',`;
-  props.push(newProp);
+  existingProps.push({ key: propertyName, value: fullKey });
 
-  // Sort properties alphabetically
-  const sortedProps = props.sort((a, b) => {
-    const keyA = a.split(':')[0]?.trim() || '';
-    const keyB = b.split(':')[0]?.trim() || '';
-    return keyA.localeCompare(keyB);
-  });
+  // Sort properties alphabetically by key
+  const sortedProps = existingProps.sort((a, b) => a.key.localeCompare(b.key));
 
-  // Reconstruct constant
+  // Reconstruct constant with proper formatting
+  const propsLines = sortedProps.map(
+    ({ key, value }) => `  ${key}: '${value}',`
+  );
   const newContent = `export const ${constantName} = {
-${sortedProps.join('\n')}
+${propsLines.join('\n')}
 } as const;`;
 
   // Replace in content

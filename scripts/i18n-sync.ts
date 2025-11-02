@@ -176,6 +176,61 @@ function kebabToCamel(str: string): string {
 }
 
 /**
+ * Sync flat constants (for 'errors' domain)
+ */
+async function syncFlatConstants(
+  constantsPath: string,
+  localeKeys: Array<{ key: string; value: any }>,
+  domain: string,
+  constantsContent: string
+): Promise<void> {
+  const constantName = `CORE_${domain.toUpperCase()}`;
+
+  // Extract keys (remove domain prefix)
+  const keys = localeKeys
+    .map(({ key }) => {
+      const parts = key.split('.');
+      if (parts.length < 2) return null;
+      const keyName = parts.slice(1).join('-'); // errors.not-found → not-found
+      return { key: keyName, value: key };
+    })
+    .filter((item): item is { key: string; value: string } => item !== null);
+
+  // Check if constant exists
+  const regex = new RegExp(
+    `export const ${constantName} = \\{([\\s\\S]*?)\\} as const;`,
+    'm'
+  );
+  const match = constantsContent.match(regex);
+
+  if (!match) {
+    console.log(`   ⚠️  Constant ${constantName} not found, skipping sync`);
+    return;
+  }
+
+  // Update existing constant
+  const props = keys
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .map(({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`)
+    .join('\n');
+
+  const newConstant = `export const ${constantName} = {
+${props}
+} as const;`;
+
+  const oldConstant = match[0];
+  if (oldConstant && oldConstant !== newConstant) {
+    const updatedContent = constantsContent.replace(regex, newConstant);
+    await writeFile(constantsPath, updatedContent, 'utf-8');
+    actions.push({
+      type: 'update',
+      file: constantsPath,
+      key: constantName,
+    });
+  }
+}
+
+/**
  * Extract last part of key (after last dot)
  */
 function getKeyName(fullKey: string): string {
@@ -202,12 +257,23 @@ async function syncConstants(
   const localeJson = JSON.parse(localeContent);
   const localeKeys = getAllKeysWithValues(localeJson);
 
-  // Group keys by category (errors, success, labels, etc.)
+  // Special handling for 'errors' domain (flat structure)
+  if (domain === 'errors') {
+    await syncFlatConstants(
+      constantsPath,
+      localeKeys,
+      domain,
+      constantsContent
+    );
+    return;
+  }
+
+  // Group keys by category (errors, success, labels, etc.) for nested structures
   const categorized = new Map<string, Array<{ key: string; value: string }>>();
 
   for (const { key } of localeKeys) {
     const parts = key.split('.');
-    if (parts.length < 2) continue;
+    if (parts.length < 3) continue; // Need domain.category.key
 
     const category = parts[1]; // e.g., "errors", "success", "labels"
     if (!category) continue;
