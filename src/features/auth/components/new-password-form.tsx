@@ -1,55 +1,57 @@
 'use client';
 
+import type React from 'react';
 import { useEffect } from 'react';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { ROUTES } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
 
-import { FieldGroup } from '@/components/ui/field';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 
-import { FormError } from '@/components/form-error';
-import { FormSuccess } from '@/components/form-success';
-import { LinkUnderline } from '@/components/link-underline';
 import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
 
-import { newPassword, type NewPasswordData } from '@/features/auth/actions';
-import { AuthState } from '@/features/auth/components/auth-state';
-import { Header } from '@/features/auth/components/header';
-import { LoadState } from '@/features/auth/components/load-state';
+import { AuthFooter } from '@/features/auth/components/auth-footer';
+import { PasswordInput } from '@/features/auth/components/password-input';
+
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_UI_MESSAGES,
 } from '@/features/auth/lib/messages';
+
+import { newPassword } from '@/features/auth/actions';
 import {
   type NewPasswordInput,
   newPasswordSchema,
 } from '@/features/auth/schemas';
 
-export const NewPasswordForm = () => {
+const useNewPasswordForm = () => {
+  const router = useRouter();
+
   const form = useForm<NewPasswordInput>({
     resolver: zodResolver(newPasswordSchema),
+    mode: 'onTouched',
     defaultValues: {
-      password: '',
       token: '',
+      password: '',
     },
   });
 
@@ -58,11 +60,11 @@ export const NewPasswordForm = () => {
 
   useEffect(() => {
     if (token) {
-      // Use setValue to programmatically set the form value.
-      // This makes the token available in the form's state and validation.
       form.setValue('token', token);
     }
-  }, [searchParams, token]);
+  }, [searchParams, form.setValue, token]);
+
+  const isTokenMissing = !token;
 
   const mutation = useMutation<
     ActionSuccess<typeof newPassword>,
@@ -70,81 +72,132 @@ export const NewPasswordForm = () => {
     NewPasswordInput
   >({
     mutationFn: data => execute(newPassword, data),
+    onSuccess: () => {
+      const timer = setTimeout(() => {
+        router.replace(ROUTES.AUTH.LOGIN);
+      }, 2500);
+      return () => clearTimeout(timer);
+    },
   });
 
-  const onSubmit = (values: NewPasswordInput) => {
-    // Prevent multiple submissions while pending
-    if (mutation.isPending) return;
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = isTokenMissing
+    ? AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND
+    : mutation.error?.message?.key || '';
 
+  const onSubmit = (values: NewPasswordInput) => {
+    if (mutation.isPending) return;
     mutation.mutate(values);
   };
 
-  const successMessage = mutation.data?.message?.key;
-  const errorMessage = mutation.error?.message?.key;
+  return {
+    form,
+    onSubmit,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError || isTokenMissing,
+    successMessage,
+    errorMessage,
+  };
+};
 
-  if (!token) {
-    return (
-      <AuthState
-        title={AUTH_ERROR_MESSAGES.UNEXPECTED_ERROR}
-        message={AUTH_ERROR_MESSAGES.TOKEN_NOT_FOUND}
-        variant="destructive"
-      />
-    );
-  }
-
-  if (mutation.isPending) {
-    // TODO: Add proper title and description
-    return (
-      <LoadState
-        title={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_TITLE}
-        description={AUTH_UI_MESSAGES.VERIFICATION_PROCESSING_DESCRIPTION}
-      />
-    );
-  }
+const NewPasswordForm = ({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => {
+  const {
+    form,
+    onSubmit,
+    isPending,
+    isSuccess,
+    isError,
+    successMessage,
+    errorMessage,
+  } = useNewPasswordForm();
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
-        <FieldGroup>
-          <Header
-            title={AUTH_UI_MESSAGES.NEW_PASSWORD_TITLE}
-            description={AUTH_UI_MESSAGES.NEW_PASSWORD_SUBTITLE}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{AUTH_UI_MESSAGES.PASSWORD_LABEL}</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
-                    autoComplete="new-password"
-                    disabled={mutation.isPending}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <>
-            <FormSuccess message={successMessage} />
-            <FormError message={errorMessage} />
-            <LoadingButton type="submit" loading={mutation.isPending}>
-              {AUTH_UI_MESSAGES.NEW_PASSWORD_BUTTON}
-            </LoadingButton>
-          </>
-          <FormDescription className="text-center">
-            <LinkUnderline>
-              <Link href={ROUTES.AUTH.LOGIN}>
-                {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
-              </Link>
-            </LinkUnderline>
-          </FormDescription>
-        </FieldGroup>
-      </form>
-    </Form>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <Card className="overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form
+            id="form-rhf-new-password"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="p-6 md:p-8"
+          >
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">
+                  {AUTH_UI_MESSAGES.NEW_PASSWORD_TITLE}
+                </h1>
+                <p className="text-muted-foreground text-balance">
+                  {AUTH_UI_MESSAGES.NEW_PASSWORD_SUBTITLE}
+                </p>
+              </div>
+
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {AUTH_UI_MESSAGES.PASSWORD_LABEL}
+                    </FieldLabel>
+                    <PasswordInput
+                      {...field}
+                      id={field.name}
+                      autoComplete="new-password"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_UI_MESSAGES.PLACEHOLDER_PASSWORD}
+                      disabled={isPending || isSuccess || isError}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_UI_MESSAGES.PASSWORD_DESCRIPTION}
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Field>
+                {isSuccess && <FormSuccess message={successMessage} />}
+                {isError && <FormError message={errorMessage} />}
+                <LoadingButton
+                  type="submit"
+                  loading={isPending}
+                  disabled={isSuccess || isError}
+                >
+                  {AUTH_UI_MESSAGES.NEW_PASSWORD_BUTTON}
+                </LoadingButton>
+              </Field>
+
+              <FieldDescription className="text-center">
+                {AUTH_UI_MESSAGES.REMEMBER_PASSWORD_CTA}{' '}
+                <Link href={ROUTES.AUTH.LOGIN}>
+                  {AUTH_UI_MESSAGES.BACK_TO_LOGIN_BUTTON}
+                </Link>
+              </FieldDescription>
+            </FieldGroup>
+          </form>
+
+          <div className="bg-muted relative hidden md:block">
+            <Image
+              src="/assets/svg/forgot-password-pana.svg"
+              alt="Security"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              fill
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <FieldDescription className="px-6 text-center">
+        <AuthFooter />
+      </FieldDescription>
+    </div>
   );
 };
+
+export { NewPasswordForm };
