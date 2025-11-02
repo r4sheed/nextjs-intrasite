@@ -52,21 +52,21 @@ export const EmailVerificationForm = () => {
     }
   }, [token, mutation, router]);
 
-  // useEffect(() => {
-  //   if (mutation.isSuccess) {
-  //     const timer = setTimeout(() => {
-  //       router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
-  //     }, REDIRECT_TIMEOUT_MS);
-  //     return () => clearTimeout(timer);
-  //   }
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      const timer = setTimeout(() => {
+        router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
+      }, REDIRECT_TIMEOUT_MS);
+      return () => clearTimeout(timer);
+    }
 
-  //   if (mutation.isError) {
-  //     const code = mutation.error?.code;
-  //     router.replace(
-  //       `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
-  //     );
-  //   }
-  // }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
+    if (mutation.isError) {
+      const code = mutation.error?.code;
+      router.replace(
+        `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
+      );
+    }
+  }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
 
   const successMessage = mutation.data?.message?.key;
 
