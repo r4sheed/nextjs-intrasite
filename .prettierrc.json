@@ -14,22 +14,38 @@
   "importOrder": [
     "^react$",
     "^react-dom$",
+    "<SEPARATOR>",
 
     "^next(.*)$",
+    "<SEPARATOR>",
 
     "<THIRD_PARTY_MODULES>",
+    "<SEPARATOR>",
 
     "^@/types/(.*)$",
+    "<SEPARATOR>",
+
+    "^@/i18n/(.*)$",
     "^@/config/(.*)$",
     "^@/lib/(.*)$",
     "^@/hooks/(.*)$",
     "^@/contexts/(.*)$",
+    "<SEPARATOR>",
+
     "^@/components/ui/(.*)$",
     "^@/components/(.*)$",
+    "<SEPARATOR>",
+
     "^@/features/(.*)/components/(.*)$",
+    "^@/features/(.*)/(.*)/(.*)$",
+    "<SEPARATOR>",
+
     "^@/(.*)$",
+    "<SEPARATOR>",
 
     "^[./]",
+    "<SEPARATOR>",
+
     "^\\u0000"
   ],
   "importOrderSeparation": true,
