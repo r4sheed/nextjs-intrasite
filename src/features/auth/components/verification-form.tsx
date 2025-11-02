@@ -66,6 +66,8 @@ export const EmailVerificationForm = () => {
         `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
       );
     }
+
+    return undefined;
   }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
 
   const successMessage = mutation.data?.message?.key;
