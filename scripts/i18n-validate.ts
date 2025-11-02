@@ -91,16 +91,31 @@ async function compareLocaleFiles(
 
 /**
  * Extract constant values from TypeScript file
+ * Only extracts values from i18n constants (ERRORS, SUCCESS, LABELS, etc.)
+ * Ignores CODES constants (those are error codes, not i18n keys)
  */
 function extractConstantValues(content: string): string[] {
   const values: string[] = [];
-  const regex = /:\s*'([^']+)'/g;
+  
+  // Match i18n constants (exclude CODES constants)
+  // Pattern: export const {DOMAIN}_{CATEGORY} = { ... }
+  // where CATEGORY is not "CODES"
+  const constantRegex = /export const (?!.*_CODES)(\w+) = \{([^}]+)\} as const;/g;
   let match;
 
-  while ((match = regex.exec(content)) !== null) {
-    const value = match[1];
-    if (value) {
-      values.push(value);
+  while ((match = constantRegex.exec(content)) !== null) {
+    const constantBody = match[2];
+    if (!constantBody) continue;
+
+    // Extract values from the constant body
+    const valueRegex = /:\s*'([^']+)'/g;
+    let valueMatch;
+
+    while ((valueMatch = valueRegex.exec(constantBody)) !== null) {
+      const value = valueMatch[1];
+      if (value) {
+        values.push(value);
+      }
     }
   }
 
