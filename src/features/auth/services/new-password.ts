@@ -12,11 +12,10 @@ import {
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
+import { AUTH_UI_MESSAGES } from '@/features/auth/lib/messages';
 
 import { NewPasswordData } from '@/features/auth/actions';
 import { type NewPasswordInput } from '@/features/auth/schemas';
-
-import { AUTH_UI_MESSAGES } from '../lib/messages';
 
 /**
  * Handles setting a new password for a user after a successful password reset token validation.
