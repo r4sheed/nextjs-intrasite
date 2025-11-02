@@ -73,19 +73,15 @@ export const notFound = (resource: string) =>
 /**
  * 500 - Database error.
  * Should be used when catching low-level database exceptions (e.g., ORM errors).
- * @param operation The database operation that failed (e.g., 'insert', 'update').
- * @param identifier Identifier of the entity involved (e.g., 'user:123').
+ * @param details The original database error or additional context.
  * @returns AppError with status 500.
  */
-export const databaseError = (operation: string, identifier: string) =>
+export const databaseError = (details?: unknown) =>
   new AppError({
     code: ERROR_CODES.DATABASE_ERROR,
-    message: {
-      key: ERROR_MESSAGES.DATABASE_ERROR,
-      params: { operation, identifier },
-    },
+    message: { key: ERROR_MESSAGES.DATABASE_ERROR },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    details: { operation, identifier },
+    details,
   });
 
 /**

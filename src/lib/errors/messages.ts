@@ -7,5 +7,5 @@ export const ERROR_MESSAGES = {
   UNAUTHORIZED: 'errors.unauthorized', // You are not authorized to perform this action.
   FORBIDDEN: 'errors.forbidden', // Access forbidden.
   NOT_FOUND: 'errors.not_found', // {resource} could not be found.
-  DATABASE_ERROR: 'errors.database_error', // A database error occurred while performing {operation} on {identifier}.
+  DATABASE_ERROR: 'errors.database_error', // A database error occurred. Please try again later.
 } as const;

@@ -1,5 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { databaseError } from '@/lib/errors';
+
 import {
   getUser,
   getUserByEmail,
@@ -8,7 +10,6 @@ import {
   getUserByIdWithoutPassword,
   verifyUserCredentials,
 } from '@/features/auth/data/user';
-import { databaseError } from '@/lib/errors';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -71,13 +72,13 @@ describe('User Data Layer', () => {
       expect(response).toBeNull();
     });
 
-    it('should return error when database fails', async () => {
+    it('should return null when database fails', async () => {
       const dbError = new Error('Database connection failed');
       mockFindUnique.mockRejectedValue(dbError);
 
-      await expect(getUserById('user-123')).rejects.toEqual(
-        databaseError('getUserById', 'user-123')
-      );
+      const response = await getUserById('user-123');
+
+      expect(response).toBeNull();
     });
   });
 
@@ -329,16 +330,19 @@ describe('User Data Layer', () => {
       expect(user).toBeNull();
     });
 
-    it('should return error when database fails during user lookup', async () => {
+    it('should return null when database fails during user lookup', async () => {
       const dbError = new Error('Database connection failed');
       mockFindUnique.mockRejectedValue(dbError);
 
-      await expect(
-        verifyUserCredentials('test@example.com', 'password123')
-      ).rejects.toEqual(databaseError('getUserByEmail', 'test@example.com'));
+      const user = await verifyUserCredentials(
+        'test@example.com',
+        'password123'
+      );
+
+      expect(user).toBeNull();
     });
 
-    it('should return DATABASE_ERROR response for all user lookup functions when database fails', async () => {
+    it('should return null for all user lookup functions when database fails', async () => {
       // Arrange: Force database error for all operations
       const dbError = new Error('Simulated database error for testing');
       mockFindUnique.mockRejectedValue(dbError);
@@ -369,30 +373,16 @@ describe('User Data Layer', () => {
       ];
 
       for (const { name, fn } of functionsToTest) {
-        await expect(fn()).rejects.toEqual(
-          // Match the appropriate AppError for each operation by using the same
-          // operation/identifier mapping as the data layer.
-          name === 'getUserById'
-            ? databaseError('getUserById', 'test-user-id')
-            : name === 'getUserByEmail'
-              ? databaseError('getUserByEmail', 'test@example.com')
-              : name === 'getUserByIdWithoutPassword'
-                ? databaseError('getUserByIdWithoutPassword', 'test-user-id')
-                : name === 'getUserByEmailWithoutPassword'
-                  ? databaseError(
-                      'getUserByEmailWithoutPassword',
-                      'test@example.com'
-                    )
-                  : name === 'getUser (with ID)'
-                    ? databaseError('getUser', 'test-user-id')
-                    : databaseError('getUser', 'test@example.com')
-        );
+        const result = await fn();
+        expect(result).toBeNull();
       }
 
-      // Test verifyUserCredentials separately since it throws AppError
-      await expect(
-        verifyUserCredentials('test@example.com', 'password')
-      ).rejects.toEqual(databaseError('getUserByEmail', 'test@example.com'));
+      // Test verifyUserCredentials separately
+      const credentialsResult = await verifyUserCredentials(
+        'test@example.com',
+        'password'
+      );
+      expect(credentialsResult).toBeNull();
     });
   });
 });
