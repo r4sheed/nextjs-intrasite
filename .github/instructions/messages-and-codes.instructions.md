@@ -208,6 +208,46 @@ export const AUTH_LABELS = {
 
 ## Naming Conventions
 
+> **Important:** This section defines the canonical naming pattern for ALL error codes, messages, and i18n keys in the application. For general error handling patterns, see [error-handling-guidelines.instructions.md](error-handling-guidelines.instructions.md).
+
+### Why `camelCase` Properties (Not `SCREAMING_SNAKE_CASE`)?
+
+**TypeScript/JavaScript Best Practice:**
+
+```typescript
+// ✅ CORRECT - camelCase object properties
+export const CORE_ERRORS = {
+  notFound: 'errors.not-found',              // camelCase property
+  internalServerError: 'errors.internal-server-error',
+} as const;
+
+// ❌ WRONG - SCREAMING_SNAKE_CASE properties
+export const CORE_ERRORS = {
+  NOT_FOUND: 'errors.not-found',             // ❌ Requires bracket access
+  INTERNAL_SERVER_ERROR: 'errors.internal-server-error',
+} as const;
+```
+
+**Rationale:**
+
+1. **TypeScript Convention** - Object properties use `camelCase`, only primitive constants use `SCREAMING_SNAKE_CASE`
+2. **IntelliSense** - `CORE_ERRORS.not...` auto-completes better than `CORE_ERRORS.NOT...`
+3. **Consistency** - Matches React props, state, and all other JavaScript object properties
+4. **Readability** - Multi-word identifiers are easier to read: `internalServerError` vs `INTERNAL_SERVER_ERROR`
+
+**When to use `SCREAMING_SNAKE_CASE`:**
+
+```typescript
+// ✅ ONLY for primitive constants
+const MAX_RETRY_COUNT = 3;
+const API_TIMEOUT_MS = 5000;
+
+// ❌ NOT for object properties
+const CONFIG = {
+  MAX_RETRY_COUNT: 3,    // ❌ Should be maxRetryCount
+};
+```
+
 ### Error Codes (`*_CODES`)
 
 - **TypeScript Property:** `camelCase` (e.g., `invalidCredentials`)

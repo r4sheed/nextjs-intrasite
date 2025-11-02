@@ -24,6 +24,7 @@ This document establishes a **unified, type-safe error handling pattern** for la
 7. **Future-Proof**: Object-based constructors allow easy extension
 8. **Race Condition Free**: State updates ordered correctly (setStatus last)
 9. **Data Layer Never Throws**: Data access layer returns `null` on errors and logs them; service layer handles all error responses
+10. **Naming Conventions**: Follow [messages-and-codes.instructions.md](messages-and-codes.instructions.md) for error codes, messages, and i18n keys (camelCase properties, kebab-case values)
 
 ### Layer Responsibilities
 
@@ -408,12 +409,14 @@ export class BadAppError extends Error {
 
 ## 5. Error Definitions
 
+> **Note:** For detailed naming conventions for error codes, messages, and i18n keys (camelCase vs kebab-case, property naming, etc.), see [messages-and-codes.instructions.md](messages-and-codes.instructions.md).
+
 ### ✅ CORRECT: Centralized helpers + messages + codes with i18n
 
 The repository centralizes base error data and helpers across three files:
 
-- `src/lib/errors/codes.ts` — `ERROR_CODES` and `ErrorCode` type (string constants)
-- `src/lib/errors/messages.ts` — `ERROR_MESSAGES` (i18n keys)
+- `src/lib/errors/codes.ts` — `CORE_CODES` constants (camelCase properties, kebab-case values)
+- `src/lib/errors/messages.ts` — `CORE_ERRORS` (i18n keys with camelCase properties, kebab-case values)
 - `src/lib/errors/helpers.ts` — factory helpers that create `AppError` instances (e.g. `internalServerError`, `validationFailed`, `unauthorized`, `forbidden`, `notFound`, `databaseError`)
 
 Example (helpers usage):
@@ -424,20 +427,20 @@ Example (helpers usage):
 import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
-import { ERROR_CODES } from './codes';
-import { ERROR_MESSAGES } from './messages';
+import { CORE_CODES } from './codes';
+import { CORE_ERRORS } from './messages';
 
 export const internalServerError = () =>
   new AppError({
-    code: ERROR_CODES.INTERNAL_SERVER_ERROR,
-    message: { key: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
+    code: CORE_CODES.internalServerError,
+    message: { key: CORE_ERRORS.internalServerError },
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   });
 
 export const validationFailed = (details: unknown) =>
   new AppError({
-    code: ERROR_CODES.VALIDATION_FAILED,
-    message: { key: ERROR_MESSAGES.VALIDATION_FAILED },
+    code: CORE_CODES.validationFailed,
+    message: { key: CORE_ERRORS.validationFailed },
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
     details,
   });
