@@ -366,4 +366,5 @@ Tests cover:
 
 - [Error Handling Guidelines](../.github/instructions/error-handling-guidelines.instructions.md) - Complete error handling patterns
 - [Messages and Codes](../.github/instructions/messages-and-codes.instructions.md) - Naming conventions for error codes and i18n keys
-- [Feature Creation Guide](../.github/FEATURE_CREATION.md) - How to create new features with i18n support
+- [Feature Creation Guide](../.github/prompts/feature-creation.prompt.md) - How to create new features with i18n support
+- [i18n Management Prompt](../.github/prompts/i18n-management.prompt.md) - Quick reference for i18n workflows

@@ -78,6 +78,8 @@ import { createBookmark as createBookmarkService } from '@/features/bookmarks/se
 
 // actions/create-bookmark.ts
 
+// actions/create-bookmark.ts
+
 export type CreateBookmarkData = { id: string };
 
 export const createBookmark = async (
@@ -354,9 +356,10 @@ After generating a feature:
 
 ## Guidelines Reference
 
-- **Error Handling:** `.github/instructions/error-handling-guidelines.instructions.md`
-- **Naming:** `.github/instructions/naming-conventions.instructions.md`
-- **Messages & Codes:** `.github/instructions/messages-and-codes.instructions.md`
-- **Next.js Patterns:** `.github/instructions/nextjs.instructions.md`
-- **TypeScript:** `.github/instructions/typescript-5-es2022.instructions.md`
-- **Governance:** `.github/instructions/guidelines-governance.instructions.md`
+- **Error Handling:** `../.github/instructions/error-handling-guidelines.instructions.md`
+- **Naming:** `../.github/instructions/naming-conventions.instructions.md`
+- **Messages & Codes:** `../.github/instructions/messages-and-codes.instructions.md`
+- **Next.js Patterns:** `../.github/instructions/nextjs.instructions.md`
+- **TypeScript:** `../.github/instructions/typescript-5-es2022.instructions.md`
+- **Governance:** `../.github/instructions/guidelines-governance.instructions.md`
+- **i18n Management:** `i18n-management.prompt.md`

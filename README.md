@@ -64,7 +64,7 @@ npm run i18n:validate             # Validate translations
 npm run i18n:sync                 # Sync translations
 ```
 
-**See [scripts/README.md](scripts/README.md) for i18n management details.**
+**See [i18n Scripts Reference](docs/i18n-scripts-reference.md) for detailed i18n management guide.**
 
 ---
 
@@ -86,7 +86,7 @@ This generates a complete feature structure with:
 - i18n translations
 - Tests boilerplate
 
-**See [Feature Creation Guide](.github/FEATURE_CREATION.md) for details.**
+**See [Feature Creation Guide](.github/prompts/feature-creation.prompt.md) for details.**
 
 ---
 

@@ -298,15 +298,21 @@ async function createFeature(featureName: string) {
 
     console.log(`\n✨ Feature "${featureName}" created successfully!\n`);
     console.log('📝 Next steps:');
+    console.log('   1. Add translations with i18n scripts:');
     console.log(
-      `   1. Update src/locales/en/${featureName}.json with translations`
+      `      npm run i18n:add ${featureName}.errors.not-found "Not found" "Nem található"`
     );
-    console.log(`   2. Add error codes to lib/strings.ts`);
-    console.log(`   3. Create your first action in actions/`);
-    console.log(`   4. Add Zod schemas to schemas/`);
-    console.log(`   5. Implement business logic in services/`);
-    console.log(`   6. Add data access functions in data/`);
-    console.log(`   7. Write tests in __tests__/\n`);
+    console.log(
+      `      npm run i18n:add ${featureName}.success.created "Created" "Létrehozva"`
+    );
+    console.log(`   2. Define error codes in lib/strings.ts`);
+    console.log(`   3. Create Zod schemas in schemas/`);
+    console.log(`   4. Implement data access in data/`);
+    console.log(`   5. Write business logic in services/`);
+    console.log(`   6. Create server actions in actions/`);
+    console.log(`   7. Build UI components in components/`);
+    console.log(`   8. Write tests in __tests__/`);
+    console.log(`\n💡 See .github/prompts/ for detailed guides\n`);
   } catch (error) {
     console.error('❌ Error creating feature:', error);
     process.exit(1);
