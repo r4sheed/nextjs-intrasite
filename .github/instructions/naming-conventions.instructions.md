@@ -73,8 +73,8 @@ export const verifyEmail = async (
 
 ### Services Layer
 
-- **Function**: `{action}{Resource}` (camelCase) - Ugyanaz mint az action
-- **Import alias**: Ha szükséges, használj `as` aliast az ütközések elkerülésére
+- **Function**: `{action}{Resource}` (camelCase) - Same as the action
+- **Import alias**: If necessary, use `as` alias to avoid name collisions
 
 **Examples**:
 
@@ -122,7 +122,7 @@ export const resetPassword = async (
 
 ## 📝 JSDoc Requirements
 
-Minden public function-nek rendelkeznie kell részletes JSDoc kommenttel:
+Every public function must have detailed JSDoc comments:
 
 ```typescript
 /**
@@ -153,12 +153,12 @@ export const loginUser = async (
 
 ### JSDoc Sections:
 
-1. **Brief description** - Mit csinál a függvény
-2. **Detailed description** - Hogyan működik, milyen side effect-ek vannak
-3. **@param** - Paraméter leírások
-4. **@returns** - Visszatérési érték leírása
-5. **@throws** - Milyen hibákat dobhat (auth esetén: "Never throws")
-6. **@example** - Használati példa
+1. **Brief description** - What the function does
+2. **Detailed description** - How it works, what side effects it has
+3. **@param** - Parameter descriptions
+4. **@returns** - Return value description
+5. **@throws** - What errors it can throw (auth case: "Never throws")
+6. **@example** - Usage example
 
 ---
 

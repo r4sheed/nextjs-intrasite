@@ -244,7 +244,7 @@ const API_TIMEOUT_MS = 5000;
 
 // ❌ NOT for object properties
 const CONFIG = {
-  MAX_RETRY_COUNT: 3,    // ❌ Should be maxRetryCount
+  MAX_RETRY_COUNT: 3, // ❌ Should be maxRetryCount
 };
 ```
 
