@@ -63,43 +63,12 @@ src/
 
 Contains **application-wide** error codes and messages that are not feature-specific.
 
-```typescript
-// src/lib/errors/codes.ts
+> **Note:** For detailed core error definitions and usage patterns, see [error-handling-guidelines.instructions.md](error-handling-guidelines.instructions.md).
 
-/**
- * Core error codes for application-wide errors
- * TypeScript properties: camelCase (for code readability)
- * String values: kebab-case (for URL-friendly usage)
- */
-export const CORE_CODES = {
-  internalServerError: 'internal-server-error',
-  validationFailed: 'validation-failed',
-  unauthorized: 'unauthorized',
-  forbidden: 'forbidden',
-  notFound: 'not-found',
-  databaseError: 'database-error',
-} as const;
+**Example structure:**
 
-export type CoreCode = (typeof CORE_CODES)[keyof typeof CORE_CODES];
-```
-
-```typescript
-// src/lib/errors/messages.ts
-
-/**
- * Core error messages (i18n keys)
- * TypeScript properties: camelCase
- * String values: kebab-case with dots
- */
-export const CORE_ERRORS = {
-  internalServerError: 'errors.internal-server-error',
-  validationFailed: 'errors.validation-failed',
-  unauthorized: 'errors.unauthorized',
-  forbidden: 'errors.forbidden',
-  notFound: 'errors.not-found',
-  databaseError: 'errors.database-error',
-} as const;
-```
+- `CORE_CODES` - camelCase properties with kebab-case values (e.g., `internalServerError: 'internal-server-error'`)
+- `CORE_ERRORS` - camelCase properties with kebab-case i18n keys (e.g., `internalServerError: 'errors.internal-server-error'`)
 
 ### Feature String Constants (`src/features/{feature}/lib/strings.ts`)
 
@@ -208,7 +177,7 @@ export const AUTH_LABELS = {
 
 ## Naming Conventions
 
-> **Important:** This section defines the canonical naming pattern for ALL error codes, messages, and i18n keys in the application. For general error handling patterns, see [error-handling-guidelines.instructions.md](error-handling-guidelines.instructions.md).
+> **Important:** This section defines the canonical naming pattern for ALL error codes, messages, and i18n keys in the application. For general error handling patterns, see [error-handling-guidelines.instructions.md](error-handling-guidelines.instructions.md). For general naming conventions beyond error handling, see [nextjs.instructions.md](nextjs.instructions.md) and [typescript-5-es2022.instructions.md](typescript-5-es2022.instructions.md).
 
 ### Why `camelCase` Properties (Not `SCREAMING_SNAKE_CASE`)?
 
@@ -382,6 +351,7 @@ const CONFIG = {
 5. **Don't hardcode strings** - always use constants
 6. **Don't add @example comments** unless absolutely necessary
 7. **Don't deeply nest i18n keys** - keep structure flat (max 2-3 levels)
+8. **Don't use `SCREAMING_SNAKE_CASE` for object/array constants** - use `camelCase` for variable names (e.g., `publicRoutes` not `PUBLIC_ROUTES`)
 
 ---
 
