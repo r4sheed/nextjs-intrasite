@@ -1,10 +1,12 @@
 'use server';
 
-import { type Response, response } from '@/lib/response';
+import type { Response } from '@/lib/response';
+import { response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
 
-import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import type { LoginInput } from '@/features/auth/schemas';
+import { loginSchema } from '@/features/auth/schemas';
 import { loginUser } from '@/features/auth/services';
 
 export type LoginData = { userId: string };

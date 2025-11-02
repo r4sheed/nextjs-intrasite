@@ -1,6 +1,7 @@
 'use server';
 
-import { type Response, response } from '@/lib/response';
+import type { Response } from '@/lib/response';
+import { response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
 

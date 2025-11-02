@@ -1,10 +1,12 @@
 'use server';
 
-import { type Response, response } from '@/lib/response';
+import type { Response } from '@/lib/response';
+import { response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
 
-import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import type { RegisterInput } from '@/features/auth/schemas';
+import { registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
 
 export type RegisterData = { userId: string };
