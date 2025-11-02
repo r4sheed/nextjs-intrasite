@@ -7,42 +7,42 @@
 
 /**
  * Auth feature error codes
- * Format: camelCase, URL-friendly
+ * Format: kebab-case, URL-friendly
  * Used in AppError code field and URL parameters
  */
 export const AUTH_CODES = {
   // Validation errors
-  invalidFields: 'invalidFields',
-  emailRequired: 'emailRequired',
-  emailInvalid: 'emailInvalid',
-  passwordRequired: 'passwordRequired',
-  passwordTooShort: 'passwordTooShort',
-  confirmPasswordRequired: 'confirmPasswordRequired',
-  confirmPasswordMismatch: 'confirmPasswordMismatch',
-  nameRequired: 'nameRequired',
-  nameTooShort: 'nameTooShort',
+  invalidFields: 'invalid-fields',
+  emailRequired: 'email-required',
+  emailInvalid: 'email-invalid',
+  passwordRequired: 'password-required',
+  passwordTooShort: 'password-too-short',
+  confirmPasswordRequired: 'confirm-password-required',
+  confirmPasswordMismatch: 'confirm-password-mismatch',
+  nameRequired: 'name-required',
+  nameTooShort: 'name-too-short',
 
   // Authentication errors
-  invalidCredentials: 'invalidCredentials',
-  verificationRequired: 'verificationRequired',
-  callbackError: 'callbackError',
+  invalidCredentials: 'invalid-credentials',
+  verificationRequired: 'verification-required',
+  callbackError: 'callback-error',
 
   // User errors
-  userNotFound: 'userNotFound',
-  emailExists: 'emailExists',
-  oauthNotLinked: 'oauthNotLinked',
+  userNotFound: 'user-not-found',
+  emailExists: 'email-exists',
+  oauthNotLinked: 'oauth-not-linked',
 
   // Token errors
-  tokenInvalid: 'tokenInvalid',
-  tokenExpired: 'tokenExpired',
+  tokenInvalid: 'token-invalid',
+  tokenExpired: 'token-expired',
 
   // Operation errors
-  registrationFailed: 'registrationFailed',
-  loginFailed: 'loginFailed',
-  signupFailed: 'signupFailed',
-  passwordUpdateFailed: 'passwordUpdateFailed',
-  passwordResetFailed: 'passwordResetFailed',
-  verificationFailed: 'verificationFailed',
+  registrationFailed: 'registration-failed',
+  loginFailed: 'login-failed',
+  signupFailed: 'signup-failed',
+  passwordUpdateFailed: 'password-update-failed',
+  passwordResetFailed: 'password-reset-failed',
+  verificationFailed: 'verification-failed',
 } as const;
 
 export type AuthCode = (typeof AUTH_CODES)[keyof typeof AUTH_CODES];
@@ -53,37 +53,37 @@ export type AuthCode = (typeof AUTH_CODES)[keyof typeof AUTH_CODES];
  */
 export const AUTH_ERRORS = {
   // Validation errors
-  invalidFields: 'auth.errors.invalidFields',
-  emailRequired: 'auth.errors.emailRequired',
-  emailInvalid: 'auth.errors.emailInvalid',
-  passwordRequired: 'auth.errors.passwordRequired',
-  passwordTooShort: 'auth.errors.passwordTooShort',
-  confirmPasswordRequired: 'auth.errors.confirmPasswordRequired',
-  confirmPasswordMismatch: 'auth.errors.confirmPasswordMismatch',
-  nameRequired: 'auth.errors.nameRequired',
-  nameTooShort: 'auth.errors.nameTooShort',
+  invalidFields: 'auth.errors.invalid-fields',
+  emailRequired: 'auth.errors.email-required',
+  emailInvalid: 'auth.errors.email-invalid',
+  passwordRequired: 'auth.errors.password-required',
+  passwordTooShort: 'auth.errors.password-too-short',
+  confirmPasswordRequired: 'auth.errors.confirm-password-required',
+  confirmPasswordMismatch: 'auth.errors.confirm-password-mismatch',
+  nameRequired: 'auth.errors.name-required',
+  nameTooShort: 'auth.errors.name-too-short',
 
   // Authentication errors
-  invalidCredentials: 'auth.errors.invalidCredentials',
-  verificationRequired: 'auth.errors.verificationRequired',
-  callbackError: 'auth.errors.callbackError',
+  invalidCredentials: 'auth.errors.invalid-credentials',
+  verificationRequired: 'auth.errors.verification-required',
+  callbackError: 'auth.errors.callback-error',
 
   // User errors
-  userNotFound: 'auth.errors.userNotFound',
-  emailExists: 'auth.errors.emailExists',
-  oauthNotLinked: 'auth.errors.oauthNotLinked',
+  userNotFound: 'auth.errors.user-not-found',
+  emailExists: 'auth.errors.email-exists',
+  oauthNotLinked: 'auth.errors.oauth-not-linked',
 
   // Token errors
-  tokenInvalid: 'auth.errors.tokenInvalid',
-  tokenExpired: 'auth.errors.tokenExpired',
+  tokenInvalid: 'auth.errors.token-invalid',
+  tokenExpired: 'auth.errors.token-expired',
 
   // Operation errors
-  registrationFailed: 'auth.errors.registrationFailed',
-  loginFailed: 'auth.errors.loginFailed',
-  signupFailed: 'auth.errors.signupFailed',
-  passwordUpdateFailed: 'auth.errors.passwordUpdateFailed',
-  passwordResetFailed: 'auth.errors.passwordResetFailed',
-  verificationFailed: 'auth.errors.verificationFailed',
+  registrationFailed: 'auth.errors.registration-failed',
+  loginFailed: 'auth.errors.login-failed',
+  signupFailed: 'auth.errors.signup-failed',
+  passwordUpdateFailed: 'auth.errors.password-update-failed',
+  passwordResetFailed: 'auth.errors.password-reset-failed',
+  verificationFailed: 'auth.errors.verification-failed',
 } as const;
 
 /**
@@ -93,10 +93,10 @@ export const AUTH_ERRORS = {
 export const AUTH_SUCCESS = {
   login: 'auth.success.login',
   signup: 'auth.success.signup',
-  emailVerified: 'auth.success.emailVerified',
-  verificationSent: 'auth.success.verificationSent',
-  passwordUpdated: 'auth.success.passwordUpdated',
-  passwordResetSent: 'auth.success.passwordResetSent',
+  emailVerified: 'auth.success.email-verified',
+  verificationSent: 'auth.success.verification-sent',
+  passwordUpdated: 'auth.success.password-updated',
+  passwordResetSent: 'auth.success.password-reset-sent',
 } as const;
 
 /**
@@ -105,61 +105,62 @@ export const AUTH_SUCCESS = {
  */
 export const AUTH_LABELS = {
   // Page titles
-  signupTitle: 'auth.labels.signupTitle',
-  loginTitle: 'auth.labels.loginTitle',
-  verificationTitle: 'auth.labels.verificationTitle',
-  forgotPasswordTitle: 'auth.labels.forgotPasswordTitle',
-  newPasswordTitle: 'auth.labels.newPasswordTitle',
+  signupTitle: 'auth.labels.signup-title',
+  loginTitle: 'auth.labels.login-title',
+  verificationTitle: 'auth.labels.verification-title',
+  forgotPasswordTitle: 'auth.labels.forgot-password-title',
+  newPasswordTitle: 'auth.labels.new-password-title',
 
   // Page subtitles
-  signupSubtitle: 'auth.labels.signupSubtitle',
-  loginSubtitle: 'auth.labels.loginSubtitle',
-  verificationSubtitle: 'auth.labels.verificationSubtitle',
-  verificationSuccessSubtitle: 'auth.labels.verificationSuccessSubtitle',
-  verificationFailedSubtitle: 'auth.labels.verificationFailedSubtitle',
-  verificationProcessingSubtitle: 'auth.labels.verificationProcessingSubtitle',
-  forgotPasswordSubtitle: 'auth.labels.forgotPasswordSubtitle',
-  newPasswordSubtitle: 'auth.labels.newPasswordSubtitle',
+  signupSubtitle: 'auth.labels.signup-subtitle',
+  loginSubtitle: 'auth.labels.login-subtitle',
+  verificationSubtitle: 'auth.labels.verification-subtitle',
+  verificationSuccessSubtitle: 'auth.labels.verification-success-subtitle',
+  verificationFailedSubtitle: 'auth.labels.verification-failed-subtitle',
+  verificationProcessingSubtitle:
+    'auth.labels.verification-processing-subtitle',
+  forgotPasswordSubtitle: 'auth.labels.forgot-password-subtitle',
+  newPasswordSubtitle: 'auth.labels.new-password-subtitle',
 
   // Form field labels
   emailLabel: 'auth.labels.email',
   nameLabel: 'auth.labels.name',
   passwordLabel: 'auth.labels.password',
-  confirmPasswordLabel: 'auth.labels.confirmPassword',
-  newPasswordLabel: 'auth.labels.newPassword',
+  confirmPasswordLabel: 'auth.labels.confirm-password',
+  newPasswordLabel: 'auth.labels.new-password',
 
   // Form placeholders
-  emailPlaceholder: 'auth.labels.emailPlaceholder',
-  namePlaceholder: 'auth.labels.namePlaceholder',
-  passwordPlaceholder: 'auth.labels.passwordPlaceholder',
-  confirmPasswordPlaceholder: 'auth.labels.confirmPasswordPlaceholder',
-  newPasswordPlaceholder: 'auth.labels.newPasswordPlaceholder',
+  emailPlaceholder: 'auth.labels.email-placeholder',
+  namePlaceholder: 'auth.labels.name-placeholder',
+  passwordPlaceholder: 'auth.labels.password-placeholder',
+  confirmPasswordPlaceholder: 'auth.labels.confirm-password-placeholder',
+  newPasswordPlaceholder: 'auth.labels.new-password-placeholder',
 
   // Field descriptions/hints
-  nameDescription: 'auth.labels.nameDescription',
-  emailDescription: 'auth.labels.emailDescription',
-  passwordDescription: 'auth.labels.passwordDescription',
-  emailResetDescription: 'auth.labels.emailResetDescription',
+  nameDescription: 'auth.labels.name-description',
+  emailDescription: 'auth.labels.email-description',
+  passwordDescription: 'auth.labels.password-description',
+  emailResetDescription: 'auth.labels.email-reset-description',
 
   // Buttons
-  loginButton: 'auth.labels.loginButton',
-  signupButton: 'auth.labels.signupButton',
-  forgotPasswordButton: 'auth.labels.forgotPasswordButton',
-  newPasswordButton: 'auth.labels.newPasswordButton',
-  backToLoginButton: 'auth.labels.backToLogin',
-  verifyEmailButton: 'auth.labels.verifyEmailButton',
+  loginButton: 'auth.labels.login-button',
+  signupButton: 'auth.labels.signup-button',
+  forgotPasswordButton: 'auth.labels.forgot-password-button',
+  newPasswordButton: 'auth.labels.new-password-button',
+  backToLoginButton: 'auth.labels.back-to-login',
+  verifyEmailButton: 'auth.labels.verify-email-button',
 
   // Links and CTAs
-  forgotPasswordLink: 'auth.labels.forgotPassword',
-  signupCtaText: 'auth.labels.signupCtaText',
-  signupCtaLink: 'auth.labels.signupCtaLink',
-  loginCtaText: 'auth.labels.loginCtaText',
-  loginCtaLink: 'auth.labels.loginCtaLink',
-  rememberPasswordCta: 'auth.labels.rememberPassword',
+  forgotPasswordLink: 'auth.labels.forgot-password',
+  signupCtaText: 'auth.labels.signup-cta-text',
+  signupCtaLink: 'auth.labels.signup-cta-link',
+  loginCtaText: 'auth.labels.login-cta-text',
+  loginCtaLink: 'auth.labels.login-cta-link',
+  rememberPasswordCta: 'auth.labels.remember-password',
 
   // Other UI text
-  orContinueWith: 'auth.labels.orContinueWith',
-  verificationSuccessTitle: 'auth.labels.verificationSuccess',
-  verificationFailedTitle: 'auth.labels.verificationFailed',
-  verificationProcessingTitle: 'auth.labels.verificationProcessing',
+  orContinueWith: 'auth.labels.or-continue-with',
+  verificationSuccessTitle: 'auth.labels.verification-success-title',
+  verificationFailedTitle: 'auth.labels.verification-failed-title',
+  verificationProcessingTitle: 'auth.labels.verification-processing-title',
 } as const;

@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "internal-server-error": "An unexpected error occurred. Please try again later.",
+    "validation-failed": "Input validation failed. Please check your entries.",
+    "database-error": "A database error occurred. Please try again later.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "forbidden": "Access forbidden.",
+    "not-found": "{resource} could not be found."
+  }
+}
