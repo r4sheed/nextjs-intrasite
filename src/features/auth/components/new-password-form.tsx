@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
 
-import { LoadingButton } from '@/components/loading-button';
+import { LoadingButton } from '@/components/shared/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
 import {

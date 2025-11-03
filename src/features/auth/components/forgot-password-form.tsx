@@ -1,6 +1,5 @@
 'use client';
 
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
@@ -8,14 +7,13 @@ import { Controller, useForm } from 'react-hook-form';
 import Image from 'next/image';
 import Link from 'next/link';
 
-
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
 
-import { LoadingButton } from '@/components/loading-button';
+import { LoadingButton } from '@/components/shared/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -26,7 +24,6 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-
 
 import { resetPassword } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
