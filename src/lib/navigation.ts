@@ -1,64 +1,97 @@
+import { getAllRoutes } from '@/lib/routes';
+
+import type { RouteAccess, RouteMeta } from '@/lib/routes';
+
+export { routes, getAllRoutes } from '@/lib/routes';
+export type { RouteAccess, RouteDefinition, RouteMeta } from '@/lib/routes';
+
 /**
- * Application route definitions with i18n label keys.
- *
- * Each route contains:
- * - url: The actual URL path
- * - label: i18n key for the route name (used in breadcrumbs, navigation, etc.)
+ * Normalised navigation item derived from the route definitions.
+ * Provides consistent shape for layout components rendering navigation links.
+ */
+export interface NavigationItem {
+  label: string;
+  href: string;
+  access: RouteAccess;
+  protected: boolean;
+  meta?: RouteMeta;
+}
+
+interface NavigationItemWithOrder extends NavigationItem {
+  order: number;
+}
+
+/**
+ * Builds a sorted list of navigation items from the master route definitions.
+ * Only routes flagged with `meta.showInNavigation` are included.
+ */
+const navigationItemsWithOrder: readonly NavigationItemWithOrder[] = (() => {
+  const items = getAllRoutes()
+    .filter(route => route.meta?.showInNavigation)
+    .map<NavigationItemWithOrder>(route => ({
+      label: route.label,
+      href: route.url,
+      access: route.access,
+      protected: route.access === 'protected',
+      meta: route.meta,
+      order: route.meta?.navigationOrder ?? Number.MAX_SAFE_INTEGER,
+    }));
+
+  return Object.freeze(
+    items
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map(item => Object.freeze(item))
+  );
+})();
+
+/**
+ * Frozen list of navigation items ready for rendering in UI components.
  *
  * @example
- * // In components:
- * <Link href={routes.settings.url}>{t(routes.settings.label)}</Link>
+ * import { navigationItems } from '@/lib/navigation';
  *
- * // For breadcrumbs:
- * const breadcrumbs = [
- *   { url: routes.home.url, label: t(routes.home.label) },
- *   { url: routes.settings.url, label: t(routes.settings.label) }
- * ];
+ * navigationItems.map(item => (
+ *   <Link key={item.href} href={item.href}>
+ *     {t(item.label)}
+ *   </Link>
+ * ));
  */
-export const routes = {
-  home: {
-    url: '/',
-    label: 'navigation.home',
-  },
-  auth: {
-    login: {
-      url: '/auth/login',
-      label: 'navigation.auth.login',
-    },
-    signUp: {
-      url: '/auth/signup',
-      label: 'navigation.auth.sign-up',
-    },
-    forgotPassword: {
-      url: '/auth/forgot-password',
-      label: 'navigation.auth.forgot-password',
-    },
-    newPassword: {
-      url: '/auth/new-password',
-      label: 'navigation.auth.new-password',
-    },
-    verifyEmail: {
-      url: '/auth/verify-email',
-      label: 'navigation.auth.verify-email',
-    },
-  },
-  settings: {
-    url: '/settings',
-    label: 'navigation.settings',
-  },
-  error: {
-    url: '/error',
-    label: 'navigation.error',
-  },
-} as const;
-
-export type Routes = typeof routes;
+export const navigationItems = Object.freeze(
+  navigationItemsWithOrder.map(item =>
+    Object.freeze({
+      label: item.label,
+      href: item.href,
+      access: item.access,
+      protected: item.protected,
+      ...(item.meta && { meta: item.meta }),
+    })
+  )
+) as readonly NavigationItem[];
 
 /**
- * API endpoint routes used internally for backend logic.
+ * Navigation items visible for both authenticated and unauthenticated visitors.
+ *
+ * @example
+ * import { publicNavigationItems } from '@/lib/navigation';
+ *
+ * const guestLinks = publicNavigationItems.map(item => ({
+ *   href: item.href,
+ *   label: item.label,
+ * }));
  */
-export const apiRoutes = {
-  auth: '/api/auth',
-} as const;
+export const publicNavigationItems = Object.freeze(
+  navigationItems.filter(item => item.access !== 'protected')
+) as readonly NavigationItem[];
 
-export type ApiRoutes = typeof apiRoutes;
+/**
+ * Navigation items available exclusively to authenticated users.
+ *
+ * @example
+ * import { protectedNavigationItems } from '@/lib/navigation';
+ *
+ * protectedNavigationItems.forEach(item => secureMenu.add(item.href));
+ */
+export const protectedNavigationItems = Object.freeze(
+  navigationItems.filter(item => item.access === 'protected')
+) as readonly NavigationItem[];

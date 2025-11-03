@@ -1,4 +1,4 @@
-import { routes } from '@/lib/navigation';
+import { navigationItems } from '@/lib/navigation';
 
 /**
  * Core site configuration containing metadata, branding, and navigation settings.
@@ -15,20 +15,11 @@ export const siteConfig = {
     twitter: 'https://twitter.com/shadcn',
     github: 'https://github.com/shadcn-ui/ui',
   },
-  navItems: [
-    {
-      label: routes.auth.login.label,
-      href: routes.auth.login.url,
-    },
-    {
-      label: routes.auth.signUp.label,
-      href: routes.auth.signUp.url,
-    },
-    {
-      label: routes.settings.label,
-      href: routes.settings.url,
-    },
-  ],
+  navItems: navigationItems.map(item => ({
+    label: item.label,
+    href: item.href,
+    protected: item.protected,
+  })),
 } as const;
 
 export type SiteFeatures = typeof siteFeatures;

@@ -5,6 +5,7 @@ import {
   AUTH_ROUTE_PREFIX,
   authRouteSet,
   DEFAULT_LOGIN_REDIRECT,
+  protectedRouteSet,
   publicRouteSet,
 } from '@/lib/routes';
 
@@ -30,8 +31,10 @@ export default auth(req => {
   const isApiAuthRoute = pathname.startsWith(AUTH_ROUTE_PREFIX);
   const isPublicRoute = publicRouteSet.has(pathname);
   const isAuthRoute = authRouteSet.has(pathname);
+  const isExplicitProtectedRoute = protectedRouteSet.has(pathname);
 
-  const isProtectedRoute = !isPublicRoute && !isAuthRoute;
+  const isProtectedRoute =
+    isExplicitProtectedRoute || (!isPublicRoute && !isAuthRoute);
 
   // Allow internal API Auth Routes (e.g., NextAuth/Auth.js internal calls)
   if (isApiAuthRoute) {
