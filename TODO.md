@@ -78,65 +78,6 @@ export const logger = {
 
 ---
 
-### Social Provider Login UX Improvements
-
-**Priority:** Medium  
-**Status:** Not Started
-
-**Issue:**
-
-- `src/features/auth/components/social-providers.tsx` - No loading state feedback during OAuth flow
-
-**Description:**
-Currently, when a user clicks a social provider button (Google/GitHub), there's no visual feedback indicating that the authentication process has started. Users might click multiple times or be uncertain if their action registered.
-
-**Proposed Solution:**
-
-1. Add loading state tracking for each provider separately
-2. Disable all provider buttons when any provider authentication is in progress
-3. Show spinner icon in place of the provider icon only for the active provider
-4. Keep other provider icons visible but disabled
-
-**Implementation:**
-
-```typescript
-// State to track which provider is currently loading
-const [loadingProvider, setLoadingProvider] = useState<AuthProvider | null>(null);
-
-const onClick = async (provider: AuthProvider) => {
-  if (disabled || loadingProvider) return;
-  setLoadingProvider(provider);
-  await signIn(provider, {
-    redirectTo: DEFAULT_LOGIN_REDIRECT,
-  });
-};
-
-// Button example:
-<Button
-  disabled={disabled || loadingProvider !== null}
-  onClick={() => onClick(AuthProvider.Google)}
->
-  {loadingProvider === AuthProvider.Google ? (
-    <Spinner className="size-5" />
-  ) : (
-    <SocialIcons.google className="size-5" />
-  )}
-</Button>
-```
-
-**Benefits:**
-
-- Clear visual feedback for user actions
-- Prevents accidental double-clicks
-- Better UX during OAuth redirect flow
-- Professional, polished authentication experience
-
-**Affected Files:**
-
-- `src/features/auth/components/social-providers.tsx`
-
----
-
 ### �📝 Email Verification Check in Password Reset
 
 **Priority:** Low  
@@ -189,4 +130,12 @@ if (siteFeatures.emailVerification && user && !user.emailVerified) {
 
 - Removed duplicate CORE_CODES and CORE_ERRORS definitions from `messages-and-codes.instructions.md`
 - Added cross-references between instruction files
+- **Status:** Completed
+
+### ✅ Social Provider Login UX Improvements
+
+- Added provider-specific loading state tracking
+- Disabled all buttons during OAuth flow
+- Show spinner only for active provider
+- Prevents double-clicks during authentication
 - **Status:** Completed

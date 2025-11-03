@@ -1,25 +1,35 @@
 'use client';
 
+import { useState } from 'react';
+
 import { signIn } from 'next-auth/react';
+
+import { siteFeatures } from '@/lib/config';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 import { SocialIcons } from '@/components/icons/social-icons';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+
 import { AuthProvider } from '@/features/auth/types/auth-provider';
-import { siteFeatures } from '@/lib/config';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
 interface SocialProvidersProps {
   disabled: boolean;
 }
 
 export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
+  const [loadingProvider, setLoadingProvider] = useState<AuthProvider | null>(
+    null
+  );
+
   if (!siteFeatures.socialAuth) {
     return null;
   }
 
-  const onClick = (provider: AuthProvider) => {
-    if (disabled) return;
-    signIn(provider, {
+  const onClick = async (provider: AuthProvider) => {
+    if (disabled || loadingProvider) return;
+    setLoadingProvider(provider);
+    await signIn(provider, {
       redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
   };
@@ -30,19 +40,27 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         type="button"
         size="lg"
         variant="outline"
-        disabled={disabled}
+        disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.Google)}
       >
-        <SocialIcons.google className="size-5" />
+        {loadingProvider === AuthProvider.Google ? (
+          <Spinner className="size-5" />
+        ) : (
+          <SocialIcons.google className="size-5" />
+        )}
       </Button>
       <Button
         type="button"
         size="lg"
         variant="outline"
-        disabled={disabled}
+        disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.GitHub)}
       >
-        <SocialIcons.github className="size-5" />
+        {loadingProvider === AuthProvider.GitHub ? (
+          <Spinner className="size-5" />
+        ) : (
+          <SocialIcons.github className="size-5" />
+        )}
       </Button>
     </>
   );
