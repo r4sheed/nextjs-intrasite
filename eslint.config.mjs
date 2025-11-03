@@ -7,6 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ['**/*.ts', '**/*.tsx'],
     plugins: {
       '@next/next': nextPlugin,
       import: importPlugin,
@@ -30,15 +31,47 @@ export default tseslint.config(
             ['builtin', 'external'],
             ['internal'],
             ['parent', 'sibling', 'index'],
+            ['type'],
           ],
           pathGroups: [
-            { pattern: 'react', group: 'external', position: 'before' },
-            { pattern: 'next/**', group: 'external', position: 'after' },
-            { pattern: '@/**', group: 'internal', position: 'after' },
+            {
+              pattern: 'react',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '{next,next/**}',
+              group: 'external',
+              position: 'after',
+            },
+            {
+              pattern: '@/lib/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@/hooks/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@/components/**',
+              group: 'internal',
+              position: 'after',
+            },
+            {
+              pattern: '@/features/**',
+              group: 'internal',
+              position: 'after',
+            },
           ],
-          pathGroupsExcludedImportTypes: ['builtin'],
-          alphabetize: { order: 'asc', caseInsensitive: true },
+          pathGroupsExcludedImportTypes: ['type'],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
           'newlines-between': 'always',
+          warnOnUnassignedImports: true,
         },
       ],
 
