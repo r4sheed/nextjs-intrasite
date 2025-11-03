@@ -110,6 +110,32 @@ if (siteFeatures.emailVerification && user && !user.emailVerified) {
 
 ---
 
+### 🔐 Stronger Password Requirements in Schema
+
+**Priority:** Very Low
+**Status:** Not Started
+
+**Description:**
+Update password validation schema to require stronger passwords with complexity requirements.
+
+**Proposed Changes:**
+
+- Update `src/features/auth/schemas/*.ts` password validation rules
+- Add requirements: minimum 8 characters, at least one uppercase, one lowercase, one number, one special character
+- Update corresponding error messages in `src/features/auth/lib/strings.ts`
+- Consider adding password strength indicator in UI components
+
+**Why:**
+Enhanced security through stronger password policies. Very low priority as current requirements are functional.
+
+**Affected Files:**
+
+- `src/features/auth/schemas/*.ts`
+- `src/features/auth/lib/strings.ts`
+- `src/features/auth/components/*password*.tsx` (optional)
+
+---
+
 ## Completed Tasks ✅
 
 ### ✅ Fix naming conventions in routes.ts
