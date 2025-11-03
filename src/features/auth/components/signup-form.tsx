@@ -7,6 +7,13 @@ import { Controller, useForm } from 'react-hook-form';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { siteFeatures } from '@/lib/config';
+import { routes } from '@/lib/navigation';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { cn } from '@/lib/utils';
+
+import { execute } from '@/hooks/use-action';
+
 import { LoadingButton } from '@/components/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,17 +26,13 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+
 import { registerUser } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
 import { AUTH_LABELS } from '@/features/auth/lib/strings';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
-import { execute } from '@/hooks/use-action';
-import { siteFeatures } from '@/lib/config';
-import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
-import { cn } from '@/lib/utils';
 
 const useSignupForm = () => {
   const form = useForm<RegisterInput>({

@@ -139,7 +139,7 @@ changelog:
 
 5. **Examples with DO/DON'T**
 
-   ````md
+   ```md
    ### ✅ CORRECT: Description
 
    `code example`
@@ -149,7 +149,7 @@ changelog:
    `code example`
 
    **Why wrong:** Explanation
-   ````
+   ```
 
 6. **Rules Summary** - Bulleted MUST/NEVER lists at the end
 

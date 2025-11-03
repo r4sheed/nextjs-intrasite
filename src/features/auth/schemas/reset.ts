@@ -7,4 +7,3 @@ export const resetSchema = z.object({
 });
 
 export type ResetInput = z.infer<typeof resetSchema>;
-

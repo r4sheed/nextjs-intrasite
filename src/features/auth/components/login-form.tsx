@@ -1,7 +1,5 @@
 'use client';
 
-import type React from 'react';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
@@ -10,6 +8,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+
+import { siteFeatures } from '@/lib/config';
+import { routes } from '@/lib/navigation';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+import { cn } from '@/lib/utils';
+
+import { execute } from '@/hooks/use-action';
 
 import { LoadingButton } from '@/components/loading-button';
 import { FormError, FormSuccess } from '@/components/shared/form-status';
@@ -23,6 +29,7 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+
 import { loginUser } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
@@ -33,12 +40,8 @@ import {
   AUTH_LABELS,
 } from '@/features/auth/lib/strings';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
-import { execute } from '@/hooks/use-action';
-import { siteFeatures } from '@/lib/config';
-import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
-import { cn } from '@/lib/utils';
+
+import type React from 'react';
 
 const useLoginForm = () => {
   const searchParams = useSearchParams();

@@ -186,13 +186,13 @@ export const AUTH_LABELS = {
 ```typescript
 // ✅ CORRECT - camelCase object properties
 export const CORE_ERRORS = {
-  notFound: 'errors.not-found',              // camelCase property
+  notFound: 'errors.not-found', // camelCase property
   internalServerError: 'errors.internal-server-error',
 } as const;
 
 // ❌ WRONG - SCREAMING_SNAKE_CASE properties
 export const CORE_ERRORS = {
-  NOT_FOUND: 'errors.not-found',             // ❌ Requires bracket access
+  NOT_FOUND: 'errors.not-found', // ❌ Requires bracket access
   INTERNAL_SERVER_ERROR: 'errors.internal-server-error',
 } as const;
 ```

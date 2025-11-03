@@ -14,4 +14,3 @@ export const newPasswordSchema = z.object({
 });
 
 export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
-

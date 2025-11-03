@@ -72,7 +72,3 @@ const AuthState = ({
 };
 
 export { AuthState };
-
-
-
-

@@ -33,12 +33,11 @@ export function ErrorCard() {
       </EmptyHeader>
       <EmptyContent>
         <EmptyDescription>
-          Need help? <Link href={routes.auth.login.url}>Try signing in again</Link>{' '}
-          or <Link href="#">Contact support</Link>
+          Need help?{' '}
+          <Link href={routes.auth.login.url}>Try signing in again</Link> or{' '}
+          <Link href="#">Contact support</Link>
         </EmptyDescription>
       </EmptyContent>
     </Empty>
   );
 }
-
-
