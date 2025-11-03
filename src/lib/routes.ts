@@ -243,16 +243,3 @@ export const protectedRoutes = Object.freeze(
 export const publicRouteSet = new Set(publicRoutes);
 export const authRouteSet = new Set(authRoutes);
 export const protectedRouteSet = new Set(protectedRoutes);
-
-/**
- * Default route after successful login.
- */
-const defaultProtectedRoute = protectedRouteEntries[0];
-export const DEFAULT_LOGIN_REDIRECT = defaultProtectedRoute
-  ? defaultProtectedRoute.url
-  : routes.home.url;
-
-/**
- * Prefix for authentication routes used by middleware.
- */
-export const AUTH_ROUTE_PREFIX = apiRoutes.auth;

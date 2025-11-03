@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { middlewareConfig } from '@/lib/config';
 import {
   navigationItems,
   protectedNavigationItems,
@@ -14,7 +15,6 @@ import {
   publicRouteSet,
   publicRoutes,
   routes,
-  DEFAULT_LOGIN_REDIRECT,
 } from '@/lib/routes';
 
 describe('Route definitions', () => {
@@ -72,9 +72,9 @@ describe('Route definitions', () => {
     );
   });
 
-  it('DEFAULT_LOGIN_REDIRECT points to first protected route or home', () => {
+  it('middlewareConfig.defaultLoginRedirect points to first protected route or home', () => {
     const expected = protectedRoutes[0] ?? routes.home.url;
-    expect(DEFAULT_LOGIN_REDIRECT).toBe(expected);
+    expect(middlewareConfig.defaultLoginRedirect).toBe(expected);
   });
 });
 

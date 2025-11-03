@@ -1,4 +1,23 @@
 import { navigationItems } from '@/lib/navigation';
+import { apiRoutes, routes } from '@/lib/routes';
+
+/**
+ * Middleware configuration for authentication and route protection.
+ * These values are derived from the routes tree to maintain single source of truth.
+ */
+export const middlewareConfig = {
+  /**
+   * API route prefix for authentication endpoints (e.g., NextAuth/Auth.js)
+   * Used by middleware for strict prefix matching.
+   */
+  authRoutePrefix: apiRoutes.auth,
+
+  /**
+   * Default redirect destination after successful login.
+   * Points to the first protected route or home if none exist.
+   */
+  defaultLoginRedirect: routes.settings.url,
+} as const;
 
 /**
  * Core site configuration containing metadata, branding, and navigation settings.
