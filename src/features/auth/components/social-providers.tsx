@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 
 import { siteFeatures } from '@/lib/config';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+import { middlewareConfig } from '@/lib/config';
 
 import { SocialIcons } from '@/components/icons/social-icons';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
     if (disabled || loadingProvider) return;
     setLoadingProvider(provider);
     await signIn(provider, {
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: middlewareConfig.defaultLoginRedirect,
     });
   };
 

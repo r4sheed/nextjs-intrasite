@@ -10,9 +10,9 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
 import { siteFeatures } from '@/lib/config';
+import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -90,7 +90,7 @@ const useLoginForm = () => {
   >({
     mutationFn: data => execute(loginUser, data),
     onSuccess: () => {
-      router.push(DEFAULT_LOGIN_REDIRECT);
+      router.push(middlewareConfig.defaultLoginRedirect);
     },
   });
 
