@@ -2,14 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
+import { updatePassword as updatePasswordAction } from '@/features/auth/actions';
 import {
   tokenExpired,
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
 import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
-
-import { updatePassword as updatePasswordAction } from '@/features/auth/actions';
 import { updatePassword } from '@/features/auth/services';
 
 // Mock the service layer

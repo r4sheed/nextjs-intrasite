@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/constants';
+import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 import {
   generatePasswordResetToken,
   generateVerificationToken,

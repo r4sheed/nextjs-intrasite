@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import type { VariantProps } from 'class-variance-authority';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+
+import type { VariantProps } from 'class-variance-authority';
 
 interface LoadingButtonProps
   extends React.ComponentProps<'button'>,

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+
 import { auth, signOut } from '@/features/auth/lib/auth';
 
 export default async function SettingsPage() {

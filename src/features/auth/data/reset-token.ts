@@ -1,6 +1,7 @@
+import { db } from '@/lib/prisma';
+
 import type { PasswordResetToken } from '@prisma/client';
 
-import { db } from '@/lib/prisma';
 
 /**
  * Data access layer for PasswordResetToken entity.

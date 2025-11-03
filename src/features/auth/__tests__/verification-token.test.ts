@@ -4,7 +4,7 @@ import {
   getVerificationTokenByEmail,
   getVerificationTokenByToken,
 } from '@/features/auth/data/verification-token';
-import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/constants';
+import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -259,3 +259,4 @@ describe('Verification Token Data Layer', () => {
     });
   });
 });
+

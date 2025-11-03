@@ -3,7 +3,6 @@
 import { type Response, response } from '@/lib/response';
 
 import { tokenNotFound } from '@/features/auth/lib/errors';
-
 import { verifyEmail as verifyEmailService } from '@/features/auth/services';
 
 /**

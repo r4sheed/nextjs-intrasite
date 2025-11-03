@@ -2,6 +2,7 @@ import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
+import { type UpdatePasswordData } from '@/features/auth/actions';
 import { getPasswordResetTokenByToken } from '@/features/auth/data/reset-token';
 import { getUserByEmail } from '@/features/auth/data/user';
 import {
@@ -10,8 +11,6 @@ import {
   userNotFound,
 } from '@/features/auth/lib/errors';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
-
-import { type UpdatePasswordData } from '@/features/auth/actions';
 import { User } from '@/features/auth/models';
 import { type NewPasswordInput } from '@/features/auth/schemas';
 

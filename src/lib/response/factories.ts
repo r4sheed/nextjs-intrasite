@@ -1,5 +1,7 @@
 import { AppError } from '@/lib/errors';
 
+import { Status } from './types';
+
 import type {
   ErrorResponse,
   Message,
@@ -7,7 +9,6 @@ import type {
   PartialResponse,
   SuccessResponse,
 } from './types';
-import { Status } from './types';
 
 type SuccessOptions<TData> = Readonly<{
   data?: TData;

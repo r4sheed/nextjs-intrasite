@@ -1,9 +1,10 @@
 import NextAuth from 'next-auth';
 
-import { authConfig } from '@/features/auth/auth.config';
-import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
 import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
+
+import { authConfig } from '@/features/auth/auth.config';
+import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,

@@ -1,13 +1,17 @@
-import type { Metadata } from 'next';
 
-import { Providers } from '@/app/providers';
-import { Analytics } from '@/components/analitycs';
-import { TailwindIndicator } from '@/components/tailwind-indicator';
-import { Toaster } from '@/components/ui/sonner';
-import { auth } from '@/features/auth/lib/auth';
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';
 import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
+
+import { Analytics } from '@/components/analitycs';
+import { TailwindIndicator } from '@/components/tailwind-indicator';
+import { Toaster } from '@/components/ui/sonner';
+
+import { auth } from '@/features/auth/lib/auth';
+
+import type { Metadata } from 'next';
+
+import { Providers } from '@/app/providers';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { siteConfig } from '@/lib/config';
+
 import { GitHubLink } from '@/components/github-link';
 import { SocialIcons } from '@/components/icons/social-icons';
 import { MainNav } from '@/components/main-nav';
@@ -8,7 +10,6 @@ import { ModeSwitcher } from '@/components/mode-switcher';
 import { SiteConfig } from '@/components/site-config';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { siteConfig } from '@/lib/config';
 
 export function SiteHeader() {
   return (

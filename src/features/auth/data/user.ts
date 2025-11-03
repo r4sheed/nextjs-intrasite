@@ -1,8 +1,9 @@
-import type { User as PrismaUser } from '@prisma/client';
 
 import { db } from '@/lib/prisma';
 
 import { User } from '@/features/auth/models';
+
+import type { User as PrismaUser } from '@prisma/client';
 
 /**
  * Data access layer for User entity

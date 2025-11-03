@@ -1,12 +1,11 @@
 import { internalServerError } from '@/lib/errors/helpers';
 import { type Response, response } from '@/lib/response';
 
+import { type ResetPasswordData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { sendResetPasswordEmail } from '@/features/auth/lib/mail';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generatePasswordResetToken } from '@/features/auth/lib/tokens';
-
-import { type ResetPasswordData } from '@/features/auth/actions';
 import { type ResetInput } from '@/features/auth/schemas';
 
 /**

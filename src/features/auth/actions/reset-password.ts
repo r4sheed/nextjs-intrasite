@@ -3,7 +3,6 @@
 import { type Response, response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
-
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 import { resetPassword as resetPasswordService } from '@/features/auth/services';
 

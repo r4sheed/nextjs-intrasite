@@ -6,9 +6,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 
+import { LayoutProvider } from '@/hooks/use-layout';
+
 import { ActiveThemeProvider } from '@/components/active-theme';
 import { ThemeProvider } from '@/components/theme-provider';
-import { LayoutProvider } from '@/hooks/use-layout';
 
 export function Providers({
   children,

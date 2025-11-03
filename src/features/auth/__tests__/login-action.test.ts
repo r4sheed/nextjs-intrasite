@@ -2,10 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
+import { loginUser as loginUserAction } from '@/features/auth/actions';
 import { invalidCredentials } from '@/features/auth/lib/errors';
 import { AUTH_CODES } from '@/features/auth/lib/strings';
-
-import { loginUser as loginUserAction } from '@/features/auth/actions';
 import { loginUser } from '@/features/auth/services';
 
 // Mock the service layer

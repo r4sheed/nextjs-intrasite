@@ -1,7 +1,8 @@
-import type { User as PrismaUser } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
+import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/config';
+
+import type { User as PrismaUser } from '@prisma/client';
 
 /**
  * User domain model representing a registered user entity.

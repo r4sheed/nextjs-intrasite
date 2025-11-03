@@ -1,6 +1,7 @@
+import { db } from '@/lib/prisma';
+
 import type { VerificationToken } from '@prisma/client';
 
-import { db } from '@/lib/prisma';
 
 /**
  * Data access layer for VerificationToken entity.

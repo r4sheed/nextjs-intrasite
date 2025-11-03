@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-
 import { useMutation } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
+
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
@@ -21,10 +21,9 @@ import {
 } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
 
-import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
-import { AUTH_CODES, AUTH_LABELS } from '@/features/auth/lib/strings';
-
 import { verifyEmail } from '@/features/auth/actions';
+import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/config';
+import { AUTH_CODES, AUTH_LABELS } from '@/features/auth/lib/strings';
 
 export const EmailVerificationForm = () => {
   const router = useRouter();

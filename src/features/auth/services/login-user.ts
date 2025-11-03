@@ -4,6 +4,7 @@ import { siteFeatures } from '@/lib/config';
 import { internalServerError } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
+import { type LoginUserData } from '@/features/auth/actions';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -15,8 +16,6 @@ import {
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
-
-import { type LoginUserData } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
 /**

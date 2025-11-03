@@ -2,14 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { response as responseFactory, Status } from '@/lib/response';
 
+import { verifyEmail as verifyEmailAction } from '@/features/auth/actions';
 import {
   tokenExpired,
   tokenNotFound,
   userNotFound,
 } from '@/features/auth/lib/errors';
 import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
-
-import { verifyEmail as verifyEmailAction } from '@/features/auth/actions';
 import { verifyEmail } from '@/features/auth/services';
 
 // Mock the service layer

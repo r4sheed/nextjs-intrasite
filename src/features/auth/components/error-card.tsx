@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
+import { routes } from '@/lib/navigation';
+
 import {
   Empty,
   EmptyContent,
@@ -10,7 +12,6 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { routes } from '@/lib/navigation';
 
 export function ErrorCard() {
   const searchParams = useSearchParams();

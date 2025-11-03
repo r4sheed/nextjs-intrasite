@@ -3,7 +3,6 @@
 import { type Response, response } from '@/lib/response';
 
 import { invalidFields } from '@/features/auth/lib/errors';
-
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { loginUser as loginUserService } from '@/features/auth/services';
 

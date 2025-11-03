@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react';
+
+import { AlertCircleIcon, CircleCheck, Info } from 'lucide-react';
 
 import Link from 'next/link';
 
-import { AlertCircleIcon, CircleCheck, Info } from 'lucide-react';
+
+import { routes } from '@/lib/navigation';
+import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,9 +16,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+
 import { AUTH_LABELS } from '@/features/auth/lib/strings';
-import { routes } from '@/lib/navigation';
-import { cn } from '@/lib/utils';
+
+import type { ReactNode } from 'react';
 
 type AuthStateVariant = 'primary' | 'destructive';
 

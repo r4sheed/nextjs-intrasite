@@ -2,6 +2,7 @@ import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
+import { type RegisterUserData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -12,8 +13,6 @@ import {
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
-
-import { type RegisterUserData } from '@/features/auth/actions';
 import { User } from '@/features/auth/models';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 

@@ -1,15 +1,14 @@
 'use client';
 
-import type React from 'react';
 import { useEffect } from 'react';
-
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
@@ -17,6 +16,8 @@ import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
 
+import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
@@ -26,20 +27,17 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 
-import { LoadingButton } from '@/components/loading-button';
-import { FormError, FormSuccess } from '@/components/shared/form-status';
-
+import { updatePassword } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
-
-import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/constants';
+import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/config';
 import { AUTH_ERRORS, AUTH_LABELS } from '@/features/auth/lib/strings';
-
-import { updatePassword } from '@/features/auth/actions';
 import {
   type NewPasswordInput,
   newPasswordSchema,
 } from '@/features/auth/schemas';
+
+import type React from 'react';
 
 const useNewPasswordForm = () => {
   const router = useRouter();

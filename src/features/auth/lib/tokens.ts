@@ -4,7 +4,7 @@ import { db } from '@/lib/prisma';
 
 import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset-token';
 import { getVerificationTokenByEmail } from '@/features/auth/data/verification-token';
-import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/constants';
+import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 
 /**
  * Generates a verification token. Deletes the old one if it exists.

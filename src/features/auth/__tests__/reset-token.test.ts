@@ -4,7 +4,7 @@ import {
   getPasswordResetTokenByEmail,
   getPasswordResetTokenByToken,
 } from '@/features/auth/data/reset-token';
-import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/constants';
+import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
