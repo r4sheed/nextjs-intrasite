@@ -7,49 +7,5 @@
   "useTabs": false,
   "arrowParens": "avoid",
   "endOfLine": "lf",
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss"
-  ],
-  "importOrder": [
-    "^react$",
-    "^react-dom$",
-    "<SEPARATOR>",
-
-    "^next(.*)$",
-    "<SEPARATOR>",
-
-    "<THIRD_PARTY_MODULES>",
-    "<SEPARATOR>",
-
-    "^@/types/(.*)$",
-    "<SEPARATOR>",
-
-    "^@/i18n/(.*)$",
-    "^@/config/(.*)$",
-    "^@/lib/(.*)$",
-    "^@/hooks/(.*)$",
-    "^@/contexts/(.*)$",
-    "<SEPARATOR>",
-
-    "^@/components/ui/(.*)$",
-    "^@/components/(.*)$",
-    "<SEPARATOR>",
-
-    "^@/features/(.*)/components/(.*)$",
-    "^@/features/(.*)/(.*)/(.*)$",
-    "<SEPARATOR>",
-
-    "^@/(.*)$",
-    "<SEPARATOR>",
-
-    "^[./]",
-    "<SEPARATOR>",
-
-    "^\\u0000"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true,
-  "importOrderBuiltinModulesToTop": false,
-  "importOrderCaseInsensitive": true
+  "plugins": ["prettier-plugin-tailwindcss"]
 }
