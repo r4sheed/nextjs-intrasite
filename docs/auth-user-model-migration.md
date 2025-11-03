@@ -173,7 +173,7 @@ export const verifyUserCredentials = async (
 ```typescript
 import bcrypt from 'bcryptjs';
 
-import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
+import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/config';
 
 export const registerUser = async (values: RegisterInput) => {
   // ... validation ...
@@ -224,7 +224,7 @@ export const registerUser = async (values: RegisterInput) => {
 ```typescript
 import bcrypt from 'bcryptjs';
 
-import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/constants';
+import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/config';
 
 export const updatePassword = async (values: NewPasswordInput) => {
   // ... token validation ...
