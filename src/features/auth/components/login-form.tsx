@@ -2,23 +2,17 @@
 
 import type React from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { Controller, useForm } from 'react-hook-form';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { Controller, useForm } from 'react-hook-form';
-
-import { siteFeatures } from '@/lib/config';
-import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
-import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
-import { cn } from '@/lib/utils';
-
-import { execute } from '@/hooks/use-action';
-
+import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
@@ -29,22 +23,22 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-
-import { LoadingButton } from '@/components/loading-button';
-import { FormError, FormSuccess } from '@/components/shared/form-status';
-
+import { loginUser } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
-
 import {
   AUTH_CODES,
   AUTH_ERRORS,
   AUTH_LABELS,
 } from '@/features/auth/lib/strings';
-
-import { loginUser } from '@/features/auth/actions';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
+import { siteFeatures } from '@/lib/config';
+import { routes } from '@/lib/navigation';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
 const useLoginForm = () => {
   const searchParams = useSearchParams();
@@ -221,7 +215,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 <>
                   <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
-                    <SocialProviders />
+                    <SocialProviders disabled={isPending} />
                   </Field>
                 </>
               )}
@@ -254,5 +248,3 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 };
 
 export { LoginForm };
-
-

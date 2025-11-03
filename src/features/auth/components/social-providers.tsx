@@ -8,12 +8,17 @@ import { AuthProvider } from '@/features/auth/types/auth-provider';
 import { siteFeatures } from '@/lib/config';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 
-export const SocialProviders = () => {
+interface SocialProvidersProps {
+  disabled: boolean;
+}
+
+export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
   if (!siteFeatures.socialAuth) {
     return null;
   }
 
   const onClick = (provider: AuthProvider) => {
+    if (disabled) return;
     signIn(provider, {
       redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
@@ -25,6 +30,7 @@ export const SocialProviders = () => {
         type="button"
         size="lg"
         variant="outline"
+        disabled={disabled}
         onClick={() => onClick(AuthProvider.Google)}
       >
         <SocialIcons.google className="size-5" />
@@ -33,6 +39,7 @@ export const SocialProviders = () => {
         type="button"
         size="lg"
         variant="outline"
+        disabled={disabled}
         onClick={() => onClick(AuthProvider.GitHub)}
       >
         <SocialIcons.github className="size-5" />
@@ -40,4 +47,3 @@ export const SocialProviders = () => {
     </>
   );
 };
-

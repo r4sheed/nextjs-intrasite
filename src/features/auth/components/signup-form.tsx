@@ -1,19 +1,14 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
-import { siteFeatures } from '@/lib/config';
-import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
-import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { execute } from '@/hooks/use-action';
-
+import { LoadingButton } from '@/components/loading-button';
+import { FormError, FormSuccess } from '@/components/shared/form-status';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
@@ -24,18 +19,17 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-
-import { LoadingButton } from '@/components/loading-button';
-import { FormError, FormSuccess } from '@/components/shared/form-status';
-
+import { registerUser } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { SocialProviders } from '@/features/auth/components/social-providers';
-
 import { AUTH_LABELS } from '@/features/auth/lib/strings';
-
-import { registerUser } from '@/features/auth/actions';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { execute } from '@/hooks/use-action';
+import { siteFeatures } from '@/lib/config';
+import { routes } from '@/lib/navigation';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { cn } from '@/lib/utils';
 
 const useSignupForm = () => {
   const form = useForm<RegisterInput>({
@@ -192,11 +186,9 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               </Field>
               {siteFeatures.socialAuth && (
                 <>
-                  <FieldSeparator>
-                    {AUTH_LABELS.orContinueWith}
-                  </FieldSeparator>
+                  <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
-                    <SocialProviders />
+                    <SocialProviders disabled={isPending} />
                   </Field>
                 </>
               )}
@@ -226,6 +218,3 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 };
 
 export { SignupForm };
-
-
-
