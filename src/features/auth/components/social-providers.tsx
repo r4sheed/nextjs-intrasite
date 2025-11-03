@@ -34,6 +34,9 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
     });
   };
 
+  const Google = SocialIcons.google;
+  const Github = SocialIcons.github;
+
   return (
     <>
       <Button
@@ -46,7 +49,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         {loadingProvider === AuthProvider.Google ? (
           <Spinner className="size-5" />
         ) : (
-          <SocialIcons.google className="size-5" />
+          <Google className="size-5" />
         )}
       </Button>
       <Button
@@ -59,7 +62,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         {loadingProvider === AuthProvider.GitHub ? (
           <Spinner className="size-5" />
         ) : (
-          <SocialIcons.github className="size-5" />
+          <Github className="size-5" />
         )}
       </Button>
     </>
