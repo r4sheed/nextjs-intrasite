@@ -31,13 +31,8 @@ export const authConfig = {
         }
 
         const { email, password } = parsed.data;
-
-        try {
-          const user = await verifyUserCredentials(email, password);
-          return user;
-        } catch (error) {
-          throw error;
-        }
+        const user = await verifyUserCredentials(email, password);
+        return user;
       },
     }),
   ],

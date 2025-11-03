@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { VerificationToken } from '@prisma/client';
@@ -36,7 +37,7 @@ const findVerificationToken = async (
     }
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findVerificationToken] Database error:', error);
+    logger.error('[findVerificationToken] Database error', error, { search });
     return null;
   }
 };

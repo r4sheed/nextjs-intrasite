@@ -1,5 +1,5 @@
 
-import { AlertCircleIcon, CircleCheck, Info } from 'lucide-react';
+import { AlertCircleIcon, Info } from 'lucide-react';
 
 import Link from 'next/link';
 

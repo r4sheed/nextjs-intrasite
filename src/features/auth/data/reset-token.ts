@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { PasswordResetToken } from '@prisma/client';
@@ -36,7 +37,7 @@ const findPasswordResetToken = async (
     }
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findPasswordResetToken] Database error:', error);
+    logger.error('[findPasswordResetToken] Database error', error, { search });
     return null;
   }
 };

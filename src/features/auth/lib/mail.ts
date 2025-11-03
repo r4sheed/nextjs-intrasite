@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { mail } from '@/lib/mail';
 import { routes } from '@/lib/navigation';
 
@@ -27,7 +28,8 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    return console.error('Error sending verification email:', error);
+    logger.error('Failed to send verification email', error, { email });
+    return;
   }
 
   return data;
@@ -49,7 +51,8 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    return console.error('Error sending reset password email:', error);
+    logger.error('Failed to send password reset email', error, { email });
+    return;
   }
 
   return data;

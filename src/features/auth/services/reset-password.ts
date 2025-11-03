@@ -1,4 +1,5 @@
 import { internalServerError } from '@/lib/errors/helpers';
+import { logger } from '@/lib/logger';
 import { type Response, response } from '@/lib/response';
 
 import { type ResetPasswordData } from '@/features/auth/actions';
@@ -54,8 +55,7 @@ export const resetPassword = async (
       message: { key: AUTH_SUCCESS.passwordResetSent },
     });
   } catch (error) {
-    // TODO: Log the error properly using a centralized logger
-    console.error('Error during password reset:', error);
+    logger.error('Failed to reset password', error, { email });
 
     // Return a generic internal server error for any unexpected issues during token generation or email sending
     return response.failure(internalServerError());

@@ -125,6 +125,7 @@ export class User {
    * Use this method when returning user data to clients or logs.
    */
   toSafeObject(): Omit<PrismaUser, 'password'> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = this.data;
     return userWithoutPassword;
   }
