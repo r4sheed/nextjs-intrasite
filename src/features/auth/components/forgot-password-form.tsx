@@ -163,7 +163,3 @@ const ForgotPasswordForm = ({
 };
 
 export { ForgotPasswordForm };
-
-
-
-
