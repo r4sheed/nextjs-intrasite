@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
@@ -139,7 +139,7 @@ const ForgotPasswordForm = ({
               </Field>
               <FieldDescription className="text-center">
                 {AUTH_LABELS.rememberPasswordCta}{' '}
-                <Link href={ROUTES.AUTH.LOGIN}>
+                <Link href={routes.auth.login.url}>
                   {AUTH_LABELS.backToLoginButton}
                 </Link>
               </FieldDescription>
@@ -163,5 +163,7 @@ const ForgotPasswordForm = ({
 };
 
 export { ForgotPasswordForm };
+
+
 
 

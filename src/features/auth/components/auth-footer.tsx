@@ -11,3 +11,4 @@ const AuthFooter = () => {
 };
 
 export { AuthFooter };
+

@@ -1,13 +1,13 @@
-import { API_ROUTES, ROUTES } from '@/lib/navigation';
+import { apiRoutes, routes } from '@/lib/navigation';
 
 /**
  * Publicly accessible routes.
  * These do not require authentication.
  */
 export const publicRoutes = Object.freeze([
-  ROUTES.HOME,
-  ROUTES.ERROR,
-  ROUTES.AUTH.VERIFY_EMAIL,
+  routes.home.url,
+  routes.error.url,
+  routes.auth.verifyEmail.url,
 ]) as readonly string[];
 
 /**
@@ -15,18 +15,18 @@ export const publicRoutes = Object.freeze([
  * Logged-in users should not access these.
  */
 export const authRoutes = Object.freeze([
-  ROUTES.AUTH.LOGIN,
-  ROUTES.AUTH.SIGN_UP,
-  ROUTES.AUTH.FORGOT_PASSWORD,
-  ROUTES.AUTH.NEW_PASSWORD,
+  routes.auth.login.url,
+  routes.auth.signUp.url,
+  routes.auth.forgotPassword.url,
+  routes.auth.newPassword.url,
 ]) as readonly string[];
 
 /**
  * Default route after successful login.
  */
-export const DEFAULT_LOGIN_REDIRECT = ROUTES.SETTINGS;
+export const DEFAULT_LOGIN_REDIRECT = routes.settings.url;
 
 /**
  * Prefix for authentication routes used by middleware.
  */
-export const AUTH_ROUTE_PREFIX = API_ROUTES.AUTH;
+export const AUTH_ROUTE_PREFIX = apiRoutes.auth;

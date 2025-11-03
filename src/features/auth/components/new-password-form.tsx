@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
@@ -72,7 +72,7 @@ const useNewPasswordForm = () => {
     mutationFn: data => execute(updatePassword, data),
     onSuccess: () => {
       const timer = setTimeout(() => {
-        router.replace(ROUTES.AUTH.LOGIN);
+        router.replace(routes.auth.login.url);
       }, REDIRECT_TIMEOUT_MS);
       return () => clearTimeout(timer);
     },
@@ -173,7 +173,7 @@ const NewPasswordForm = ({
 
               <FieldDescription className="text-center">
                 {AUTH_LABELS.rememberPasswordCta}{' '}
-                <Link href={ROUTES.AUTH.LOGIN}>
+                <Link href={routes.auth.login.url}>
                   {AUTH_LABELS.backToLoginButton}
                 </Link>
               </FieldDescription>
@@ -199,3 +199,5 @@ const NewPasswordForm = ({
 };
 
 export { NewPasswordForm };
+
+

@@ -10,7 +10,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 
 export function ErrorCard() {
   const searchParams = useSearchParams();
@@ -33,10 +33,12 @@ export function ErrorCard() {
       </EmptyHeader>
       <EmptyContent>
         <EmptyDescription>
-          Need help? <Link href={ROUTES.AUTH.LOGIN}>Try signing in again</Link>{' '}
+          Need help? <Link href={routes.auth.login.url}>Try signing in again</Link>{' '}
           or <Link href="#">Contact support</Link>
         </EmptyDescription>
       </EmptyContent>
     </Empty>
   );
 }
+
+

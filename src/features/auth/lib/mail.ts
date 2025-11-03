@@ -1,7 +1,8 @@
+import { mail } from '@/lib/mail';
+import { routes } from '@/lib/navigation';
+
 import { ResetTemplate } from '@/features/auth/components/reset-template';
 import { VerificationTemplate } from '@/features/auth/components/verification-template';
-import { mail } from '@/lib/mail';
-import { ROUTES } from '@/lib/navigation';
 
 const BASE_URL = 'http://localhost:3000';
 const DEFAULT_FROM = 'onboarding@resend.dev';
@@ -11,7 +12,7 @@ const BASE_TEMPLATE_PROPS = {
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const url = `${BASE_URL}/${ROUTES.AUTH.VERIFY_EMAIL}?token=${token}`;
+  const url = `${BASE_URL}${routes.auth.verifyEmail.url}?token=${token}`;
 
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
@@ -33,7 +34,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const url = `${BASE_URL}/${ROUTES.AUTH.NEW_PASSWORD}?token=${token}`;
+  const url = `${BASE_URL}${routes.auth.newPassword.url}?token=${token}`;
 
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,

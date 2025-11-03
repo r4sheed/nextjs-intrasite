@@ -12,7 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
 import { siteFeatures } from '@/lib/config';
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { DEFAULT_LOGIN_REDIRECT } from '@/lib/routes';
 import { cn } from '@/lib/utils';
@@ -184,7 +184,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                         {AUTH_LABELS.passwordLabel}
                       </FieldLabel>
                       <Link
-                        href={ROUTES.AUTH.FORGOT_PASSWORD}
+                        href={routes.auth.forgotPassword.url}
                         className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
                       >
                         {AUTH_LABELS.forgotPasswordLink}
@@ -228,7 +228,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 
               <FieldDescription className="text-center">
                 {AUTH_LABELS.signupCtaText}{' '}
-                <Link href={ROUTES.AUTH.SIGN_UP}>
+                <Link href={routes.auth.signUp.url}>
                   {AUTH_LABELS.signupCtaLink}
                 </Link>
               </FieldDescription>
@@ -254,3 +254,5 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 };
 
 export { LoginForm };
+
+

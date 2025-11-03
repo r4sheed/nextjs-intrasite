@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import {
   AUTH_ROUTE_PREFIX,
   authRoutes,
@@ -50,7 +50,7 @@ export default auth(req => {
       callbackUrl += url.search;
     }
 
-    const loginUrl = new URL(ROUTES.AUTH.LOGIN, url.origin);
+    const loginUrl = new URL(routes.auth.login.url, url.origin);
     // Add the callback URL as a search parameter so the user returns after login
     loginUrl.searchParams.set('callbackUrl', callbackUrl);
 

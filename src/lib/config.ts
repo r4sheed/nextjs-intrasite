@@ -1,4 +1,4 @@
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 
 export const siteConfig = {
   name: 'shadcn/ui',
@@ -12,9 +12,9 @@ export const siteConfig = {
     github: 'https://github.com/shadcn-ui/ui',
   },
   navItems: [
-    { label: 'Login', href: ROUTES.AUTH.LOGIN, protected: false },
-    { label: 'Register', href: ROUTES.AUTH.SIGN_UP, protected: false },
-    { label: 'Settings', href: ROUTES.SETTINGS, protected: true },
+    { label: 'Login', href: routes.auth.login.url, protected: false },
+    { label: 'Register', href: routes.auth.signUp.url, protected: false },
+    { label: 'Settings', href: routes.settings.url, protected: true },
   ],
 } as const;
 

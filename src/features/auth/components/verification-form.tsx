@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
 
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';
@@ -42,7 +42,7 @@ export const EmailVerificationForm = () => {
   useEffect(() => {
     if (!token) {
       router.replace(
-        `${ROUTES.AUTH.LOGIN}?&verify_error=${AUTH_CODES.tokenInvalid}`
+        `${routes.auth.login.url}?&verify_error=${AUTH_CODES.tokenInvalid}`
       );
       return;
     }
@@ -55,7 +55,7 @@ export const EmailVerificationForm = () => {
   useEffect(() => {
     if (mutation.isSuccess) {
       const timer = setTimeout(() => {
-        router.replace(`${ROUTES.AUTH.LOGIN}?verified=1`);
+        router.replace(`${routes.auth.login.url}?verified=1`);
       }, REDIRECT_TIMEOUT_MS);
       return () => clearTimeout(timer);
     }
@@ -63,7 +63,7 @@ export const EmailVerificationForm = () => {
     if (mutation.isError) {
       const code = mutation.error?.code;
       router.replace(
-        `${ROUTES.AUTH.LOGIN}?&verify_error=${encodeURIComponent(code)}`
+        `${routes.auth.login.url}?&verify_error=${encodeURIComponent(code)}`
       );
     }
 
@@ -102,3 +102,5 @@ export const EmailVerificationForm = () => {
     </Empty>
   );
 };
+
+

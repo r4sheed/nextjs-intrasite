@@ -8,7 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
 import { siteFeatures } from '@/lib/config';
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
@@ -202,7 +202,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               )}
               <FieldDescription className="text-center">
                 {AUTH_LABELS.loginCtaText}{' '}
-                <Link href={ROUTES.AUTH.LOGIN}>
+                <Link href={routes.auth.login.url}>
                   {AUTH_LABELS.loginCtaLink}
                 </Link>
               </FieldDescription>
@@ -226,4 +226,6 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
 };
 
 export { SignupForm };
+
+
 

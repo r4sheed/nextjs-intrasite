@@ -14,7 +14,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { AUTH_LABELS } from '@/features/auth/lib/strings';
-import { ROUTES } from '@/lib/navigation';
+import { routes } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
 type AuthStateVariant = 'primary' | 'destructive';
@@ -60,7 +60,7 @@ const AuthState = ({
       <EmptyContent>
         <div className="flex flex-col gap-4">
           {children && <EmptyContent>{children}</EmptyContent>}
-          <Link href={ROUTES.AUTH.LOGIN}>
+          <Link href={routes.auth.login.url}>
             <Button variant="outline" size="sm">
               {AUTH_LABELS.backToLoginButton}
             </Button>{' '}
@@ -72,5 +72,7 @@ const AuthState = ({
 };
 
 export { AuthState };
+
+
 
 

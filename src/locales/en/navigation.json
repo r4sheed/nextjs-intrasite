@@ -1,0 +1,14 @@
+{
+  "navigation": {
+    "home": "Home",
+    "settings": "Settings",
+    "error": "Error",
+    "auth": {
+      "login": "Sign in",
+      "sign-up": "Sign up",
+      "forgot-password": "Forgot password",
+      "new-password": "New password",
+      "verify-email": "Verify email"
+    }
+  }
+}
