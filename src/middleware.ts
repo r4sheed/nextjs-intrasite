@@ -3,26 +3,34 @@ import { NextResponse } from 'next/server';
 import { routes } from '@/lib/navigation';
 import {
   AUTH_ROUTE_PREFIX,
-  authRoutes,
+  authRouteSet,
   DEFAULT_LOGIN_REDIRECT,
-  publicRoutes,
+  publicRouteSet,
 } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';
 
+/**
+ * Next.js middleware for authentication and route protection.
+ *
+ * This middleware checks if the user is authenticated and redirects accordingly:
+ * - Allows API auth routes.
+ * - Redirects logged-in users away from auth pages.
+ * - Redirects unauthenticated users from protected routes to login with callback.
+ *
+ * @param req - The incoming request object with auth property.
+ * @returns NextResponse for redirects or NextResponse.next() to continue.
+ */
 export default auth(req => {
   const isLoggedIn = !!req.auth;
 
-  // Safely get URL and pathname
   const url = req.nextUrl ?? new URL(req.url);
   const pathname = url.pathname;
 
-  // Determine the type of route
   const isApiAuthRoute = pathname.startsWith(AUTH_ROUTE_PREFIX);
-  const isPublicRoute = publicRoutes.includes(pathname);
-  const isAuthRoute = authRoutes.includes(pathname);
+  const isPublicRoute = publicRouteSet.has(pathname);
+  const isAuthRoute = authRouteSet.has(pathname);
 
-  // A route is protected if it is neither public nor an authentication route.
   const isProtectedRoute = !isPublicRoute && !isAuthRoute;
 
   // Allow internal API Auth Routes (e.g., NextAuth/Auth.js internal calls)
@@ -32,26 +40,14 @@ export default auth(req => {
 
   // Redirect Logged-in Users from Auth Routes (e.g /login or /signup pages)
   if (isLoggedIn && isAuthRoute) {
-    console.log(
-      `Redirecting authenticated user from ${pathname} to ${DEFAULT_LOGIN_REDIRECT}`
-    );
     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, url));
   }
 
   // Redirect Unauthenticated Users from Protected Routes
   if (!isLoggedIn && isProtectedRoute) {
-    console.log(
-      `Redirecting unauthenticated user from protected route ${pathname}`
-    );
-
-    // Construct the full callback URL (path + search params)
-    let callbackUrl = pathname;
-    if (url.search) {
-      callbackUrl += url.search;
-    }
+    const callbackUrl = `${pathname}${url.search}`;
 
     const loginUrl = new URL(routes.auth.login.url, url.origin);
-    // Add the callback URL as a search parameter so the user returns after login
     loginUrl.searchParams.set('callbackUrl', callbackUrl);
 
     return NextResponse.redirect(loginUrl);
@@ -60,6 +56,10 @@ export default auth(req => {
   return NextResponse.next();
 });
 
+/**
+ * Middleware configuration.
+ * Defines which routes the middleware should run on.
+ */
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
