@@ -1,17 +1,14 @@
 import js from '@eslint/js';
-import next from 'eslint-config-next';
-import prettier from 'eslint-config-prettier';
+import nextPlugin from '@next/eslint-plugin-next';
 import importPlugin from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  next.configs.recommended,
-  next.configs['core-web-vitals'],
-
   {
     plugins: {
+      '@next/next': nextPlugin,
       import: importPlugin,
     },
 
@@ -23,6 +20,9 @@ export default [
     },
 
     rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+
       'import/order': [
         'error',
         {
@@ -52,9 +52,6 @@ export default [
       '@next/next/no-img-element': 'warn',
     },
   },
-
-  prettier,
-
   {
     ignores: [
       'node_modules/**',
@@ -64,5 +61,5 @@ export default [
       'next-env.d.ts',
       'dist/**',
     ],
-  },
-];
+  }
+);
