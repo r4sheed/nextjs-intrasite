@@ -1,8 +1,10 @@
+import crypt from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
 import { db } from '@/lib/prisma';
 
 import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset-token';
+import { getTwoFactorTokenByEmail } from '@/features/auth/data/two-factor-token';
 import { getVerificationTokenByEmail } from '@/features/auth/data/verification-token';
 import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 
@@ -57,6 +59,31 @@ export const generatePasswordResetToken = async (email: string) => {
     data: {
       email: email,
       token: token,
+      expires: expiresAt,
+    },
+  });
+
+  return result;
+};
+
+/**
+ * Generates a two-factor authentication token. Deletes the old one if it exists.
+ * @param email - User's email.
+ * @return The generated two-factor authentication token.
+ */
+export const generateTwoFactorToken = async (email: string) => {
+  const token = crypt.randomInt(100_000, 999_999).toString();
+  const expiresAt = new Date(Date.now() + TOKEN_LIFETIME_MS); // TODO: Change to shorter duration
+
+  const existingToken = await getTwoFactorTokenByEmail(email);
+  if (existingToken) {
+    await db.twoFactorToken.delete({ where: { id: existingToken.id } });
+  }
+
+  const result = await db.twoFactorToken.create({
+    data: {
+      email,
+      token,
       expires: expiresAt,
     },
   });

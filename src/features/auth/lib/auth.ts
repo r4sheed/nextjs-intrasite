@@ -4,6 +4,7 @@ import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
+import { getTwoFactorConfirmationByUserId } from '@/features/auth/data/two-factor-confirmation';
 import { getUserByIdWithoutPassword } from '@/features/auth/data/user';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -36,10 +37,33 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         return false;
       }
 
-      const data = await getUserByIdWithoutPassword(user.id);
+      const existingUser = await getUserByIdWithoutPassword(user.id);
 
       // Prevent sign in without email verification
-      return !!data?.emailVerified;
+      const emailVerified = !!existingUser?.emailVerified;
+      if (!emailVerified) {
+        return false;
+      }
+
+      // Prevent sign in without completing two-factor authentication
+      if (siteFeatures.twoFactorAuth && existingUser?.twoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
+
+        console.log('Two-factor confirmation:', twoFactorConfirmation);
+
+        if (!twoFactorConfirmation) {
+          return false;
+        }
+
+        // Delete the used two-factor confirmation
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        });
+      }
+
+      return true;
     },
     async jwt({ token, user }) {
       // The user is not logged in

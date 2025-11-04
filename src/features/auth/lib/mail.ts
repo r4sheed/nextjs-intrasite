@@ -2,6 +2,7 @@ import { mail } from '@/lib/mail';
 import { routes } from '@/lib/navigation';
 
 import { ResetTemplate } from '@/features/auth/components/reset-template';
+import { TwoFactorTemplate } from '@/features/auth/components/two-factor-template';
 import { VerificationTemplate } from '@/features/auth/components/verification-template';
 
 const BASE_URL = 'http://localhost:3000';
@@ -52,5 +53,22 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
     return console.error('Error sending reset password email:', error);
   }
 
+  return data;
+};
+
+export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
+  const templateProps = {
+    ...BASE_TEMPLATE_PROPS,
+    token: token,
+  };
+  const { data, error } = await mail.emails.send({
+    from: DEFAULT_FROM,
+    to: email,
+    subject: 'Two-factor authentication code',
+    react: TwoFactorTemplate(templateProps),
+  });
+  if (error) {
+    return console.error('Error sending two-factor code email:', error);
+  }
   return data;
 };

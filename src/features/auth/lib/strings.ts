@@ -25,6 +25,7 @@ export const AUTH_CODES = {
   // Authentication errors
   invalidCredentials: 'invalid-credentials',
   verificationRequired: 'verification-required',
+  twoFactorRequired: 'two-factor-required',
   callbackError: 'callback-error',
 
   // User errors
@@ -66,6 +67,7 @@ export const AUTH_ERRORS = {
   // Authentication errors
   invalidCredentials: 'auth.errors.invalid-credentials',
   verificationRequired: 'auth.errors.verification-required',
+  twoFactorRequired: 'auth.errors.two-factor-required',
   callbackError: 'auth.errors.callback-error',
 
   // User errors
@@ -91,12 +93,13 @@ export const AUTH_ERRORS = {
  * Confirmation messages for successful operations
  */
 export const AUTH_SUCCESS = {
-  login: 'auth.success.login',
-  signup: 'auth.success.signup',
   emailVerified: 'auth.success.email-verified',
-  verificationSent: 'auth.success.verification-sent',
-  passwordUpdated: 'auth.success.password-updated',
+  login: 'auth.success.login',
   passwordResetSent: 'auth.success.password-reset-sent',
+  passwordUpdated: 'auth.success.password-updated',
+  signup: 'auth.success.signup',
+  twoFactorSent: 'auth.success.two-factor-sent',
+  verificationSent: 'auth.success.verification-sent',
 } as const;
 
 /**

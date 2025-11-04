@@ -13,12 +13,16 @@ import {
   invalidCredentials,
   invalidFields,
 } from '@/features/auth/lib/errors';
-import { sendVerificationEmail } from '@/features/auth/lib/mail';
+import {
+  sendVerificationEmail,
+  sendTwoFactorTokenEmail,
+} from '@/features/auth/lib/mail';
 import {
   AUTH_CODES,
   AUTH_ERRORS,
   AUTH_SUCCESS,
 } from '@/features/auth/lib/strings';
+import { generateTwoFactorToken } from '@/features/auth/lib/tokens';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
@@ -80,6 +84,25 @@ export const loginUser = async (
         message: {
           key: AUTH_SUCCESS.verificationSent,
         },
+      });
+    }
+
+    // If two-factor authentication is enabled for this user, generate
+    // a token, send it via email, and return a partial response indicating
+    // that two-factor confirmation is required.
+    if (siteFeatures.twoFactorAuth && verifiedUser.twoFactorEnabled) {
+      const twoFactorToken = await generateTwoFactorToken(verifiedUser.id);
+      // await sendTwoFactorTokenEmail(email, twoFactorToken.token);
+
+      // Return partial response indicating two-factor confirmation is required
+      return response.partial({
+        data: { userId: verifiedUser.id, twoFactorRequired: true },
+        errors: [
+          {
+            code: AUTH_CODES.twoFactorRequired,
+            message: { key: AUTH_ERRORS.twoFactorRequired },
+          },
+        ],
       });
     }
 

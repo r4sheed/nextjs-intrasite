@@ -50,6 +50,7 @@ export type SiteFeatures = typeof siteFeatures;
 export const siteFeatures = {
   socialAuth: true, // Enables authentication via OAuth providers (e.g., Google, GitHub) - See AuthProvider for supported providers.
   emailVerification: true, // Require email verification for signup and login
+  twoFactorAuth: true, // Enables two-factor authentication (2FA) via email codes
 } as const;
 
 export type SiteConfig = typeof siteConfig;

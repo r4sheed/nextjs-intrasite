@@ -9,7 +9,7 @@ import { loginUser as loginUserService } from '@/features/auth/services';
 /**
  * Successful login response data containing the authenticated user's ID.
  */
-export type LoginUserData = { userId: string };
+export type LoginUserData = { userId: string; twoFactorRequired?: boolean };
 
 /**
  * Server Action to authenticate a user with email and password credentials.

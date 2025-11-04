@@ -7,6 +7,7 @@ export const loginSchema = z.object({
   password: z
     .string({ message: AUTH_ERRORS.invalidFields })
     .min(1, { message: AUTH_ERRORS.passwordRequired }),
+  code: z.optional(z.string()),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
