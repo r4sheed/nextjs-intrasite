@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
@@ -12,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -44,6 +46,8 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import type React from 'react';
 
 const useLoginForm = () => {
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -89,17 +93,25 @@ const useLoginForm = () => {
     LoginInput
   >({
     mutationFn: data => execute(loginUser, data),
-    onSuccess: () => {
+    onSuccess: data => {
+      // The service layer returns a partial response when email verification required
+      if (data.status === Status.Partial) return;
+      setIsRedirecting(true);
+
       router.push(middlewareConfig.defaultLoginRedirect);
     },
   });
+
+  const isPending = mutation.isPending || isRedirecting;
+  const isSuccess = mutation.isSuccess || isVerifySuccess;
+  const isError = mutation.isError || !!urlError || verifyError;
 
   const successMessage = mutation.data?.message?.key || verifySuccessMessage;
   const errorMessage =
     mutation.error?.message?.key || urlError || verifyErrorMessage;
 
   const onSubmit = (values: LoginInput) => {
-    if (mutation.isPending) return;
+    if (isPending) return;
     mutation.mutate(values);
   };
 
@@ -107,9 +119,9 @@ const useLoginForm = () => {
     form,
     onSubmit,
     mutation,
-    isPending: mutation.isPending,
-    isSuccess: mutation.isSuccess || isVerifySuccess,
-    isError: mutation.isError || !!urlError || verifyError,
+    isPending: isPending,
+    isSuccess: isSuccess,
+    isError: isError,
     successMessage,
     errorMessage,
   };

@@ -14,7 +14,11 @@ import {
   invalidFields,
 } from '@/features/auth/lib/errors';
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
-import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
+import {
+  AUTH_CODES,
+  AUTH_ERRORS,
+  AUTH_SUCCESS,
+} from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
@@ -64,8 +68,15 @@ export const loginUser = async (
         verificationToken.token
       );
 
-      return response.success({
+      // Return partial response indicating verification is required
+      return response.partial({
         data: { userId: verifiedUser.id },
+        errors: [
+          {
+            code: AUTH_CODES.verificationRequired,
+            message: { key: AUTH_ERRORS.verificationRequired },
+          },
+        ],
         message: {
           key: AUTH_SUCCESS.verificationSent,
         },
