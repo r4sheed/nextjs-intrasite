@@ -329,7 +329,88 @@ const onSubmit = (values: LoginInput) => {
 - Test OAuth error → regular login error sequence (URL should be clean)
 - Test verification success/error → regular login flow
 - Test page refresh after parameter consumption (should be clean)
-- Ensure parameters work correctly on direct navigation## Completed Tasks ✅
+- Ensure parameters work correctly on direct navigation- Ensure parameters work correctly on direct navigation
+
+---
+
+### ⚡ Component Performance Optimization
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**
+Optimize React components for better performance, considering the upcoming React Compiler 1.0 in Next.js 16. While the compiler provides automatic memoization, manual optimization may still be needed for complex cases.
+
+**Current Issues:**
+
+- Components may be re-rendering unnecessarily due to new function/object creation on each render
+- Larger computations in components could benefit from memoization
+- No established patterns for performance optimization in the codebase
+- React Compiler 1.0 (coming with Next.js 16) will provide automatic memoization, but manual control may still be needed
+
+**Proposed Solution:**
+
+With React Compiler 1.0:
+
+- Rely on automatic memoization provided by the compiler for most cases
+- Use `useMemo` and `useCallback` as escape hatches where precise control is needed (e.g., effect dependencies)
+- For new code: prefer compiler-driven optimization over manual memoization
+- For existing code: carefully test before removing manual memoization, as it may change compilation output
+
+Manual optimization where still beneficial:
+
+- Use `useMemo` for expensive computations that depend on props or state
+- Use `useCallback` to memoize functions passed as props to prevent child component re-renders
+- Identify components with heavy computations or frequent re-renders for optimization
+
+**Implementation Steps:**
+
+1. **Prepare for React Compiler adoption:**
+   - Ensure Next.js 16 upgrade includes React Compiler configuration
+   - Add `babel-plugin-react-compiler` or equivalent to build setup
+   - Enable compiler-powered ESLint rules from `eslint-plugin-react-hooks`
+
+2. **Audit existing components:**
+   - Review current `useMemo`/`useCallback` usage - some may be removable with compiler
+   - Identify performance bottlenecks that need manual optimization
+   - Test component re-rendering patterns
+
+3. **Update guidelines:**
+   - Document React Compiler best practices
+   - Update performance optimization patterns to prefer compiler-driven approaches
+   - Include migration guidance for existing manual memoization
+
+**Guidelines Update:**
+
+Update `nextjs.instructions.md` or `typescript-5-es2022.instructions.md` to include:
+
+- React Compiler adoption and configuration
+- When to use manual `useMemo`/`useCallback` vs relying on compiler
+- Performance optimization patterns for compiler-enabled apps
+
+**Affected Files:**
+
+- All React components in `src/components/` and `src/features/*/components/`
+- `src/.github/instructions/nextjs.instructions.md` (add React Compiler guidelines)
+- `src/.github/instructions/typescript-5-es2022.instructions.md` (add performance guidelines)
+- Build configuration files (add React Compiler plugin)
+- `eslint.config.js` (enable compiler-powered linting)
+
+**Benefits:**
+
+- ✅ Automatic performance improvements from React Compiler
+- ✅ Reduced manual optimization burden
+- ✅ Better adherence to React rules through compiler linting
+- ✅ Future-proof performance optimization patterns
+- ✅ Improved build performance with SWC support
+
+**Timeline:**
+
+- Start after Next.js 16 stable release
+- Enable React Compiler incrementally following official adoption guide
+- Test performance improvements and adjust manual optimizations as needed
+
+## Completed Tasks ✅
 
 ### ✅ Fix naming conventions in routes.ts
 
