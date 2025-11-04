@@ -1,9 +1,10 @@
+import { defineConfig } from 'eslint';
 import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import nextPlugin from '@next/eslint-plugin-next';
 import importPlugin from 'eslint-plugin-import';
-import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -11,6 +12,7 @@ export default tseslint.config(
     plugins: {
       '@next/next': nextPlugin,
       import: importPlugin,
+      '@typescript-eslint': tseslint.plugin,
     },
 
     languageOptions: {
@@ -21,9 +23,11 @@ export default tseslint.config(
     },
 
     rules: {
+      // Next.js recommended + core web vitals
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
 
+      // import sorting
       'import/order': [
         'error',
         {
@@ -34,36 +38,12 @@ export default tseslint.config(
             ['type'],
           ],
           pathGroups: [
-            {
-              pattern: 'react',
-              group: 'external',
-              position: 'before',
-            },
-            {
-              pattern: '{next,next/**}',
-              group: 'external',
-              position: 'after',
-            },
-            {
-              pattern: '@/lib/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@/hooks/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@/components/**',
-              group: 'internal',
-              position: 'after',
-            },
-            {
-              pattern: '@/features/**',
-              group: 'internal',
-              position: 'after',
-            },
+            { pattern: 'react', group: 'external', position: 'before' },
+            { pattern: '{next,next/**}', group: 'external', position: 'after' },
+            { pattern: '@/lib/**', group: 'internal', position: 'before' },
+            { pattern: '@/hooks/**', group: 'internal', position: 'before' },
+            { pattern: '@/components/**', group: 'internal', position: 'after' },
+            { pattern: '@/features/**', group: 'internal', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['type'],
           alphabetize: {
@@ -75,13 +55,12 @@ export default tseslint.config(
         },
       ],
 
+      // TS cleanup
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_' },
-      ],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
 
+      // Next-specific rule adjustments
       '@next/next/no-img-element': 'warn',
     },
   },
@@ -94,5 +73,5 @@ export default tseslint.config(
       'next-env.d.ts',
       'dist/**',
     ],
-  }
-);
+  },
+]);
