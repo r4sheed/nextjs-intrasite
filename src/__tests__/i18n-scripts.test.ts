@@ -3,7 +3,7 @@
  *
  * Tests for i18n management utilities (add, validate, sync)
  */
-import { execSync } from 'node:child_process';
+
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
