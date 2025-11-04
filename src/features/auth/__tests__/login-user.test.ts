@@ -100,8 +100,8 @@ describe('loginUser service', () => {
       password: 'pw',
     });
 
-    expect(result.status).toBe('success');
-    if (result.status === 'success') {
+    expect(result.status).toBe('partial');
+    if (result.status === 'partial') {
       expect(result.data).toEqual({ userId: 'user-1' });
       expect(result.message?.key).toBe(AUTH_SUCCESS.verificationSent);
     }
