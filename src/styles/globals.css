@@ -150,11 +150,15 @@
     @apply bg-selection text-selection-foreground;
   }
   html {
-    @apply scroll-smooth;
+    @apply overscroll-none scroll-smooth;
   }
   body {
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
+  }
+
+  [data-slot='layout'] {
+    @apply 3xl:p-2 3xl:fixed:p-0 overscroll-none;
   }
 
   @supports (font: -apple-system-body) and (-webkit-appearance: none) {
@@ -166,6 +170,11 @@
   a:active,
   button:active {
     @apply opacity-60 md:opacity-100;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }
 
@@ -339,12 +348,5 @@
     padding-block: 0.1rem;
     font-family: var(--font-mono);
     font-size: 0.8rem;
-  }
-}
-
-@layer base {
-  button:not(:disabled),
-  [role='button']:not(:disabled) {
-    cursor: pointer;
   }
 }
