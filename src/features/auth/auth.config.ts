@@ -4,7 +4,6 @@ import Credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 
-
 import { routes } from '@/lib/navigation';
 import { db } from '@/lib/prisma';
 
@@ -32,12 +31,8 @@ export const authConfig = {
 
         const { email, password } = parsed.data;
 
-        try {
-          const user = await verifyUserCredentials(email, password);
-          return user;
-        } catch (error) {
-          throw error;
-        }
+        const user = await verifyUserCredentials(email, password);
+        return user;
       },
     }),
   ],
