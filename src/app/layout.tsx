@@ -1,4 +1,3 @@
-
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';
 import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
@@ -58,7 +57,7 @@ export default async function RootLayout({
       </head>
       <body
         className={cn(
-          'text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]',
+          'group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]',
           fontVariables
         )}
       >
