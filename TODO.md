@@ -410,6 +410,42 @@ Update `nextjs.instructions.md` or `typescript-5-es2022.instructions.md` to incl
 - Enable React Compiler incrementally following official adoption guide
 - Test performance improvements and adjust manual optimizations as needed
 
+### ⚡ Caching priority and static prerendering
+
+**Priority:** High  
+**Status:** Not Started
+
+Goal: Make caching a first-class concern and prefer pages that can be statically prerendered using Next.js Cache Components (use cache / cacheLife / cacheTag / revalidateTag / updateTag) and React `Suspense` where appropriate.
+
+Details and expectations:
+
+- Follow the Next.js Cache Components guidance: https://nextjs.org/docs/app/getting-started/cache-components — pay attention to runtime APIs (cookies, headers, searchParams, connection, draftMode, etc.) that make a route dynamic.
+- Where possible, make pages statically prerenderable by adding `use cache` and `cacheLife` at Page/Layout or helper function level.
+- Use the Data Cache thoughtfully: avoid making an entire route dynamic because of an internal fetch — move fetch logic into cached helpers and tag cached data (`cacheTag`, `revalidateTag`, `updateTag`) to enable targeted invalidation and revalidation.
+- Use `Suspense` boundaries for streaming + partial prerendering (PPR): render a fast static shell and stream dynamic parts in with fallback UI.
+- Authentication (auth): because we want to keep pages prerenderable, perform user-specific checks (session validation) in middleware or (soon) a proxy layer. The middleware/proxy should handle auth verification and forward any necessary headers/identifiers to internal APIs.
+- Documentation: later update project guidelines in `docs/` and `.github/instructions` with examples (when to use `use cache`, when to wrap with `Suspense`, and how to design middleware/proxy auth flows while preserving static shells).
+
+Acceptance criteria:
+
+1. This item exists in the repository `TODO.md` (this entry).
+2. A follow-up task will run an audit over `src/app` and `src/features` routes to mark which pages/components can move to `use cache` and where `Suspense` boundaries are needed.
+3. A separate TODO/plan exists for middleware -> proxy based auth verification and for updating `next.config.ts` to enable `cacheComponents: true` if the team approves.
+
+Notes / assumptions:
+
+- The repo uses the Next.js App Router (project structure indicates this).
+- Enabling Cache Components requires a config change (`next.config.ts`). Only apply if the team accepts the runtime/behavioural changes.
+
+Proxy considerations:
+
+- Follow the Next.js Proxy guidance: https://nextjs.org/docs/app/getting-started/proxy
+- Use cases: quick redirects, header modifications, A/B rewrites, and optimistic checks (permission-based redirects). Proxy is effective for running fast pre-request logic that can rewrite/redirect or modify headers.
+- Limitations: Proxy is not intended for slow data fetching or full session management/authorization. Avoid heavy IO inside `proxy.ts`. Do not rely on Proxy for long-running auth flows.
+- Convention: place a single `proxy.ts` (or `.js`) at the project root or `src/` and organize logic into modules imported by that file. Only one `proxy.ts` is supported per project; use `matcher` to scope proxy rules to paths.
+- Behavior notes: fetch options like `options.cache`, `options.next.revalidate`, or `options.next.tags` have no effect inside Proxy. Proxy can rewrite, redirect, modify headers, or respond directly.
+- How this relates to caching/auth: Proxy is a good place for optimistic auth checks or request-based rewrites before a route renders, and for header transformations that help downstream APIs; however, for robust session validation and auth flows prefer middleware (or a dedicated backend auth service). Use Proxy for lightweight checks and middleware/proxy together to preserve static shells while handling auth and header forwarding.
+
 ## Completed Tasks ✅
 
 ### ✅ Fix naming conventions in routes.ts
