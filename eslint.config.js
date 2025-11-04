@@ -1,33 +1,43 @@
-import { defineConfig } from 'eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import nextPlugin from '@next/eslint-plugin-next';
 import importPlugin from 'eslint-plugin-import';
 
-export default defineConfig([
+export default [
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'dist/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  reactHooks.configs.flat.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
+      'react-hooks': reactHooks,
+      '@typescript-eslint': tseslint.plugin,
       '@next/next': nextPlugin,
       import: importPlugin,
-      '@typescript-eslint': tseslint.plugin,
     },
-
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         project: './tsconfig.json',
       },
     },
-
     rules: {
-      // Next.js recommended + core web vitals
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
+      // React Hooks
+      ...reactHooks.configs.recommended.rules,
+
+      // Next.js
+      '@next/next/no-html-link-for-pages': 'error',
+      '@next/next/no-img-element': 'warn',
 
       // import sorting
       'import/order': [
@@ -57,23 +67,13 @@ export default defineConfig([
         },
       ],
 
-      // TS cleanup
+      // TypeScript
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-
-      // Next-specific rule adjustments
-      '@next/next/no-img-element': 'warn',
     },
   },
-  {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
-      'next-env.d.ts',
-      'dist/**',
-    ],
-  },
-]);
+];
