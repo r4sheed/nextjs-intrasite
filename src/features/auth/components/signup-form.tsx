@@ -208,6 +208,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               src="/assets/svg/sign-up-pana.svg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
+              priority
               fill
             />
           </div>

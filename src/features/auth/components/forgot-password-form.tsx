@@ -147,6 +147,7 @@ const ForgotPasswordForm = ({
               src="/assets/svg/forgot-password-amico.svg"
               alt="Security"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              priority
               fill
             />
           </div>
