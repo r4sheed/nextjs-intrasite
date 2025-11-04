@@ -129,7 +129,7 @@ function extractConstantValues(content: string): string[] {
 async function validateConstants(
   constantsPath: string,
   localePath: string,
-  domain: string
+  _domain: string
 ): Promise<void> {
   if (!existsSync(constantsPath)) {
     warnings.push({
