@@ -24,7 +24,7 @@ export function Providers({
     <QueryClientProvider client={client}>
       <SessionProvider session={session}>
         <ThemeProvider>
-          <ActiveThemeProvider initialTheme="default">
+          <ActiveThemeProvider>
             <LayoutProvider>{children}</LayoutProvider>
           </ActiveThemeProvider>
         </ThemeProvider>
