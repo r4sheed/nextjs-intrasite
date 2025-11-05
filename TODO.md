@@ -1,6 +1,76 @@
-# TODO List
+### 🔄 Session Data Synchronization with Database
 
-## Future Tasks
+**Priority:** High  
+**Status:** Not Started
+
+**Description:**  
+Implement automatic synchronization of user data between database and session to ensure session always reflects the latest user state (role, permissions, etc.). Currently, session data becomes stale when user data is modified in the database without re-authentication.
+
+**Current Issue:**  
+When user data (e.g., role) is modified in the database, the session retains old values until re-login. This creates security risks where users may retain or lose permissions inappropriately.
+
+**Proposed Solution:**  
+Update the JWT callback to always fetch fresh user data from the database, ensuring session data stays synchronized:
+
+```typescript
+// In src/features/auth/lib/auth.ts
+async jwt({ token, user }) {
+  // The user is not logged in
+  if (!token.sub) {
+    return token;
+  }
+
+  // Always fetch fresh user data from database to keep session synchronized
+  const dbUser = await getUserByIdWithoutPassword(token.sub);
+  if (dbUser) {
+    token.role = dbUser.role;
+    token.name = dbUser.name;
+    token.email = dbUser.email;
+    // Add other fields that might change during session
+  }
+
+  return token;
+},
+```
+
+**Benefits:**
+
+- ✅ Session always reflects current database state
+- ✅ Automatic permission updates without re-login
+- ✅ Security: Prevents stale permission issues
+- ✅ User experience: Changes take effect immediately
+
+**Performance Considerations:**
+
+- Database call on every JWT refresh (typically every request)
+- Consider caching strategy if performance becomes an issue
+- Alternative: Selective refresh only for critical fields
+
+**Implementation Steps:**
+
+1. Update JWT callback in `src/features/auth/lib/auth.ts`
+2. Add database query to fetch fresh user data
+3. Test session synchronization after database updates
+4. Monitor performance impact
+5. Consider caching optimization if needed
+
+**Affected Files:**
+
+- `src/features/auth/lib/auth.ts` (JWT callback update)
+
+**Testing:**
+
+- Test role changes take effect immediately in session
+- Test other user fields synchronize properly
+- Test performance impact on session requests
+- Test error handling when database is unavailable
+
+**NextAuth Documentation Reference:**
+
+- JWT Callback: https://authjs.dev/guides/basics/callbacks#jwt-callback
+- Session Management: https://authjs.dev/guides/basics/session-management
+
+---
 
 ### ⏱️ Resend Cooldown Timer for 2FA
 
