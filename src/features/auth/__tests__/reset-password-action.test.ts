@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CORE_CODES } from '@/lib/errors/codes';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { resetPassword as resetPasswordAction } from '@/features/auth/actions';
@@ -73,7 +74,7 @@ describe('resetPassword action', () => {
 
   it('should handle service errors properly', async () => {
     const mockError = {
-      code: 'INTERNAL_SERVER_ERROR',
+      code: CORE_CODES.internalServerError,
       message: { key: 'errors.internal_server_error' },
       httpStatus: 500,
     };
@@ -86,7 +87,7 @@ describe('resetPassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe('INTERNAL_SERVER_ERROR');
+      expect(response.code).toBe(CORE_CODES.internalServerError);
     }
   });
 
