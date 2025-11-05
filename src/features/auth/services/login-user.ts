@@ -1,10 +1,13 @@
 import { AuthError } from 'next-auth';
 
+import { AppError, internalServerError } from '@/lib/errors';
 import { siteFeatures } from '@/lib/config';
-import { internalServerError } from '@/lib/errors';
+import { routes } from '@/lib/navigation';
 import { type Response, response } from '@/lib/response';
+import { maskEmail } from '@/lib/utils';
 
 import { type LoginUserData } from '@/features/auth/actions';
+import { getTwoFactorTokenByUserId } from '@/features/auth/data/two-factor-token';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
@@ -22,8 +25,10 @@ import {
   AUTH_ERRORS,
   AUTH_SUCCESS,
 } from '@/features/auth/lib/strings';
-import { generateTwoFactorToken } from '@/features/auth/lib/tokens';
-import { generateVerificationToken } from '@/features/auth/lib/tokens';
+import {
+  generateTwoFactorToken,
+  generateVerificationToken,
+} from '@/features/auth/lib/tokens';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 
 /**
@@ -88,22 +93,51 @@ export const loginUser = async (
     }
 
     // If two-factor authentication is enabled for this user, generate
-    // a token, send it via email, and return a partial response indicating
-    // that two-factor confirmation is required.
+    // a token, send it via email, and return a success response with
+    // redirect URL to the verification page.
     if (siteFeatures.twoFactorAuth && verifiedUser.twoFactorEnabled) {
-      const twoFactorToken = await generateTwoFactorToken(verifiedUser.id);
-      // await sendTwoFactorTokenEmail(email, twoFactorToken.token);
+      try {
+        const existingToken = await getTwoFactorTokenByUserId(verifiedUser.id);
+        const now = new Date();
+        let twoFactorToken = existingToken;
+        let createdNewToken = false;
 
-      // Return partial response indicating two-factor confirmation is required
-      return response.partial({
-        data: { userId: verifiedUser.id, twoFactorRequired: true },
-        errors: [
-          {
-            code: AUTH_CODES.twoFactorRequired,
-            message: { key: AUTH_ERRORS.twoFactorRequired },
+        if (!twoFactorToken || twoFactorToken.expires <= now) {
+          twoFactorToken = await generateTwoFactorToken(verifiedUser.id);
+          createdNewToken = true;
+        }
+
+        if (!twoFactorToken) {
+          return response.failure(internalServerError());
+        }
+
+        const maskedEmail = maskEmail(email);
+
+        if (createdNewToken) {
+          await sendTwoFactorTokenEmail({
+            email,
+            token: twoFactorToken.token,
+            sessionId: twoFactorToken.id,
+          });
+        }
+
+        // Return success response with redirect URL for 2FA verification
+        // No message - just redirect silently
+        return response.success({
+          data: {
+            userId: verifiedUser.id,
+            requiresVerification: true,
+            redirectUrl: `${routes.auth.verify.url}?type=2fa&sessionId=${twoFactorToken.id}&email=${encodeURIComponent(maskedEmail)}`,
           },
-        ],
-      });
+        });
+      } catch (error) {
+        // Catch rate-limiting or other token generation errors
+        if (error instanceof AppError) {
+          return response.failure(error);
+        }
+        // For unexpected errors, return a generic internal server error
+        return response.failure(internalServerError());
+      }
     }
 
     // At this point credentials are valid and the account is either verified
@@ -133,6 +167,11 @@ export const loginUser = async (
         case 'CallbackRouteError':
           return response.failure(callbackError(error));
       }
+    }
+
+    // Handle specific AppErrors, like rate limiting from token generation
+    if (error instanceof AppError) {
+      return response.failure(error);
     }
 
     // TODO: Log the error for debugging

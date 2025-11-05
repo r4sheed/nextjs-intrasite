@@ -145,4 +145,122 @@ describe('loginUser service', () => {
       redirect: false,
     });
   });
+
+  it('reuses active two-factor token without generating a new one', async () => {
+    const existingToken = {
+      id: 'token-123',
+      userId: 'user-3',
+      token: '654321',
+      attempts: 0,
+      expires: new Date(Date.now() + 5 * 60 * 1000),
+      createdAt: new Date(),
+    };
+
+    const verifyUserCredentials = vi.fn().mockResolvedValue({
+      id: 'user-3',
+      emailVerified: true,
+      twoFactorEnabled: true,
+    });
+
+    vi.doMock('@/features/auth/data/user', () => ({ verifyUserCredentials }));
+
+    const getTwoFactorTokenByUserId = vi.fn().mockResolvedValue(existingToken);
+
+    vi.doMock('@/features/auth/data/two-factor-token', () => ({
+      getTwoFactorTokenByUserId,
+    }));
+
+    const generateTwoFactorToken = vi.fn();
+    const generateVerificationToken = vi.fn();
+
+    vi.doMock('@/features/auth/lib/tokens', () => ({
+      generateTwoFactorToken,
+      generateVerificationToken,
+    }));
+
+    const sendTwoFactorTokenEmail = vi.fn();
+    vi.doMock('@/features/auth/lib/mail', () => ({
+      sendVerificationEmail: vi.fn(),
+      sendTwoFactorTokenEmail,
+    }));
+
+    vi.doMock('@/features/auth/lib/auth', () => ({ signIn: vi.fn() }));
+
+    const { loginUser } = await import('@/features/auth/services/login-user');
+    const { Status } = await import('@/lib/response');
+
+    const result = await loginUser({
+      email: 'user@example.com',
+      password: 'super-secret',
+    });
+
+    expect(result.status).toBe(Status.Success);
+    if (result.status === Status.Success) {
+      expect(result.data?.requiresVerification).toBe(true);
+      expect(result.data?.redirectUrl).toContain(existingToken.id);
+    }
+
+    expect(generateTwoFactorToken).not.toHaveBeenCalled();
+    expect(sendTwoFactorTokenEmail).not.toHaveBeenCalled();
+  });
+
+  it('generates a new token and email when no active two-factor token exists', async () => {
+    const verifyUserCredentials = vi.fn().mockResolvedValue({
+      id: 'user-4',
+      emailVerified: true,
+      twoFactorEnabled: true,
+    });
+
+    vi.doMock('@/features/auth/data/user', () => ({ verifyUserCredentials }));
+
+    vi.doMock('@/features/auth/data/two-factor-token', () => ({
+      getTwoFactorTokenByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    const newToken = {
+      id: 'token-456',
+      userId: 'user-4',
+      token: '123456',
+      attempts: 0,
+      expires: new Date(Date.now() + 5 * 60 * 1000),
+      createdAt: new Date(),
+    };
+
+    const generateTwoFactorToken = vi.fn().mockResolvedValue(newToken);
+    const generateVerificationToken = vi.fn();
+
+    vi.doMock('@/features/auth/lib/tokens', () => ({
+      generateTwoFactorToken,
+      generateVerificationToken,
+    }));
+
+    const sendTwoFactorTokenEmail = vi.fn();
+    vi.doMock('@/features/auth/lib/mail', () => ({
+      sendVerificationEmail: vi.fn(),
+      sendTwoFactorTokenEmail,
+    }));
+
+    vi.doMock('@/features/auth/lib/auth', () => ({ signIn: vi.fn() }));
+
+    const { loginUser } = await import('@/features/auth/services/login-user');
+    const { Status } = await import('@/lib/response');
+
+    const result = await loginUser({
+      email: 'user@example.com',
+      password: 'super-secret',
+    });
+
+    expect(result.status).toBe(Status.Success);
+    if (result.status === Status.Success) {
+      expect(result.data?.requiresVerification).toBe(true);
+      expect(result.data?.redirectUrl).toContain(newToken.id);
+    }
+
+    expect(generateTwoFactorToken).toHaveBeenCalledWith('user-4');
+    expect(sendTwoFactorTokenEmail).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      token: newToken.token,
+      sessionId: newToken.id,
+    });
+  });
 });

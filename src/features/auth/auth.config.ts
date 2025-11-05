@@ -7,7 +7,14 @@ import Google from 'next-auth/providers/google';
 import { routes } from '@/lib/navigation';
 import { db } from '@/lib/prisma';
 
-import { verifyUserCredentials } from '@/features/auth/data/user';
+import {
+  deleteTwoFactorConfirmation,
+  getTwoFactorConfirmationByUserId,
+} from '@/features/auth/data/two-factor-confirmation';
+import {
+  getUserByEmail,
+  verifyUserCredentials,
+} from '@/features/auth/data/user';
 import { loginSchema } from '@/features/auth/schemas';
 
 export const authConfig = {
@@ -29,10 +36,26 @@ export const authConfig = {
           return null;
         }
 
-        const { email, password } = parsed.data;
+        const { email, password, twoFactorBypass } = parsed.data;
 
-        const user = await verifyUserCredentials(email, password);
-        return user;
+        // Check if user has a TwoFactorConfirmation (bypass password check)
+        if (twoFactorBypass) {
+          const user = await getUserByEmail(email);
+          if (user) {
+            const confirmation = await getTwoFactorConfirmationByUserId(
+              user.id
+            );
+            if (confirmation) {
+              // User has completed 2FA, allow sign-in without password verification
+              return user;
+            }
+          }
+          // If no confirmation found, fall through to normal password verification
+        }
+
+        // Normal password verification
+        const verifiedUser = await verifyUserCredentials(email, password);
+        return verifiedUser;
       },
     }),
   ],
@@ -41,4 +64,21 @@ export const authConfig = {
     error: routes.error.url,
   },
   session: { strategy: 'jwt' },
+  callbacks: {
+    async signIn({ user }) {
+      // Check if user has completed 2FA verification
+      if (user.id) {
+        const confirmation = await getTwoFactorConfirmationByUserId(user.id);
+
+        // If 2FA confirmation exists, allow sign-in and delete the confirmation
+        if (confirmation) {
+          await deleteTwoFactorConfirmation(user.id);
+          return true;
+        }
+      }
+
+      // Allow sign-in for users without 2FA enabled
+      return true;
+    },
+  },
 } satisfies NextAuthConfig;

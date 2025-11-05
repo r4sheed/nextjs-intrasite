@@ -25,6 +25,48 @@ export const BCRYPT_SALT_ROUNDS = 10;
 export const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
 
 /**
+ * Two-factor authentication token lifetime in milliseconds (5 minutes)
+ *
+ * @remarks
+ * Shorter lifetime for 2FA codes for enhanced security.
+ * Users have 5 minutes to enter the code from their email.
+ */
+export const TWO_FACTOR_TOKEN_LIFETIME_MS = 5 * 60 * 1000;
+
+/**
+ * Minimum time that must elapse before a new 2FA token can be sent.
+ *
+ * @remarks
+ * Used to enforce resend rate limiting. Aligns with TWO_FACTOR_TOKEN_LIFETIME_MS
+ * by default so users cannot request multiple codes within the same validity window.
+ */
+export const TWO_FACTOR_RESEND_COOLDOWN_MS = 5 * 60 * 1000;
+
+/**
+ * Maximum number of resend requests allowed within the configured window.
+ */
+export const TWO_FACTOR_RESEND_MAX_PER_WINDOW = 3;
+
+/**
+ * Rolling window used to count resend requests (in milliseconds).
+ */
+export const TWO_FACTOR_RESEND_WINDOW_MS = 60 * 60 * 1000;
+
+/**
+ * Duration to retain historical two-factor tokens for rate-limit auditing.
+ */
+export const TWO_FACTOR_TOKEN_RETENTION_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Maximum allowed failed attempts for 2FA code verification
+ *
+ * @remarks
+ * After this many failed attempts, the token is invalidated and
+ * the user must request a new code.
+ */
+export const TWO_FACTOR_MAX_ATTEMPTS = 3;
+
+/**
  * Redirect timeout in milliseconds after successful operations
  *
  * @remarks
@@ -32,3 +74,13 @@ export const TOKEN_LIFETIME_MS = 60 * 60 * 1000;
  * Used in email verification and password reset flows.
  */
 export const REDIRECT_TIMEOUT_MS = 2500;
+
+/**
+ * Placeholder password used when bypassing the credential check after 2FA confirmation.
+ *
+ * @remarks
+ * NextAuth's credentials authorize schema expects a password field. When the
+ * two-factor bypass flag is present we supply this placeholder value so schema
+ * validation passes without requiring the user's actual password.
+ */
+export const TWO_FACTOR_BYPASS_PLACEHOLDER = '__two-factor-bypass__';

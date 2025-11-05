@@ -75,9 +75,9 @@ export const routes = {
       label: 'navigation.auth.new-password',
       access: 'auth',
     },
-    verifyEmail: {
-      url: '/auth/verify-email',
-      label: 'navigation.auth.verify-email',
+    verify: {
+      url: '/auth/verify',
+      label: 'navigation.auth.verify',
       access: 'public',
     },
   },

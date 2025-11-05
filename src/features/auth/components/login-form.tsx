@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
-import { is } from 'zod/v4/locales';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,12 +31,6 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
 
 import { loginUser } from '@/features/auth/actions';
 import { AuthFooter } from '@/features/auth/components/auth-footer';
@@ -54,7 +47,6 @@ import type React from 'react';
 
 const useLoginForm = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [isTwoFactor, setIsTwoFactor] = useState(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,9 +71,6 @@ const useLoginForm = () => {
       case AUTH_CODES.tokenExpired:
         return AUTH_ERRORS.tokenExpired;
       default:
-        if (verifyError.startsWith('AUTH_')) {
-          return AUTH_ERRORS.verificationFailed;
-        }
         return '';
     }
   })();
@@ -102,15 +91,15 @@ const useLoginForm = () => {
   >({
     mutationFn: data => execute(loginUser, data),
     onSuccess: response => {
-      // Handle two-factor authentication requirement
-      if (response.status === Status.Partial) {
-        if (response.data.twoFactorRequired) {
-          setIsTwoFactor(true);
-          return;
-        }
+      setIsRedirecting(true);
+
+      // Check for redirect requirement (2FA verification)
+      if (response.data?.redirectUrl) {
+        router.push(response.data.redirectUrl);
+        return;
       }
 
-      setIsRedirecting(true);
+      // Normal login success - redirect to dashboard
       router.push(middlewareConfig.defaultLoginRedirect);
     },
   });
@@ -135,7 +124,6 @@ const useLoginForm = () => {
     isPending: isPending,
     isSuccess: isSuccess,
     isError: isError,
-    isTwoFactor,
     successMessage,
     errorMessage,
   };
@@ -148,7 +136,6 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
     isPending,
     isSuccess,
     isError,
-    isTwoFactor,
     successMessage,
     errorMessage,
   } = useLoginForm();
@@ -156,171 +143,118 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
-        <CardContent
-          className={`grid p-0 md:grid-cols-${isTwoFactor ? '1' : '2'}`}
-        >
+        <CardContent className="grid p-0 md:grid-cols-2">
           <form
             id="form-rhf-login"
             onSubmit={form.handleSubmit(onSubmit)}
             className="p-6 md:p-8"
           >
-            {isTwoFactor ? (
-              <FieldGroup>
-                <Field className="items-center text-center">
-                  <h1 className="text-2xl font-bold">
-                    Enter verification code
-                  </h1>
-                  <p className="text-muted-foreground text-sm text-balance">
-                    We sent a 6-digit code to your email
-                  </p>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="otp" className="sr-only">
-                    Verification code
-                  </FieldLabel>
-                  <InputOTP
-                    maxLength={6}
-                    id="otp"
-                    required
-                    containerClassName="gap-4 flex justify-center"
-                  >
-                    <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:h-16 *:data-[slot=input-otp-slot]:w-12 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border *:data-[slot=input-otp-slot]:text-xl">
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:h-16 *:data-[slot=input-otp-slot]:w-12 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border *:data-[slot=input-otp-slot]:text-xl">
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                  <FieldDescription className="text-center">
-                    Enter the 6-digit code sent to your email.
-                  </FieldDescription>
-                </Field>
-                <Field>
-                  <LoadingButton type="submit">Verify</LoadingButton>
-                  <FieldDescription className="text-center">
-                    Didn&apos;t receive the code? <a href="#">Resend</a>
-                  </FieldDescription>
-                </Field>
-              </FieldGroup>
-            ) : (
-              <FieldGroup>
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <h1 className="text-2xl font-bold">
-                    {AUTH_LABELS.loginTitle}
-                  </h1>
-                  <p className="text-muted-foreground text-balance">
-                    {AUTH_LABELS.loginSubtitle}
-                  </p>
-                </div>
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">{AUTH_LABELS.loginTitle}</h1>
+                <p className="text-muted-foreground text-balance">
+                  {AUTH_LABELS.loginSubtitle}
+                </p>
+              </div>
 
-                <Controller
-                  name="email"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        {AUTH_LABELS.emailLabel}
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        id={field.name}
-                        type="email"
-                        autoComplete="email"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_LABELS.emailPlaceholder}
-                        disabled={isPending}
-                        required
-                      />
-                      <FieldDescription>
-                        {AUTH_LABELS.emailDescription}
-                      </FieldDescription>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name="password"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center">
-                        <FieldLabel htmlFor={field.name}>
-                          {AUTH_LABELS.passwordLabel}
-                        </FieldLabel>
-                        <Link
-                          href={routes.auth.forgotPassword.url}
-                          className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
-                        >
-                          {AUTH_LABELS.forgotPasswordLink}
-                        </Link>
-                      </div>
-                      <PasswordInput
-                        {...field}
-                        id={field.name}
-                        autoComplete="current-password"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_LABELS.passwordPlaceholder}
-                        disabled={isPending}
-                        required
-                      />
-                      <FieldDescription>
-                        {AUTH_LABELS.passwordDescription}
-                      </FieldDescription>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Field>
-                  {isSuccess && <FormSuccess message={successMessage} />}
-                  {isError && <FormError message={errorMessage} />}
-                  <LoadingButton type="submit" loading={isPending}>
-                    {AUTH_LABELS.loginButton}
-                  </LoadingButton>
-                </Field>
-
-                {siteFeatures.socialAuth && (
-                  <>
-                    <FieldSeparator>
-                      {AUTH_LABELS.orContinueWith}
-                    </FieldSeparator>
-                    <Field className="grid grid-cols-2 gap-4">
-                      <SocialProviders disabled={isPending} />
-                    </Field>
-                  </>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {AUTH_LABELS.emailLabel}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="email"
+                      autoComplete="email"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_LABELS.emailPlaceholder}
+                      disabled={isPending}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_LABELS.emailDescription}
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
+              />
 
-                <FieldDescription className="text-center">
-                  {AUTH_LABELS.signupCtaText}{' '}
-                  <Link href={routes.auth.signUp.url}>
-                    {AUTH_LABELS.signupCtaLink}
-                  </Link>
-                </FieldDescription>
-              </FieldGroup>
-            )}
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor={field.name}>
+                        {AUTH_LABELS.passwordLabel}
+                      </FieldLabel>
+                      <Link
+                        href={routes.auth.forgotPassword.url}
+                        className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
+                      >
+                        {AUTH_LABELS.forgotPasswordLink}
+                      </Link>
+                    </div>
+                    <PasswordInput
+                      {...field}
+                      id={field.name}
+                      autoComplete="current-password"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_LABELS.passwordPlaceholder}
+                      disabled={isPending}
+                      required
+                    />
+                    <FieldDescription>
+                      {AUTH_LABELS.passwordDescription}
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Field>
+                {isSuccess && <FormSuccess message={successMessage} />}
+                {isError && <FormError message={errorMessage} />}
+                <LoadingButton type="submit" loading={isPending}>
+                  {AUTH_LABELS.loginButton}
+                </LoadingButton>
+              </Field>
+
+              {siteFeatures.socialAuth && (
+                <>
+                  <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
+                  <Field className="grid grid-cols-2 gap-4">
+                    <SocialProviders disabled={isPending} />
+                  </Field>
+                </>
+              )}
+
+              <FieldDescription className="text-center">
+                {AUTH_LABELS.signupCtaText}{' '}
+                <Link href={routes.auth.signUp.url}>
+                  {AUTH_LABELS.signupCtaLink}
+                </Link>
+              </FieldDescription>
+            </FieldGroup>
           </form>
 
-          {!isTwoFactor && (
-            <div className="bg-muted relative hidden md:block">
-              <Image
-                src="/assets/svg/tablet-login-pana.svg"
-                alt="Image"
-                className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
-                priority
-                fill
-              />
-            </div>
-          )}
+          <div className="bg-muted relative hidden md:block">
+            <Image
+              src="/assets/svg/tablet-login-pana.svg"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-contain dark:brightness-[0.2] dark:grayscale"
+              priority
+              fill
+            />
+          </div>
         </CardContent>
       </Card>
 

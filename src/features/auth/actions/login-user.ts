@@ -7,9 +7,14 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { loginUser as loginUserService } from '@/features/auth/services';
 
 /**
- * Successful login response data containing the authenticated user's ID.
+ * Successful login response data.
+ * May include redirect URL if additional verification is required (2FA).
  */
-export type LoginUserData = { userId: string; twoFactorRequired?: boolean };
+export type LoginUserData = {
+  userId: string;
+  requiresVerification?: boolean;
+  redirectUrl?: string;
+};
 
 /**
  * Server Action to authenticate a user with email and password credentials.

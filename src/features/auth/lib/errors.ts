@@ -129,3 +129,59 @@ export const tokenExpired = (tokenId?: string) =>
     httpStatus: HTTP_STATUS.GONE,
     details: tokenId ? { tokenId } : undefined,
   });
+
+/**
+ * 401 - Invalid 2FA code.
+ * Used when the user enters an incorrect verification code.
+ */
+export const twoFactorCodeInvalid = () =>
+  new AppError({
+    code: AUTH_CODES.twoFactorCodeInvalid,
+    message: { key: AUTH_ERRORS.twoFactorCodeInvalid },
+    httpStatus: HTTP_STATUS.UNAUTHORIZED,
+  });
+
+/**
+ * 410 - 2FA code expired.
+ * Used when a 2FA token has passed its expiry time.
+ */
+export const twoFactorCodeExpired = () =>
+  new AppError({
+    code: AUTH_CODES.twoFactorCodeExpired,
+    message: { key: AUTH_ERRORS.twoFactorCodeExpired },
+    httpStatus: HTTP_STATUS.GONE,
+  });
+
+/**
+ * 429 - Too many failed 2FA attempts.
+ * Used when the user has exceeded the maximum number of failed verification attempts.
+ */
+export const twoFactorMaxAttempts = () =>
+  new AppError({
+    code: AUTH_CODES.twoFactorMaxAttempts,
+    message: { key: AUTH_ERRORS.twoFactorMaxAttempts },
+    httpStatus: HTTP_STATUS.TOO_MANY_REQUESTS,
+  });
+
+/**
+ * 429 - Rate limit for sending 2FA codes exceeded.
+ * Used when the user requests a new 2FA code too frequently (e.g., within 5 minutes).
+ */
+export const rateLimitExceeded = () =>
+  new AppError({
+    code: AUTH_CODES.rateLimitExceeded,
+    message: { key: AUTH_ERRORS.rateLimitExceeded },
+    httpStatus: HTTP_STATUS.TOO_MANY_REQUESTS,
+  });
+
+/**
+ * 400 - Two-factor session missing error.
+ * Used when a two-factor authentication session is not found.
+ * @returns AppError with status 400.
+ */
+export const twoFactorSessionMissing = () =>
+  new AppError({
+    code: AUTH_CODES.twoFactorSessionMissing,
+    message: { key: AUTH_ERRORS.twoFactorSessionMissing },
+    httpStatus: HTTP_STATUS.BAD_REQUEST,
+  });

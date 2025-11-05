@@ -1,11 +1,15 @@
 import { mail } from '@/lib/mail';
 import { routes } from '@/lib/navigation';
+import { maskEmail } from '@/lib/utils';
 
 import { ResetTemplate } from '@/features/auth/components/reset-template';
 import { TwoFactorTemplate } from '@/features/auth/components/two-factor-template';
 import { VerificationTemplate } from '@/features/auth/components/verification-template';
 
-const BASE_URL = 'http://localhost:3000';
+const MAIL_BASE_URL =
+  process.env.NEXTAUTH_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  'http://localhost:3000';
 const DEFAULT_FROM = 'onboarding@resend.dev';
 const BASE_TEMPLATE_PROPS = {
   companyName: 'Your App Name',
@@ -13,7 +17,7 @@ const BASE_TEMPLATE_PROPS = {
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const url = `${BASE_URL}${routes.auth.verifyEmail.url}?token=${token}`;
+  const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}`;
 
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
@@ -35,7 +39,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const url = `${BASE_URL}${routes.auth.newPassword.url}?token=${token}`;
+  const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}`;
 
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
@@ -56,14 +60,42 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   return data;
 };
 
-export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
+type TwoFactorMailOptions = Readonly<{
+  email: string;
+  token: string;
+  sessionId: string;
+}>;
+
+export const sendTwoFactorTokenEmail = async (
+  options: TwoFactorMailOptions
+) => {
+  const maskedEmail = maskEmail(options.email);
+  const verificationUrl = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=2fa&sessionId=${encodeURIComponent(
+    options.sessionId
+  )}&email=${encodeURIComponent(maskedEmail)}&code=${encodeURIComponent(
+    options.token
+  )}`;
+
+  // TEMPORARY: Log to console instead of sending email to avoid daily limit
+  console.log('\n========================================');
+  console.log('🔐 TWO-FACTOR CODE (DEVELOPMENT MODE)');
+  console.log('========================================');
+  console.log(`Email: ${options.email}`);
+  console.log(`Code: ${options.token}`);
+  console.log(`URL:  ${verificationUrl}`);
+  console.log('========================================\n');
+
+  return { success: true };
+
+  /* ORIGINAL CODE - RE-ENABLE IN PRODUCTION
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
-    token: token,
+    token: options.token,
+    verificationUrl,
   };
   const { data, error } = await mail.emails.send({
     from: DEFAULT_FROM,
-    to: email,
+    to: options.email,
     subject: 'Two-factor authentication code',
     react: TwoFactorTemplate(templateProps),
   });
@@ -71,4 +103,5 @@ export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
     return console.error('Error sending two-factor code email:', error);
   }
   return data;
+  */
 };

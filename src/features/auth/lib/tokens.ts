@@ -1,12 +1,26 @@
 import crypt from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
+import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 
+import {
+  countTwoFactorTokensSince,
+  createTwoFactorToken,
+  deleteTwoFactorTokensBefore,
+  getTwoFactorTokenByUserId,
+} from '@/features/auth/data/two-factor-token';
 import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset-token';
-import { getTwoFactorTokenByEmail } from '@/features/auth/data/two-factor-token';
 import { getVerificationTokenByEmail } from '@/features/auth/data/verification-token';
-import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
+import {
+  TOKEN_LIFETIME_MS,
+  TWO_FACTOR_RESEND_COOLDOWN_MS,
+  TWO_FACTOR_RESEND_MAX_PER_WINDOW,
+  TWO_FACTOR_RESEND_WINDOW_MS,
+  TWO_FACTOR_TOKEN_LIFETIME_MS,
+  TWO_FACTOR_TOKEN_RETENTION_MS,
+} from '@/features/auth/lib/config';
+import { rateLimitExceeded } from '@/features/auth/lib/errors';
 
 /**
  * Generates a verification token. Deletes the old one if it exists.
@@ -67,26 +81,58 @@ export const generatePasswordResetToken = async (email: string) => {
 };
 
 /**
- * Generates a two-factor authentication token. Deletes the old one if it exists.
- * @param email - User's email.
- * @return The generated two-factor authentication token.
+ * Generates a two-factor authentication token with resend safeguards.
+ *
+ * This function contains the business logic for 2FA token generation:
+ * 1. Allows one immediate resend even within the cooldown window.
+ * 2. Enforces cooldown for additional resend attempts.
+ * 3. Applies a rolling window limit to mitigate abuse.
+ * 4. Deletes stale tokens after issuance to reduce storage.
+ * 5. Generates and persists the new token.
+ *
+ * @param userId - The user's unique ID.
+ * @returns The newly generated TwoFactorToken.
+ * @throws {AppError} - Throws `rateLimitExceeded` when cooldown/window limits are exceeded.
  */
-export const generateTwoFactorToken = async (email: string) => {
-  const token = crypt.randomInt(100_000, 999_999).toString();
-  const expiresAt = new Date(Date.now() + TOKEN_LIFETIME_MS); // TODO: Change to shorter duration
+export const generateTwoFactorToken = async (userId: string) => {
+  // Evaluate resend window before generating new token
+  const existingToken = await getTwoFactorTokenByUserId(userId);
+  const windowStart = new Date(Date.now() - TWO_FACTOR_RESEND_WINDOW_MS);
+  const tokensInWindow = await countTwoFactorTokensSince(userId, windowStart);
 
-  const existingToken = await getTwoFactorTokenByEmail(email);
   if (existingToken) {
-    await db.twoFactorToken.delete({ where: { id: existingToken.id } });
+    const resendThreshold = new Date(
+      Date.now() - TWO_FACTOR_RESEND_COOLDOWN_MS
+    );
+
+    const withinCooldownWindow = existingToken.createdAt > resendThreshold;
+    const hasPriorResend = tokensInWindow > 1;
+
+    if (withinCooldownWindow && hasPriorResend) {
+      // Only enforce cooldown after the first resend attempt
+      throw rateLimitExceeded();
+    }
   }
 
-  const result = await db.twoFactorToken.create({
-    data: {
-      email,
-      token,
-      expires: expiresAt,
-    },
-  });
+  if (tokensInWindow >= TWO_FACTOR_RESEND_MAX_PER_WINDOW) {
+    throw rateLimitExceeded();
+  }
 
-  return result;
+  // 3. Generate a new 6-digit token
+  const token = crypt.randomInt(100_000, 999_999).toString();
+  const expires = new Date(Date.now() + TWO_FACTOR_TOKEN_LIFETIME_MS);
+
+  // 4. Call data layer to create the new token
+  const newTwoFactorToken = await createTwoFactorToken(userId, token, expires);
+
+  if (!newTwoFactorToken) {
+    throw internalServerError();
+  }
+
+  const retentionBoundary = new Date(
+    Date.now() - TWO_FACTOR_TOKEN_RETENTION_MS
+  );
+  await deleteTwoFactorTokensBefore(userId, retentionBoundary);
+
+  return newTwoFactorToken;
 };

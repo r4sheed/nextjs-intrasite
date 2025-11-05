@@ -26,7 +26,9 @@ export const AUTH_CODES = {
   invalidCredentials: 'invalid-credentials',
   verificationRequired: 'verification-required',
   twoFactorRequired: 'two-factor-required',
+  twoFactorSessionMissing: 'two-factor-session-missing',
   callbackError: 'callback-error',
+  registrationFailed: 'registration-failed',
 
   // User errors
   userNotFound: 'user-not-found',
@@ -36,14 +38,10 @@ export const AUTH_CODES = {
   // Token errors
   tokenInvalid: 'token-invalid',
   tokenExpired: 'token-expired',
-
-  // Operation errors
-  registrationFailed: 'registration-failed',
-  loginFailed: 'login-failed',
-  signupFailed: 'signup-failed',
-  passwordUpdateFailed: 'password-update-failed',
-  passwordResetFailed: 'password-reset-failed',
-  verificationFailed: 'verification-failed',
+  twoFactorCodeInvalid: 'two-factor-code-invalid',
+  twoFactorCodeExpired: 'two-factor-code-expired',
+  twoFactorMaxAttempts: 'two-factor-max-attempts',
+  rateLimitExceeded: 'rate-limit-exceeded',
 } as const;
 
 export type AuthCode = (typeof AUTH_CODES)[keyof typeof AUTH_CODES];
@@ -69,23 +67,21 @@ export const AUTH_ERRORS = {
   verificationRequired: 'auth.errors.verification-required',
   twoFactorRequired: 'auth.errors.two-factor-required',
   callbackError: 'auth.errors.callback-error',
+  registrationFailed: 'auth.errors.registration-failed',
 
   // User errors
   userNotFound: 'auth.errors.user-not-found',
   emailExists: 'auth.errors.email-exists',
+  twoFactorSessionMissing: 'auth.errors.two-factor-session-missing',
   oauthNotLinked: 'auth.errors.oauth-not-linked',
 
   // Token errors
   tokenInvalid: 'auth.errors.token-invalid',
   tokenExpired: 'auth.errors.token-expired',
-
-  // Operation errors
-  registrationFailed: 'auth.errors.registration-failed',
-  loginFailed: 'auth.errors.login-failed',
-  signupFailed: 'auth.errors.signup-failed',
-  passwordUpdateFailed: 'auth.errors.password-update-failed',
-  passwordResetFailed: 'auth.errors.password-reset-failed',
-  verificationFailed: 'auth.errors.verification-failed',
+  twoFactorCodeInvalid: 'auth.errors.two-factor-code-invalid',
+  twoFactorCodeExpired: 'auth.errors.two-factor-code-expired',
+  twoFactorMaxAttempts: 'auth.errors.two-factor-max-attempts',
+  rateLimitExceeded: 'auth.errors.rate-limit-exceeded',
 } as const;
 
 /**
@@ -99,6 +95,7 @@ export const AUTH_SUCCESS = {
   passwordUpdated: 'auth.success.password-updated',
   signup: 'auth.success.signup',
   twoFactorSent: 'auth.success.two-factor-sent',
+  twoFactorVerified: 'auth.success.two-factor-verified',
   verificationSent: 'auth.success.verification-sent',
 } as const;
 
@@ -111,6 +108,7 @@ export const AUTH_LABELS = {
   signupTitle: 'auth.labels.signup-title',
   loginTitle: 'auth.labels.login-title',
   verificationTitle: 'auth.labels.verification-title',
+  verify2faTitle: 'auth.labels.verify-2fa-title',
   forgotPasswordTitle: 'auth.labels.forgot-password-title',
   newPasswordTitle: 'auth.labels.new-password-title',
 
@@ -118,6 +116,9 @@ export const AUTH_LABELS = {
   signupSubtitle: 'auth.labels.signup-subtitle',
   loginSubtitle: 'auth.labels.login-subtitle',
   verificationSubtitle: 'auth.labels.verification-subtitle',
+  verify2faSubtitle: 'auth.labels.verify-2fa-subtitle',
+  verify2faDescription: 'auth.labels.verify-2fa-description',
+  verify2faCodeSent: 'auth.labels.verify-2fa-code-sent',
   verificationSuccessSubtitle: 'auth.labels.verification-success-subtitle',
   verificationFailedSubtitle: 'auth.labels.verification-failed-subtitle',
   verificationProcessingSubtitle:
@@ -131,6 +132,7 @@ export const AUTH_LABELS = {
   passwordLabel: 'auth.labels.password',
   confirmPasswordLabel: 'auth.labels.confirm-password',
   newPasswordLabel: 'auth.labels.new-password',
+  otpLabel: 'auth.labels.otp-code',
 
   // Form placeholders
   emailPlaceholder: 'auth.labels.email-placeholder',
@@ -138,6 +140,7 @@ export const AUTH_LABELS = {
   passwordPlaceholder: 'auth.labels.password-placeholder',
   confirmPasswordPlaceholder: 'auth.labels.confirm-password-placeholder',
   newPasswordPlaceholder: 'auth.labels.new-password-placeholder',
+  otpPlaceholder: 'auth.labels.otp-placeholder',
 
   // Field descriptions/hints
   nameDescription: 'auth.labels.name-description',
@@ -152,6 +155,8 @@ export const AUTH_LABELS = {
   newPasswordButton: 'auth.labels.new-password-button',
   backToLoginButton: 'auth.labels.back-to-login',
   verifyEmailButton: 'auth.labels.verify-email-button',
+  verifyButton: 'auth.labels.verify-button',
+  resendCodeButton: 'auth.labels.resend-code',
 
   // Links and CTAs
   forgotPasswordLink: 'auth.labels.forgot-password',

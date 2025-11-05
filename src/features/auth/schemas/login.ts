@@ -8,6 +8,7 @@ export const loginSchema = z.object({
     .string({ message: AUTH_ERRORS.invalidFields })
     .min(1, { message: AUTH_ERRORS.passwordRequired }),
   code: z.optional(z.string()),
+  twoFactorBypass: z.optional(z.union([z.literal(true), z.literal('true')])), // Flag for 2FA confirmation bypass
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

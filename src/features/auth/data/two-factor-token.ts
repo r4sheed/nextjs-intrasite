@@ -3,80 +3,179 @@ import { db } from '@/lib/prisma';
 import type { TwoFactorToken } from '@prisma/client';
 
 /**
- * Data access layer for TwoFactorToken entity.
+ * Data access layer for 2FA token entity.
  *
- * Provides methods to retrieve password reset tokens from the database.
+ * Provides methods to retrieve two-factor authentication tokens from the database.
  * Returns null on errors to let the service layer handle error responses.
  */
 
 /**
- * Defines the possible search criteria for a password reset token.
+ * Retrieves the most recent two-factor token for a given user ID.
+ * @param userId - The user's unique identifier.
+ * @returns The most recent TwoFactorToken or null if not found or on error.
  */
-type TokenSearch = { token: string } | { email: string };
-
-/**
- * Generic password reset token lookup utility with error handling.
- *
- * @param search - Search criteria (either by unique token or by email).
- * @returns The token if found, null if not found or on database error.
- */
-const findTwoFactorToken = async (
-  search: TokenSearch
+export const getTwoFactorTokenByUserId = async (
+  userId: string
 ): Promise<TwoFactorToken | null> => {
   try {
-    if ('token' in search) {
-      return await db.twoFactorToken.findUnique({
-        where: { token: search.token },
-      });
-    } else {
-      return await db.twoFactorToken.findFirst({
-        where: { email: search.email },
-      });
-    }
+    return await db.twoFactorToken.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
   } catch (error) {
-    // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findTwoFactorToken] Database error:', error);
+    console.error('[DATA] Error fetching 2FA token by userId:', error);
     return null;
   }
 };
 
 /**
- * Retrieves a password reset token by its unique token string.
+ * Retrieves a two-factor token by its token string.
  *
- * Used during password reset flow when the user clicks the reset link from email.
+ * Used during 2FA verification flow when the user enters the code.
  *
- * @param token - The unique token string.
- * @returns The token if found, null otherwise (including on database errors).
- *
- * @example
- * const token = await getTwoFactorTokenByToken('xyz789...');
- * if (token && token.expires > new Date()) {
- *   // Token is valid, allow password reset
- * }
+ * @param token - The unique token string (6-digit code).
+ * @returns The TwoFactorToken if found, null otherwise.
  */
 export const getTwoFactorTokenByToken = async (
   token: string
 ): Promise<TwoFactorToken | null> => {
-  return await findTwoFactorToken({ token });
+  try {
+    return await db.twoFactorToken.findUnique({
+      where: { token },
+    });
+  } catch (error) {
+    console.error('[DATA] Error fetching 2FA token by token:', error);
+    return null;
+  }
 };
 
 /**
- * Retrieves the first password reset token associated with an email address.
+ * Retrieves a two-factor token by its unique ID.
  *
- * Used to check if a reset token already exists for a user before generating
- * a new one, preventing token spam.
- *
- * @param email - The user's email address.
- * @returns The first token for the email if found, null otherwise (including on database errors).
- *
- * @example
- * const existingToken = await getTwoFactorTokenByEmail('user@example.com');
- * if (existingToken) {
- *   // Delete old token before creating new one
- * }
+ * @param id - Identifier of the two-factor token.
+ * @returns The TwoFactorToken if found, null otherwise.
  */
-export const getTwoFactorTokenByEmail = async (
-  email: string
+export const getTwoFactorTokenById = async (
+  id: string
 ): Promise<TwoFactorToken | null> => {
-  return await findTwoFactorToken({ email });
+  try {
+    return await db.twoFactorToken.findUnique({
+      where: { id },
+    });
+  } catch (error) {
+    console.error('[DATA] Error fetching 2FA token by id:', error);
+    return null;
+  }
 };
+
+/**
+ * Creates a new two-factor token for a user.
+ * This is a pure data access function. Business logic (like deleting old tokens)
+ * should be handled in the service/lib layer.
+ *
+ * @param userId - The user's ID.
+ * @param token - The 6-digit code.
+ * @param expires - The token's expiration timestamp.
+ * @returns The created TwoFactorToken or null on error.
+ */
+export const createTwoFactorToken = async (
+  userId: string,
+  token: string,
+  expires: Date
+): Promise<TwoFactorToken | null> => {
+  try {
+    return await db.twoFactorToken.create({
+      data: {
+        userId,
+        token,
+        expires,
+      },
+    });
+  } catch (error) {
+    console.error('[DATA] Error creating 2FA token:', error);
+    return null;
+  }
+};
+
+/**
+ * Deletes two-factor tokens for a specific user created before the provided timestamp.
+ *
+ * @param userId - The ID of the user whose stale tokens should be deleted.
+ * @param before - Timestamp; tokens older than this will be removed.
+ * @returns true if deletion was successful, null on error.
+ */
+export const deleteTwoFactorTokensBefore = async (
+  userId: string,
+  before: Date
+): Promise<boolean | null> => {
+  try {
+    await db.twoFactorToken.deleteMany({
+      where: {
+        userId,
+        createdAt: { lt: before },
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error('[DATA] Error deleting stale 2FA tokens:', error);
+    return null;
+  }
+};
+
+/**
+ * Increments the failed attempt counter for a two-factor token.
+ *
+ * @param tokenId - The ID of the token to update.
+ * @returns The updated TwoFactorToken or null on error.
+ */
+export const incrementTwoFactorAttempts = async (
+  tokenId: string
+): Promise<TwoFactorToken | null> => {
+  try {
+    return await db.twoFactorToken.update({
+      where: { id: tokenId },
+      data: { attempts: { increment: 1 } },
+    });
+  } catch (error) {
+    console.error('[DATA] Error incrementing 2FA attempts:', error);
+    return null;
+  }
+};
+
+/**
+ * Deletes a two-factor token by its ID.
+ *
+ * @param tokenId - The ID of the token to delete.
+ * @returns true if deleted successfully, null on error.
+ */
+export const deleteTwoFactorToken = async (
+  tokenId: string
+): Promise<boolean | null> => {
+  try {
+    await db.twoFactorToken.delete({
+      where: { id: tokenId },
+    });
+    return true;
+  } catch (error) {
+    console.error('[DATA] Error deleting 2FA token:', error);
+    return null;
+  }
+};
+
+/**
+ * Counts how many two-factor tokens the user generated since the provided timestamp.
+ *
+ * @param userId - The ID of the user.
+ * @param since - Timestamp to measure from.
+ * @returns Number of tokens created since the timestamp.
+ */
+export const countTwoFactorTokensSince = async (
+  userId: string,
+  since: Date
+): Promise<number> =>
+  await db.twoFactorToken.count({
+    where: {
+      userId,
+      createdAt: { gte: since },
+    },
+  });

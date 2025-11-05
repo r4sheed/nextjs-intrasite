@@ -115,7 +115,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       autoComplete="name"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_LABELS.namePlaceholder}
-                      disabled={isPending}
+                      disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
@@ -142,7 +142,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_LABELS.emailPlaceholder}
-                      disabled={isPending}
+                      disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
@@ -168,7 +168,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_LABELS.passwordPlaceholder}
-                      disabled={isPending}
+                      disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
@@ -183,7 +183,11 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               <Field>
                 {isSuccess && <FormSuccess message={successMessage} />}
                 {isError && <FormError message={errorMessage} />}
-                <LoadingButton type="submit" loading={isPending}>
+                <LoadingButton
+                  type="submit"
+                  disabled={isSuccess}
+                  loading={isPending}
+                >
                   {AUTH_LABELS.signupButton}
                 </LoadingButton>
               </Field>
