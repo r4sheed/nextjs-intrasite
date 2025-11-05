@@ -9,4 +9,3 @@ export type {
   VerifyTwoFactorInput,
 } from '../schemas/two-factor';
 export { resendTwoFactor } from './resend-two-factor';
-export { verify2fa } from './verify-2fa';
