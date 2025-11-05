@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { BCRYPT_SALT_ROUNDS } from '@/features/auth/lib/config';
 
 import type { User as PrismaUser } from '@prisma/client';
+import type { UserRole } from '@prisma/client';
 
 /**
  * User domain model representing a registered user entity.
@@ -46,7 +47,7 @@ export class User {
   /**
    * Get the user's role.
    */
-  get role(): string {
+  get role(): UserRole {
     return this.data.role;
   }
 
@@ -93,7 +94,7 @@ export class User {
    * @param role - The role to check for.
    * @returns True if the user has the specified role.
    */
-  hasRole(role: string): boolean {
+  hasRole(role: UserRole): boolean {
     return this.data.role === role;
   }
 
