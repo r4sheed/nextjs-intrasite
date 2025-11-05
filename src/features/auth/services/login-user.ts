@@ -1,7 +1,7 @@
 import { AuthError } from 'next-auth';
 
-import { AppError, internalServerError } from '@/lib/errors';
 import { siteFeatures } from '@/lib/config';
+import { AppError, internalServerError } from '@/lib/errors';
 import { routes } from '@/lib/navigation';
 import { type Response, response } from '@/lib/response';
 import { maskEmail } from '@/lib/utils';
