@@ -1,6 +1,6 @@
 import { AuthError } from 'next-auth';
 
-import { AppError, internalServerError } from '@/lib/errors';
+import { internalServerError } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
 import {
