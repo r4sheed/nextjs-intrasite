@@ -446,7 +446,73 @@ Proxy considerations:
 - Behavior notes: fetch options like `options.cache`, `options.next.revalidate`, or `options.next.tags` have no effect inside Proxy. Proxy can rewrite, redirect, modify headers, or respond directly.
 - How this relates to caching/auth: Proxy is a good place for optimistic auth checks or request-based rewrites before a route renders, and for header transformations that help downstream APIs; however, for robust session validation and auth flows prefer middleware (or a dedicated backend auth service). Use Proxy for lightweight checks and middleware/proxy together to preserve static shells while handling auth and header forwarding.
 
-## Completed Tasks ✅
+---
+
+### 🔍 Add Email Parameter to Verification URLs for Better Query Performance
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**
+Currently, verification URLs only include the token parameter (`?token=uuid`), and the database query searches solely by token. However, the `VerificationToken` model has a composite unique index on `[email, token]`, which could be leveraged for more efficient queries.
+
+The token field is a UUID v4 string (unique), while the id is cuid(). Using email + token for queries would leverage the composite index more effectively than token-only searches.
+
+**Proposed Solution:**
+Add the email parameter to verification URLs in `mail.ts` and update the verification service to query by both email and token. This provides several benefits:
+
+1. **Better Performance:** Uses the composite index `[email, token]` instead of just `token`
+2. **Enhanced Security:** Validates that the token belongs to the expected email
+3. **Improved UX:** Prevents accidental token reuse across different emails
+
+**Current Implementation:**
+
+```typescript
+// mail.ts
+const url = `${BASE_URL}${routes.auth.verifyEmail.url}?token=${token}`;
+
+// verify-email.ts
+const existingToken = await getVerificationTokenByToken(token);
+```
+
+**Proposed Changes:**
+
+```typescript
+// mail.ts
+const url = `${BASE_URL}${routes.auth.verifyEmail.url}?token=${token}&email=${encodeURIComponent(email)}`;
+
+// verify-email.ts - new query function needed
+const existingToken = await getVerificationTokenByEmailAndToken(email, token);
+```
+
+**Implementation Steps:**
+
+1. Update `sendVerificationEmail` in `mail.ts` to include email parameter
+2. Update `sendResetPasswordEmail` in `mail.ts` to include email parameter (if applicable)
+3. Create new data function `getVerificationTokenByEmailAndToken` in `src/features/auth/data/verification-token.ts`
+4. Update `verifyEmail` service to accept email parameter and use new query
+5. Update `verify-email` action to extract and validate email from URL params
+6. Update password reset flow similarly if needed
+7. Add tests for the new query and parameter handling
+
+**Benefits:**
+
+- ✅ Potentially faster queries using composite index
+- ✅ Additional validation layer (token must match email)
+- ✅ Better separation of concerns in URL parameters
+- ✅ Future-proof for email-based token management
+
+**Affected Files:**
+
+- `src/features/auth/lib/mail.ts`
+- `src/features/auth/data/verification-token.ts` (new function)
+- `src/features/auth/services/verify-email.ts`
+- `src/features/auth/actions/verify-email.ts`
+- `src/features/auth/services/reset-password.ts` (if applicable)
+- Test files for the above
+
+**Database Impact:**
+The composite unique constraint `@@unique([email, token])` already exists, so no schema changes needed. The new query will leverage this index effectively.
 
 ### ✅ Fix naming conventions in routes.ts
 
