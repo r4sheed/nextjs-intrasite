@@ -771,6 +771,32 @@ const existingToken = await getVerificationTokenByEmailAndToken(email, token);
 **Database Impact:**
 The composite unique constraint `@@unique([email, token])` already exists, so no schema changes needed. The new query will leverage this index effectively.
 
+### 🆔 Rename VerificationToken Model for Clarity
+
+**Priority:** Low  
+**Status:** Not Started
+
+**Description:**
+The Prisma model `VerificationToken` represents email verification tokens, but the generic name is misleading now that the project also has password reset and two-factor tokens. Renaming it to `EmailVerificationToken` (and mirroring changes across the codebase) would reduce confusion and make intent explicit.
+
+**Proposed Steps:**
+
+1. Create a Prisma migration that renames the table/model to `EmailVerificationToken` (and updates related schema references).
+2. Update data layer helper filenames and exports (`verification-token.ts` → `email-verification-token.ts`).
+3. Adjust services/actions (`verify-email`, `resend-verification`, etc.) to reference the new names.
+4. Update mail helpers to import the renamed data module.
+5. Run Prisma generate and ensure all tests still pass.
+
+**Considerations:**
+
+- Check for any direct SQL queries or references that might need manual updates.
+- Ensure migration accounts for existing unique indexes (email + token) when renaming.
+- Verify environment seeds/fixtures use the new model name.
+
+**Impact:**
+- Improves readability and reduces ambiguity between verification types.
+- Prepares the ground for introducing additional token types without name collisions.
+
 ### ✅ Fix naming conventions in routes.ts
 
 - Changed `PUBLIC_ROUTES` → `publicRoutes`
