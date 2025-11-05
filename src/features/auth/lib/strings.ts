@@ -29,6 +29,11 @@ export const AUTH_CODES = {
   twoFactorSessionMissing: 'two-factor-session-missing',
   callbackError: 'callback-error',
   registrationFailed: 'registration-failed',
+  loginFailed: 'login-failed',
+  passwordResetFailed: 'password-reset-failed',
+  passwordUpdateFailed: 'password-update-failed',
+  signupFailed: 'signup-failed',
+  verificationFailed: 'verification-failed',
 
   // User errors
   userNotFound: 'user-not-found',
@@ -68,6 +73,11 @@ export const AUTH_ERRORS = {
   twoFactorRequired: 'auth.errors.two-factor-required',
   callbackError: 'auth.errors.callback-error',
   registrationFailed: 'auth.errors.registration-failed',
+  loginFailed: 'auth.errors.login-failed',
+  passwordResetFailed: 'auth.errors.password-reset-failed',
+  passwordUpdateFailed: 'auth.errors.password-update-failed',
+  signupFailed: 'auth.errors.signup-failed',
+  verificationFailed: 'auth.errors.verification-failed',
 
   // User errors
   userNotFound: 'auth.errors.user-not-found',
@@ -156,7 +166,8 @@ export const AUTH_LABELS = {
   backToLoginButton: 'auth.labels.back-to-login',
   verifyEmailButton: 'auth.labels.verify-email-button',
   verifyButton: 'auth.labels.verify-button',
-  resendCodeButton: 'auth.labels.resend-code',
+  resendCode: 'auth.labels.resend-code',
+  resendCodeButton: 'auth.labels.resend-code-button',
 
   // Links and CTAs
   forgotPasswordLink: 'auth.labels.forgot-password',
