@@ -2,6 +2,66 @@
 
 ## Future Tasks
 
+### ⏱️ Resend Cooldown Timer for 2FA
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**  
+Implement a countdown timer in the frontend for the 2FA resend functionality to show users when they can request a new verification code again. This improves UX by clearly indicating the cooldown period and preventing unnecessary attempts.
+
+**Features:**
+
+- **Countdown Display:** Show remaining time until resend is available (e.g., "Resend in 4:32")
+- **Auto-update:** Timer updates every second and automatically enables the resend button when cooldown expires
+- **Visual Feedback:** Different states for active cooldown (disabled button) and ready to resend (enabled button)
+- **Accessibility:** Screen reader announcements for timer updates
+- **Locale Support:** Timer text uses i18n keys for different languages
+
+**Implementation Details:**
+
+- Create a custom hook `useCountdown` that manages the timer state
+- Integrate with existing 2FA verification components
+- Use the existing `TWO_FACTOR_RESEND_COOLDOWN_MS` constant (5 minutes)
+- Handle component unmount/remount correctly to avoid memory leaks
+- Show timer only when resend is on cooldown
+
+**Example Usage:**
+
+```tsx
+// In verify-two-factor component
+const { timeLeft, isActive } = useCountdown(5 * 60 * 1000); // 5 minutes
+
+return (
+  <Button disabled={isActive} onClick={handleResend}>
+    {isActive ? `Resend in ${formatTime(timeLeft)}` : 'Resend Code'}
+  </Button>
+);
+```
+
+**Benefits:**
+
+- ✅ Better user experience with clear feedback
+- ✅ Reduces server load from premature resend attempts
+- ✅ Prevents user confusion about when resend is available
+- ✅ Accessible design with proper ARIA labels
+
+**Affected Files:**
+
+- `src/hooks/use-countdown.ts` (new hook)
+- `src/features/auth/components/verify-two-factor.tsx` (integrate timer)
+- `src/locales/*/auth.json` (add timer-related i18n keys)
+
+**Testing:**
+
+- Test timer countdown accuracy
+- Test button state changes (disabled → enabled)
+- Test component unmount during countdown
+- Test accessibility with screen readers
+- Test different locales
+
+---
+
 ### 🔢 Formatting Utilities Components
 
 **Priority:** Medium  
