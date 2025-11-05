@@ -1,209 +1,146 @@
 ---
+description: 'Unified Naming Conventions for the Project'
 applyTo: '**'
 ---
 
-# Auth Feature Naming Conventions
+# Unified Naming Conventions
+
+**Version:** 1.0  
+**Last Updated:** November 2025  
+**Target:** All project files
+
+---
 
 ## Overview
 
-Uniform naming pattern within the auth feature for better readability and maintainability.
+This document establishes a **single source of truth** for all naming conventions across the project. Following these rules ensures consistency, readability, and maintainability.
 
 ---
 
-## 📁 File Naming Pattern
+## 1. General Naming
 
-### Actions Layer (`src/features/auth/actions/`)
-
-- **Pattern**: `{action}-{resource}.ts`
-- **Examples**:
-  - `login-user.ts` - User login action
-  - `register-user.ts` - User registration action
-  - `verify-email.ts` - Email verification action
-  - `reset-password.ts` - Password reset request action
-  - `update-password.ts` - Password update with token action
-
-### Services Layer (`src/features/auth/services/`)
-
-- **Pattern**: `{action}-{resource}.ts`
-- **Examples**:
-  - `login-user.ts` - User login service
-  - `register-user.ts` - User registration service
-  - `verify-email.ts` - Email verification service
-  - `reset-password.ts` - Password reset request service
-  - `update-password.ts` - Password update with token service
-
-### Data Layer (`src/features/auth/data/`)
-
-- **Pattern**: `{resource}.ts`
-- **Examples**:
-  - `user.ts` - User repository functions
-  - `verification-token.ts` - Verification token repository
-  - `reset-token.ts` - Password reset token repository
+| Category               | Convention   | Example                             | Notes                                 |
+| ---------------------- | ------------ | ----------------------------------- | ------------------------------------- |
+| **Folders**            | `kebab-case` | `user-profile`, `lib`, `components` | Lowercase, words separated by hyphens |
+| **Files (Components)** | `kebab-case` | `user-card.tsx`, `login-form.tsx`   | Lowercase, words separated by hyphens |
+| **Files (Hooks)**      | `kebab-case` | `use-user.ts`, `use-layout.ts`      | Lowercase, words separated by hyphens |
+| **Files (Utilities)**  | `kebab-case` | `date-formatter.ts`, `utils.ts`     | Lowercase, words separated by hyphens |
+| **Files (Static)**     | `kebab-case` | `logo-dark.svg`, `background.png`   | Lowercase, words separated by hyphens |
+| **Variables**          | `camelCase`  | `userName`, `isAuthenticating`      | Start with lowercase letter           |
+| **Functions**          | `camelCase`  | `getUserById`, `calculateTotal`     | Start with lowercase letter           |
+| **Types/Interfaces**   | `PascalCase` | `User`, `LoginInput`, `ApiResponse` | Start with uppercase letter           |
+| **Enums**              | `PascalCase` | `Status`, `UserRole`                | Start with uppercase letter           |
 
 ---
 
-## 🔤 Export Naming Pattern
+## 2. Constants
 
-### Actions Layer
+The style for constants depends on whether they are primitive values or complex objects/arrays.
 
-- **Function**: `{action}{Resource}` (camelCase)
-- **Type**: `{Action}{Resource}Data` (PascalCase)
+### ✅ Primitive Constants: `UPPER_SNAKE_CASE`
 
-**Examples**:
+Use for standalone, primitive values (string, number, boolean) that are universally constant.
 
 ```typescript
-// File: login-user.ts
-export type LoginUserData = { userId: string };
-export const loginUser = async (
-  values: LoginInput
-): Promise<Response<LoginUserData>> => {
-  // ...
-};
+const MAX_RETRY_COUNT = 3;
+const API_TIMEOUT_MS = 5000;
+const DEFAULT_LOGIN_REDIRECT = '/dashboard';
 ```
 
-```typescript
-// File: verify-email.ts
-export type VerifyEmailData = Record<string, never>;
-export const verifyEmail = async (
-  token: string
-): Promise<Response<VerifyEmailData>> => {
-  // ...
-};
-```
+### ✅ Object/Array Constants: `camelCase`
 
-### Services Layer
-
-- **Function**: `{action}{Resource}` (camelCase) - Same as the action
-- **Import alias**: If necessary, use `as` alias to avoid name collisions
-
-**Examples**:
+Use for constant objects, arrays, or configurations. The variable itself is `camelCase`, and its properties are also `camelCase`. Use `as const` for type safety.
 
 ```typescript
-// File: login-user.ts
-export const loginUser = async (
-  values: LoginInput
-): Promise<Response<LoginUserData>> => {
-  // ...
-};
-```
+// CORRECT: `camelCase` for the variable name
+const siteConfig = {
+  name: 'MyApp',
+  version: '1.0.0',
+} as const;
 
-```typescript
-// File: reset-password.ts
-export const resetPassword = async (
-  values: ResetInput
-): Promise<Response<ResetPasswordData>> => {
-  // ...
-};
-```
+const publicRoutes = ['/home', '/about'] as const;
 
-### Data Layer
-
-- **Function**: `{verb}{Resource}{ByCriteria}` (camelCase)
-- **Examples**:
-  - `getUserByEmail(email: string)`
-  - `getUserById(id: string)`
-  - `getVerificationTokenByToken(token: string)`
-  - `getPasswordResetTokenByEmail(email: string)`
-  - `verifyUserCredentials(email: string, password: string)`
-
----
-
-## 📋 Complete Mapping
-
-| **Feature**     | **Action File**      | **Action Export** | **Service File**     | **Service Export** |
-| --------------- | -------------------- | ----------------- | -------------------- | ------------------ |
-| Login           | `login-user.ts`      | `loginUser`       | `login-user.ts`      | `loginUser`        |
-| Register        | `register-user.ts`   | `registerUser`    | `register-user.ts`   | `registerUser`     |
-| Verify Email    | `verify-email.ts`    | `verifyEmail`     | `verify-email.ts`    | `verifyEmail`      |
-| Reset Password  | `reset-password.ts`  | `resetPassword`   | `reset-password.ts`  | `resetPassword`    |
-| Update Password | `update-password.ts` | `updatePassword`  | `update-password.ts` | `updatePassword`   |
-
----
-
-## 📝 JSDoc Requirements
-
-Every public function must have detailed JSDoc comments:
-
-```typescript
-/**
- * Core service to authenticate a user with email and password credentials.
- *
- * This service validates credentials via the data layer, handles email verification
- * flows (sending verification emails for unverified accounts), and delegates session
- * creation to NextAuth's signIn function. It implements security best practices by
- * separating credential validation from session creation.
- *
- * @param values - Validated login input containing email and password.
- * @returns Response with user ID on success, or structured error on failure.
- *
- * @throws Never throws - all errors are returned as Response<T> error objects.
- *
- * @example
- * const result = await loginUser({ email: 'user@example.com', password: 'pass123' });
- * if (result.status === Status.Success) {
- *   console.log(result.data.userId);
- * }
- */
-export const loginUser = async (
-  values: LoginInput
-): Promise<Response<LoginUserData>> => {
-  // ...
-};
-```
-
-### JSDoc Sections:
-
-1. **Brief description** - What the function does
-2. **Detailed description** - How it works, what side effects it has
-3. **@param** - Parameter descriptions
-4. **@returns** - Return value description
-5. **@throws** - What errors it can throw (auth case: "Never throws")
-6. **@example** - Usage example
-
----
-
-## 🎯 Import Guidelines
-
-### Actions Import
-
-```typescript
-// ✅ CORRECT: Named imports from barrel file
-import { loginUser, registerUser, verifyEmail } from '@/features/auth/actions';
-
-// ❌ WRONG: Direct file imports
-import { loginUser } from '@/features/auth/actions/login-user';
-```
-
-### Services Import (within actions)
-
-```typescript
-// ✅ CORRECT: Import with alias to avoid name collision
-import { loginUser as loginUserService } from '@/features/auth/services';
-// ✅ CORRECT: Named import from barrel
-import { verifyEmail } from '@/features/auth/services';
-```
-
-### Data Layer Import
-
-```typescript
-// ✅ CORRECT: Named imports
-import {
-  getUserByEmail,
-  verifyUserCredentials,
-} from '@/features/auth/data/user';
-import { getVerificationTokenByToken } from '@/features/auth/data/verification-token';
+// INCORRECT: Don't use SCREAMING_SNAKE_CASE for objects/arrays
+const PUBLIC_ROUTES = ['/home', '/about']; // ❌
+const SITE_CONFIG = { name: 'MyApp' }; // ❌
 ```
 
 ---
 
-## 🔄 Migration Checklist
+## 3. Error Codes & i18n Keys
 
-When adding a new action/service:
+This section defines the canonical pattern for error codes, messages, and i18n keys.
 
-- [ ] File name kebab-case: `{action}-{resource}.ts`
-- [ ] Export name camelCase: `{action}{Resource}`
-- [ ] Type export PascalCase: `{Action}{Resource}Data`
-- [ ] Full JSDoc comment for every public function
-- [ ] Update Index.ts (barrel export)
-- [ ] Write/update tests
-- [ ] Update components with the new name
+> **For detailed implementation patterns, see:** [messages-and-codes.instructions.md](messages-and-codes.instructions.md)
+
+### Summary Table
+
+| Category                   | TypeScript Property | String Value (Code/Key)      | Example                               |
+| -------------------------- | ------------------- | ---------------------------- | ------------------------------------- |
+| **Error Codes**            | `camelCase`         | `kebab-case`                 | `code: AUTH_CODES.invalidCredentials` |
+| **Error/Success Messages** | `camelCase`         | `domain.category.kebab-case` | `key: AUTH_ERRORS.invalidCredentials` |
+| **UI Labels**              | `camelCase`         | `domain.labels.kebab-case`   | `t(AUTH_LABELS.loginTitle)`           |
+
+### ✅ `camelCase` for TypeScript Properties
+
+Object properties in TypeScript should always be `camelCase` for consistency and better developer experience (e.g., IntelliSense).
+
+```typescript
+// CORRECT - camelCase object properties
+export const AUTH_CODES = {
+  invalidCredentials: 'invalid-credentials', // ✅
+  emailRequired: 'email-required', // ✅
+} as const;
+
+// INCORRECT - SCREAMING_SNAKE_CASE properties
+export const BAD_AUTH_CODES = {
+  INVALID_CREDENTIALS: 'invalid-credentials', // ❌ Requires bracket access
+  EMAIL_REQUIRED: 'email-required', // ❌ Inconsistent with other JS objects
+} as const;
+```
+
+---
+
+## 4. Feature-Specific Naming (Auth Example)
+
+For feature-specific file and function naming, follow a consistent pattern. This section now serves as an example of applying the general rules.
+
+### File Naming (`{action}-{resource}.ts`)
+
+- **Actions:** `login-user.ts`, `register-user.ts`
+- **Services:** `verify-email.ts`, `reset-password.ts`
+- **Data:** `user.ts`, `verification-token.ts`
+
+### Function Naming
+
+- **Actions/Services:** `{action}{Resource}` (e.g., `loginUser`, `registerUser`)
+- **Data Layer:** `{verb}{Resource}{ByCriteria}` (e.g., `getUserByEmail`, `getVerificationTokenByToken`)
+- **Types:** `{Action}{Resource}Data` (e.g., `LoginUserData`)
+
+---
+
+## 5. Component Naming
+
+- **Component Files:** `kebab-case` (e.g., `user-card.tsx`)
+- **Component Exports:** `PascalCase` (e.g., `UserCard`)
+- **Context Providers:** `XyzProvider` (e.g., `ThemeProvider`)
+
+---
+
+## Summary: DOs and DON'Ts
+
+### ✅ DO
+
+- **Use `kebab-case`** for all file and folder names.
+- **Use `camelCase`** for variables, functions, and object properties.
+- **Use `PascalCase`** for types, interfaces, enums, and component exports.
+- **Use `UPPER_SNAKE_CASE`** for primitive constants ONLY.
+- **Use `as const`** for type-safe constant objects.
+- **Follow the `domain.category.kebab-case`** pattern for i18n keys.
+
+### ❌ DON'T
+
+- **Don't use `SCREAMING_SNAKE_CASE`** for object or array constants.
+- **Don't use `PascalCase`** for files or folders.
+- **Don't prefix interfaces** with `I` (e.g., `IUser`).
+- **Don't mix naming styles** within the same category.

@@ -177,7 +177,7 @@ export const AUTH_LABELS = {
 
 ## Naming Conventions
 
-> **Important:** This section defines the canonical naming pattern for ALL error codes, messages, and i18n keys in the application. For general error handling patterns, see [error-handling-guidelines.instructions.md](error-handling-guidelines.instructions.md). For general naming conventions beyond error handling, see [nextjs.instructions.md](nextjs.instructions.md) and [typescript-5-es2022.instructions.md](typescript-5-es2022.instructions.md).
+> **Important:** This section defines the canonical naming pattern for ALL error codes, messages, and i18n keys in the application. For general naming conventions, see [naming-conventions.instructions.md](naming-conventions.instructions.md).
 
 ### Why `camelCase` Properties (Not `SCREAMING_SNAKE_CASE`)?
 

@@ -159,13 +159,7 @@ changelog:
 
 ### Before Adding a New Guideline
 
-**Check these files for overlap:**
-
-1. `error-handling-guidelines.instructions.md` - Error patterns, Response types
-2. `messages-and-codes.instructions.md` - Naming, i18n, constants
-3. `naming-conventions.instructions.md` - File/function naming
-4. `nextjs.instructions.md` - Next.js patterns, component structure
-5. `typescript-5-es2022.instructions.md` - TypeScript rules
+**CRITICAL: Before creating a new guideline, you must check all existing instruction files for overlap.** This prevents redundant, conflicting, or inconsistent rules.
 
 ### Consolidation Rules
 
@@ -215,8 +209,8 @@ Example:
 
 ### naming-conventions.instructions.md
 
-**Covers:** Auth feature file/function naming patterns  
-**Does NOT cover:** General TypeScript naming (see typescript-5-es2022)
+**Covers:** All naming conventions (files, folders, variables, constants, etc.)  
+**Does NOT cover:** Feature-specific examples (which are in their respective files)
 
 ### nextjs.instructions.md
 

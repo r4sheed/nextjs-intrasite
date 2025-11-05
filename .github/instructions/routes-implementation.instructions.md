@@ -5,11 +5,9 @@ applyTo: '**'
 
 # Route Implementation Guidelines
 
-**Purpose:**
-
-This guideline explains the canonical, project-approved way to define and extend application routes. It enforces a single source of truth for URLs, access levels, navigation metadata, and optional role requirements.
-
-Target: Next.js + TypeScript project structure used by this repository.
+**Version:** 1.0  
+**Last Updated:** November 2025  
+**Target:** Next.js + TypeScript project structure used by this repository.
 
 Core principles:
 

@@ -30,7 +30,7 @@ applyTo: '**'
 
 ## Naming & Style
 
-> **Important:** For detailed naming conventions, see [nextjs.instructions.md](nextjs.instructions.md) and [messages-and-codes.instructions.md](messages-and-codes.instructions.md).
+> **Important:** For detailed naming conventions, see [naming-conventions.instructions.md](naming-conventions.instructions.md).
 
 - Use PascalCase for classes, interfaces, enums, and type aliases; camelCase for everything else.
 - Skip interface prefixes like `I`; rely on descriptive names.
