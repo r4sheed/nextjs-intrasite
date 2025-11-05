@@ -11,7 +11,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run --project=all",
+    "test": "vitest run",
     "test:watch": "vitest --project=all",
     "test:feature": "tsx scripts/test-feature.ts",
     "feature:create": "tsx scripts/create-feature.ts",
