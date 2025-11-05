@@ -5,13 +5,13 @@ import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 
 import {
+  getVerificationTokenByEmail,
+  getPasswordResetTokenByEmail,
   countTwoFactorTokensSince,
   createTwoFactorToken,
   deleteTwoFactorTokensBefore,
   getTwoFactorTokenByUserId,
-} from '@/features/auth/data/two-factor-token';
-import { getPasswordResetTokenByEmail } from '@/features/auth/data/reset-token';
-import { getVerificationTokenByEmail } from '@/features/auth/data/verification-token';
+} from '@/features/auth/data';
 import {
   TOKEN_LIFETIME_MS,
   TWO_FACTOR_RESEND_COOLDOWN_MS,
