@@ -64,17 +64,32 @@ This document establishes the standards and best practices for testing across th
 
 ---
 
-## File Structure
+## Running Tests
 
+### All Tests
+
+Run the complete test suite to ensure all functionality works correctly:
+
+```bash
+npm test                    # Run all tests once
+npm run test:watch          # Run tests in watch mode during development
 ```
-src/
-└── features/
-    └── auth/
-        ├── __tests__/
-        │   ├── login-form.test.tsx     # Test for the login form component
-        │   └── register-user.test.ts   # Test for the register user action/service
-        ├── components/
-        │   └── login-form.tsx
-        └── services/
-            └── register-user.ts
+
+### Feature-Specific Testing
+
+For faster development cycles, run tests only for a specific feature:
+
+```bash
+npm run test:feature auth   # Run only auth feature tests
+npm run test:feature posts  # Run only posts feature tests
 ```
+
+This is especially useful when working on a single feature with 200+ total tests, as it significantly reduces test execution time while maintaining focused testing.
+
+### Test Organization
+
+- **Feature tests** are located in `src/features/{feature}/__tests__/`
+- **Shared utility tests** are in `src/lib/__tests__/`
+- **Integration tests** may span multiple features when testing complex interactions
+
+---
