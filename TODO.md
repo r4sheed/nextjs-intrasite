@@ -2,6 +2,263 @@
 
 ## Future Tasks
 
+### 🔢 Formatting Utilities Components
+
+**Priority:** Medium  
+**Status:** Not Started
+
+Implement reusable formatting utility components inspired by [Web Awesome](https://webawesome.com/docs/components/) to format numbers and time values with locale support and flexible options.
+
+#### Component 1: Format Number (`<FormatNumber>`)
+
+**Description:** A React component that formats numbers using the browser's `Intl.NumberFormat` API with support for different locales and formatting styles.
+
+**Features:**
+
+- **Decimal formatting:** Format regular numbers with thousand separators (e.g., `1,000` or `1.000` based on locale)
+- **Percentage formatting:** Display values as percentages (e.g., `0%`, `25%`, `50%`, `100%`)
+- **Currency formatting:** Format monetary values with currency symbols or codes (e.g., `$2,000.00`, `€2.000,00`, `₽2 000,00`)
+- **Locale support:** Use the `locale` prop to set number formatting locale (e.g., `en-US`, `de-DE`, `ru-RU`)
+- **Customizable display:** Control currency display with `currencyDisplay` prop (`'symbol'`, `'narrowSymbol'`, `'code'`, or `'name'`)
+
+**Props:**
+
+```typescript
+interface FormatNumberProps {
+  value: number;
+  type?: 'decimal' | 'percent' | 'currency'; // default: 'decimal'
+  currency?: string; // ISO 4217 code (e.g., 'USD', 'EUR', 'GBP'), default: 'USD'
+  currencyDisplay?: 'symbol' | 'narrowSymbol' | 'code' | 'name'; // default: 'symbol'
+  locale?: string; // BCP 47 language tag (e.g., 'en-US', 'de-DE'), default: browser locale
+  withoutGrouping?: boolean; // disable thousand separators, default: false
+  minimumIntegerDigits?: number; // min integer digits (1-21)
+  minimumFractionDigits?: number; // min fraction digits (0-100)
+  maximumFractionDigits?: number; // max fraction digits (0-100)
+  minimumSignificantDigits?: number; // min significant digits (1-21)
+  maximumSignificantDigits?: number; // max significant digits (1-21)
+}
+```
+
+**Examples:**
+
+```tsx
+// Decimal (default)
+<FormatNumber value={321412523} />
+// Output: "321,412,523" (or locale-specific format)
+
+// Percentage
+<FormatNumber type="percent" value={0} />    {/* 0% */}
+<FormatNumber type="percent" value={0.25} />  {/* 25% */}
+<FormatNumber type="percent" value={0.5} />   {/* 50% */}
+<FormatNumber type="percent" value={1} />     {/* 100% */}
+
+// Currency
+<FormatNumber type="currency" value={2000} currency="USD" locale="en-US" />
+// Output: "$2,000.00"
+
+<FormatNumber type="currency" value={2000} currency="EUR" locale="de-DE" />
+// Output: "2.000,00 €"
+
+<FormatNumber type="currency" value={2000} currency="RUB" locale="ru-RU" />
+// Output: "2 000,00 ₽"
+```
+
+**Implementation Details:**
+
+- Create component at `src/components/format-number.tsx` (or `src/components/ui/format-number.tsx`)
+- Use `Intl.NumberFormat` API for native locale support (no language packs needed)
+- Use `useLocale()` hook or context to get default locale from app
+- Handle edge cases: `null`, `undefined`, `NaN`, `Infinity`
+- Support dynamic locale changes
+- Render as `<span>` with formatted text content
+- Add TypeScript types for all props
+
+**Testing:**
+
+- Test basic decimal formatting with different locales
+- Test percentage conversion (0.25 → 25%)
+- Test currency formatting with different ISO 4217 codes
+- Test edge cases (NaN, Infinity, null values)
+- Test locale fallback behavior
+- Test grouping separator disabling
+- Test significant digits vs. fraction digits
+
+**Affected Files:**
+
+- `src/components/format-number.tsx` (new component)
+- `src/components/ui/index.ts` (export if using ui folder)
+- `src/components/__tests__/format-number.test.tsx` (new test)
+
+---
+
+#### Component 2: Relative Time (`<RelativeTime>`)
+
+**Description:** A React component that outputs a localized time phrase relative to the current date and time (e.g., "5 minutes ago", "in 2 days").
+
+**Features:**
+
+- **Relative time display:** Show human-readable relative time (e.g., "5 minutes ago", "yesterday", "in 2 weeks")
+- **Formatting styles:** Three levels of verbosity - `'narrow'` (e.g., "5y ago"), `'short'` (e.g., "5 yr. ago"), `'long'` (e.g., "5 years ago")
+- **Numeric behavior:** Control whether to always show numeric values or allow "auto" descriptive text (e.g., "yesterday" vs. "1 day ago")
+- **Automatic sync:** Optional `sync` prop to update display as time passes
+- **Locale support:** Use `locale` prop to set the desired locale for formatting
+- **Custom date:** `date` prop accepts ISO 8601 strings or Date objects
+
+**Props:**
+
+```typescript
+interface RelativeTimeProps {
+  date: Date | string; // ISO 8601 string or Date object
+  format?: 'long' | 'short' | 'narrow'; // default: 'long'
+  numeric?: 'always' | 'auto'; // default: 'auto'
+  sync?: boolean; // auto-update as time passes, default: false
+  locale?: string; // BCP 47 language tag (e.g., 'en-US', 'hu-HU'), default: browser locale
+}
+```
+
+**Examples:**
+
+```tsx
+// Basic usage (format: long, numeric: auto)
+<RelativeTime date="2025-10-31T10:00:00Z" />
+// Output: "5 days ago" or "yesterday" (depending on current time)
+
+// Short format
+<RelativeTime
+  date="2025-11-02T14:30:00Z"
+  format="short"
+/>
+// Output: "5 yr. ago" or "5 yr. from now"
+
+// Narrow format
+<RelativeTime
+  date="2025-11-02T14:30:00Z"
+  format="narrow"
+/>
+// Output: "5y ago"
+
+// Always numeric (no descriptive text)
+<RelativeTime
+  date="2025-11-01T00:00:00Z"
+  numeric="always"
+/>
+// Output: "1 day ago" (instead of "yesterday")
+
+// With auto-sync (updates as time passes)
+<RelativeTime
+  date={new Date()}
+  sync={true}
+/>
+// Output: "now" → "1 second ago" → "2 seconds ago" (auto-updates)
+
+// Hungarian locale
+<RelativeTime
+  date="2025-11-02T10:00:00Z"
+  locale="hu-HU"
+/>
+// Output: "5 napja"
+```
+
+**Implementation Details:**
+
+- Create component at `src/components/relative-time.tsx` (or `src/components/ui/relative-time.tsx`)
+- Use `Intl.RelativeTimeFormat` API for native locale support
+- Automatically calculate time unit (seconds, minutes, hours, days, months, years) based on difference
+- Use `useInterval` hook to implement sync feature (updates every 1 second)
+- Parse ISO 8601 strings safely with `Date.parse()` or date library
+- Handle edge cases: past/future dates, very large/small differences
+- Support dynamic locale changes
+- Render as `<time>` element with `dateTime` attribute for accessibility
+- Add TypeScript types for all props
+
+**Hook Implementation (if needed):**
+
+```typescript
+function useRelativeTime(date: Date | string, sync?: boolean) {
+  const [relativeTime, setRelativeTime] = useState<string>('');
+
+  const update = () => {
+    // Calculate and format relative time
+    setRelativeTime(/* formatted string */);
+  };
+
+  useEffect(() => {
+    update();
+    if (!sync) return;
+
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [date, sync]);
+
+  return relativeTime;
+}
+```
+
+**Testing:**
+
+- Test past dates (5 minutes ago, 2 hours ago, 3 days ago, 6 months ago)
+- Test future dates (in 5 minutes, in 2 hours, tomorrow)
+- Test different formatting styles (long, short, narrow)
+- Test numeric vs. auto behavior
+- Test sync updates at intervals
+- Test different locales (en-US, hu-HU, de-DE, ru-RU)
+- Test edge cases (current time, very far past/future dates)
+- Test ISO 8601 string parsing
+- Test accessibility (time element with dateTime attribute)
+
+**Affected Files:**
+
+- `src/components/relative-time.tsx` (new component)
+- `src/hooks/use-relative-time.ts` (new hook, optional)
+- `src/components/ui/index.ts` (export if using ui folder)
+- `src/components/__tests__/relative-time.test.tsx` (new test)
+
+---
+
+**Implementation Steps:**
+
+1. **Phase 1: FormatNumber Component**
+   - [ ] Create `src/components/format-number.tsx` with full prop support
+   - [ ] Add TypeScript types and JSDoc documentation
+   - [ ] Implement `Intl.NumberFormat` wrapper with error handling
+   - [ ] Create comprehensive test suite
+   - [ ] Add usage examples in component JSDoc
+
+2. **Phase 2: RelativeTime Component**
+   - [ ] Create `src/components/relative-time.tsx` with full prop support
+   - [ ] Optionally create `src/hooks/use-relative-time.ts` helper hook
+   - [ ] Implement `Intl.RelativeTimeFormat` wrapper with time unit calculation
+   - [ ] Implement sync feature with `useInterval` or `setInterval`
+   - [ ] Add accessibility features (`<time>` element)
+   - [ ] Create comprehensive test suite
+   - [ ] Add usage examples in component JSDoc
+
+3. **Phase 3: Integration & Documentation**
+   - [ ] Export both components from `src/components/ui/index.ts` (if applicable)
+   - [ ] Add usage documentation to component files
+   - [ ] Create example/demo file in docs or Storybook (if applicable)
+   - [ ] Add i18n key examples to `src/locales/*/common.json` if needed
+   - [ ] Update project README with formatting utilities section
+
+**Benefits:**
+
+- ✅ Reusable formatting components across the application
+- ✅ Built-in locale support using browser APIs (no language packs needed)
+- ✅ Improved UX with human-readable time phrases
+- ✅ Type-safe implementation with full TypeScript support
+- ✅ Better performance with native browser formatting APIs
+- ✅ Accessibility-first design (proper semantic HTML)
+- ✅ Aligned with modern Web Awesome component design patterns
+
+**Related Web Awesome Docs:**
+
+- Format Number: https://webawesome.com/docs/components/format-number/
+- Relative Time: https://webawesome.com/docs/components/relative-time/
+- Intl.NumberFormat: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+- Intl.RelativeTimeFormat: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat
+
+---
+
 ### ⚠️ Centralized Logging System
 
 **Priority:** Medium  
