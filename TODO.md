@@ -794,8 +794,96 @@ The Prisma model `VerificationToken` represents email verification tokens, but t
 - Verify environment seeds/fixtures use the new model name.
 
 **Impact:**
+
 - Improves readability and reduces ambiguity between verification types.
 - Prepares the ground for introducing additional token types without name collisions.
+
+### 🛡️ Rate Limiting for Login Attempts
+
+**Priority:** High  
+**Status:** Not Started
+
+**Description:**
+Implement rate limiting for login attempts to prevent brute force attacks and credential stuffing. This is a critical security feature that should limit the number of login attempts per IP address or user account within a time window.
+
+**Proposed Solution:**
+
+Create a rate limiting utility that tracks login attempts and blocks excessive attempts:
+
+```typescript
+// src/lib/rate-limit.ts
+interface RateLimitOptions {
+  windowMs: number; // Time window in milliseconds
+  maxAttempts: number; // Maximum attempts within the window
+  keyPrefix: string; // Prefix for Redis/cache keys
+}
+
+export class RateLimiter {
+  constructor(private options: RateLimitOptions) {}
+
+  async checkLimit(
+    key: string
+  ): Promise<{ allowed: boolean; remaining: number; resetTime: Date }> {
+    // Implementation using Redis or in-memory cache
+  }
+}
+```
+
+**Implementation Steps:**
+
+1. **Create Rate Limiting Utility:**
+   - Add `src/lib/rate-limit.ts` with configurable rate limiter
+   - Support both Redis (production) and in-memory (development) storage
+   - Include proper TypeScript types and error handling
+
+2. **Integrate with Login Flow:**
+   - Add rate limiting check in `src/features/auth/actions/login-user.ts`
+   - Track attempts by IP address + email combination
+   - Return appropriate error when limit exceeded
+
+3. **Configure Limits:**
+   - 5 attempts per 15 minutes per IP+email combination
+   - Progressive delays or temporary blocks for repeated violations
+   - Different limits for different risk levels
+
+4. **Update Error Messages:**
+   - Add rate limit error to `src/features/auth/lib/strings.ts`
+   - Include reset time in error message for better UX
+
+5. **Add Monitoring:**
+   - Log rate limit hits for security monitoring
+   - Consider alerting on suspicious patterns
+
+**Security Considerations:**
+
+- Use IP address + email as the key to prevent abuse
+- Implement sliding window or fixed window rate limiting
+- Consider geo-blocking for high-risk regions
+- Ensure rate limits don't leak information about account existence
+
+**Benefits:**
+
+- ✅ Prevents brute force attacks on user accounts
+- ✅ Reduces server load from malicious login attempts
+- ✅ Improves overall application security posture
+- ✅ Better user experience with clear error messages
+
+**Affected Files:**
+
+- `src/lib/rate-limit.ts` (new utility)
+- `src/features/auth/actions/login-user.ts` (add rate limiting)
+- `src/features/auth/lib/strings.ts` (add rate limit error messages)
+- `src/features/auth/services/login-user.ts` (optional: service-level checks)
+
+**Testing:**
+
+- Test rate limiting behavior with multiple failed attempts
+- Verify limits reset after time window
+- Test different IP addresses have separate limits
+- Ensure legitimate users aren't blocked
+- Test error message formatting with reset times
+
+---
 
 ### ✅ Fix naming conventions in routes.ts
 
