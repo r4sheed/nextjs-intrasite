@@ -9,7 +9,7 @@ export default defineConfig(async () => {
       environment: 'jsdom',
       include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
       globals: true,
-      setupFiles: [],
+      setupFiles: ['src/test/setup.ts'],
     },
   };
 });
