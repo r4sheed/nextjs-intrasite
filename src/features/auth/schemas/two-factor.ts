@@ -25,10 +25,3 @@ export const resendTwoFactorSchema = z.object({
 });
 
 export type ResendTwoFactorInput = z.infer<typeof resendTwoFactorSchema>;
-
-export const verify2faSchema = z.object({
-  email: z.string().email({ message: AUTH_ERRORS.emailInvalid }),
-  userId: z.string().cuid({ message: AUTH_ERRORS.invalidFields }),
-});
-
-export type Verify2faInput = z.infer<typeof verify2faSchema>;
