@@ -7,7 +7,9 @@ export default defineConfig(async () => {
     plugins: [react(), tsconfigPaths()],
     test: {
       environment: 'jsdom',
-      include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+      include: process.env.VITEST_INCLUDE
+        ? process.env.VITEST_INCLUDE.split(',')
+        : ['src/**/*.test.ts', 'src/**/*.test.tsx'],
       globals: true,
       setupFiles: ['src/test/setup.ts'],
     },
