@@ -56,9 +56,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // Delete the used two-factor confirmation
-        await db.twoFactorConfirmation.delete({
-          where: { id: twoFactorConfirmation.id },
-        });
+        try {
+          await db.twoFactorConfirmation.delete({
+            where: { id: twoFactorConfirmation.id },
+          });
+        } catch (error) {
+          console.error(
+            '[AUTH] Failed to delete 2FA confirmation for user',
+            existingUser.id,
+            error
+          );
+          // Don't allow sign-in if cleanup fails
+          return false;
+        }
       }
 
       return true;
