@@ -7,7 +7,7 @@ export default {
   schema: path.join('prisma', 'schema.prisma'),
   migrations: {
     path: path.join('prisma', 'migrations'),
-    seed: `tsx src/prisma/seed.ts`,
+    seed: `tsx prisma/seed.ts`,
   },
   views: {
     path: path.join('prisma', 'views'),
