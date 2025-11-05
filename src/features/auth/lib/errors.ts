@@ -164,17 +164,6 @@ export const twoFactorMaxAttempts = () =>
   });
 
 /**
- * 429 - Rate limit for sending 2FA codes exceeded.
- * Used when the user requests a new 2FA code too frequently (e.g., within 5 minutes).
- */
-export const rateLimitExceeded = () =>
-  new AppError({
-    code: AUTH_CODES.rateLimitExceeded,
-    message: { key: AUTH_ERRORS.rateLimitExceeded },
-    httpStatus: HTTP_STATUS.TOO_MANY_REQUESTS,
-  });
-
-/**
  * 400 - Two-factor session missing error.
  * Used when a two-factor authentication session is not found.
  * @returns AppError with status 400.
@@ -184,4 +173,15 @@ export const twoFactorSessionMissing = () =>
     code: AUTH_CODES.twoFactorSessionMissing,
     message: { key: AUTH_ERRORS.twoFactorSessionMissing },
     httpStatus: HTTP_STATUS.BAD_REQUEST,
+  });
+
+/**
+ * 429 - Rate limit for sending 2FA codes exceeded.
+ * Used when the user requests a new 2FA code too frequently (e.g., within 5 minutes).
+ */
+export const rateLimitExceeded = () =>
+  new AppError({
+    code: AUTH_CODES.rateLimitExceeded,
+    message: { key: AUTH_ERRORS.rateLimitExceeded },
+    httpStatus: HTTP_STATUS.TOO_MANY_REQUESTS,
   });
