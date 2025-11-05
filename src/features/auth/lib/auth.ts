@@ -5,7 +5,7 @@ import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
 import { getTwoFactorConfirmationByUserId } from '@/features/auth/data/two-factor-confirmation';
-import { getUser } from '@/features/auth/data/user';
+import { getUserById } from '@/features/auth/data/user';
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -37,7 +37,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         return false;
       }
 
-      const existingUser = await getUser({id: user.id});
+      const existingUser = await getUserById(user.id);
 
       // Prevent sign in without email verification
       const emailVerified = !!existingUser?.emailVerified;
