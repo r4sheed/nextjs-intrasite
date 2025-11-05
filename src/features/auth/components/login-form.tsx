@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
-import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
