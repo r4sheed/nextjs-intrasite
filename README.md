@@ -54,6 +54,7 @@ npm run lint         # Run ESLint
 npm run format       # Format code with Prettier
 npm run test         # Run all tests
 npm run test:watch   # Run tests in watch mode
+npm run test:feature <name>  # Run tests for specific feature (e.g., npm run test:feature auth)
 
 # Feature scaffolding
 npm run feature:create <name>  # Generate new feature scaffold
@@ -193,7 +194,7 @@ Features:
 
 ## Testing
 
-103 tests covering:
+113 tests covering:
 
 - Server actions
 - Services
@@ -202,8 +203,9 @@ Features:
 - Response utilities
 
 ```bash
-npm test           # Run all tests
-npm run test:watch # Watch mode
+npm test                    # Run all tests
+npm run test:watch          # Watch mode
+npm run test:feature auth   # Run only auth feature tests
 ```
 
 ---
