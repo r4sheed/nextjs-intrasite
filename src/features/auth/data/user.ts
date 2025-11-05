@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/prisma';
 
 import { User } from '@/features/auth/models';
@@ -7,8 +6,7 @@ import type { User as PrismaUser } from '@prisma/client';
 
 /**
  * Data access layer for User entity
- * Returns null on errors to let the service layer handle error responses
- * Returns null when user is not found (expected behavior)
+ * Returns null on errors. Passwords excluded by default for security.
  */
 
 /**
@@ -26,7 +24,7 @@ const USER_WITHOUT_PASSWORD_SELECT = {
 } as const;
 
 /**
- * Type for user without password
+ * Type for user data without password field
  */
 export type UserWithoutPassword = Omit<PrismaUser, 'password'>;
 
@@ -41,9 +39,9 @@ export type UserLookupOptions = {
 
 /**
  * Generic user lookup utility with error handling
- * @param where - Prisma where clause
- * @param select - Optional select clause for specific fields
- * @returns User object if found, null if not found or on database error
+ * @param where - Prisma where clause for ID or email
+ * @param select - Optional field selection
+ * @returns User object if found, null on error
  */
 const findUser = async <T = PrismaUser>(
   where: { id: string } | { email: string },
@@ -64,14 +62,14 @@ const findUser = async <T = PrismaUser>(
 };
 
 /**
- * Unified user lookup function - prioritizes ID over email
- * @param options - Lookup options with id, email, or includePassword
- * @returns User object if found, null if not found or on database error
+ * Unified user lookup function - defaults to password excluded
+ * @param options - Lookup options (id/email/includePassword)
+ * @returns User object if found, null on error
  */
 export const getUser = async (
   options: UserLookupOptions
 ): Promise<PrismaUser | UserWithoutPassword | null> => {
-  const { id, email, includePassword = true } = options;
+  const { id, email, includePassword = false } = options;
 
   // Prioritize ID if provided
   if (id) {
@@ -120,58 +118,34 @@ export const getUserByEmail = async (
 };
 
 /**
- * Fetch user by ID without password field
- * @param userId - The user's unique identifier
- * @returns User object without password if found, null if not found or on database error
- */
-export const getUserByIdWithoutPassword = async (
-  userId: string
-): Promise<UserWithoutPassword | null> => {
-  return await findUser<UserWithoutPassword>(
-    { id: userId },
-    USER_WITHOUT_PASSWORD_SELECT
-  );
-};
-
-/**
- * Fetch user by email without password field
- * @param email - The user's email address
- * @returns User object without password if found, null if not found or on database error
- */
-export const getUserByEmailWithoutPassword = async (
-  email: string
-): Promise<UserWithoutPassword | null> => {
-  return await findUser<UserWithoutPassword>(
-    { email },
-    USER_WITHOUT_PASSWORD_SELECT
-  );
-};
-
-/**
- * Verify user credentials (email + password)
- * @param email - The user's email address
- * @param password - The plain text password to verify
- * @returns User object without password if credentials are valid, null otherwise (including on database errors)
- *
- * @remarks
- * This function uses the User model's verifyPassword method for business logic.
- * The data layer fetches the raw Prisma user, then wraps it in the User model.
+ * Verify user credentials with password checking
+ * @param email - User email
+ * @param password - Plain text password to verify
+ * @returns User without password if valid, null otherwise
  */
 export const verifyUserCredentials = async (
   email: string,
   password: string
 ): Promise<UserWithoutPassword | null> => {
-  // Fetch user with password (includes password field)
-  const prismaUser = await getUserByEmail(email);
+  // Fetch user with password
+  const data = await getUser({ email, includePassword: true });
 
-  if (!prismaUser) return null;
+  // Type guard to check if user has password
+  function hasPassword(
+    user: PrismaUser | UserWithoutPassword
+  ): user is PrismaUser {
+    return 'password' in user;
+  }
 
-  // Wrap in User model and verify password (business logic)
-  const user = new User(prismaUser);
+  // Ensure we have a full PrismaUser with password
+  if (!data || !hasPassword(data)) return null;
+
+  // Wrap in User model and verify password
+  const user = new User(data);
   const isPasswordValid = await user.verifyPassword(password);
 
   if (!isPasswordValid) return null;
 
-  // Return user without password using model method
+  // Return user without password
   return user.toSafeObject();
 };

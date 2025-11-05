@@ -25,8 +25,6 @@ export {
   getUser,
   getUserById,
   getUserByEmail,
-  getUserByIdWithoutPassword,
-  getUserByEmailWithoutPassword,
   verifyUserCredentials,
 } from './user';
 

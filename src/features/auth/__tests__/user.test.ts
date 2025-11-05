@@ -1,13 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { databaseError } from '@/lib/errors';
-
 import {
   getUser,
   getUserByEmail,
-  getUserByEmailWithoutPassword,
   getUserById,
-  getUserByIdWithoutPassword,
   verifyUserCredentials,
 } from '@/features/auth/data/user';
 
@@ -28,11 +24,14 @@ vi.mock('bcryptjs', () => ({
 }));
 
 describe('User Data Layer', () => {
-  let mockFindUnique: any;
+  let mockFindUnique: ReturnType<typeof vi.fn>;
+  let mockBcryptCompare: ReturnType<typeof vi.fn>;
 
   beforeAll(async () => {
     const { db } = await import('@/lib/prisma');
     mockFindUnique = vi.mocked(db.user.findUnique);
+    const { default: bcrypt } = await import('bcryptjs');
+    mockBcryptCompare = vi.mocked(bcrypt.compare);
   });
 
   beforeEach(() => {
@@ -113,63 +112,6 @@ describe('User Data Layer', () => {
       const response = await getUserByEmail('nonexistent@example.com');
 
       expect(response).toBeNull();
-    });
-  });
-
-  describe('getUserByIdWithoutPassword', () => {
-    it('should return user without password field', async () => {
-      const mockUser = {
-        id: 'user-123',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'USER' as const,
-        emailVerified: null,
-        image: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockFindUnique.mockResolvedValue(mockUser);
-
-      const response = await getUserByIdWithoutPassword('user-123');
-
-      expect(response).toEqual(mockUser);
-      expect(response).not.toHaveProperty('password');
-      expect(mockFindUnique).toHaveBeenCalledWith({
-        where: { id: 'user-123' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          emailVerified: true,
-          image: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-    });
-  });
-
-  describe('getUserByEmailWithoutPassword', () => {
-    it('should return user without password field', async () => {
-      const mockUser = {
-        id: 'user-123',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'USER' as const,
-        emailVerified: null,
-        image: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockFindUnique.mockResolvedValue(mockUser);
-
-      const response = await getUserByEmailWithoutPassword('test@example.com');
-
-      expect(response).toEqual(mockUser);
-      expect(response).not.toHaveProperty('password');
     });
   });
 
@@ -273,8 +215,7 @@ describe('User Data Layer', () => {
 
     it('should return user data for valid credentials', async () => {
       mockFindUnique.mockResolvedValue(mockUser);
-      const { default: bcrypt } = await import('bcryptjs');
-      (bcrypt.compare as any).mockResolvedValue(true);
+      mockBcryptCompare.mockResolvedValue(true);
 
       const user = await verifyUserCredentials(
         'test@example.com',
@@ -319,8 +260,7 @@ describe('User Data Layer', () => {
 
     it('should return null for invalid password', async () => {
       mockFindUnique.mockResolvedValue(mockUser);
-      const { default: bcrypt } = await import('bcryptjs');
-      (bcrypt.compare as any).mockResolvedValue(false);
+      mockBcryptCompare.mockResolvedValue(false);
 
       const user = await verifyUserCredentials(
         'test@example.com',
@@ -349,30 +289,13 @@ describe('User Data Layer', () => {
 
       // Act & Assert: Test all user lookup functions
       const functionsToTest = [
-        { name: 'getUserById', fn: () => getUserById('test-user-id') },
-        {
-          name: 'getUserByEmail',
-          fn: () => getUserByEmail('test@example.com'),
-        },
-        {
-          name: 'getUserByIdWithoutPassword',
-          fn: () => getUserByIdWithoutPassword('test-user-id'),
-        },
-        {
-          name: 'getUserByEmailWithoutPassword',
-          fn: () => getUserByEmailWithoutPassword('test@example.com'),
-        },
-        {
-          name: 'getUser (with ID)',
-          fn: () => getUser({ id: 'test-user-id' }),
-        },
-        {
-          name: 'getUser (with email)',
-          fn: () => getUser({ email: 'test@example.com' }),
-        },
+        () => getUserById('test-user-id'),
+        () => getUserByEmail('test@example.com'),
+        () => getUser({ id: 'test-user-id' }),
+        () => getUser({ email: 'test@example.com' }),
       ];
 
-      for (const { name, fn } of functionsToTest) {
+      for (const fn of functionsToTest) {
         const result = await fn();
         expect(result).toBeNull();
       }
