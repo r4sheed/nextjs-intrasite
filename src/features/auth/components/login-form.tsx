@@ -41,7 +41,10 @@ import {
   AUTH_ERRORS,
   AUTH_LABELS,
 } from '@/features/auth/lib/strings';
-import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import {
+  type LoginFormInput,
+  loginSchema,
+} from '@/features/auth/schemas/login';
 
 import type React from 'react';
 
@@ -75,7 +78,7 @@ const useLoginForm = () => {
     }
   })();
 
-  const form = useForm<LoginInput>({
+  const form = useForm<LoginFormInput>({
     resolver: zodResolver(loginSchema),
     mode: 'onTouched',
     defaultValues: {
@@ -87,7 +90,7 @@ const useLoginForm = () => {
   const mutation = useMutation<
     ActionSuccess<typeof loginUser>,
     ErrorResponse,
-    LoginInput
+    LoginFormInput
   >({
     mutationFn: data => execute(loginUser, data),
     onSuccess: response => {
@@ -102,6 +105,9 @@ const useLoginForm = () => {
       // Normal login success - redirect to dashboard
       router.push(middlewareConfig.defaultLoginRedirect);
     },
+    onError: () => {
+      // Error is handled by the form state
+    },
   });
 
   const isPending = mutation.isPending || isRedirecting;
@@ -112,8 +118,10 @@ const useLoginForm = () => {
   const errorMessage =
     mutation.error?.message?.key || urlError || verifyErrorMessage;
 
-  const onSubmit = (values: LoginInput) => {
-    if (isPending) return;
+  const onSubmit = (values: LoginFormInput) => {
+    if (isPending) {
+      return;
+    }
     mutation.mutate(values);
   };
 

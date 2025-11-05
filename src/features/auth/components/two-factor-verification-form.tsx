@@ -27,12 +27,12 @@ import {
 import {
   InputOTP,
   InputOTPGroup,
+  InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 
 import {
   resendTwoFactor,
-  verify2fa,
   verifyTwoFactor,
   type ResendTwoFactorInput,
   type VerifyTwoFactorInput,
@@ -64,13 +64,6 @@ export const TwoFactorVerificationForm = () => {
     AUTH_LABELS.verify2faCodeSent.split('{email}');
   const codeFromQuery = searchParams.get('code');
 
-  useEffect(() => {
-    const latestSessionId = searchParams.get('sessionId');
-    if (latestSessionId !== sessionId) {
-      setSessionId(latestSessionId);
-    }
-  }, [searchParams, sessionId]);
-
   const form = useForm<VerifyTwoFactorCodeInput>({
     resolver: zodResolver(verifyTwoFactorCodeSchema),
     defaultValues: { code: '' },
@@ -92,16 +85,11 @@ export const TwoFactorVerificationForm = () => {
       setIsRedirecting(true);
 
       try {
-        // Call server action to complete sign-in (can't call signIn directly - uses Prisma)
-        await verify2fa({
-          email: data.data.email,
-          userId: data.data.userId,
-        });
-
-        // Force page refresh to update session
-        window.location.href = middlewareConfig.defaultLoginRedirect;
+        // Sign-in is now completed in the service layer
+        // Replace current history entry to prevent going back to used 2FA page
+        router.replace(middlewareConfig.defaultLoginRedirect);
       } catch (error) {
-        console.error('[2FA] Sign-in failed:', error);
+        console.error('[2FA] Redirect failed:', error);
         setIsRedirecting(false);
       }
     },
@@ -253,10 +241,16 @@ export const TwoFactorVerificationForm = () => {
                     disabled={isPending || isSessionLocked}
                     containerClassName="gap-4 flex justify-center"
                   >
-                    <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:h-16 *:data-[slot=input-otp-slot]:w-12 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border *:data-[slot=input-otp-slot]:text-xl">
-                      {[0, 1, 2, 3, 4, 5].map(index => (
-                        <InputOTPSlot key={index} index={index} />
-                      ))}
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                   <FieldDescription className="text-center">
@@ -280,7 +274,7 @@ export const TwoFactorVerificationForm = () => {
 
               <Button
                 type="button"
-                variant="ghost"
+                variant="link"
                 onClick={handleResend}
                 disabled={
                   isPending || resendMutation.isPending || isSessionLocked
@@ -288,15 +282,6 @@ export const TwoFactorVerificationForm = () => {
                 className="w-full"
               >
                 {AUTH_LABELS.resendCodeButton}
-              </Button>
-
-              <Button
-                type="button"
-                variant="link"
-                onClick={() => router.push(routes.auth.login.url)}
-                className="w-full"
-              >
-                {AUTH_LABELS.backToLoginButton}
               </Button>
             </Field>
           </FieldGroup>
