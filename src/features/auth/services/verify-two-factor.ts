@@ -1,14 +1,23 @@
-import { internalServerError } from '@/lib/errors';
+import { AuthError } from 'next-auth';
+
+import { AppError, internalServerError } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { createTwoFactorConfirmation } from '@/features/auth/data/two-factor-confirmation';
+import {
+  createTwoFactorConfirmation,
+  deleteTwoFactorConfirmation,
+} from '@/features/auth/data/two-factor-confirmation';
 import {
   deleteTwoFactorToken,
   getTwoFactorTokenById,
   incrementTwoFactorAttempts,
 } from '@/features/auth/data/two-factor-token';
 import { getUserById } from '@/features/auth/data/user';
-import { TWO_FACTOR_MAX_ATTEMPTS } from '@/features/auth/lib/config';
+import { signIn } from '@/features/auth/lib/auth';
+import {
+  TWO_FACTOR_BYPASS_PLACEHOLDER,
+  TWO_FACTOR_MAX_ATTEMPTS,
+} from '@/features/auth/lib/config';
 import {
   twoFactorCodeExpired,
   twoFactorCodeInvalid,
@@ -75,7 +84,31 @@ export const verifyTwoFactorCode = async (
     // by the auth callback to allow session creation
     await createTwoFactorConfirmation(user.id);
 
-    // Return success without message - client will handle sign-in and redirect
+    // Complete the sign-in process
+    try {
+      await signIn('credentials', {
+        email: user.email,
+        password: TWO_FACTOR_BYPASS_PLACEHOLDER,
+        twoFactorBypass: true,
+        redirect: false,
+      });
+
+      // Clean up the TwoFactorConfirmation after successful sign-in
+      // This ensures cleanup happens regardless of callback execution
+      await deleteTwoFactorConfirmation(user.id);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        // Handle NextAuth errors
+        console.error(
+          '[SERVICE] Sign-in failed after 2FA verification:',
+          error
+        );
+        return response.failure(internalServerError());
+      }
+      throw error; // Re-throw unexpected errors
+    }
+
+    // Return success without message - client will handle redirect
     return response.success({
       data: {
         userId: user.id,
