@@ -12,3 +12,6 @@ export const loginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
+// Form-specific type that only includes user-provided fields
+export type LoginFormInput = Pick<LoginInput, 'email' | 'password'>;
