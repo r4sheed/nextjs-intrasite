@@ -51,8 +51,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           existingUser.id
         );
 
-        console.log('Two-factor confirmation:', twoFactorConfirmation);
-
         if (!twoFactorConfirmation) {
           return false;
         }
