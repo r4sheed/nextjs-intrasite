@@ -39,9 +39,80 @@ import {
 
 import type React from 'react';
 
-const useNewPasswordForm = () => {
+/**
+ * Hook for extracting and setting token from URL parameters
+ * @param form - React Hook Form instance
+ * @returns Object with token value and missing token flag
+ */
+const useTokenFromUrl = (
+  form: ReturnType<typeof useForm<NewPasswordInput>>
+) => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+
+  // Set token in form when URL param changes
+  useEffect(() => {
+    if (token) {
+      form.setValue('token', token);
+    }
+  }, [searchParams, form, token]);
+
+  return { token, isTokenMissing: !token };
+};
+
+/**
+ * Hook for new password mutation with redirect logic
+ * @returns TanStack Query mutation for password update
+ */
+const useNewPasswordMutation = () => {
   const router = useRouter();
 
+  return useMutation<
+    ActionSuccess<typeof updatePassword>,
+    ErrorResponse,
+    NewPasswordInput
+  >({
+    mutationFn: data => execute(updatePassword, data),
+    onSuccess: () => {
+      // Redirect to login after successful password update
+      const timer = setTimeout(() => {
+        router.replace(routes.auth.login.url);
+      }, REDIRECT_TIMEOUT_MS);
+      return () => clearTimeout(timer);
+    },
+  });
+};
+
+/**
+ * Hook for computing form state and messages
+ * @param mutation - Password update mutation
+ * @param isTokenMissing - Whether token is missing from URL
+ * @returns Computed state object with loading states and messages
+ */
+const useNewPasswordState = (
+  mutation: ReturnType<typeof useNewPasswordMutation>,
+  isTokenMissing: boolean
+) => {
+  const successMessage = mutation.data?.message?.key;
+  const errorMessage = isTokenMissing
+    ? AUTH_ERRORS.tokenInvalid
+    : mutation.error?.message?.key || '';
+
+  return {
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError || isTokenMissing,
+    successMessage,
+    errorMessage,
+  };
+};
+
+/**
+ * Main hook for new password form logic
+ * Combines token extraction, mutation, and state management
+ * @returns Form instance, submit handler, and computed state
+ */
+const useNewPasswordForm = () => {
   const form = useForm<NewPasswordInput>({
     resolver: zodResolver(newPasswordSchema),
     mode: 'onTouched',
@@ -51,49 +122,19 @@ const useNewPasswordForm = () => {
     },
   });
 
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-
-  useEffect(() => {
-    if (token) {
-      form.setValue('token', token);
-    }
-  }, [searchParams, form.setValue, token]);
-
-  const isTokenMissing = !token;
-
-  const mutation = useMutation<
-    ActionSuccess<typeof updatePassword>,
-    ErrorResponse,
-    NewPasswordInput
-  >({
-    mutationFn: data => execute(updatePassword, data),
-    onSuccess: () => {
-      const timer = setTimeout(() => {
-        router.replace(routes.auth.login.url);
-      }, REDIRECT_TIMEOUT_MS);
-      return () => clearTimeout(timer);
-    },
-  });
-
-  const successMessage = mutation.data?.message?.key;
-  const errorMessage = isTokenMissing
-    ? AUTH_ERRORS.tokenInvalid
-    : mutation.error?.message?.key || '';
+  const { isTokenMissing } = useTokenFromUrl(form);
+  const mutation = useNewPasswordMutation();
+  const state = useNewPasswordState(mutation, isTokenMissing);
 
   const onSubmit = (values: NewPasswordInput) => {
-    if (mutation.isPending) return;
+    if (state.isPending) return;
     mutation.mutate(values);
   };
 
   return {
     form,
     onSubmit,
-    isPending: mutation.isPending,
-    isSuccess: mutation.isSuccess,
-    isError: mutation.isError || isTokenMissing,
-    successMessage,
-    errorMessage,
+    ...state,
   };
 };
 

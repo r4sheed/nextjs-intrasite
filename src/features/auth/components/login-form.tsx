@@ -48,11 +48,12 @@ import {
 
 import type React from 'react';
 
-const useLoginForm = () => {
-  const [isRedirecting, setIsRedirecting] = useState(false);
-
+/**
+ * Hook for extracting URL parameters related to login state
+ * @returns Object with URL-based error and success messages
+ */
+const useUrlParams = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
@@ -78,14 +79,21 @@ const useLoginForm = () => {
     }
   })();
 
-  const form = useForm<LoginFormInput>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  return {
+    urlError,
+    verifySuccessMessage,
+    verifyErrorMessage,
+    isVerifySuccess,
+  };
+};
+
+/**
+ * Hook for login mutation with redirect logic
+ * @returns Object with mutation and redirecting state
+ */
+const useLoginMutation = () => {
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const mutation = useMutation<
     ActionSuccess<typeof loginUser>,
@@ -98,6 +106,7 @@ const useLoginForm = () => {
 
       // Check for redirect requirement (2FA verification)
       if (response.data?.redirectUrl) {
+        console.log('redirecting', response.data.redirectUrl);
         router.push(response.data.redirectUrl);
         return;
       }
@@ -110,31 +119,64 @@ const useLoginForm = () => {
     },
   });
 
+  return { mutation, isRedirecting };
+};
+
+/**
+ * Hook for computing form state and messages
+ * @param mutation - Login mutation instance
+ * @param urlParams - URL parameters from useUrlParams
+ * @param isRedirecting - Whether redirect is in progress
+ * @returns Computed state object with loading states and messages
+ */
+const useFormState = (
+  mutation: ReturnType<typeof useLoginMutation>['mutation'],
+  urlParams: ReturnType<typeof useUrlParams>,
+  isRedirecting: boolean
+) => {
+  const {
+    urlError,
+    verifySuccessMessage,
+    verifyErrorMessage,
+    isVerifySuccess,
+  } = urlParams;
+
   const isPending = mutation.isPending || isRedirecting;
   const isSuccess = mutation.isSuccess || isVerifySuccess;
-  const isError = mutation.isError || !!urlError || verifyError;
+  const isError = mutation.isError || !!urlError || !!verifyErrorMessage;
 
   const successMessage = mutation.data?.message?.key || verifySuccessMessage;
   const errorMessage =
     mutation.error?.message?.key || urlError || verifyErrorMessage;
 
+  return { isPending, isSuccess, isError, successMessage, errorMessage };
+};
+
+/**
+ * Main hook for login form logic
+ */
+const useLoginForm = () => {
+  const urlParams = useUrlParams();
+  const { mutation, isRedirecting } = useLoginMutation();
+  const formState = useFormState(mutation, urlParams, isRedirecting);
+
+  const form = useForm<LoginFormInput>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
   const onSubmit = (values: LoginFormInput) => {
-    if (isPending) {
+    if (formState.isPending) {
       return;
     }
     mutation.mutate(values);
   };
 
-  return {
-    form,
-    onSubmit,
-    mutation,
-    isPending: isPending,
-    isSuccess: isSuccess,
-    isError: isError,
-    successMessage,
-    errorMessage,
-  };
+  return { form, onSubmit, mutation, ...formState };
 };
 
 const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {

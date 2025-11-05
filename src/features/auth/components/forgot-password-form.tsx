@@ -32,7 +32,12 @@ import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 
 import type React from 'react';
 
+/**
+ * Hook for forgot password form logic
+ * @returns Form instance, submit handler, and computed state
+ */
 const useForgotPasswordForm = () => {
+  // Form setup with validation
   const form = useForm<ResetInput>({
     resolver: zodResolver(resetSchema),
     mode: 'onTouched',
@@ -41,6 +46,7 @@ const useForgotPasswordForm = () => {
     },
   });
 
+  // Mutation for password reset
   const mutation = useMutation<
     ActionSuccess<typeof resetPassword>,
     ErrorResponse,
@@ -49,9 +55,11 @@ const useForgotPasswordForm = () => {
     mutationFn: data => execute(resetPassword, data),
   });
 
+  // Computed state
   const successMessage = mutation.data?.message?.key;
   const errorMessage = mutation.error?.message?.key;
 
+  // Submit handler with pending check
   const onSubmit = (values: ResetInput) => {
     if (mutation.isPending) return;
     mutation.mutate(values);

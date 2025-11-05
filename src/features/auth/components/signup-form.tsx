@@ -34,7 +34,12 @@ import { SocialProviders } from '@/features/auth/components/social-providers';
 import { AUTH_LABELS } from '@/features/auth/lib/strings';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 
+/**
+ * Hook for signup form logic
+ * @returns Form instance, submit handler, and computed state
+ */
 const useSignupForm = () => {
+  // Form setup with validation
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
@@ -45,6 +50,7 @@ const useSignupForm = () => {
     },
   });
 
+  // Mutation for user registration
   const mutation = useMutation<
     ActionSuccess<typeof registerUser>,
     ErrorResponse,
@@ -53,9 +59,11 @@ const useSignupForm = () => {
     mutationFn: data => execute(registerUser, data),
   });
 
+  // Computed state
   const successMessage = mutation.data?.message?.key;
   const errorMessage = mutation.error?.message?.key;
 
+  // Submit handler with pending check
   const onSubmit = (values: RegisterInput) => {
     if (mutation.isPending) return;
     mutation.mutate(values);
