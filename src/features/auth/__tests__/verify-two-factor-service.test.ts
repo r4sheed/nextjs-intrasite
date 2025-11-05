@@ -134,6 +134,7 @@ describe('verifyTwoFactorCode service', () => {
     const getTwoFactorTokenById = vi.fn().mockResolvedValue(token);
     const deleteTwoFactorToken = vi.fn();
     const createTwoFactorConfirmation = vi.fn();
+    const deleteTwoFactorConfirmation = vi.fn();
 
     vi.doMock('@/features/auth/data/two-factor-token', () => ({
       getTwoFactorTokenById,
@@ -150,6 +151,7 @@ describe('verifyTwoFactorCode service', () => {
 
     vi.doMock('@/features/auth/data/two-factor-confirmation', () => ({
       createTwoFactorConfirmation,
+      deleteTwoFactorConfirmation,
     }));
 
     const { verifyTwoFactorCode } = await import(
@@ -166,5 +168,6 @@ describe('verifyTwoFactorCode service', () => {
     }
     expect(deleteTwoFactorToken).toHaveBeenCalledWith('token-1');
     expect(createTwoFactorConfirmation).toHaveBeenCalledWith('user-1');
+    expect(deleteTwoFactorConfirmation).toHaveBeenCalledWith('user-1');
   });
 });
