@@ -1042,3 +1042,108 @@ export class RateLimiter {
 - Show spinner only for active provider
 - Prevents double-clicks during authentication
 - **Status:** Completed
+
+---
+
+### 🐛 Fix Two-Factor Confirmation Deletion Database Error
+
+**Priority:** High  
+**Status:** Not Started
+
+**Description:**  
+Database error occurs when attempting to delete `twoFactorConfirmation` record after successful 2FA verification. The error indicates "No record was found for a delete" operation, suggesting the record is being deleted twice or doesn't exist.
+
+**Current Issue:**
+
+```
+[deleteTwoFactorConfirmation] Database error: Error [PrismaClientKnownRequestError]:
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].twoFactorConfirmation.delete()` invocation in
+C:\Users\Admin\GitHub\web\next.js\nextjs-intrasite\.next\server\chunks\ssr\[root-of-the-server]__859953ab._.js:550:166
+
+  547 };
+  548 const deleteTwoFactorConfirmation = async (userId)=>{
+  549     try {
+→ 550         await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].twoFactorConfirmation.delete({
+An operation failed because it depends on one or more records that were required but not found. No record was found for a delete.
+    at <unknown> (src\features\auth\data\two-factor-confirmation.ts:60:42)
+    at async deleteTwoFactorConfirmation (src\features\auth\data\two-factor-confirmation.ts:60:5)
+    at async verifyTwoFactorCode (src\features\auth\services\verify-two-factor.ts:98:7)
+    at async verifyTwoFactor (src\features\auth\actions\verify-two-factor.ts:33:10)
+```
+
+**Root Cause Analysis:**  
+The `deleteTwoFactorConfirmation` function in `src/features/auth/data/two-factor-confirmation.ts` attempts to delete by `userId`, but the record may not exist or may have already been deleted. This could happen if:
+
+1. The record is deleted in the NextAuth `signIn` callback (`src/features/auth/lib/auth.ts`) after successful authentication
+2. The record doesn't exist for some users (e.g., if 2FA was disabled/enabled)
+3. Race condition between multiple verification attempts
+
+**Proposed Solution:**  
+Make the delete operation optional by either:
+
+1. **Option A (Recommended):** Use `deleteMany` with `where: { userId }` and handle 0 deletions gracefully
+2. **Option B:** Check if record exists before deleting using `findFirst` + conditional delete
+3. **Option C:** Wrap in try-catch and log warning instead of throwing error
+
+**Implementation Steps:**
+
+1. Update `deleteTwoFactorConfirmation` in `src/features/auth/data/two-factor-confirmation.ts`:
+
+   ```typescript
+   export const deleteTwoFactorConfirmation = async (
+     userId: string
+   ): Promise<boolean> => {
+     try {
+       // Option A: Use deleteMany and check affected count
+       const result = await db.twoFactorConfirmation.deleteMany({
+         where: { userId },
+       });
+
+       if (result.count === 0) {
+         console.warn(
+           `[2FA] No confirmation record found for user ${userId} - may have been already deleted`
+         );
+         return false;
+       }
+
+       return true;
+     } catch (error) {
+       console.error('[2FA] Failed to delete confirmation record:', error);
+       throw error;
+     }
+   };
+   ```
+
+2. Update callers to handle the boolean return value if needed
+3. Add proper logging for debugging
+4. Consider adding database constraints or application logic to prevent double deletion
+
+**Benefits:**
+
+- ✅ Prevents database errors from crashing the verification flow
+- ✅ Handles edge cases where confirmation record doesn't exist
+- ✅ Provides better logging for debugging
+- ✅ Maintains backward compatibility with existing callers
+
+**Affected Files:**
+
+- `src/features/auth/data/two-factor-confirmation.ts` (main fix)
+- `src/features/auth/services/verify-two-factor.ts` (update caller if needed)
+- `src/features/auth/lib/auth.ts` (review deletion logic to prevent race conditions)
+
+**Testing:**
+
+- Test successful 2FA verification (should not error)
+- Test case where confirmation record doesn't exist
+- Test concurrent verification attempts
+- Verify NextAuth callback doesn't conflict with service deletion
+- Check logs for appropriate warnings/errors
+
+**Next Steps:**
+
+- Implement the fix using Option A (deleteMany approach)
+- Test thoroughly to ensure no regression
+- Monitor logs for any remaining issues
+- Consider adding database-level constraints if needed
+
+---
