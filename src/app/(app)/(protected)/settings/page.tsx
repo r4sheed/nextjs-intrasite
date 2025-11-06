@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 
-import { auth, signOut } from '@/features/auth/lib/auth';
+import { logoutUser } from '@/features/auth/actions/logout-user';
+import { auth } from '@/features/auth/lib/auth';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -9,13 +10,7 @@ export default async function SettingsPage() {
       <div className="mb-6 rounded-md p-4">
         <pre>{JSON.stringify(session, null, 2)}</pre>
       </div>
-      <form
-        action={async () => {
-          'use server';
-
-          await signOut();
-        }}
-      >
+      <form action={logoutUser}>
         <Button type="submit">Sign Out</Button>
       </form>
     </div>
