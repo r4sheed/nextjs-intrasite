@@ -57,10 +57,11 @@ export const deleteTwoFactorConfirmation = async (
   userId: string
 ): Promise<boolean | null> => {
   try {
-    await db.twoFactorConfirmation.delete({
+    const result = await db.twoFactorConfirmation.deleteMany({
       where: { userId },
     });
-    return true;
+
+    return result.count > 0;
   } catch (error) {
     console.error('[deleteTwoFactorConfirmation] Database error:', error);
     return null;
