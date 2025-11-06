@@ -6,10 +6,7 @@ import { ResetTemplate } from '@/features/auth/components/reset-template';
 import { TwoFactorTemplate } from '@/features/auth/components/two-factor-template';
 import { VerificationTemplate } from '@/features/auth/components/verification-template';
 
-const MAIL_BASE_URL =
-  process.env.NEXTAUTH_URL ??
-  process.env.NEXT_PUBLIC_APP_URL ??
-  'http://localhost:3000';
+const MAIL_BASE_URL = 'http://localhost:3000';
 const DEFAULT_FROM = 'onboarding@resend.dev';
 const BASE_TEMPLATE_PROPS = {
   companyName: 'Your App Name',
@@ -19,6 +16,16 @@ const BASE_TEMPLATE_PROPS = {
 export const sendVerificationEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}`;
 
+  // TEMPORARY: Log to console instead of sending email to avoid daily limit
+  console.log('\n========================================');
+  console.log('🔐 EMAIL VERIFICATION (DEVELOPMENT MODE)');
+  console.log('========================================');
+  console.log(`URL:  ${url}`);
+  console.log('========================================\n');
+
+  return { success: true };
+
+  /* ORIGINAL CODE - RE-ENABLE IN PRODUCTION
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
     url: url,
@@ -36,11 +43,22 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   }
 
   return data;
+  */
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}`;
 
+  // TEMPORARY: Log to console instead of sending email to avoid daily limit
+  console.log('\n========================================');
+  console.log('🔐 PASSWORD RESET (DEVELOPMENT MODE)');
+  console.log('========================================');
+  console.log(`URL:  ${url}`);
+  console.log('========================================\n');
+
+  return { success: true };
+
+  /* ORIGINAL CODE - RE-ENABLE IN PRODUCTION
   const templateProps = {
     ...BASE_TEMPLATE_PROPS,
     url: url,
@@ -58,6 +76,7 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   }
 
   return data;
+  */
 };
 
 type TwoFactorMailOptions = Readonly<{
