@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
-import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -102,6 +102,8 @@ const useLoginMutation = () => {
   >({
     mutationFn: data => execute(loginUser, data),
     onSuccess: response => {
+      if (response.status === Status.Partial) return;
+
       setIsRedirecting(true);
 
       // Check for redirect requirement (2FA verification)
@@ -273,7 +275,11 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               <Field>
                 {isSuccess && <FormSuccess message={successMessage} />}
                 {isError && <FormError message={errorMessage} />}
-                <LoadingButton type="submit" loading={isPending}>
+                <LoadingButton
+                  type="submit"
+                  loading={isPending}
+                  disabled={isSuccess}
+                >
                   {AUTH_LABELS.loginButton}
                 </LoadingButton>
               </Field>
