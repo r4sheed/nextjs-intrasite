@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
-import { CircleCheck } from 'lucide-react';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -12,10 +12,13 @@ import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
+  EmptyContent,
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
@@ -23,7 +26,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 import { verifyEmail } from '@/features/auth/actions';
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/config';
-import { AUTH_CODES, AUTH_LABELS } from '@/features/auth/lib/strings';
+import { AUTH_ERRORS, AUTH_LABELS } from '@/features/auth/lib/strings';
 
 /**
  * Email verification form component
@@ -33,8 +36,8 @@ export const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const hasToken = Boolean(token); // Check if token exists in URL
 
-  // Mutation for email verification
   const mutation = useMutation<
     ActionSuccess<typeof verifyEmail>,
     ErrorResponse,
@@ -43,74 +46,113 @@ export const EmailVerificationForm = () => {
     mutationFn: token => execute(verifyEmail, token),
   });
 
-  // Handle token validation and verification trigger
+  const { mutate, status, isPending, isSuccess, isError, data, error } =
+    mutation; // Destructure mutation state
+
+  // Trigger verification when token is present and idle
   useEffect(() => {
     if (!token) {
-      // Redirect with error if no token
-      router.replace(
-        `${routes.auth.login.url}?&verify_error=${AUTH_CODES.tokenInvalid}`
-      );
       return;
     }
 
-    // Trigger verification if not already started
-    if (!mutation.isPending && !mutation.isSuccess && !mutation.isError) {
-      mutation.mutate(token);
+    if (status === 'idle') {
+      mutate(token);
     }
-  }, [token, mutation, router]);
+  }, [token, mutate, status]);
 
-  // Handle verification result redirects
+  // Redirect to login after successful verification
   useEffect(() => {
-    if (mutation.isSuccess) {
-      // Redirect to login with success indicator after delay
-      const timer = setTimeout(() => {
-        router.replace(`${routes.auth.login.url}?verified=1`);
-      }, REDIRECT_TIMEOUT_MS);
-      return () => clearTimeout(timer);
+    if (!isSuccess) {
+      return;
     }
 
-    if (mutation.isError) {
-      // Redirect to login with error code
-      const code = mutation.error?.code;
-      router.replace(
-        `${routes.auth.login.url}?&verify_error=${encodeURIComponent(code)}`
-      );
-    }
+    const timer = setTimeout(() => {
+      router.replace(`${routes.auth.login.url}?verified=1`);
+    }, REDIRECT_TIMEOUT_MS);
 
-    return undefined;
-  }, [mutation.isSuccess, mutation.isError, mutation.error, router]);
+    return () => clearTimeout(timer);
+  }, [isSuccess, router]);
 
-  const successMessage = mutation.data?.message?.key;
+  const successMessage = data?.message?.key;
+  const errorMessage = !hasToken
+    ? AUTH_ERRORS.tokenInvalid
+    : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
+  const showError = !hasToken || isError; // Show error if no token or verification failed
+  const showLoading = hasToken && (status === 'idle' || isPending); // Show loading during verification
 
-  // Show success state
-  if (mutation.isSuccess) {
+  // Success state
+  if (isSuccess) {
     return (
-      <Empty className="border border-dashed">
-        <EmptyHeader>
-          <EmptyMedia>
-            <CircleCheck className="size-10" />
-          </EmptyMedia>
-          <EmptyTitle>{AUTH_LABELS.verificationSuccessTitle}</EmptyTitle>
-          <EmptyDescription>
-            {successMessage || AUTH_LABELS.verificationSuccessSubtitle}
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <Card>
+        <CardContent>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia>
+                <CircleCheck className="size-10" />
+              </EmptyMedia>
+              <EmptyTitle>{AUTH_LABELS.verificationSuccessTitle}</EmptyTitle>
+              <EmptyDescription>
+                {successMessage || AUTH_LABELS.verificationSuccessSubtitle}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </CardContent>
+      </Card>
     );
   }
 
-  // Show loading state
-  return (
-    <Empty className="border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia>
-          <Spinner className="size-10" />
-        </EmptyMedia>
-        <EmptyTitle>{AUTH_LABELS.verificationProcessingTitle}</EmptyTitle>
-        <EmptyDescription>
-          {AUTH_LABELS.verificationProcessingSubtitle}
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  );
+  // Error state
+  if (showError) {
+    return (
+      <Card>
+        <CardContent>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CircleX className="size-10" />
+              </EmptyMedia>
+              <EmptyTitle>{AUTH_LABELS.verificationFailedTitle}</EmptyTitle>
+              <EmptyDescription>
+                {errorMessage || AUTH_LABELS.verificationFailedSubtitle}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() => {
+                  router.replace(routes.auth.login.url);
+                }}
+              >
+                {AUTH_LABELS.backToLoginButton}
+              </Button>
+            </EmptyContent>
+          </Empty>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Loading state
+  if (showLoading) {
+    return (
+      <Card>
+        <CardContent>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia>
+                <Spinner className="size-10" />
+              </EmptyMedia>
+              <EmptyTitle>{AUTH_LABELS.verificationProcessingTitle}</EmptyTitle>
+              <EmptyDescription>
+                {AUTH_LABELS.verificationProcessingSubtitle}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return null;
 };
