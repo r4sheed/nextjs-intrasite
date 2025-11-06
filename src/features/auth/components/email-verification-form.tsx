@@ -27,6 +27,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { verifyEmail } from '@/features/auth/actions';
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/config';
 import { AUTH_ERRORS, AUTH_LABELS } from '@/features/auth/lib/strings';
+import { verifyEmailSchema } from '@/features/auth/schemas';
 
 /**
  * Email verification form component
@@ -55,8 +56,14 @@ export const EmailVerificationForm = () => {
       return;
     }
 
+    // Validate token format before making API call
+    const validation = verifyEmailSchema.safeParse({ token });
+    if (!validation.success) {
+      return; // Invalid token, will show error state
+    }
+
     if (status === 'idle') {
-      mutate(token);
+      mutate(validation.data.token);
     }
   }, [token, mutate, status]);
 
@@ -74,11 +81,17 @@ export const EmailVerificationForm = () => {
   }, [isSuccess, router]);
 
   const successMessage = data?.message?.key;
+  const isTokenValid = token
+    ? verifyEmailSchema.safeParse({ token }).success
+    : false;
   const errorMessage = !hasToken
     ? AUTH_ERRORS.tokenInvalid
-    : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
-  const showError = !hasToken || isError; // Show error if no token or verification failed
-  const showLoading = hasToken && (status === 'idle' || isPending); // Show loading during verification
+    : !isTokenValid
+      ? AUTH_ERRORS.tokenInvalid
+      : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
+  const showError = !hasToken || !isTokenValid || isError; // Show error if no token, invalid token, or verification failed
+  const showLoading =
+    hasToken && isTokenValid && (status === 'idle' || isPending); // Show loading only for valid tokens
 
   // Success state
   if (isSuccess) {

@@ -10,3 +10,4 @@ export {
   verifyTwoFactorCodeSchema,
   type VerifyTwoFactorCodeInput,
 } from './two-factor';
+export { verifyEmailSchema, type VerifyEmailInput } from './verification';
