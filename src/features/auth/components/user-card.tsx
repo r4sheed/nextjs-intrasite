@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 import { AuthUser } from '@/features/auth/lib/auth-utils';
@@ -15,9 +16,9 @@ interface UserDataProps {
 const UserData = ({ label, value }: UserDataProps) => {
   return (
     <div className="flex flex-row items-center justify-between rounded-lg border p-3">
-      <p className="text-sm font-medium">{label}</p>
-      <p className="bg-accent-foreground/10 max-w-[180px] truncate rounded-md p-1 text-xs">
-        {value || '??'}
+      <Badge>{label}</Badge>
+      <p className="max-w-[180px] truncate">
+        <Badge variant="secondary">{value}</Badge>
       </p>
     </div>
   );
