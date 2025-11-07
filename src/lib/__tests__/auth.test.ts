@@ -1,0 +1,141 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+
+import { currentUser, hasRole, isAuthenticated, requireAuth } from '@/lib/auth';
+
+import { auth } from '@/features/auth/lib/auth';
+
+import type { Session } from 'next-auth';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockAuth = auth as any;
+
+// Mock the auth function
+vi.mock('@/features/auth/lib/auth', () => ({
+  auth: vi.fn(),
+}));
+
+describe('auth utilities', () => {
+  beforeEach(() => {
+    // Reset mock before each test
+    mockAuth.mockReset();
+  });
+
+  describe('currentUser', () => {
+    it('should return user when authenticated', async () => {
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'USER' as const,
+      };
+
+      const mockSession: Session = {
+        user: mockUser,
+        expires: '2025-12-31',
+      };
+
+      mockAuth.mockResolvedValue(mockSession);
+
+      const result = await currentUser();
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should return null when not authenticated', async () => {
+      mockAuth.mockResolvedValue(null);
+
+      const result = await currentUser();
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('isAuthenticated', () => {
+    it('should return true when user exists', async () => {
+      const mockSession: Session = {
+        user: { id: '123', email: 'test@example.com' },
+        expires: '2025-12-31',
+      };
+
+      mockAuth.mockResolvedValue(mockSession);
+
+      const result = await isAuthenticated();
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when no user', async () => {
+      mockAuth.mockResolvedValue(null);
+
+      const result = await isAuthenticated();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('hasRole', () => {
+    it('should return true when user has matching role', async () => {
+      const mockSession: Session = {
+        user: { id: '123', role: 'ADMIN' as const },
+        expires: '2025-12-31',
+      };
+
+      mockAuth.mockResolvedValue(mockSession);
+
+      const result = await hasRole('ADMIN');
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when user has different role', async () => {
+      const mockSession: Session = {
+        user: { id: '123', role: 'USER' as const },
+        expires: '2025-12-31',
+      };
+
+      mockAuth.mockResolvedValue(mockSession);
+
+      const result = await hasRole('ADMIN');
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when not authenticated', async () => {
+      mockAuth.mockResolvedValue(null);
+
+      const result = await hasRole('ADMIN');
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('requireAuth', () => {
+    it('should return user when authenticated', async () => {
+      const mockUser = { id: '123', email: 'test@example.com' };
+      const mockSession: Session = {
+        user: mockUser,
+        expires: '2025-12-31',
+      };
+
+      mockAuth.mockResolvedValue(mockSession);
+
+      const result = await requireAuth();
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw error when not authenticated', async () => {
+      mockAuth.mockResolvedValue(null);
+
+      await expect(requireAuth()).rejects.toThrow('Authentication required');
+    });
+
+    it('should throw custom error message', async () => {
+      mockAuth.mockResolvedValue(null);
+
+      await expect(requireAuth('Custom message')).rejects.toThrow(
+        'Custom message'
+      );
+    });
+  });
+});
