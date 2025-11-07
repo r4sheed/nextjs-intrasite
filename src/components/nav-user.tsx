@@ -27,6 +27,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
+import { LogoutTrigger } from '@/features/auth/components/logout-trigger';
+
 /**
  * Generates 2-character initials from a user's name
  * @param name - The user's full name
@@ -146,14 +148,12 @@ export function NavUser({ user }: { user: User | null | undefined }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onSelect={async () => {
-                alert('Logging out...');
-              }}
-            >
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <LogoutTrigger>
+              <DropdownMenuItem>
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
+            </LogoutTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
