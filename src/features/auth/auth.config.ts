@@ -7,11 +7,8 @@ import Google from 'next-auth/providers/google';
 import { routes } from '@/lib/navigation';
 import { db } from '@/lib/prisma';
 
-import { getTwoFactorConfirmationByUserId } from '@/features/auth/data/two-factor-confirmation';
-import {
-  getUserByEmail,
-  verifyUserCredentials,
-} from '@/features/auth/data/user';
+import { getTwoFactorConfirmationByUserId } from '@/features/auth/data';
+import { getUserByEmail, verifyUserCredentials } from '@/features/auth/data';
 import { loginSchema } from '@/features/auth/schemas';
 
 export const authConfig = {

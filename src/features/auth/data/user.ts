@@ -21,6 +21,7 @@ const USER_WITHOUT_PASSWORD_SELECT = {
   role: true,
   createdAt: true,
   updatedAt: true,
+  twoFactorEnabled: true,
 } as const;
 
 /**

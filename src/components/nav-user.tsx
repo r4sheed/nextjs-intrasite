@@ -7,6 +7,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  User,
 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,12 +27,53 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-export function NavUser({ user }: { user: any }) {
+/**
+ * Generates 2-character initials from a user's name
+ * @param name - The user's full name
+ * @returns 2 uppercase characters for avatar fallback
+ */
+function generateInitials(name: string | undefined | null): string {
+  if (!name || typeof name !== 'string') {
+    return '??';
+  }
+
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return '??';
+  }
+
+  const words = trimmed.split(/\s+/).filter(word => word.length > 0);
+
+  if (words.length === 0) {
+    return '??';
+  }
+
+  if (words.length === 1) {
+    // Single word: take first 2 characters
+    const word = words[0];
+    return word ? word.substring(0, 2).toUpperCase() : '??';
+  }
+
+  // Multiple words: take first character from first two words
+  const first = words[0]?.[0] || '';
+  const second = words[1]?.[0] || '';
+  return (first + second).toUpperCase() || '??';
+}
+
+interface User {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+export function NavUser({ user }: { user: User | null | undefined }) {
   const { isMobile } = useSidebar();
 
   if (!user) {
     return null;
   }
+
+  const avatarFallback = generateInitials(user.name);
 
   return (
     <SidebarMenu>
@@ -43,9 +85,13 @@ export function NavUser({ user }: { user: any }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.image} alt={user.name} />
-                {/* TODO: Generate initials */}
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage
+                  src={user.image ?? undefined}
+                  alt={user.name ?? undefined}
+                />
+                <AvatarFallback className="rounded-lg">
+                  {avatarFallback}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
@@ -63,8 +109,13 @@ export function NavUser({ user }: { user: any }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.image} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage
+                    src={user.image ?? undefined}
+                    alt={user.name ?? undefined}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    {avatarFallback}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>

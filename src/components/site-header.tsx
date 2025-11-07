@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { siteConfig } from '@/lib/config';
 
 import { GitHubLink } from '@/components/github-link';
-import { SocialIcons } from '@/components/social-icons';
 import { MainNav } from '@/components/main-nav';
 import { MobileNav } from '@/components/mobile-nav';
 import { ModeSwitcher } from '@/components/mode-switcher';
 import { SiteConfig } from '@/components/site-config';
+import { SocialIcons } from '@/components/social-icons';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 

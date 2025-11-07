@@ -64,14 +64,6 @@ export function AppSidebar({
   const pathname = usePathname();
   const user = useCurrentUser();
 
-  const data = {
-    user: {
-      name: user?.name,
-      email: user?.email,
-      image: user?.image,
-    },
-  };
-
   return (
     <Sidebar
       className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--footer-height)-4rem)] overscroll-none bg-transparent lg:flex"
@@ -160,7 +152,7 @@ export function AppSidebar({
         <div className="from-background via-background/80 to-background/50 sticky -bottom-1 z-10 h-16 shrink-0 bg-gradient-to-t blur-xs" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

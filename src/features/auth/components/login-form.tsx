@@ -4,6 +4,7 @@ import { useState, startTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
@@ -94,6 +95,7 @@ const useUrlParams = () => {
 const useLoginMutation = () => {
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const { update: updateSession } = useSession();
 
   const mutation = useMutation<
     ActionSuccess<typeof loginUser>,
@@ -101,11 +103,19 @@ const useLoginMutation = () => {
     LoginFormInput
   >({
     mutationFn: data => execute(loginUser, data),
-    onSuccess: response => {
+    onSuccess: async response => {
       // Server indicated partial success (e.g., 2FA required)
       if (response.status === Status.Partial) return;
 
       setIsRedirecting(true);
+
+      if (updateSession) {
+        try {
+          await updateSession();
+        } catch (error) {
+          console.error('Failed to update session after login:', error);
+        }
+      }
 
       // Check for redirect requirement (2FA verification)
       if (response.data?.redirectUrl) {

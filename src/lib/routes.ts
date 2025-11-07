@@ -90,6 +90,31 @@ export const routes = {
       navigationOrder: 3,
     },
   },
+  admin: {
+    url: '/admin',
+    label: 'navigation.admin',
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+      navigationOrder: 4,
+    },
+  },
+  client: {
+    url: '/client',
+    label: 'navigation.client',
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+    },
+  },
+  server: {
+    url: '/server',
+    label: 'navigation.server',
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+    },
+  },
   error: {
     url: '/error',
     label: 'navigation.error',
