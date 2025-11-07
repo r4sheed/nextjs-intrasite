@@ -2,7 +2,7 @@
 
 import { UserRole } from '@prisma/client';
 
-import { currentUserRole } from '@/lib/auth';
+import { currentUserRole } from '@/features/auth/lib/auth-utils';
 
 /*
  * Action to test if the current user is an admin.

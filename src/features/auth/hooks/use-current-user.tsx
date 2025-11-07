@@ -1,6 +1,6 @@
 import { useSession } from './use-session';
 
-import type { AuthUser } from '@/lib/auth';
+import type { AuthUser } from '@/features/auth/lib/auth-utils';
 
 const isAuthUser = (user: unknown): user is AuthUser => {
   if (!user || typeof user !== 'object') {

@@ -1,4 +1,4 @@
-import { AuthUser } from '@/lib/auth';
+import { AuthUser } from '@/features/auth/lib/auth-utils';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 

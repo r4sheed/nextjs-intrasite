@@ -2,7 +2,7 @@ import { UserRole } from '@prisma/client';
 
 import { NextResponse } from 'next/server';
 
-import { currentUserRole } from '@/lib/auth';
+import { currentUserRole } from '@/features/auth/lib/auth-utils';
 import { HTTP_STATUS } from '@/lib/http-status';
 
 export async function GET() {

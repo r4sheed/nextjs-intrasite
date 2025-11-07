@@ -1,4 +1,4 @@
-import { currentUser } from '@/lib/auth';
+import { currentUser } from '@/features/auth/lib/auth-utils';
 
 import { UserCard } from '@/features/auth/components/user-card';
 

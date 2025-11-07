@@ -1,6 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { currentUser, hasRole, isAuthenticated, requireAuth } from '@/lib/auth';
+import {@/features/auth/lib/auth-utils
+  currentUser,
+  hasRole,
+  isAuthenticated,
+  requireAuth,
+} from '@/lib/auth-utils';
 
 import { auth } from '@/features/auth/lib/auth';
 
