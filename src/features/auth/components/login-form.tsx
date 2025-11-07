@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
 
-import { FormError, FormSuccess } from '@/components/shared/form-status';
-import { LoadingButton } from '@/components/shared/loading-button';
+import { FormError, FormSuccess } from '@/components/form-status';
+import { LoadingButton } from '@/components/loading-button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
@@ -102,6 +102,7 @@ const useLoginMutation = () => {
   >({
     mutationFn: data => execute(loginUser, data),
     onSuccess: response => {
+      // Server indicated partial success (e.g., 2FA required)
       if (response.status === Status.Partial) return;
 
       setIsRedirecting(true);

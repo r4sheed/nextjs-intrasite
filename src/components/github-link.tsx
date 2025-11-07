@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { siteConfig } from '@/lib/config';
 
-import { SocialIcons } from '@/components/icons/social-icons';
+import { SocialIcons } from '@/components/social-icons';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 

@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 
-import { SocialIcons } from '@/components/icons/social-icons';
+import { SocialIcons } from '@/components/social-icons';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 

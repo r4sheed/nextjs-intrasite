@@ -14,8 +14,8 @@ import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';
 
-import { FormError } from '@/components/shared/form-status';
-import { LoadingButton } from '@/components/shared/loading-button';
+import { FormError } from '@/components/form-status';
+import { LoadingButton } from '@/components/loading-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {

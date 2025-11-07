@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { siteConfig } from '@/lib/config';
 
 import { GitHubLink } from '@/components/github-link';
-import { SocialIcons } from '@/components/icons/social-icons';
+import { SocialIcons } from '@/components/social-icons';
 import { MainNav } from '@/components/main-nav';
 import { MobileNav } from '@/components/mobile-nav';
 import { ModeSwitcher } from '@/components/mode-switcher';
