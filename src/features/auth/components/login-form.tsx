@@ -106,17 +106,17 @@ const useLoginMutation = () => {
 
       setIsRedirecting(true);
 
-      startTransition(() => {
-        // Refresh server components to update session in SessionProvider
-        router.refresh();
-      });
-
       // Check for redirect requirement (2FA verification)
       if (response.data?.redirectUrl) {
         console.log('redirecting', response.data.redirectUrl);
         router.push(response.data.redirectUrl);
         return;
       }
+
+      startTransition(() => {
+        // Refresh server components to update session in SessionProvider
+        router.refresh();
+      });
 
       // Normal login success - redirect to dashboard
       router.push(middlewareConfig.defaultLoginRedirect);
