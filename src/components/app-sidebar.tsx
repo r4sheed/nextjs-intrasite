@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { NavUser } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +13,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
+
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 
 export const PAGES_NEW = [
   '/docs/components/button-group',
@@ -58,6 +62,15 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { items: { children: object } }) {
   const pathname = usePathname();
+  const user = useCurrentUser();
+
+  const data = {
+    user: {
+      name: user?.name,
+      email: user?.email,
+      image: user?.image,
+    },
+  };
 
   return (
     <Sidebar
@@ -146,6 +159,9 @@ export function AppSidebar({
         })}
         <div className="from-background via-background/80 to-background/50 sticky -bottom-1 z-10 h-16 shrink-0 bg-gradient-to-t blur-xs" />
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
     </Sidebar>
   );
 }

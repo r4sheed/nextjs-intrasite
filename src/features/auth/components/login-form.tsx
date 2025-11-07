@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, startTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -112,6 +112,11 @@ const useLoginMutation = () => {
         router.push(response.data.redirectUrl);
         return;
       }
+
+      startTransition(() => {
+        // Refresh server components to update session in SessionProvider
+        router.refresh();
+      });
 
       // Normal login success - redirect to dashboard
       router.push(middlewareConfig.defaultLoginRedirect);

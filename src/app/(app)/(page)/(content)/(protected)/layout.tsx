@@ -1,49 +1,8 @@
-import Link from 'next/link';
-
-import { DocsTableOfContents } from '@/components/docs-toc';
-import { OpenInV0Cta } from '@/components/open-in-v0-cta';
-
-const doc = {
-  toc: [
-    {
-      title: 'Introduction',
-      url: '#introduction',
-      depth: 2,
-    },
-    {
-      title: 'Getting Started',
-      url: '#getting-started',
-      depth: 2,
-    },
-    {
-      title: 'Installation',
-      url: '#installation',
-      depth: 3,
-    },
-    {
-      title: 'Configuration',
-      url: '#configuration',
-      depth: 3,
-    },
-    {
-      title: 'API Reference',
-      url: '#api-reference',
-      depth: 2,
-    },
-    {
-      title: 'Components',
-      url: '#components',
-      depth: 3,
-    },
-    {
-      title: 'Hooks',
-      url: '#hooks',
-      depth: 3,
-    },
-  ],
-};
-
-export default async function HomePage() {
+export default async function ContentLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
       <div className="flex min-w-0 flex-1 flex-col">
@@ -53,38 +12,26 @@ export default async function HomePage() {
             <div className="flex flex-col gap-2">
               <div className="flex items-start justify-between">
                 <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl">
-                  Title
+                  Protected layout
                 </h1>
                 <div className="docs-nav bg-background/80 border-border/50 fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-t px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none" />
               </div>
               <p className="text-muted-foreground text-[1.05rem] text-balance sm:text-base">
-                description
+                This layout is used for pages that require authentication.
               </p>
             </div>
           </div>
           <div className="w-full flex-1 *:data-[slot=alert]:first:mt-0">
-            MDX components
+            {children}
           </div>
-        </div>
-        <div className="mx-auto hidden h-16 w-full max-w-2xl items-center gap-2 px-4 sm:flex md:px-0">
-          neighbours.previous - neighbours.next
         </div>
       </div>
       <div className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[calc(100svh-var(--footer-height)+2rem)] w-72 flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
         <div className="h-(--top-spacing) shrink-0" />
         <div className="no-scrollbar overflow-y-auto px-8">
-          {doc.toc.length ? (
-            <div className="no-scrollbar overflow-y-auto px-8">
-              <DocsTableOfContents toc={doc.toc} />
-              <div className="h-12" />
-            </div>
-          ) : null}
-
           <div className="h-12" />
         </div>
-        <div className="flex flex-1 flex-col gap-12 px-6">
-          <OpenInV0Cta />
-        </div>
+        <div className="flex flex-1 flex-col gap-12 px-6"></div>
       </div>
     </div>
   );

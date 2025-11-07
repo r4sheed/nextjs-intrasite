@@ -64,7 +64,7 @@ const sidebarItems = {
 
 export type sidebarItemsType = typeof sidebarItems;
 
-export default function HomeLayout({
+export default function PageLayout({
   children,
 }: {
   children: React.ReactNode;
