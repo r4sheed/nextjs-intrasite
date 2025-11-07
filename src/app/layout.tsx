@@ -64,7 +64,7 @@ export default async function RootLayout({
         <Providers session={session}>
           <main>{children}</main>
           <TailwindIndicator />
-          <Toaster position="top-center" />
+          <Toaster />
           <Analytics />
         </Providers>
       </body>
