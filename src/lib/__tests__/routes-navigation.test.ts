@@ -110,6 +110,11 @@ describe('Navigation helpers', () => {
       .map(route => route.url);
     const expectedProtected = navigationRoutes
       .filter(route => route.access === 'protected')
+      .sort(
+        (a, b) =>
+          (a.meta?.navigationOrder ?? Number.MAX_SAFE_INTEGER) -
+          (b.meta?.navigationOrder ?? Number.MAX_SAFE_INTEGER)
+      )
       .map(route => route.url);
 
     expect(publicNavigationItems.map(item => item.href)).toEqual(
