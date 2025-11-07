@@ -1,6 +1,6 @@
-import { AuthUser } from '@/features/auth/lib/auth-utils';
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+import { AuthUser } from '@/features/auth/lib/auth-utils';
 
 interface UserCardProps {
   user?: AuthUser | null;
