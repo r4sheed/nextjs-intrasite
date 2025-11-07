@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, startTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -105,6 +105,11 @@ const useLoginMutation = () => {
       if (response.status === Status.Partial) return;
 
       setIsRedirecting(true);
+
+      startTransition(() => {
+        // Refresh server components to update session in SessionProvider
+        router.refresh();
+      });
 
       // Check for redirect requirement (2FA verification)
       if (response.data?.redirectUrl) {
