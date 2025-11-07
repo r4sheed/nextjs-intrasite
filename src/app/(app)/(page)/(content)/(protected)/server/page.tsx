@@ -6,9 +6,5 @@ export const dynamic = 'force-dynamic';
 export default async function ServerPage() {
   const user = await currentUser();
 
-  return (
-    <div>
-      <UserCard title=" 💻 Server user" user={user} />
-    </div>
-  );
+  return <UserCard title=" 💻 Server user" user={user} />;
 }
