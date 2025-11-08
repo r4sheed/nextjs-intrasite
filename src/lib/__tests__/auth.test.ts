@@ -1,13 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import {@/features/auth/lib/auth-utils
+import { auth } from '@/features/auth/lib/auth';
+import {
   currentUser,
   hasRole,
   isAuthenticated,
   requireAuth,
-} from '@/lib/auth-utils';
-
-import { auth } from '@/features/auth/lib/auth';
+} from '@/features/auth/lib/auth-utils';
 
 import type { Session } from 'next-auth';
 
