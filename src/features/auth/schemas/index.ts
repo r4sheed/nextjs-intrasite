@@ -11,3 +11,4 @@ export {
   type VerifyTwoFactorCodeInput,
 } from './two-factor';
 export { verifyEmailSchema, type VerifyEmailInput } from './verification';
+export { UserSettingsSchema, type UserSettingsInput } from './user-settings';
