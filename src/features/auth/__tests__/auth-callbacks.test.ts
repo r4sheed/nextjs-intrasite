@@ -25,7 +25,6 @@ describe('auth callbacks', () => {
         email: 'alice@example.com',
         image: 'alice.png',
         role: 'ADMIN',
-        twoFactorEnabled: true,
       } as never);
 
       const token = { sub: 'user-1' } as JWT;
@@ -39,7 +38,6 @@ describe('auth callbacks', () => {
       expect(result.role).toBe('ADMIN');
       expect(result.email).toBe('alice@example.com');
       expect(result.picture).toBe('alice.png');
-      expect(result.twoFactorEnabled).toBe(true);
     });
 
     it('clears privileged fields when the user no longer exists', async () => {
@@ -50,7 +48,6 @@ describe('auth callbacks', () => {
         role: 'ADMIN',
         email: 'old@example.com',
         picture: 'old.png',
-        twoFactorEnabled: true,
       } as JWT;
 
       const result = await authCallbacks.jwt({
@@ -62,7 +59,6 @@ describe('auth callbacks', () => {
       expect(result.role).toBeUndefined();
       expect(result.email).toBeNull();
       expect(result.picture).toBeNull();
-      expect(result.twoFactorEnabled).toBeUndefined();
     });
   });
 
@@ -75,7 +71,6 @@ describe('auth callbacks', () => {
           email: null,
           image: null,
           role: undefined,
-          twoFactorEnabled: undefined,
         },
         expires: new Date().toISOString(),
       };
@@ -86,7 +81,6 @@ describe('auth callbacks', () => {
         email: 'alice@example.com',
         picture: 'alice.png',
         role: 'ADMIN',
-        twoFactorEnabled: true,
       } as JWT;
 
       const result = await authCallbacks.session({
@@ -99,7 +93,6 @@ describe('auth callbacks', () => {
       expect(result?.user.email).toBe('alice@example.com');
       expect(result?.user.image).toBe('alice.png');
       expect(result?.user.role).toBe('ADMIN');
-      expect(result?.user.twoFactorEnabled).toBe(true);
     });
 
     it('preserves existing session fields when the token lacks data', async () => {
@@ -110,7 +103,6 @@ describe('auth callbacks', () => {
           email: 'persisted@example.com',
           image: 'persisted.png',
           role: 'MODERATOR',
-          twoFactorEnabled: false,
         },
         expires: new Date().toISOString(),
       };
@@ -129,7 +121,6 @@ describe('auth callbacks', () => {
       expect(result?.user.email).toBe('persisted@example.com');
       expect(result?.user.image).toBe('persisted.png');
       expect(result?.user.role).toBe('MODERATOR');
-      expect(result?.user.twoFactorEnabled).toBe(false);
     });
   });
 });
