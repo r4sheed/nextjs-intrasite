@@ -11,7 +11,7 @@ import { SocialIcons } from '@/components/social-icons';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-export function SiteHeader() {
+const SiteHeader = () => {
   return (
     <header className="bg-background sticky top-0 z-50 w-full">
       <div className="container-wrapper 3xl:fixed:px-0 px-6">
@@ -30,7 +30,7 @@ export function SiteHeader() {
           </Button>
           <MainNav items={siteConfig.navItems} className="hidden lg:flex" />
           <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
-            {/*            <div className="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+            {/* <div className="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
               <CommandMenu
                 tree={pageTree}
                 colors={colors}
@@ -46,9 +46,12 @@ export function SiteHeader() {
             <SiteConfig className="3xl:flex hidden" />
             <Separator orientation="vertical" />
             <ModeSwitcher />
+            <Separator orientation="vertical" />
           </div>
         </div>
       </div>
     </header>
   );
-}
+};
+
+export { SiteHeader };
