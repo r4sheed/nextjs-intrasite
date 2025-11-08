@@ -470,7 +470,7 @@ const AdvancedSection = () => {
               </FieldDescription>
               <div className="flex gap-2">
                 <code className="bg-muted flex-1 rounded-md px-3 py-2 text-sm">
-                  sk_test_4eC39HqLyjWDarjtT1zdp7dc
+                  test_4eC39HqLyjWDarjtT1zdp7dc
                 </code>
                 <Button variant="outline" size="sm">
                   Regenerate
