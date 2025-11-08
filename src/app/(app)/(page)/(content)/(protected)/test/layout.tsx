@@ -12,12 +12,12 @@ export default async function ContentLayout({
             <div className="flex flex-col gap-2">
               <div className="flex items-start justify-between">
                 <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl">
-                  Protected layout
+                  Test layout
                 </h1>
                 <div className="docs-nav bg-background/80 border-border/50 fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-t px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none" />
               </div>
               <p className="text-muted-foreground text-[1.05rem] text-balance sm:text-base">
-                This layout is used for pages that require authentication.
+                This layout is used for pages that test session functionality.
               </p>
             </div>
           </div>

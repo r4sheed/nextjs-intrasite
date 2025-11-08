@@ -7,6 +7,10 @@ import { OpenInV0Cta } from '@/components/open-in-v0-cta';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+export const revalidate = false;
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
 const doc = {
   toc: [
     {
@@ -56,7 +60,7 @@ const links = {
 const previous = { name: 'Previous Page' };
 const next = { name: 'Next Page' };
 
-export default async function HomePage() {
+export default async function Page() {
   return (
     <div className="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
       <div className="flex min-w-0 flex-1 flex-col">
@@ -133,16 +137,12 @@ export default async function HomePage() {
       </div>
       <div className="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[calc(100svh-var(--footer-height)+2rem)] w-72 flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
         <div className="h-(--top-spacing) shrink-0" />
-        <div className="no-scrollbar overflow-y-auto px-8">
-          {doc.toc.length ? (
-            <div className="no-scrollbar overflow-y-auto px-8">
-              <DocsTableOfContents toc={doc.toc} />
-              <div className="h-12" />
-            </div>
-          ) : null}
-
-          <div className="h-12" />
-        </div>
+        {doc.toc?.length ? (
+          <div className="no-scrollbar overflow-y-auto px-8">
+            <DocsTableOfContents toc={doc.toc} />
+            <div className="h-12" />
+          </div>
+        ) : null}
         <div className="flex flex-1 flex-col gap-12 px-6">
           <OpenInV0Cta />
         </div>

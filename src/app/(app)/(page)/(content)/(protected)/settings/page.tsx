@@ -1,3 +1,5 @@
-export default async function SettingsPage() {
-  return null;
+import { SettingsPage } from '../_components/settings-page';
+
+export default function Page() {
+  return <SettingsPage />;
 }
