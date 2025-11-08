@@ -2,9 +2,20 @@
 
 import { useState } from 'react';
 
-import { User, Shield, Bell, Palette, Settings } from 'lucide-react';
+import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -529,7 +540,29 @@ const AdvancedSection = () => {
           <div className="text-destructive text-sm">
             <p>Please be certain. This action cannot be undone!</p>
           </div>
-          <Button variant="destructive">Delete Account</Button>
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Button variant="destructive">
+                <Trash2 />
+                Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-destructive dark:bg-destructive/60 hover:bg-destructive focus-visible:ring-destructive text-white">
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardFooter>
       </Card>
     </div>
