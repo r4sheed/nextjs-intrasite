@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 
-import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
+import {
+  User,
+  Shield,
+  Bell,
+  Palette,
+  Settings,
+  Save,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
 import {
@@ -28,6 +37,9 @@ import {
 } from '@/components/ui/card';
 import {
   Field,
+  FieldSet,
+  FieldLabel,
+  FieldGroup,
   FieldContent,
   FieldDescription,
   FieldTitle,
@@ -143,7 +155,10 @@ const ProfileSection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>Save Changes</Button>
+          <Button>
+            <Save />
+            Save Changes
+          </Button>
         </CardFooter>
       </Card>
     </div>
@@ -188,7 +203,9 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>Update Password</Button>
+          <Button>
+            <RefreshCw /> Update Password
+          </Button>
         </CardFooter>
       </Card>
 
@@ -212,7 +229,9 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>Save Changes</Button>
+          <Button>
+            <Save /> Save Changes
+          </Button>
         </CardFooter>
       </Card>
 
@@ -351,34 +370,115 @@ const AppearanceSection = () => {
           <CardDescription>Select your preferred color scheme</CardDescription>
         </CardHeader>
         <CardContent>
-          <RadioGroup defaultValue="system" className="grid gap-4">
-            <Field orientation="horizontal">
-              <FieldContent>
-                <FieldTitle>Light</FieldTitle>
-                <FieldDescription>Use light theme</FieldDescription>
-              </FieldContent>
-              <RadioGroupItem value="light" id="light" />
-            </Field>
-            <Field orientation="horizontal">
-              <FieldContent>
-                <FieldTitle>Dark</FieldTitle>
-                <FieldDescription>Use dark theme</FieldDescription>
-              </FieldContent>
-              <RadioGroupItem value="dark" id="dark" />
-            </Field>
-            <Field orientation="horizontal">
-              <FieldContent>
-                <FieldTitle>System</FieldTitle>
-                <FieldDescription>Match your system settings</FieldDescription>
-              </FieldContent>
-              <RadioGroupItem value="system" id="system" />
-            </Field>
-          </RadioGroup>
+          <FieldGroup>
+            <FieldSet>
+              <RadioGroup defaultValue="kubernetes">
+                <FieldLabel htmlFor="kubernetes-r2h">
+                  <Field orientation="horizontal">
+                    <FieldContent>
+                      <FieldTitle>Kubernetes</FieldTitle>
+                      <FieldDescription>
+                        Run GPU workloads on a K8s configured cluster.
+                      </FieldDescription>
+                    </FieldContent>
+                    <RadioGroupItem value="kubernetes" id="kubernetes-r2h" />
+                  </Field>
+                </FieldLabel>
+                <FieldLabel htmlFor="vm-z4k">
+                  <Field orientation="horizontal">
+                    <FieldContent>
+                      <FieldTitle>Virtual Machine</FieldTitle>
+                      <FieldDescription>
+                        Access a VM configured cluster to run GPU workloads.
+                      </FieldDescription>
+                    </FieldContent>
+                    <RadioGroupItem value="vm" id="vm-z4k" />
+                  </Field>
+                </FieldLabel>
+              </RadioGroup>
+            </FieldSet>
+          </FieldGroup>
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
           <Button>Save Theme</Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme Preview</CardTitle>
+          <CardDescription>
+            See how placeholders appear in different themes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <div className="mb-2">
+                <p className="text-sm font-medium">Light Theme</p>
+                <p className="text-muted-foreground text-xs">
+                  Default light appearance
+                </p>
+              </div>
+              <div className="rounded-lg border bg-white p-6">
+                <div className="flex flex-col gap-4">
+                  {/* Top panel with stripes */}
+                  <div className="rounded-lg bg-gray-100 p-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="h-3 w-32 rounded-full bg-gray-300" />
+                      <div className="h-3 w-40 rounded-full bg-gray-300" />
+                    </div>
+                  </div>
+
+                  {/* Item 1 */}
+                  <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-4">
+                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-300" />
+                    <div className="h-3 flex-1 rounded-full bg-gray-300" />
+                  </div>
+
+                  {/* Item 2 */}
+                  <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-4">
+                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-300" />
+                    <div className="h-3 flex-1 rounded-full bg-gray-300" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-2">
+                <p className="text-sm font-medium">Blue Theme</p>
+                <p className="text-muted-foreground text-xs">
+                  Blue accent preview
+                </p>
+              </div>
+              <div className="rounded-lg border bg-blue-50 p-6">
+                <div className="flex flex-col gap-4">
+                  {/* Top panel with stripes */}
+                  <div className="rounded-lg bg-indigo-100 p-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="h-3 w-32 rounded-full bg-indigo-500" />
+                      <div className="h-3 w-40 rounded-full bg-indigo-500" />
+                    </div>
+                  </div>
+
+                  {/* Item 1 */}
+                  <div className="flex items-center gap-4 rounded-lg bg-indigo-100 p-4">
+                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-500" />
+                    <div className="h-3 flex-1 rounded-full bg-indigo-500" />
+                  </div>
+
+                  {/* Item 2 */}
+                  <div className="flex items-center gap-4 rounded-lg bg-indigo-100 p-4">
+                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-500" />
+                    <div className="h-3 flex-1 rounded-full bg-indigo-500" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       <Card>
