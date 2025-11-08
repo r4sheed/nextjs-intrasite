@@ -91,7 +91,7 @@ export const routes = {
     },
   },
   admin: {
-    url: '/admin',
+    url: '/test/admin',
     label: 'navigation.admin',
     access: 'protected',
     meta: {
@@ -100,7 +100,7 @@ export const routes = {
     },
   },
   client: {
-    url: '/client',
+    url: '/test/client',
     label: 'navigation.client',
     access: 'protected',
     meta: {
@@ -108,7 +108,7 @@ export const routes = {
     },
   },
   server: {
-    url: '/server',
+    url: '/test/server',
     label: 'navigation.server',
     access: 'protected',
     meta: {
