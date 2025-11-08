@@ -57,6 +57,8 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
+import { PasswordInput } from '@/features/auth/components/password-input';
+
 import { SettingsSidebar } from './settings-sidebar';
 
 const sidebarGroups = [
@@ -179,10 +181,8 @@ const SecuritySection = () => {
           <Field>
             <FieldContent>
               <FieldTitle>Current Password</FieldTitle>
-              <FieldDescription>
-                Enter your current password to verify it's you
-              </FieldDescription>
-              <Input type="password" />
+              <FieldDescription>Enter your current password</FieldDescription>
+              <PasswordInput autoComplete="current-password" required />
             </FieldContent>
           </Field>
 
@@ -190,13 +190,13 @@ const SecuritySection = () => {
             <Field>
               <FieldContent>
                 <FieldTitle>New Password</FieldTitle>
-                <Input type="password" />
+                <PasswordInput autoComplete="new-password" required />
               </FieldContent>
             </Field>
             <Field>
               <FieldContent>
                 <FieldTitle>Confirm Password</FieldTitle>
-                <Input type="password" />
+                <PasswordInput autoComplete="new-password" required />
               </FieldContent>
             </Field>
           </div>
@@ -372,29 +372,26 @@ const AppearanceSection = () => {
         <CardContent>
           <FieldGroup>
             <FieldSet>
-              <RadioGroup defaultValue="kubernetes">
-                <FieldLabel htmlFor="kubernetes-r2h">
-                  <Field orientation="horizontal">
-                    <FieldContent>
-                      <FieldTitle>Kubernetes</FieldTitle>
-                      <FieldDescription>
-                        Run GPU workloads on a K8s configured cluster.
-                      </FieldDescription>
-                    </FieldContent>
-                    <RadioGroupItem value="kubernetes" id="kubernetes-r2h" />
-                  </Field>
-                </FieldLabel>
-                <FieldLabel htmlFor="vm-z4k">
-                  <Field orientation="horizontal">
-                    <FieldContent>
-                      <FieldTitle>Virtual Machine</FieldTitle>
-                      <FieldDescription>
-                        Access a VM configured cluster to run GPU workloads.
-                      </FieldDescription>
-                    </FieldContent>
-                    <RadioGroupItem value="vm" id="vm-z4k" />
-                  </Field>
-                </FieldLabel>
+              <RadioGroup defaultValue="light">
+                <div className="items-between flex justify-between gap-4">
+                  <FieldLabel>
+                    <Field orientation="horizontal">
+                      <RadioGroupItem value="light" id="theme-light" />
+                      <FieldContent>
+                        <FieldTitle>Light</FieldTitle>
+                      </FieldContent>
+                    </Field>
+                  </FieldLabel>
+
+                  <FieldLabel>
+                    <Field orientation="horizontal">
+                      <RadioGroupItem value="dark" id="theme-dark" />
+                      <FieldContent>
+                        <FieldTitle>Dark</FieldTitle>
+                      </FieldContent>
+                    </Field>
+                  </FieldLabel>
+                </div>
               </RadioGroup>
             </FieldSet>
           </FieldGroup>
@@ -403,82 +400,6 @@ const AppearanceSection = () => {
         <CardFooter className="justify-end">
           <Button>Save Theme</Button>
         </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Theme Preview</CardTitle>
-          <CardDescription>
-            See how placeholders appear in different themes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <div className="mb-2">
-                <p className="text-sm font-medium">Light Theme</p>
-                <p className="text-muted-foreground text-xs">
-                  Default light appearance
-                </p>
-              </div>
-              <div className="rounded-lg border bg-white p-6">
-                <div className="flex flex-col gap-4">
-                  {/* Top panel with stripes */}
-                  <div className="rounded-lg bg-gray-100 p-4">
-                    <div className="flex flex-col gap-3">
-                      <div className="h-3 w-32 rounded-full bg-gray-300" />
-                      <div className="h-3 w-40 rounded-full bg-gray-300" />
-                    </div>
-                  </div>
-
-                  {/* Item 1 */}
-                  <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-4">
-                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-300" />
-                    <div className="h-3 flex-1 rounded-full bg-gray-300" />
-                  </div>
-
-                  {/* Item 2 */}
-                  <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-4">
-                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-300" />
-                    <div className="h-3 flex-1 rounded-full bg-gray-300" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-2">
-                <p className="text-sm font-medium">Blue Theme</p>
-                <p className="text-muted-foreground text-xs">
-                  Blue accent preview
-                </p>
-              </div>
-              <div className="rounded-lg border bg-blue-50 p-6">
-                <div className="flex flex-col gap-4">
-                  {/* Top panel with stripes */}
-                  <div className="rounded-lg bg-indigo-100 p-4">
-                    <div className="flex flex-col gap-3">
-                      <div className="h-3 w-32 rounded-full bg-indigo-500" />
-                      <div className="h-3 w-40 rounded-full bg-indigo-500" />
-                    </div>
-                  </div>
-
-                  {/* Item 1 */}
-                  <div className="flex items-center gap-4 rounded-lg bg-indigo-100 p-4">
-                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-500" />
-                    <div className="h-3 flex-1 rounded-full bg-indigo-500" />
-                  </div>
-
-                  {/* Item 2 */}
-                  <div className="flex items-center gap-4 rounded-lg bg-indigo-100 p-4">
-                    <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-500" />
-                    <div className="h-3 flex-1 rounded-full bg-indigo-500" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
       <Card>
