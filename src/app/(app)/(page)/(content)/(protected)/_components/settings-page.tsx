@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
 import {
@@ -562,7 +563,7 @@ const AdvancedSection = () => {
             <p>Please be certain. This action cannot be undone!</p>
           </div>
           <AlertDialog>
-            <AlertDialogTrigger>
+            <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <Trash2 />
                 Delete Account
@@ -578,7 +579,17 @@ const AdvancedSection = () => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive dark:bg-destructive/60 hover:bg-destructive focus-visible:ring-destructive text-white">
+                <AlertDialogAction
+                  className="bg-destructive dark:bg-destructive/60 hover:bg-destructive focus-visible:ring-destructive text-white"
+                  onClick={() => {
+                    toast.loading('Deleting account');
+
+                    setTimeout(() => {
+                      toast.dismiss();
+                      toast.success('Account deleted successfully.');
+                    }, 2500);
+                  }}
+                >
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
