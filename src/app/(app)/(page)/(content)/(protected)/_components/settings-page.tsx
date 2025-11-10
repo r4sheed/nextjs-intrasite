@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 
-import {
-  User,
-  Shield,
-  Bell,
-  Palette,
-  Settings,
-  Save,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
+import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
@@ -158,10 +149,7 @@ const ProfileSection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>
-            <Save />
-            Save Changes
-          </Button>
+          <Button>Save Changes</Button>
         </CardFooter>
       </Card>
     </div>
@@ -204,9 +192,7 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>
-            <RefreshCw /> Update Password
-          </Button>
+          <Button>Update Password</Button>
         </CardFooter>
       </Card>
 
@@ -230,9 +216,7 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>
-            <Save /> Save Changes
-          </Button>
+          <Button> Save Changes</Button>
         </CardFooter>
       </Card>
 
