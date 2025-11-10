@@ -74,8 +74,8 @@ const SettingsSidebar = ({
                     className={cn(
                       'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-[0.8rem] no-underline transition-colors',
                       isActive
-                        ? 'bg-sidebar-accent text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-accent text-foreground'
+                        : 'text-foreground hover:text-foreground'
                     )}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => onSectionSelect(item.id)}
