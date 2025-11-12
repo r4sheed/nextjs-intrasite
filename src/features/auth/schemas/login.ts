@@ -2,8 +2,10 @@ import { z } from 'zod';
 
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
+import { emailFieldForRegistration } from './user-fields';
+
 export const loginSchema = z.object({
-  email: z.email({ message: AUTH_ERRORS.emailRequired }),
+  email: emailFieldForRegistration,
   password: z
     .string({ message: AUTH_ERRORS.invalidFields })
     .min(1, { message: AUTH_ERRORS.passwordRequired }),

@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
-import { AUTH_ERRORS } from '@/features/auth/lib/strings';
+import { emailFieldForRegistration } from './user-fields';
 
 export const resetSchema = z.object({
-  email: z.email({ message: AUTH_ERRORS.emailRequired }),
+  email: emailFieldForRegistration,
 });
 
 export type ResetInput = z.infer<typeof resetSchema>;

@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
-import { AUTH_ERRORS } from '@/features/auth/lib/strings';
-export const UserSettingsSchema = z.object({
-  name: z.optional(z.string({ message: AUTH_ERRORS.invalidFields })),
-});
+import { emailFieldForSettings, nameFieldForSettings } from './user-fields';
+
+export const UserSettingsSchema = z
+  .object({
+    name: nameFieldForSettings,
+    email: emailFieldForSettings,
+  })
+  .catchall(z.any().optional());
 
 export type UserSettingsInput = z.infer<typeof UserSettingsSchema>;

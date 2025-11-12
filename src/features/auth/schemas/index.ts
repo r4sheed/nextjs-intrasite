@@ -12,3 +12,4 @@ export {
 } from './two-factor';
 export { verifyEmailSchema, type VerifyEmailInput } from './verification';
 export { UserSettingsSchema, type UserSettingsInput } from './user-settings';
+export * from './user-fields';
