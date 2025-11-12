@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 
 import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
-import { randomString } from 'node_modules/zod/v4/core/util.cjs';
 import { toast } from 'sonner';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
@@ -18,7 +17,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -37,7 +35,6 @@ import {
   FieldDescription,
   FieldTitle,
 } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
@@ -48,14 +45,10 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 
-import { updateUserSettings } from '@/features/auth/actions/user-settings';
 import { PasswordInput } from '@/features/auth/components/password-input';
-import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
-import { useSession } from '@/features/auth/hooks/use-session';
-import { AUTH_LABELS } from '@/features/auth/lib/strings';
 
+import { ProfileSection } from './sections/profile-section';
 import { SettingsSidebar } from './settings-sidebar';
 
 const sidebarGroups = [
@@ -78,95 +71,6 @@ const sidebarGroups = [
 ] as const;
 
 type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
-
-const ProfileSection = () => {
-  const [isPending, startTransition] = useTransition();
-
-  const session = useSession();
-
-  const user = useCurrentUser();
-
-  const onSubmit = async () => {
-    startTransition(async () => {
-      const result = await updateUserSettings({
-        name: randomString(8),
-      });
-
-      if (result.status === 'success') {
-        await session.update();
-        toast.success('Profile updated successfully');
-      } else {
-        toast.error('Failed to update profile');
-      }
-    });
-  };
-
-  return (
-    <div className="flex flex-col gap-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Update your personal details and public profile
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src="/abstract-geometric-shapes.png" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div className="space-y-2">
-              {/* TODO: A modal where the user can select or remove avatar */}
-              <Button variant="outline" size="sm">
-                Change Avatar
-              </Button>
-              <p className="text-muted-foreground text-xs">
-                JPG, PNG or GIF. Max size 2MB.
-              </p>
-            </div>
-          </div>
-
-          <Separator />
-
-          <Field>
-            <FieldContent>
-              <FieldTitle>Name</FieldTitle>
-              <FieldDescription>Your public display name</FieldDescription>
-              <Input
-                type="text"
-                placeholder={AUTH_LABELS.namePlaceholder}
-                defaultValue={user?.name || ''}
-              />
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldContent>
-              <FieldTitle>Email Address</FieldTitle>
-              <FieldDescription>
-                We'll use this email for account notifications
-              </FieldDescription>
-              <Input
-                type="email"
-                placeholder={AUTH_LABELS.emailPlaceholder}
-                defaultValue={user?.email || ''}
-                disabled
-                readOnly
-              />
-            </FieldContent>
-          </Field>
-        </CardContent>
-        <Separator />
-        <CardFooter className="justify-end">
-          <Button disabled={isPending} onClick={onSubmit}>
-            Save Changes
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-  );
-};
 
 const SecuritySection = () => {
   return (
