@@ -27,7 +27,6 @@ export const updateUserSettings = async (
   const validation = UserSettingsSchema.safeParse(values);
 
   if (!validation.success) {
-    console.log(validation.error);
     return response.failure(validationFailed(validation.error));
   }
 
