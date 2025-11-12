@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { auth } from '@/features/auth/lib/auth';
@@ -30,7 +31,8 @@ describe('auth utilities', () => {
         id: '123',
         email: 'test@example.com',
         name: 'Test User',
-        role: 'USER' as const,
+        role: UserRole.USER,
+        isOAuth: false,
       };
 
       const mockSession: Session = {
@@ -57,7 +59,12 @@ describe('auth utilities', () => {
   describe('isAuthenticated', () => {
     it('should return true when user exists', async () => {
       const mockSession: Session = {
-        user: { id: '123', email: 'test@example.com' },
+        user: {
+          id: '123',
+          email: 'test@example.com',
+          role: UserRole.USER,
+          isOAuth: false,
+        },
         expires: '2025-12-31',
       };
 
@@ -80,7 +87,7 @@ describe('auth utilities', () => {
   describe('hasRole', () => {
     it('should return true when user has matching role', async () => {
       const mockSession: Session = {
-        user: { id: '123', role: 'ADMIN' as const },
+        user: { id: '123', role: UserRole.ADMIN, isOAuth: false },
         expires: '2025-12-31',
       };
 
@@ -93,7 +100,7 @@ describe('auth utilities', () => {
 
     it('should return false when user has different role', async () => {
       const mockSession: Session = {
-        user: { id: '123', role: 'USER' as const },
+        user: { id: '123', role: UserRole.USER, isOAuth: false },
         expires: '2025-12-31',
       };
 
@@ -115,7 +122,12 @@ describe('auth utilities', () => {
 
   describe('requireAuth', () => {
     it('should return user when authenticated', async () => {
-      const mockUser = { id: '123', email: 'test@example.com' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        role: UserRole.USER,
+        isOAuth: false,
+      };
       const mockSession: Session = {
         user: mockUser,
         expires: '2025-12-31',
