@@ -478,15 +478,14 @@ export const BadErrors = {
 ```typescript
 'use server';
 
-import { type Response, response } from '@/lib/response';
+import { z } from 'zod';
 
-import { invalidFields } from '@/features/auth/lib/errors';
+import { validationFailed } from '@/lib/errors';
+import { type Response, response } from '@/lib/response';
 
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser } from '@/features/auth/services';
-
-// Defines the expected successful data structure returned by the 'register' action.
-export type RegisterData = { userId: string };
+import type { RegisterUserData } from '@/features/auth/services/register-user';
 
 /**
  * Register action - validates input and calls service
@@ -494,11 +493,11 @@ export type RegisterData = { userId: string };
  */
 export async function register(
   values: RegisterInput
-): Promise<Response<RegisterData>> {
+): Promise<Response<RegisterUserData>> {
   // 1. Validate input with Zod
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {
-    return response.error(invalidFields(validation.error.issues));
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
   // 2. Call service layer - it returns Response<T>

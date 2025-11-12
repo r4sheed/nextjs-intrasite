@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { internalServerError } from '@/lib/errors';
 import { CORE_CODES } from '@/lib/errors/codes';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { resetPassword as resetPasswordAction } from '@/features/auth/actions';
-import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { resetPassword } from '@/features/auth/services';
+
+import type { ResetInput } from '@/features/auth/schemas';
 
 // Mock the service layer
 vi.mock('@/features/auth/services', () => ({
@@ -42,7 +45,7 @@ describe('resetPassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
       expect(response.details).toBeDefined();
     }
     // Service should not be called for invalid input
@@ -56,29 +59,24 @@ describe('resetPassword action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
       expect(response.details).toBeDefined();
     }
     expect(resetPassword).not.toHaveBeenCalled();
   });
 
   it('should return error for missing email field', async () => {
-    const response = await resetPasswordAction({} as any);
+    const response = await resetPasswordAction({} as ResetInput);
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
     }
     expect(resetPassword).not.toHaveBeenCalled();
   });
 
   it('should handle service errors properly', async () => {
-    const mockError = {
-      code: CORE_CODES.internalServerError,
-      message: { key: 'errors.internal_server_error' },
-      httpStatus: 500,
-    };
-    const mockResponse = responseFactory.failure(mockError as any);
+    const mockResponse = responseFactory.failure(internalServerError());
     vi.mocked(resetPassword).mockResolvedValue(mockResponse);
 
     const response = await resetPasswordAction({

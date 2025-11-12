@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import type { RegisterInput } from '@/features/auth/schemas';
-
 describe('registerUser service', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -24,22 +22,6 @@ describe('registerUser service', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
-  });
-
-  it('returns invalidFields for malformed input', async () => {
-    vi.doMock('@/features/auth/data/user', () => ({ getUserByEmail: vi.fn() }));
-
-    const mod = await import('@/features/auth/services/register-user');
-
-    const result = await mod.registerUser({} as unknown as RegisterInput);
-
-    expect(result.status).toBe('error');
-    const { AUTH_CODES } = await import('@/features/auth/lib/strings');
-    if (result.status === 'error') {
-      expect(result.code).toBe(AUTH_CODES.invalidFields);
-    } else {
-      throw new Error('Expected error response');
-    }
   });
 
   it('returns emailAlreadyExists when user already exists', async () => {

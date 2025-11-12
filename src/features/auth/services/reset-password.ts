@@ -1,12 +1,18 @@
-import { internalServerError } from '@/lib/errors/helpers';
+import { AppError, internalServerError } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { type ResetPasswordData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { sendResetPasswordEmail } from '@/features/auth/lib/mail';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generatePasswordResetToken } from '@/features/auth/lib/tokens';
 import { type ResetInput } from '@/features/auth/schemas';
+
+export type ResetPasswordData = Record<string, never>;
+
+const createSuccessResponse = () =>
+  response.success<ResetPasswordData>({
+    message: { key: AUTH_SUCCESS.passwordResetSent },
+  });
 
 /**
  * Core service to initiate a password reset request by generating a token and sending an email.
@@ -36,10 +42,7 @@ export const resetPassword = async (
   // the UI displays a generic "email sent" message, preventing attackers from
   // distinguishing between existing and non-existing email addresses.
   if (!user) {
-    return response.success({
-      data: {},
-      message: { key: AUTH_SUCCESS.passwordResetSent },
-    });
+    return createSuccessResponse();
   }
 
   try {
@@ -49,11 +52,12 @@ export const resetPassword = async (
     // Send the password reset email containing the generated token
     await sendResetPasswordEmail(token.email, token.token);
 
-    return response.success({
-      data: {},
-      message: { key: AUTH_SUCCESS.passwordResetSent },
-    });
+    return createSuccessResponse();
   } catch (error) {
+    if (error instanceof AppError) {
+      return response.failure(error);
+    }
+
     // TODO: Log the error properly using a centralized logger
     console.error('Error during password reset:', error);
 

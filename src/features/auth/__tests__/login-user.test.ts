@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import type { LoginInput } from '@/features/auth/schemas';
-
 describe('loginUser service', () => {
   beforeEach(() => {
     // Ensure a clean module registry between tests so our doMock calls take effect
@@ -26,27 +24,6 @@ describe('loginUser service', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
-  });
-
-  it('returns invalidFields for malformed input', async () => {
-    // Minimal mocks to avoid side-effects during module import
-    vi.doMock('@/features/auth/data/user', () => ({
-      verifyUserCredentials: vi.fn(),
-    }));
-
-    const mod = await import('@/features/auth/services/login-user');
-
-    const result = await mod.loginUser({} as unknown as LoginInput);
-
-    expect(result.status).toBe('error');
-    // message code is provided via the AppError -> response.failure mapping
-    // The exact code for invalid fields is defined in AUTH_CODES.invalidFields
-    const { AUTH_CODES } = await import('@/features/auth/lib/strings');
-    if (result.status === 'error') {
-      expect(result.code).toBe(AUTH_CODES.invalidFields);
-    } else {
-      throw new Error('Expected error response');
-    }
   });
 
   it('returns invalidCredentials when verifyUserCredentials returns null', async () => {

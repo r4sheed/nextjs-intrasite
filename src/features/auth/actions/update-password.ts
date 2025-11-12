@@ -11,10 +11,7 @@ import {
 } from '@/features/auth/schemas';
 import { updatePassword as updatePasswordService } from '@/features/auth/services';
 
-/**
- * Successful password update response data (empty object as no data is returned).
- */
-export type UpdatePasswordData = Record<string, never>;
+import type { UpdatePasswordData } from '@/features/auth/services/update-password';
 
 /**
  * Server Action to update a user's password using a valid reset token.

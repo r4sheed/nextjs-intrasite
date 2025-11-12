@@ -6,7 +6,6 @@ import { routes } from '@/lib/navigation';
 import { type Response, response } from '@/lib/response';
 import { maskEmail } from '@/lib/utils';
 
-import { type LoginUserData } from '@/features/auth/actions';
 import { getTwoFactorTokenByUserId } from '@/features/auth/data/two-factor-token';
 import { verifyUserCredentials } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
@@ -14,7 +13,6 @@ import {
   callbackError,
   emailVerificationRequired,
   invalidCredentials,
-  invalidFields,
 } from '@/features/auth/lib/errors';
 import {
   sendVerificationEmail,
@@ -29,7 +27,13 @@ import {
   generateTwoFactorToken,
   generateVerificationToken,
 } from '@/features/auth/lib/tokens';
-import { type LoginInput, loginSchema } from '@/features/auth/schemas';
+import { type LoginInput } from '@/features/auth/schemas';
+
+export type LoginUserData = {
+  userId: string;
+  requiresVerification?: boolean;
+  redirectUrl?: string;
+};
 
 /**
  * Core service to authenticate a user with email and password credentials.
@@ -47,12 +51,7 @@ import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 export const loginUser = async (
   values: LoginInput
 ): Promise<Response<LoginUserData>> => {
-  const parsed = loginSchema.safeParse(values);
-  if (!parsed.success) {
-    return response.failure(invalidFields(parsed.error.issues));
-  }
-
-  const { email, password } = parsed.data;
+  const { email, password } = values;
 
   try {
     // First validate credentials via the data layer. This avoids calling

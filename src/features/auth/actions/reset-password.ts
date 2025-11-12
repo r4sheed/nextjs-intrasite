@@ -8,10 +8,7 @@ import { type Response, response } from '@/lib/response';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 import { resetPassword as resetPasswordService } from '@/features/auth/services';
 
-/**
- * Successful password reset request response data (empty object as no data is returned).
- */
-export type ResetPasswordData = Record<string, never>;
+import type { ResetPasswordData } from '@/features/auth/services/reset-password';
 
 /**
  * Server Action to initiate a password reset request by email.

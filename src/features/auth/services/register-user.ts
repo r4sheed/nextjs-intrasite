@@ -2,19 +2,19 @@ import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
-import { type RegisterUserData } from '@/features/auth/actions';
 import { getUserByEmail } from '@/features/auth/data/user';
 import { signIn } from '@/features/auth/lib/auth';
 import {
   emailAlreadyExists,
-  invalidFields,
   registrationFailed,
 } from '@/features/auth/lib/errors';
 import { sendVerificationEmail } from '@/features/auth/lib/mail';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import { generateVerificationToken } from '@/features/auth/lib/tokens';
 import { User } from '@/features/auth/models';
-import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
+import { type RegisterInput } from '@/features/auth/schemas';
+
+export type RegisterUserData = { userId: string };
 
 /**
  * Core service to register a new user account with email, password, and name.
@@ -32,13 +32,7 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 export const registerUser = async (
   values: RegisterInput
 ): Promise<Response<RegisterUserData>> => {
-  // Validate input
-  const parsed = registerSchema.safeParse(values);
-  if (!parsed.success) {
-    return response.failure(invalidFields(parsed.error.issues));
-  }
-
-  const { email, password, name } = parsed.data;
+  const { email, password, name } = values;
 
   // Check if user already exists
   const user = await getUserByEmail(email);

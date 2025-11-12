@@ -12,20 +12,6 @@ import { AUTH_CODES, AUTH_ERRORS } from './strings';
  */
 
 /**
- * 422 - Invalid fields error.
- * Used for detailed client-side input validation error in auth forms.
- * @param details The raw validation errors (e.g., ZodError object) or a custom error structure.
- * @returns AppError with status 422.
- */
-export const invalidFields = (details: unknown) =>
-  new AppError({
-    code: AUTH_CODES.invalidFields,
-    message: { key: AUTH_ERRORS.invalidFields },
-    httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
-    details: details,
-  });
-
-/**
  * 401 - Invalid credentials error.
  * Used specifically for login errors (e.g., wrong password or non-existent user).
  * @returns AppError with status 401.

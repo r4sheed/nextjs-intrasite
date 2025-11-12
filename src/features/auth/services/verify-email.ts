@@ -10,7 +10,7 @@ import {
 } from '@/features/auth/lib/errors';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 
-import type { VerifyEmailData } from '@/features/auth/actions';
+export type VerifyEmailData = Record<string, never>;
 
 /**
  * Core service to verify a user's email address using a verification token.

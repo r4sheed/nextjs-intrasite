@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CORE_CODES } from '@/lib/errors/codes';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { registerUser as registerUserAction } from '@/features/auth/actions';
@@ -48,7 +49,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
       expect(response.details).toBeDefined();
     }
   });
@@ -62,7 +63,7 @@ describe('registerUser action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
       expect(response.details).toBeDefined();
     }
   });

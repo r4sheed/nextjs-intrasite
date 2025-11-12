@@ -12,7 +12,6 @@
  */
 export const AUTH_CODES = {
   // Validation errors
-  invalidFields: 'invalid-fields',
   emailRequired: 'email-required',
   emailInvalid: 'email-invalid',
   passwordRequired: 'password-required',

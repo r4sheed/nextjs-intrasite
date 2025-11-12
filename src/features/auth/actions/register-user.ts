@@ -8,10 +8,7 @@ import { type Response, response } from '@/lib/response';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser as registerUserService } from '@/features/auth/services';
 
-/**
- * Successful registration response data containing the newly created user's ID.
- */
-export type RegisterUserData = { userId: string };
+import type { RegisterUserData } from '@/features/auth/services/register-user';
 
 /**
  * Server Action to register a new user account.

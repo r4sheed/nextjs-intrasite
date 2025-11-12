@@ -5,10 +5,7 @@ import { type Response, response } from '@/lib/response';
 import { tokenNotFound } from '@/features/auth/lib/errors';
 import { verifyEmail as verifyEmailService } from '@/features/auth/services';
 
-/**
- * Successful email verification response data (empty object as no data is returned).
- */
-export type VerifyEmailData = Record<string, never>;
+import type { VerifyEmailData } from '@/features/auth/services/verify-email';
 
 /**
  * Server Action to verify a user's email address using a verification token.

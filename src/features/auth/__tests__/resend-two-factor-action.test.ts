@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CORE_CODES } from '@/lib/errors/codes';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { resendTwoFactor } from '@/features/auth/actions';
 import { twoFactorSessionMissing } from '@/features/auth/lib/errors';
-import { AUTH_CODES, AUTH_SUCCESS } from '@/features/auth/lib/strings';
+import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
 import {
   type ResendTwoFactorData,
   resendTwoFactorCode,
@@ -19,12 +20,12 @@ describe('resendTwoFactor action', () => {
     vi.clearAllMocks();
   });
 
-  it('returns invalidFields when sessionId is malformed', async () => {
+  it('returns validationFailed when sessionId is malformed', async () => {
     const response = await resendTwoFactor({ sessionId: 'not-a-cuid' });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
     }
     expect(resendTwoFactorCode).not.toHaveBeenCalled();
   });

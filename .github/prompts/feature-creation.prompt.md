@@ -104,9 +104,10 @@ Same as CRUD, but **without** the `models/` folder. Best for features that don't
 // actions/create-bookmark.ts
 'use server';
 
-import { response, type Response } from '@/lib/response';
+import { z } from 'zod';
 
-import { invalidFields } from '@/features/bookmarks/lib/errors';
+import { validationFailed } from '@/lib/errors';
+import { response, type Response } from '@/lib/response';
 
 import {
   type CreateBookmarkInput,
@@ -129,13 +130,13 @@ export type CreateBookmarkData = { id: string };
 export const createBookmark = async (
   values: CreateBookmarkInput
 ): Promise<Response<CreateBookmarkData>> => {
-  const result = createBookmarkSchema.safeParse(values);
+  const validation = createBookmarkSchema.safeParse(values);
 
-  if (!result.success) {
-    return response.error(invalidFields(result.error.issues));
+  if (!validation.success) {
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
-  return await createBookmarkService(result.data);
+  return await createBookmarkService(validation.data);
 };
 ```
 

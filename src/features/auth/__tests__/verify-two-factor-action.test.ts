@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CORE_CODES } from '@/lib/errors/codes';
 import { response as responseFactory, Status } from '@/lib/response';
 
 import { verifyTwoFactor } from '@/features/auth/actions';
 import { twoFactorSessionMissing } from '@/features/auth/lib/errors';
-import { AUTH_CODES } from '@/features/auth/lib/strings';
 import {
   type VerifyTwoFactorData,
   verifyTwoFactorCode,
@@ -19,7 +19,7 @@ describe('verifyTwoFactor action', () => {
     vi.clearAllMocks();
   });
 
-  it('returns invalidFields when validation fails', async () => {
+  it('returns validationFailed when validation fails', async () => {
     const response = await verifyTwoFactor({
       sessionId: 'invalid-session',
       code: '123456',
@@ -27,7 +27,7 @@ describe('verifyTwoFactor action', () => {
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.invalidFields);
+      expect(response.code).toBe(CORE_CODES.validationFailed);
     }
 
     expect(verifyTwoFactorCode).not.toHaveBeenCalled();
