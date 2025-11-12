@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import {
   resendTwoFactorSchema,
   type ResendTwoFactorInput,
@@ -24,11 +26,11 @@ import {
 export const resendTwoFactor = async (
   values: ResendTwoFactorInput
 ): Promise<Response<ResendTwoFactorData>> => {
-  const result = resendTwoFactorSchema.safeParse(values);
+  const validation = resendTwoFactorSchema.safeParse(values);
 
-  if (!result.success) {
-    return response.failure(invalidFields(result.error.issues));
+  if (!validation.success) {
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
-  return await resendTwoFactorCode(result.data.sessionId);
+  return await resendTwoFactorCode(validation.data.sessionId);
 };

@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import { type LoginInput, loginSchema } from '@/features/auth/schemas';
 import { loginUser as loginUserService } from '@/features/auth/services';
 
@@ -31,13 +33,13 @@ export const loginUser = async (
   values: LoginInput
 ): Promise<Response<LoginUserData>> => {
   // Validate the input fields using the defined schema
-  const result = loginSchema.safeParse(values);
+  const validation = loginSchema.safeParse(values);
 
-  if (!result.success) {
+  if (!validation.success) {
     // Return early with specific field validation errors
-    return response.failure(invalidFields(result.error.issues));
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
   // Call the core service function to handle authentication logic
-  return await loginUserService(result.data);
+  return await loginUserService(validation.data);
 };

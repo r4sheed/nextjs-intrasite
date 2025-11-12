@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import {
   type VerifyTwoFactorInput,
   verifyTwoFactorSchema,
@@ -24,11 +26,14 @@ import {
 export const verifyTwoFactor = async (
   values: VerifyTwoFactorInput
 ): Promise<Response<VerifyTwoFactorData>> => {
-  const result = verifyTwoFactorSchema.safeParse(values);
+  const validation = verifyTwoFactorSchema.safeParse(values);
 
-  if (!result.success) {
-    return response.failure(invalidFields(result.error.issues));
+  if (!validation.success) {
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
-  return await verifyTwoFactorCode(result.data.sessionId, result.data.code);
+  return await verifyTwoFactorCode(
+    validation.data.sessionId,
+    validation.data.code
+  );
 };

@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import { type ResetInput, resetSchema } from '@/features/auth/schemas';
 import { resetPassword as resetPasswordService } from '@/features/auth/services';
 
@@ -26,12 +28,12 @@ export const resetPassword = async (
   values: ResetInput
 ): Promise<Response<ResetPasswordData>> => {
   // Validate the input fields (email format)
-  const result = resetSchema.safeParse(values);
-  if (!result.success) {
+  const validation = resetSchema.safeParse(values);
+  if (!validation.success) {
     // Return early with specific field validation errors
-    return response.failure(invalidFields(result.error.issues));
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
   // Call the core service function which handles the business logic (token creation, email sending)
-  return await resetPasswordService(result.data);
+  return await resetPasswordService(validation.data);
 };

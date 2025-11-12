@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import {
   type NewPasswordInput,
   newPasswordSchema,
@@ -29,12 +31,12 @@ export const updatePassword = async (
   values: NewPasswordInput
 ): Promise<Response<UpdatePasswordData>> => {
   // Validate the input fields against the defined schema
-  const result = newPasswordSchema.safeParse(values);
-  if (!result.success) {
+  const validation = newPasswordSchema.safeParse(values);
+  if (!validation.success) {
     // Return early with specific field validation errors
-    return response.failure(invalidFields(result.error.issues));
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
   // Call the core service function to handle the business logic
-  return await updatePasswordService(result.data);
+  return await updatePasswordService(validation.data);
 };

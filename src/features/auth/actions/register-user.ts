@@ -1,8 +1,10 @@
 'use server';
 
+import { z } from 'zod';
+
+import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { invalidFields } from '@/features/auth/lib/errors';
 import { type RegisterInput, registerSchema } from '@/features/auth/schemas';
 import { registerUser as registerUserService } from '@/features/auth/services';
 
@@ -26,13 +28,13 @@ export const registerUser = async (
   values: RegisterInput
 ): Promise<Response<RegisterUserData>> => {
   // Validate the input fields using the defined schema
-  const result = registerSchema.safeParse(values);
+  const validation = registerSchema.safeParse(values);
 
-  if (!result.success) {
+  if (!validation.success) {
     // Return early with specific field validation errors
-    return response.failure(invalidFields(result.error.issues));
+    return response.failure(validationFailed(z.treeifyError(validation.error)));
   }
 
   // Call the core service function to handle user creation and database persistence
-  return await registerUserService(result.data);
+  return await registerUserService(validation.data);
 };
