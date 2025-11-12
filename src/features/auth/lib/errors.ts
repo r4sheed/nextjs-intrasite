@@ -53,6 +53,28 @@ export const emailAlreadyExists = () =>
   });
 
 /**
+ * 401 - Incorrect current password.
+ * Used when the provided current password does not match the stored password.
+ */
+export const passwordIncorrect = () =>
+  new AppError({
+    code: AUTH_CODES.passwordIncorrect,
+    message: { key: AUTH_ERRORS.passwordIncorrect },
+    httpStatus: HTTP_STATUS.UNAUTHORIZED,
+  });
+
+/**
+ * 422 - New password matches the current password.
+ * Used when the user tries to reuse their existing password.
+ */
+export const passwordUnchanged = () =>
+  new AppError({
+    code: AUTH_CODES.passwordUnchanged,
+    message: { key: AUTH_ERRORS.passwordUnchanged },
+    httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+  });
+
+/**
  * 500 - Registration failed error.
  * Generic error for unexpected server issues during the registration process.
  * @returns AppError with status 500.
