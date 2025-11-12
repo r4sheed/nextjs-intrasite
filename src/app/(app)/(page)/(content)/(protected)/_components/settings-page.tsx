@@ -46,131 +46,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 
-import { PasswordInput } from '@/features/auth/components/password-input';
-
 import { ProfileSection } from './sections/profile-section';
+import { SecuritySection } from './sections/security-section';
 import { SettingsSidebar } from './settings-sidebar';
-
-const sidebarGroups = [
-  {
-    title: 'General',
-    items: [
-      { id: 'profile', label: 'Profile', icon: User },
-      { id: 'security', label: 'Security', icon: Shield },
-      { id: 'notifications', label: 'Notifications', icon: Bell },
-    ],
-  },
-  {
-    title: 'Personalization',
-    items: [{ id: 'appearance', label: 'Appearance', icon: Palette }],
-  },
-  {
-    title: 'System',
-    items: [{ id: 'advanced', label: 'Advanced', icon: Settings }],
-  },
-] as const;
-
-type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
-
-const SecuritySection = () => {
-  return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>
-            Update your password to keep your account secure
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Field>
-            <FieldContent>
-              <FieldTitle>Current Password</FieldTitle>
-              <FieldDescription>Enter your current password</FieldDescription>
-              <PasswordInput autoComplete="current-password" required />
-            </FieldContent>
-          </Field>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Field>
-              <FieldContent>
-                <FieldTitle>New Password</FieldTitle>
-                <PasswordInput autoComplete="new-password" required />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldContent>
-                <FieldTitle>Confirm Password</FieldTitle>
-                <PasswordInput autoComplete="new-password" required />
-              </FieldContent>
-            </Field>
-          </div>
-        </CardContent>
-        <Separator />
-        <CardFooter className="justify-end">
-          <Button>Update Password</Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Two-Factor Authentication</CardTitle>
-          <CardDescription>
-            Add an extra layer of security to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldTitle>Enable 2FA</FieldTitle>
-              <FieldDescription>
-                Use an authenticator app for additional security
-              </FieldDescription>
-            </FieldContent>
-            <Switch />
-          </Field>
-        </CardContent>
-        <Separator />
-        <CardFooter className="justify-end">
-          <Button> Save Changes</Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Sessions</CardTitle>
-          <CardDescription>
-            Manage devices that are currently logged into your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium">MacBook Pro - Chrome</p>
-              <p className="text-muted-foreground text-xs">
-                Last active: 2 minutes ago
-              </p>
-            </div>
-            <Button variant="outline" size="sm">
-              Revoke
-            </Button>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium">iPhone 15 - Safari</p>
-              <p className="text-muted-foreground text-xs">
-                Last active: 3 hours ago
-              </p>
-            </div>
-            <Button variant="outline" size="sm">
-              Revoke
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
 
 const NotificationsSection = () => {
   return (
@@ -500,6 +378,27 @@ const AdvancedSection = () => {
     </div>
   );
 };
+
+const sidebarGroups = [
+  {
+    title: 'General',
+    items: [
+      { id: 'profile', label: 'Profile', icon: User },
+      { id: 'security', label: 'Security', icon: Shield },
+      { id: 'notifications', label: 'Notifications', icon: Bell },
+    ],
+  },
+  {
+    title: 'Personalization',
+    items: [{ id: 'appearance', label: 'Appearance', icon: Palette }],
+  },
+  {
+    title: 'System',
+    items: [{ id: 'advanced', label: 'Advanced', icon: Settings }],
+  },
+] as const;
+
+type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
 
 const SettingsPage = () => {
   const [activeSection, setActiveSection] =
