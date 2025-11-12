@@ -1,7 +1,5 @@
 'use server';
 
-import { z } from 'zod';
-
 import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
@@ -31,7 +29,7 @@ export const updatePassword = async (
   const validation = newPasswordSchema.safeParse(values);
   if (!validation.success) {
     // Return early with specific field validation errors
-    return response.failure(validationFailed(z.treeifyError(validation.error)));
+    return response.failure(validationFailed(validation.error));
   }
 
   // Call the core service function to handle the business logic

@@ -497,7 +497,7 @@ export async function register(
   // 1. Validate input with Zod
   const validation = registerSchema.safeParse(values);
   if (!validation.success) {
-    return response.failure(validationFailed(z.treeifyError(validation.error)));
+    return response.failure(validationFailed(validation.error));
   }
 
   // 2. Call service layer - it returns Response<T>

@@ -1,7 +1,5 @@
 'use server';
 
-import { z } from 'zod';
-
 import { validationFailed } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
@@ -29,7 +27,7 @@ export const resendTwoFactor = async (
   const validation = resendTwoFactorSchema.safeParse(values);
 
   if (!validation.success) {
-    return response.failure(validationFailed(z.treeifyError(validation.error)));
+    return response.failure(validationFailed(validation.error));
   }
 
   return await resendTwoFactorCode(validation.data.sessionId);

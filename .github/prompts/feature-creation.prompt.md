@@ -133,7 +133,7 @@ export const createBookmark = async (
   const validation = createBookmarkSchema.safeParse(values);
 
   if (!validation.success) {
-    return response.failure(validationFailed(z.treeifyError(validation.error)));
+    return response.failure(validationFailed(validation.error));
   }
 
   return await createBookmarkService(validation.data);

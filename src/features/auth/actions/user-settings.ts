@@ -1,7 +1,5 @@
 'use server';
 
-import { z } from 'zod';
-
 import { validationFailed, unauthorized } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
@@ -28,7 +26,7 @@ export const updateUserSettings = async (
 ): Promise<Response<UpdateUserSettingsData>> => {
   const validation = UserSettingsSchema.safeParse(values);
   if (!validation.success) {
-    return response.failure(validationFailed(z.treeifyError(validation.error)));
+    return response.failure(validationFailed(validation.error));
   }
 
   const user = await currentUser();
