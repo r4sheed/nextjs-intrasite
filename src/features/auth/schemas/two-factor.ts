@@ -21,7 +21,7 @@ export type VerifyTwoFactorCodeInput = z.infer<
 >;
 
 export const resendTwoFactorSchema = z.object({
-  sessionId: z.string().cuid({ message: AUTH_ERRORS.invalidFields }),
+  sessionId: z.cuid({ message: AUTH_ERRORS.invalidFields }),
 });
 
 export type ResendTwoFactorInput = z.infer<typeof resendTwoFactorSchema>;
