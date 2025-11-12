@@ -10,7 +10,7 @@ import {
   passwordUnchanged,
 } from '@/features/auth/lib/errors';
 import { User } from '@/features/auth/models';
-import { type UserSettingsInput } from '@/features/auth/schemas';
+import { type UserSettingsFormData } from '@/features/auth/schemas';
 
 import type { Prisma } from '@prisma/client';
 
@@ -26,14 +26,14 @@ export type UpdateUserSettingsData = {
 
 export type UpdateUserSettingsParams = {
   userId: string;
-  values: UserSettingsInput;
+  values: UserSettingsFormData;
 };
 
 type UpdateContext = {
   isOAuth: boolean;
 };
 
-type ExtendedUserSettingsInput = UserSettingsInput & {
+type ExtendedUserSettingsInput = UserSettingsFormData & {
   currentPassword?: string;
   newPassword?: string;
   confirmPassword?: string;
@@ -139,6 +139,10 @@ export const updateUserSettingsService = async ({
         return response.failure(passwordIncorrect());
       }
 
+      if (currentPassword.length > 0 && currentPassword === newPassword) {
+        return response.failure(passwordUnchanged());
+      }
+
       updatePayload.password = await User.hashPassword(newPassword);
     }
 
@@ -153,14 +157,7 @@ export const updateUserSettingsService = async ({
       data: updatePayload,
       select: USER_SELECT,
     });
-    const currentPassword =
-      typeof extendedValues.currentPassword === 'string'
-        ? extendedValues.currentPassword.trim()
-        : '';
 
-    if (currentPassword.length > 0 && currentPassword === newPassword) {
-      return response.failure(passwordUnchanged());
-    }
     return response.success({
       data: buildSuccessData(updatedUser, context),
     });
