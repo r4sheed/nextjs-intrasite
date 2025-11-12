@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 
 import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
+import { randomString } from 'node_modules/zod/v4/core/util.cjs';
 import { toast } from 'sonner';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
@@ -49,7 +50,11 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
+import { updateUserSettings } from '@/features/auth/actions/user-settings';
 import { PasswordInput } from '@/features/auth/components/password-input';
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
+import { useSession } from '@/features/auth/hooks/use-session';
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { SettingsSidebar } from './settings-sidebar';
 
@@ -75,6 +80,27 @@ const sidebarGroups = [
 type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
 
 const ProfileSection = () => {
+  const [isPending, startTransition] = useTransition();
+
+  const session = useSession();
+
+  const user = useCurrentUser();
+
+  const onSubmit = async () => {
+    startTransition(async () => {
+      const result = await updateUserSettings({
+        name: randomString(8),
+      });
+
+      if (result.status === 'success') {
+        await session.update();
+        toast.success('Profile updated successfully');
+      } else {
+        toast.error('Failed to update profile');
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <Card>
@@ -103,21 +129,17 @@ const ProfileSection = () => {
 
           <Separator />
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <Field>
-              <FieldContent>
-                <FieldTitle>First Name</FieldTitle>
-                <Input placeholder="John" defaultValue="John" />
-              </FieldContent>
-            </Field>
-
-            <Field>
-              <FieldContent>
-                <FieldTitle>Last Name</FieldTitle>
-                <Input placeholder="Doe" defaultValue="Doe" />
-              </FieldContent>
-            </Field>
-          </div>
+          <Field>
+            <FieldContent>
+              <FieldTitle>Name</FieldTitle>
+              <FieldDescription>Your public display name</FieldDescription>
+              <Input
+                type="text"
+                placeholder={AUTH_LABELS.namePlaceholder}
+                defaultValue={user?.name || ''}
+              />
+            </FieldContent>
+          </Field>
 
           <Field>
             <FieldContent>
@@ -127,29 +149,19 @@ const ProfileSection = () => {
               </FieldDescription>
               <Input
                 type="email"
-                placeholder="john@example.com"
-                defaultValue="john@example.com"
-              />
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldContent>
-              <FieldTitle>Bio</FieldTitle>
-              <FieldDescription>
-                Write a short introduction about yourself
-              </FieldDescription>
-              <Textarea
-                placeholder="Tell us about yourself"
-                className="min-h-24 resize-none"
-                defaultValue="Product designer and developer passionate about creating intuitive interfaces."
+                placeholder={AUTH_LABELS.emailPlaceholder}
+                defaultValue={user?.email || ''}
+                disabled
+                readOnly
               />
             </FieldContent>
           </Field>
         </CardContent>
         <Separator />
         <CardFooter className="justify-end">
-          <Button>Save Changes</Button>
+          <Button disabled={isPending} onClick={onSubmit}>
+            Save Changes
+          </Button>
         </CardFooter>
       </Card>
     </div>

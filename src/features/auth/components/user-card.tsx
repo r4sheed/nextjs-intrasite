@@ -33,7 +33,9 @@ const UserCard = ({ user, title }: UserCardProps) => {
       <CardContent className="space-y-4">
         <UserData label="userid" value={user?.id} />
         <UserData label="email" value={user?.email} />
+        <UserData label="name" value={user?.name} />
         <UserData label="role" value={user?.role} />
+        <UserData label="isOAuth" value={user?.isOAuth ? 'YES' : 'NO'} />
       </CardContent>
     </Card>
   );

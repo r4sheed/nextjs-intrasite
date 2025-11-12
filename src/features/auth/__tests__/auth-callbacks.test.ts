@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 vi.mock('@/features/auth/data/user', () => ({
@@ -24,7 +25,7 @@ describe('auth callbacks', () => {
         name: 'Alice',
         email: 'alice@example.com',
         image: 'alice.png',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
       } as never);
 
       const token = { sub: 'user-1' } as JWT;
@@ -35,7 +36,7 @@ describe('auth callbacks', () => {
       } as unknown as Parameters<NonNullable<typeof authCallbacks.jwt>>[0]);
 
       expect(mockedGetUserById).toHaveBeenCalledWith('user-1');
-      expect(result.role).toBe('ADMIN');
+      expect(result.role).toBe(UserRole.ADMIN);
       expect(result.email).toBe('alice@example.com');
       expect(result.picture).toBe('alice.png');
     });
@@ -45,7 +46,7 @@ describe('auth callbacks', () => {
 
       const token = {
         sub: 'missing-user',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
         email: 'old@example.com',
         picture: 'old.png',
       } as JWT;
@@ -56,7 +57,7 @@ describe('auth callbacks', () => {
       } as unknown as Parameters<NonNullable<typeof authCallbacks.jwt>>[0]);
 
       expect(mockedGetUserById).toHaveBeenCalledWith('missing-user');
-      expect(result.role).toBeUndefined();
+      expect(result.role).toBe(UserRole.USER);
       expect(result.email).toBeNull();
       expect(result.picture).toBeNull();
     });
@@ -64,23 +65,24 @@ describe('auth callbacks', () => {
 
   describe('session', () => {
     it('projects token values onto the session user', async () => {
-      const session: Session = {
+      const session = {
         user: {
           id: 'user-1',
           name: null,
           email: null,
           image: null,
-          role: undefined,
+          role: UserRole.USER,
+          isOAuth: false,
         },
         expires: new Date().toISOString(),
-      };
+      } as Session;
 
       const token = {
         sub: 'user-1',
         name: 'Alice',
         email: 'alice@example.com',
         picture: 'alice.png',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
       } as JWT;
 
       const result = await authCallbacks.session({
@@ -92,20 +94,21 @@ describe('auth callbacks', () => {
       expect(result?.user.name).toBe('Alice');
       expect(result?.user.email).toBe('alice@example.com');
       expect(result?.user.image).toBe('alice.png');
-      expect(result?.user.role).toBe('ADMIN');
+      expect(result?.user.role).toBe(UserRole.ADMIN);
     });
 
     it('preserves existing session fields when the token lacks data', async () => {
-      const session: Session = {
+      const session = {
         user: {
           id: 'user-1',
           name: 'Persisted',
           email: 'persisted@example.com',
           image: 'persisted.png',
-          role: 'MODERATOR',
+          role: UserRole.MODERATOR,
+          isOAuth: true,
         },
         expires: new Date().toISOString(),
-      };
+      } as Session;
 
       const token = {
         sub: 'user-1',
@@ -120,7 +123,7 @@ describe('auth callbacks', () => {
       expect(result?.user.name).toBe('Persisted');
       expect(result?.user.email).toBe('persisted@example.com');
       expect(result?.user.image).toBe('persisted.png');
-      expect(result?.user.role).toBe('MODERATOR');
+      expect(result?.user.role).toBe(UserRole.MODERATOR);
     });
   });
 });

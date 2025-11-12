@@ -1,9 +1,11 @@
+import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
 import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
+import { getAccountByUserId } from '@/features/auth/data/account';
 import { getTwoFactorConfirmationByUserId } from '@/features/auth/data/two-factor-confirmation';
 import { getUserById } from '@/features/auth/data/user';
 
@@ -19,13 +21,17 @@ type MutableToken = JWT & {
   name?: string | null;
   email?: string | null;
   picture?: string | null;
-  role?: SessionUser['role'];
+  role?: UserRole | undefined;
+  isOAuth?: boolean | undefined;
 };
 
 /**
  * User properties that we mirror between the JWT payload and the session object.
  */
-type UserSnapshot = Pick<SessionUser, 'name' | 'email' | 'image' | 'role'>;
+type UserSnapshot = Pick<
+  SessionUser,
+  'name' | 'email' | 'image' | 'role' | 'isOAuth'
+>;
 
 const asMutableToken = (token: JWT): MutableToken => token as MutableToken;
 
@@ -38,13 +44,17 @@ const resetTokenUserSnapshot = (token: JWT) => {
   mutable.name = null;
   mutable.email = null;
   mutable.picture = null;
-  mutable.role = undefined;
+  mutable.role = UserRole.USER;
+  mutable.isOAuth = false;
 
   return token;
 };
 
 /**
  * Writes the provided user snapshot onto the JWT after clearing previous values.
+ * @param token - The JWT token to update.
+ * @param snapshot - The user data snapshot to apply.
+ * @returns The updated JWT token.
  */
 const updateTokenFromUser = (token: JWT, snapshot: Partial<UserSnapshot>) => {
   const mutable = asMutableToken(resetTokenUserSnapshot(token));
@@ -61,12 +71,18 @@ const updateTokenFromUser = (token: JWT, snapshot: Partial<UserSnapshot>) => {
   if (snapshot.role !== undefined) {
     mutable.role = snapshot.role;
   }
+  if (snapshot.isOAuth !== undefined) {
+    mutable.isOAuth = snapshot.isOAuth;
+  }
 
   return token;
 };
 
 /**
  * Projects the JWT payload onto the session user object so client code receives the latest snapshot.
+ * @param sessionUser - The current session user object.
+ * @param token - The JWT token containing the latest user data.
+ * @returns The updated session user object.
  */
 const mergeTokenIntoSessionUser = (
   sessionUser: SessionUser,
@@ -88,7 +104,10 @@ const mergeTokenIntoSessionUser = (
     next.image = mutable.picture ?? null;
   }
   if (mutable.role !== undefined) {
-    next.role = mutable.role;
+    next.role = mutable.role ?? UserRole.USER;
+  }
+  if (mutable.isOAuth !== undefined) {
+    next.isOAuth = mutable.isOAuth ?? false;
   }
 
   return next;
@@ -101,6 +120,10 @@ const canQueryDatabaseForToken =
   typeof process === 'undefined' || process.env.NEXT_RUNTIME !== 'edge';
 
 const events = {
+  /**
+   * Marks the user's email as verified when linking an OAuth account.
+   * @param user - The user whose account is being linked.
+   */
   async linkAccount({ user }) {
     // Mark email as verified when linking an OAuth account
     await db.user.update({
@@ -111,9 +134,20 @@ const events = {
 } satisfies NonNullable<NextAuthConfig['events']>;
 
 export const authCallbacks = {
+  /**
+   * Checks if the user is authorized to access a protected route.
+   * @param auth - The current authentication state.
+   * @returns True if authorized, false otherwise.
+   */
   async authorized({ auth }) {
     return !!auth;
   },
+  /**
+   * Handles the sign-in process, including validation for credentials and OAuth.
+   * @param user - The user attempting to sign in.
+   * @param account - The account information (e.g., provider).
+   * @returns True if sign-in is allowed, false otherwise.
+   */
   async signIn({ user, account }) {
     // Allow OAuth without email verification
     if (account?.provider !== 'credentials') {
@@ -166,6 +200,12 @@ export const authCallbacks = {
 
     return true;
   },
+  /**
+   * Handles JWT token creation and updates during authentication.
+   * @param token - The JWT token.
+   * @param user - The user data (present during sign-in).
+   * @returns The updated JWT token.
+   */
   async jwt({ token, user }) {
     // Ensure the subject claim always mirrors the authenticated user's id.
     if (user?.id) {
@@ -182,7 +222,8 @@ export const authCallbacks = {
         name: user.name ?? null,
         email: user.email ?? null,
         image: user.image ?? null,
-        role: user.role,
+        role: user.role ?? 'USER',
+        isOAuth: user.isOAuth,
       });
     }
 
@@ -198,13 +239,22 @@ export const authCallbacks = {
       return resetTokenUserSnapshot(token);
     }
 
+    const account = await getAccountByUserId(databaseUser.id);
+
     return updateTokenFromUser(token, {
       name: databaseUser.name ?? null,
       email: databaseUser.email ?? null,
       image: databaseUser.image ?? null,
-      role: databaseUser.role,
+      role: databaseUser.role ?? 'USER',
+      isOAuth: !!account,
     });
   },
+  /**
+   * Updates the session object with the latest user data from the JWT.
+   * @param session - The session object.
+   * @param token - The JWT token.
+   * @returns The updated session object.
+   */
   async session({ session, token }) {
     if (!session.user) {
       return session;

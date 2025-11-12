@@ -4,8 +4,8 @@ import Credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 
-import { routes } from '@/lib/navigation';
 import { db } from '@/lib/prisma';
+import { routes } from '@/lib/routes';
 
 import { getTwoFactorConfirmationByUserId } from '@/features/auth/data';
 import { getUserByEmail, verifyUserCredentials } from '@/features/auth/data';
@@ -42,7 +42,10 @@ export const authConfig = {
             if (confirmation) {
               // User has completed 2FA, allow sign-in without password verification
               // Note: TwoFactorConfirmation will be deleted in the signIn callback
-              return user;
+              return {
+                ...user,
+                isOAuth: false,
+              };
             }
           }
           // If no confirmation found, fall through to normal password verification

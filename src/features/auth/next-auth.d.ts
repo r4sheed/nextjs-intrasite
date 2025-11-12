@@ -3,7 +3,8 @@ import type { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
   interface User {
-    role?: UserRole;
+    role: UserRole;
+    isOAuth: boolean;
   }
   /**
    * Returned by `useSession`, `auth`, contains information about the active session.
@@ -11,13 +12,15 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
-      role?: UserRole;
+      role: UserRole;
+      isOAuth: boolean;
     } & DefaultSession['user'];
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role?: UserRole;
+    role: UserRole;
+    isOAuth: boolean;
   }
 }
