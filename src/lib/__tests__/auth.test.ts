@@ -33,6 +33,7 @@ describe('auth utilities', () => {
         name: 'Test User',
         role: UserRole.USER,
         isOAuth: false,
+        twoFactorEnabled: false,
       };
 
       const mockSession: Session = {
@@ -64,6 +65,7 @@ describe('auth utilities', () => {
           email: 'test@example.com',
           role: UserRole.USER,
           isOAuth: false,
+          twoFactorEnabled: false,
         },
         expires: '2025-12-31',
       };
@@ -87,7 +89,12 @@ describe('auth utilities', () => {
   describe('hasRole', () => {
     it('should return true when user has matching role', async () => {
       const mockSession: Session = {
-        user: { id: '123', role: UserRole.ADMIN, isOAuth: false },
+        user: {
+          id: '123',
+          role: UserRole.ADMIN,
+          isOAuth: false,
+          twoFactorEnabled: false,
+        },
         expires: '2025-12-31',
       };
 
@@ -100,7 +107,12 @@ describe('auth utilities', () => {
 
     it('should return false when user has different role', async () => {
       const mockSession: Session = {
-        user: { id: '123', role: UserRole.USER, isOAuth: false },
+        user: {
+          id: '123',
+          role: UserRole.USER,
+          isOAuth: false,
+          twoFactorEnabled: false,
+        },
         expires: '2025-12-31',
       };
 
@@ -127,6 +139,7 @@ describe('auth utilities', () => {
         email: 'test@example.com',
         role: UserRole.USER,
         isOAuth: false,
+        twoFactorEnabled: false,
       };
       const mockSession: Session = {
         user: mockUser,
