@@ -252,7 +252,7 @@ const ProfileSection = () => {
                     </FieldDescription>
                     <Input
                       {...field}
-                      id={field.name ?? 'email'}
+                      id={field.name}
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
