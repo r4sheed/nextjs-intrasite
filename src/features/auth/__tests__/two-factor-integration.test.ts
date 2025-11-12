@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 
 import { db } from '@/lib/prisma';
@@ -74,11 +75,12 @@ describe('2FA Integration Tests', () => {
         name: 'Test User',
         emailVerified: new Date(),
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
         twoFactorEnabled: true,
         password: 'hashed-password',
+        isOAuth: false,
       };
 
       // Mock database calls
@@ -156,7 +158,7 @@ describe('2FA Integration Tests', () => {
         twoFactorEnabled: true,
         name: 'Test User',
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -203,7 +205,7 @@ describe('2FA Integration Tests', () => {
         twoFactorEnabled: true,
         name: 'Test User',
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -253,7 +255,7 @@ describe('2FA Integration Tests', () => {
         twoFactorEnabled: true,
         name: 'Test User',
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -295,7 +297,7 @@ describe('2FA Integration Tests', () => {
         twoFactorEnabled: true,
         name: 'Test User',
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -350,7 +352,7 @@ describe('2FA Integration Tests', () => {
         twoFactorEnabled: true,
         name: 'Test User',
         image: null,
-        role: 'USER' as const,
+        role: UserRole.USER,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
