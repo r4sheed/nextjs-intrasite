@@ -970,3 +970,146 @@ export class RateLimiter {
 - **Status:** Completed
 
 ---
+
+### 📏 FileSize Component
+
+**Priority:** Medium  
+**Status:** Not Started
+
+Implement a `FileSize` component that formats byte values into human-readable file sizes (e.g., "1.2 MB", "512 KB", "2.5 GB").
+
+**Description:** A React component that converts byte values to human-readable file size strings using binary (1024-based) or decimal (1000-based) units.
+
+**Features:**
+
+- **Binary vs Decimal units:** Support both 1024-based (KiB, MiB, GiB) and 1000-based (KB, MB, GB) calculations
+- **Automatic unit selection:** Choose appropriate unit based on size (B, KB, MB, GB, TB)
+- **Precision control:** Configurable decimal places (0-2 digits)
+- **Locale support:** Use `Intl.NumberFormat` for number formatting in different locales
+- **Compact mode:** Optional abbreviated units (e.g., "1.2M" instead of "1.2 MB")
+
+**Props:**
+
+```typescript
+interface FileSizeProps {
+  value: number; // Bytes as number
+  unit?: 'binary' | 'decimal'; // default: 'binary' (1024-based)
+  precision?: number; // decimal places (0-2), default: 1
+  compact?: boolean; // abbreviated units, default: false
+  locale?: string; // BCP 47 language tag, default: browser locale
+}
+```
+
+**Examples:**
+
+```tsx
+// Basic usage (binary, 1 decimal place)
+<FileSize value={1024} />
+// Output: "1.0 KB"
+
+<FileSize value={1048576} />
+// Output: "1.0 MB"
+
+<FileSize value={2147483648} />
+// Output: "2.0 GB"
+
+// Decimal units (1000-based)
+<FileSize value={1000} unit="decimal" />
+// Output: "1.0 KB"
+
+<FileSize value={1500000} unit="decimal" />
+// Output: "1.5 MB"
+
+// Different precision
+<FileSize value={1536} precision={0} />
+// Output: "2 KB"
+
+<FileSize value={1536} precision={2} />
+// Output: "1.50 KB"
+
+// Compact mode
+<FileSize value={1048576} compact={true} />
+// Output: "1.0M"
+
+// Different locale
+<FileSize value={1234567} locale="de-DE" />
+// Output: "1,2 MB" (German formatting)
+```
+
+**Implementation Details:**
+
+- Create component at `src/components/ui/file-size.tsx`
+- Implement binary/decimal unit calculation logic
+- Use `Intl.NumberFormat` for locale-aware number formatting
+- Handle edge cases: negative values, NaN, Infinity, very large/small numbers
+- Support dynamic locale changes
+- Render as `<span>` with formatted text content
+- Add TypeScript types for all props
+
+**Unit Conversion Logic:**
+
+```typescript
+// Binary (1024-based)
+const UNITS_BINARY = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+const SIZES_BINARY = [1, 1024, 1024 ** 2, 1024 ** 3, 1024 ** 4, 1024 ** 5];
+
+// Decimal (1000-based)
+const UNITS_DECIMAL = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+const SIZES_DECIMAL = [1, 1000, 1000 ** 2, 1000 ** 3, 1000 ** 4, 1000 ** 5];
+
+// Compact abbreviations
+const UNITS_COMPACT = ['B', 'K', 'M', 'G', 'T', 'P'];
+```
+
+**Testing:**
+
+- Test binary vs decimal calculations
+- Test unit selection (B, KB, MB, GB, TB)
+- Test precision control (0, 1, 2 decimal places)
+- Test compact mode abbreviations
+- Test different locales (en-US, de-DE, hu-HU)
+- Test edge cases (0, negative, NaN, Infinity)
+- Test very large/small numbers
+
+**Benefits:**
+
+- ✅ Consistent file size display across the application
+- ✅ Human-readable format for better UX
+- ✅ Locale support for international users
+- ✅ Flexible precision and unit options
+- ✅ Type-safe implementation
+
+**Affected Files:**
+
+- `src/components/ui/file-size.tsx` (new component)
+- `src/components/ui/index.ts` (export)
+- `src/components/__tests__/file-size.test.tsx` (new test)
+
+**Usage Examples:**
+
+```tsx
+// File upload progress
+<FileUpload
+  onProgress={bytes => (
+    <div>
+      Uploading: <FileSize value={bytes} /> / <FileSize value={totalBytes} />
+    </div>
+  )}
+/>;
+
+// File list
+{
+  files.map(file => (
+    <div key={file.id}>
+      {file.name} - <FileSize value={file.size} />
+    </div>
+  ));
+}
+
+// Storage quota
+<div>
+  Used: <FileSize value={usedBytes} /> / <FileSize value={totalBytes} />
+</div>;
+```
+
+---
