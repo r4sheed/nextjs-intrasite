@@ -22,7 +22,6 @@ import type { LoginUserData } from '@/features/auth/services/login-user';
 export const loginUser = async (
   values: LoginInput
 ): Promise<Response<LoginUserData>> => {
-  // Validate the input fields using the defined schema
   const validation = loginSchema.safeParse(values);
 
   if (!validation.success) {

@@ -25,8 +25,8 @@ import type { UpdatePasswordData } from '@/features/auth/services/update-passwor
 export const updatePassword = async (
   values: NewPasswordInput
 ): Promise<Response<UpdatePasswordData>> => {
-  // Validate the input fields against the defined schema
   const validation = newPasswordSchema.safeParse(values);
+
   if (!validation.success) {
     // Return early with specific field validation errors
     return response.failure(validationFailed(validation.error));

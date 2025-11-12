@@ -25,7 +25,9 @@ export const updateUserSettings = async (
   values: UserSettingsFormData
 ): Promise<Response<UpdateUserSettingsData>> => {
   const validation = UserSettingsSchema.safeParse(values);
+
   if (!validation.success) {
+    console.log(validation.error);
     return response.failure(validationFailed(validation.error));
   }
 

@@ -22,7 +22,6 @@ import type { RegisterUserData } from '@/features/auth/services/register-user';
 export const registerUser = async (
   values: RegisterInput
 ): Promise<Response<RegisterUserData>> => {
-  // Validate the input fields using the defined schema
   const validation = registerSchema.safeParse(values);
 
   if (!validation.success) {

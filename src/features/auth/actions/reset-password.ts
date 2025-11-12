@@ -22,8 +22,8 @@ import type { ResetPasswordData } from '@/features/auth/services/reset-password'
 export const resetPassword = async (
   values: ResetInput
 ): Promise<Response<ResetPasswordData>> => {
-  // Validate the input fields (email format)
   const validation = resetSchema.safeParse(values);
+
   if (!validation.success) {
     // Return early with specific field validation errors
     return response.failure(validationFailed(validation.error));
