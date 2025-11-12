@@ -82,6 +82,7 @@ export const AUTH_ERRORS = {
   signupFailed: 'auth.errors.signup-failed',
   verificationFailed: 'auth.errors.verification-failed',
   securitySettingsUpdateFailed: 'auth.errors.security-settings-update-failed',
+  profileUpdateFailed: 'auth.errors.profile-update-failed',
 
   // User errors
   userNotFound: 'auth.errors.user-not-found',
@@ -107,6 +108,7 @@ export const AUTH_SUCCESS = {
   login: 'auth.success.login',
   passwordResetSent: 'auth.success.password-reset-sent',
   passwordUpdated: 'auth.success.password-updated',
+  profileUpdated: 'auth.success.profile-updated',
   signup: 'auth.success.signup',
   twoFactorSent: 'auth.success.two-factor-sent',
   twoFactorVerified: 'auth.success.two-factor-verified',
@@ -122,6 +124,7 @@ export const AUTH_INFO = {
   noChangesToSave: 'auth.info.no-changes-to-save',
   updatingSecuritySettings: 'auth.info.updating-security-settings',
   updatingPassword: 'auth.info.updating-password',
+  updatingProfile: 'auth.info.updating-profile',
   twoFactorEnabled: 'auth.info.two-factor-enabled',
   twoFactorDisabled: 'auth.info.two-factor-disabled',
 } as const;
@@ -140,6 +143,7 @@ export const AUTH_LABELS = {
   newPasswordTitle: 'auth.labels.new-password-title',
   changePasswordTitle: 'auth.labels.change-password-title',
   twoFactorTitle: 'auth.labels.two-factor-title',
+  profileTitle: 'auth.labels.profile-title',
 
   // Page subtitles
   signupSubtitle: 'auth.labels.signup-subtitle',
@@ -156,6 +160,7 @@ export const AUTH_LABELS = {
   newPasswordSubtitle: 'auth.labels.new-password-subtitle',
   changePasswordDescription: 'auth.labels.change-password-description',
   twoFactorDescription: 'auth.labels.two-factor-description',
+  profileDescription: 'auth.labels.profile-description',
 
   // Form field labels
   emailLabel: 'auth.labels.email',
@@ -182,6 +187,10 @@ export const AUTH_LABELS = {
   emailResetDescription: 'auth.labels.email-reset-description',
   currentPasswordDescription: 'auth.labels.current-password-description',
   twoFactorToggleDescription: 'auth.labels.two-factor-toggle-description',
+  avatarDescription: 'auth.labels.avatar-description',
+  emailManagedDescription: 'auth.labels.email-managed-description',
+  emailNotificationsDescription: 'auth.labels.email-notifications-description',
+  contactSupportDescription: 'auth.labels.contact-support-description',
 
   // Buttons
   loginButton: 'auth.labels.login-button',
@@ -195,6 +204,8 @@ export const AUTH_LABELS = {
   resendCodeButton: 'auth.labels.resend-code-button',
   updatePasswordButton: 'auth.labels.update-password-button',
   saveChangesButton: 'auth.labels.save-changes-button',
+  changeAvatarButton: 'auth.labels.change-avatar-button',
+  randomButton: 'auth.labels.random-button',
 
   // Links and CTAs
   forgotPasswordLink: 'auth.labels.forgot-password',

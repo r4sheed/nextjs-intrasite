@@ -34,7 +34,12 @@ import { Separator } from '@/components/ui/separator';
 import { updateUserSettings } from '@/features/auth/actions/user-settings';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { useSession } from '@/features/auth/hooks/use-session';
-import { AUTH_LABELS } from '@/features/auth/lib/strings';
+import {
+  AUTH_ERRORS,
+  AUTH_INFO,
+  AUTH_LABELS,
+  AUTH_SUCCESS,
+} from '@/features/auth/lib/strings';
 import {
   UserSettingsSchema,
   type UserSettingsInput,
@@ -54,14 +59,14 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
   >({
     mutationFn: data => execute(updateUserSettings, data),
     onMutate: () => {
-      toastIdRef.current = toast.loading('Updating profile...');
+      toastIdRef.current = toast.loading(AUTH_INFO.updatingProfile);
     },
     onSuccess: async () => {
       await session.update();
-      toast.success('Profile updated successfully');
+      toast.success(AUTH_SUCCESS.profileUpdated);
     },
     onError: () => {
-      toast.error('Failed to update profile. Please try again.');
+      toast.error(AUTH_ERRORS.profileUpdateFailed);
     },
     onSettled: () => {
       if (toastIdRef.current !== undefined) {
@@ -149,7 +154,7 @@ const ProfileSection = () => {
   const onSubmit = (values: UserSettingsInput) => {
     if (isPending) return;
     if (!form.formState.isDirty) {
-      toast.info('No changes to save');
+      toast.info(AUTH_INFO.noChangesToSave);
       return;
     }
     mutation.mutate(buildFormPayload(values, isOAuth));
@@ -167,10 +172,8 @@ const ProfileSection = () => {
     <div className="flex flex-col gap-8">
       <Card>
         <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Update your personal details and public profile
-          </CardDescription>
+          <CardTitle>{AUTH_LABELS.profileTitle}</CardTitle>
+          <CardDescription>{AUTH_LABELS.profileDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
@@ -181,10 +184,11 @@ const ProfileSection = () => {
             <div className="space-y-2">
               {/* TODO: A modal where the user can select or remove avatar */}
               <Button variant="outline" size="sm" disabled={isPending}>
-                Change Avatar
+                {AUTH_LABELS.changeAvatarButton}
               </Button>
               <p className="text-muted-foreground text-xs">
-                JPG, PNG or GIF. Max size 2MB.
+                {/* TODO: set maxSize to translation */}
+                {AUTH_LABELS.avatarDescription}
               </p>
             </div>
           </div>
@@ -224,12 +228,9 @@ const ProfileSection = () => {
                         onClick={onGenerateName}
                         disabled={isPending}
                       >
-                        Random
+                        {AUTH_LABELS.randomButton}
                       </Button>
                     </div>
-                    <FieldDescription>
-                      Your public display name
-                    </FieldDescription>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
@@ -247,7 +248,7 @@ const ProfileSection = () => {
                     <FieldTitle>{AUTH_LABELS.emailLabel}</FieldTitle>
                     <FieldDescription>
                       {isOAuth
-                        ? 'Email is managed by your OAuth provider.'
+                        ? AUTH_LABELS.emailManagedDescription
                         : AUTH_LABELS.emailDescription}
                     </FieldDescription>
                     <Input
@@ -263,13 +264,12 @@ const ProfileSection = () => {
                     />
                     {!isOAuth && (
                       <FieldDescription>
-                        We'll use this email for account notifications
+                        {AUTH_LABELS.emailNotificationsDescription}
                       </FieldDescription>
                     )}
                     {isOAuth && (
                       <FieldDescription>
-                        Contact support if you need to change this email
-                        address.
+                        {AUTH_LABELS.contactSupportDescription}
                       </FieldDescription>
                     )}
                     {fieldState.invalid && (
@@ -287,7 +287,7 @@ const ProfileSection = () => {
             <FormError message={errorMessage} />
           </div>
           <Button type="submit" form="form-rhf-profile" disabled={isPending}>
-            Save Changes
+            {AUTH_LABELS.saveChangesButton}
           </Button>
         </CardFooter>
       </Card>
