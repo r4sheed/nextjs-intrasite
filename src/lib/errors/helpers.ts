@@ -83,18 +83,3 @@ export const databaseError = (details?: unknown) =>
     httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     details,
   });
-
-/**
- * Convenience object containing all core error factory functions
- * @example
- * import { errors } from '@/lib/errors';
- * throw errors.internalServerError();
- */
-export const errors = {
-  internalServerError,
-  validationFailed,
-  unauthorized,
-  forbidden,
-  notFound,
-  databaseError,
-};
