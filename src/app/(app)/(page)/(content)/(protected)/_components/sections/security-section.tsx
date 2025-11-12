@@ -36,17 +36,19 @@ import { updateUserSettings } from '@/features/auth/actions/user-settings';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { useSession } from '@/features/auth/hooks/use-session';
-import { AUTH_INFO } from '@/features/auth/lib/strings';
+import {
+  AUTH_ERRORS,
+  AUTH_INFO,
+  AUTH_LABELS,
+  AUTH_SUCCESS,
+} from '@/features/auth/lib/strings';
 import {
   PasswordSchema,
   TwoFactorSchema,
 } from '@/features/auth/schemas/user-settings';
 
-const passwordSchema = PasswordSchema;
-const twoFactorSchema = TwoFactorSchema;
-
-type PasswordFormValues = z.infer<typeof passwordSchema>;
-type TwoFactorFormValues = z.infer<typeof twoFactorSchema>;
+type PasswordFormValues = z.infer<typeof PasswordSchema>;
+type TwoFactorFormValues = z.infer<typeof TwoFactorSchema>;
 
 const SecuritySection = () => {
   const session = useSession();
@@ -55,7 +57,7 @@ const SecuritySection = () => {
   const twoFactorToastIdRef = useRef<string | number | undefined>(undefined);
 
   const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
+    resolver: zodResolver(PasswordSchema),
     mode: 'onTouched',
     defaultValues: {
       currentPassword: '',
@@ -65,7 +67,7 @@ const SecuritySection = () => {
   });
 
   const twoFactorForm = useForm<TwoFactorFormValues>({
-    resolver: zodResolver(twoFactorSchema),
+    resolver: zodResolver(TwoFactorSchema),
     defaultValues: {
       twoFactorEnabled: user?.twoFactorEnabled ?? false,
     },
@@ -93,7 +95,7 @@ const SecuritySection = () => {
     },
     onSuccess: async () => {
       await session.update();
-      toast.success('Password updated successfully');
+      toast.success(AUTH_SUCCESS.passwordUpdated);
       passwordForm.reset({
         currentPassword: '',
         newPassword: '',
@@ -132,7 +134,7 @@ const SecuritySection = () => {
       );
     },
     onError: () => {
-      toast.error('Failed to update security settings. Please try again.');
+      toast.error(AUTH_ERRORS.securitySettingsUpdateFailed);
     },
     onSettled: () => {
       if (twoFactorToastIdRef.current !== undefined) {
@@ -184,9 +186,9 @@ const SecuritySection = () => {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Change Password</CardTitle>
+          <CardTitle>{AUTH_LABELS.changePasswordTitle}</CardTitle>
           <CardDescription>
-            Update your password to keep your account secure
+            {AUTH_LABELS.changePasswordDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -201,9 +203,9 @@ const SecuritySection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>Current Password</FieldTitle>
+                    <FieldTitle>{AUTH_LABELS.currentPasswordLabel}</FieldTitle>
                     <FieldDescription>
-                      Enter your current password
+                      {AUTH_LABELS.currentPasswordDescription}
                     </FieldDescription>
                     <PasswordInput
                       {...field}
@@ -228,7 +230,7 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>New Password</FieldTitle>
+                      <FieldTitle>{AUTH_LABELS.newPasswordLabel}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
@@ -251,7 +253,9 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>Confirm Password</FieldTitle>
+                      <FieldTitle>
+                        {AUTH_LABELS.confirmPasswordLabel}
+                      </FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
@@ -280,17 +284,15 @@ const SecuritySection = () => {
             form="form-password-settings"
             disabled={passwordMutation.isPending}
           >
-            Update Password
+            {AUTH_LABELS.updatePasswordButton}
           </Button>
         </CardFooter>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Two-Factor Authentication</CardTitle>
-          <CardDescription>
-            Add an extra layer of security to your account
-          </CardDescription>
+          <CardTitle>{AUTH_LABELS.twoFactorTitle}</CardTitle>
+          <CardDescription>{AUTH_LABELS.twoFactorDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form
@@ -300,9 +302,9 @@ const SecuritySection = () => {
           >
             <Field orientation="horizontal">
               <FieldContent>
-                <FieldTitle>Enable 2FA</FieldTitle>
+                <FieldTitle>{AUTH_LABELS.twoFactorToggleLabel}</FieldTitle>
                 <FieldDescription>
-                  Use an authenticator app for additional security
+                  {AUTH_LABELS.twoFactorToggleDescription}
                 </FieldDescription>
               </FieldContent>
               <Controller
@@ -329,7 +331,7 @@ const SecuritySection = () => {
             form="form-two-factor-settings"
             disabled={twoFactorMutation.isPending}
           >
-            Save Changes
+            {AUTH_LABELS.saveChangesButton}
           </Button>
         </CardFooter>
       </Card>
