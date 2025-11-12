@@ -1,58 +1,34 @@
 'use server';
 
-import { z } from 'zod';
-
-import { db } from '@/lib/prisma';
+import { unauthorized } from '@/lib/errors';
 import { type Response, response } from '@/lib/response';
 
-import { getUserById } from '@/features/auth/data/user';
 import { currentUser } from '@/features/auth/lib/auth-utils';
-import { invalidCredentials } from '@/features/auth/lib/errors';
-import { UserSettingsInput } from '@/features/auth/schemas';
-
-export type UpdateUserSettingsData = {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null;
-  role: string;
-};
+import { invalidFields } from '@/features/auth/lib/errors';
+import {
+  UserSettingsSchema,
+  type UserSettingsInput,
+} from '@/features/auth/schemas';
+import {
+  updateUserSettingsService,
+  type UpdateUserSettingsData,
+} from '@/features/auth/services/update-user-settings';
 
 export const updateUserSettings = async (
   values: UserSettingsInput
 ): Promise<Response<UpdateUserSettingsData>> => {
+  const result = UserSettingsSchema.safeParse(values);
+  if (!result.success) {
+    return response.failure(invalidFields(result.error.issues));
+  }
+
   const user = await currentUser();
-
   if (!user) {
-    return response.failure(invalidCredentials()); // TODO: Add not authenticated error
+    return response.failure(unauthorized());
   }
 
-  const dbUser = await getUserById(user.id);
-  if (!dbUser) {
-    return response.failure(invalidCredentials());
-  }
-
-  const updatedUser = await db.user.update({
-    where: { id: dbUser.id },
-    data: {
-      ...values,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-      role: true,
-    },
-  });
-
-  return response.success({
-    data: {
-      id: updatedUser.id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      image: updatedUser.image,
-      role: updatedUser.role,
-    },
+  return updateUserSettingsService({
+    userId: user.id,
+    values: result.data,
   });
 };
