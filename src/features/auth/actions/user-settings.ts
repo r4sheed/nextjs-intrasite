@@ -8,7 +8,7 @@ import { type Response, response } from '@/lib/response';
 import { currentUser } from '@/features/auth/lib/auth-utils';
 import {
   UserSettingsSchema,
-  type UserSettingsInput,
+  type UserSettingsFormData,
 } from '@/features/auth/schemas';
 import {
   updateUserSettingsService,
@@ -24,7 +24,7 @@ import {
  * updates. Returns a unified Response object describing success or failure.
  */
 export const updateUserSettings = async (
-  values: UserSettingsInput
+  values: UserSettingsFormData
 ): Promise<Response<UpdateUserSettingsData>> => {
   const validation = UserSettingsSchema.safeParse(values);
   if (!validation.success) {

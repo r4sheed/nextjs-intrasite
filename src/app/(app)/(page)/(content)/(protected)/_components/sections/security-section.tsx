@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
 
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
@@ -45,10 +44,12 @@ import {
 import {
   PasswordSchema,
   TwoFactorSchema,
-} from '@/features/auth/schemas/user-settings';
+  type PasswordFormData,
+  type TwoFactorFormData,
+} from '@/features/auth/schemas';
 
-type PasswordFormValues = z.infer<typeof PasswordSchema>;
-type TwoFactorFormValues = z.infer<typeof TwoFactorSchema>;
+type PasswordFormValues = PasswordFormData;
+type TwoFactorFormValues = TwoFactorFormData;
 
 const SecuritySection = () => {
   const session = useSession();
@@ -82,7 +83,7 @@ const SecuritySection = () => {
   const passwordMutation = useMutation<
     ActionSuccess<typeof updateUserSettings>,
     ErrorResponse,
-    PasswordFormValues
+    PasswordFormData
   >({
     mutationFn: data =>
       execute(updateUserSettings, {
@@ -116,7 +117,7 @@ const SecuritySection = () => {
   const twoFactorMutation = useMutation<
     ActionSuccess<typeof updateUserSettings>,
     ErrorResponse,
-    TwoFactorFormValues
+    TwoFactorFormData
   >({
     mutationFn: data => execute(updateUserSettings, data),
     onMutate: () => {
@@ -144,10 +145,10 @@ const SecuritySection = () => {
     },
   });
 
-  const handlePasswordSubmit = (values: PasswordFormValues) => {
+  const handlePasswordSubmit = (values: PasswordFormData) => {
     if (passwordMutation.isPending) return;
 
-    const trimmedValues: PasswordFormValues = {
+    const trimmedValues: PasswordFormData = {
       currentPassword: values.currentPassword.trim(),
       newPassword: values.newPassword.trim(),
       confirmPassword: values.confirmPassword.trim(),
@@ -167,7 +168,7 @@ const SecuritySection = () => {
     passwordMutation.mutate(trimmedValues);
   };
 
-  const handleTwoFactorSubmit = (values: TwoFactorFormValues) => {
+  const handleTwoFactorSubmit = (values: TwoFactorFormData) => {
     if (twoFactorMutation.isPending) return;
 
     const currentValue = user?.twoFactorEnabled ?? false;

@@ -42,7 +42,7 @@ import {
 } from '@/features/auth/lib/strings';
 import {
   UserSettingsSchema,
-  type UserSettingsInput,
+  type UserSettingsFormData,
 } from '@/features/auth/schemas';
 
 /**
@@ -55,7 +55,7 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
   return useMutation<
     ActionSuccess<typeof updateUserSettings>,
     ErrorResponse,
-    UserSettingsInput
+    UserSettingsFormData
   >({
     mutationFn: data => execute(updateUserSettings, data),
     onMutate: () => {
@@ -83,7 +83,7 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
 const getDefaultFormValues = (
   user: ReturnType<typeof useCurrentUser>,
   isOAuth: boolean
-): UserSettingsInput => {
+): UserSettingsFormData => {
   return {
     name: user?.name ?? '',
     ...(isOAuth ? {} : { email: user?.email ?? '' }),
@@ -96,7 +96,7 @@ const getDefaultFormValues = (
 const getUpdatedFormValues = (
   data: NonNullable<ActionSuccess<typeof updateUserSettings>['data']>,
   isOAuth: boolean
-): UserSettingsInput => {
+): UserSettingsFormData => {
   return {
     name: data.name ?? '',
     ...(isOAuth ? {} : { email: data.email }),
@@ -108,9 +108,9 @@ const getUpdatedFormValues = (
  * Only includes fields that have values
  */
 const buildFormPayload = (
-  values: UserSettingsInput,
+  values: UserSettingsFormData,
   isOAuth: boolean
-): UserSettingsInput => {
+): UserSettingsFormData => {
   return {
     ...(values.name !== undefined ? { name: values.name } : {}),
     ...(isOAuth ? {} : { email: values.email }),
@@ -130,7 +130,7 @@ const ProfileSection = () => {
   const isOAuth = user?.isOAuth ?? false;
 
   const mutation = useProfileMutation(session);
-  const form = useForm<UserSettingsInput>({
+  const form = useForm<UserSettingsFormData>({
     resolver: zodResolver(UserSettingsSchema),
     mode: 'onTouched',
     defaultValues: getDefaultFormValues(user, isOAuth),
@@ -151,7 +151,7 @@ const ProfileSection = () => {
     }
   }, [mutation.data, form, isOAuth]);
 
-  const onSubmit = (values: UserSettingsInput) => {
+  const onSubmit = (values: UserSettingsFormData) => {
     if (isPending) return;
     if (!form.formState.isDirty) {
       toast.info(AUTH_INFO.noChangesToSave);
