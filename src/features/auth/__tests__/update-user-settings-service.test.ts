@@ -202,7 +202,7 @@ describe('updateUserSettingsService', () => {
 
     expect(result.code).toBe(AUTH_CODES.passwordUnchanged);
     expect(updateSpy).not.toHaveBeenCalled();
-    expect(verifyPassword).not.toHaveBeenCalled();
+    expect(verifyPassword).toHaveBeenCalledWith('same-password');
   });
 
   it('updates two-factor state when toggled', async () => {
