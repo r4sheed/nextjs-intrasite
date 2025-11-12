@@ -21,4 +21,3 @@ export {
   TwoFactorSchema,
   type TwoFactorFormData,
 } from './user-settings';
-export * from './user-fields';

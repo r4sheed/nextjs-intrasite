@@ -14,7 +14,6 @@ import {
  */
 const currentPasswordField = z
   .string({ message: AUTH_ERRORS.passwordRequired })
-  .min(1, { message: AUTH_ERRORS.passwordRequired })
   .optional();
 
 /**
@@ -23,7 +22,6 @@ const currentPasswordField = z
  */
 const confirmPasswordField = z
   .string({ message: AUTH_ERRORS.confirmPasswordRequired })
-  .min(1, { message: AUTH_ERRORS.confirmPasswordRequired })
   .optional();
 
 /**
@@ -176,13 +174,9 @@ export type SecuritySettingsFormData = z.infer<typeof SecuritySettingsSchema>;
  */
 export const PasswordSchema = z
   .object({
-    currentPassword: z
-      .string({ message: AUTH_ERRORS.passwordRequired })
-      .min(1, { message: AUTH_ERRORS.passwordRequired }),
+    currentPassword: z.string({ message: AUTH_ERRORS.passwordRequired }),
     newPassword: passwordField,
-    confirmPassword: z
-      .string({ message: AUTH_ERRORS.confirmPasswordRequired })
-      .min(1, { message: AUTH_ERRORS.confirmPasswordRequired }),
+    confirmPassword: z.string({ message: AUTH_ERRORS.confirmPasswordRequired }),
   })
   .superRefine((data, ctx) => {
     // Validate password confirmation matches

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { PASSWORD_MIN_LENGTH } from '@/features/auth/lib/config';
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 import { emailFieldForRegistration } from './user-fields';
@@ -12,7 +13,7 @@ export const loginSchema = z.object({
   email: emailFieldForRegistration,
   password: z
     .string({ message: AUTH_ERRORS.invalidFields })
-    .min(1, { message: AUTH_ERRORS.passwordRequired }),
+    .min(PASSWORD_MIN_LENGTH, { message: AUTH_ERRORS.passwordTooShort }),
   code: z.optional(z.string()),
   twoFactorBypass: z.optional(z.coerce.boolean()),
 });

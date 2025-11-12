@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { TWO_FACTOR_CODE_LENGTH } from '@/features/auth/lib/config';
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 /**
@@ -10,7 +11,9 @@ export const verifyTwoFactorSchema = z.object({
   sessionId: z.cuid({ message: AUTH_ERRORS.invalidFields }),
   code: z
     .string({ message: AUTH_ERRORS.twoFactorCodeInvalid })
-    .length(6, { message: AUTH_ERRORS.twoFactorCodeInvalid })
+    .length(TWO_FACTOR_CODE_LENGTH, {
+      message: AUTH_ERRORS.twoFactorCodeInvalid,
+    })
     .regex(/^\d+$/, { message: AUTH_ERRORS.twoFactorCodeInvalid }),
 });
 

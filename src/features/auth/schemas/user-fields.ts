@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  NAME_MIN_LENGTH,
+  NAME_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from '@/features/auth/lib/config';
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 /**
@@ -13,8 +18,7 @@ import { AUTH_ERRORS } from '@/features/auth/lib/strings';
  */
 export const nameFieldForRegistration = z
   .string({ message: AUTH_ERRORS.invalidFields })
-  .min(1, { message: AUTH_ERRORS.nameRequired })
-  .min(2, { message: AUTH_ERRORS.nameTooShort });
+  .min(NAME_MIN_LENGTH, { message: AUTH_ERRORS.nameTooShort });
 
 /**
  * Name field for user settings updates
@@ -22,8 +26,7 @@ export const nameFieldForRegistration = z
  */
 export const nameFieldForSettings = z
   .string({ message: AUTH_ERRORS.invalidFields })
-  .min(1, { message: AUTH_ERRORS.invalidFields })
-  .max(50, { message: AUTH_ERRORS.invalidFields })
+  .max(NAME_MAX_LENGTH, { message: AUTH_ERRORS.invalidFields })
   .optional();
 
 /**
@@ -48,5 +51,4 @@ export const emailFieldForSettings = z
  */
 export const passwordField = z
   .string({ message: AUTH_ERRORS.invalidFields })
-  .min(1, { message: AUTH_ERRORS.passwordRequired })
-  .min(8, { message: AUTH_ERRORS.passwordTooShort });
+  .min(PASSWORD_MIN_LENGTH, { message: AUTH_ERRORS.passwordTooShort });

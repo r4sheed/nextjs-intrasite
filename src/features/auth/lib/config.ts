@@ -84,3 +84,39 @@ export const REDIRECT_TIMEOUT_MS = 2500;
  * validation passes without requiring the user's actual password.
  */
 export const TWO_FACTOR_BYPASS_PLACEHOLDER = '__two-factor-bypass__';
+
+/**
+ * Minimum length for user names
+ *
+ * @remarks
+ * Used in registration and profile update forms.
+ * Prevents extremely short names that could be problematic.
+ */
+export const NAME_MIN_LENGTH = 2;
+
+/**
+ * Maximum length for user names
+ *
+ * @remarks
+ * Used in profile update forms to prevent excessively long names.
+ * Provides reasonable upper bound for database storage.
+ */
+export const NAME_MAX_LENGTH = 50;
+
+/**
+ * Minimum length for passwords
+ *
+ * @remarks
+ * Enforces basic password security requirements.
+ * Should be combined with complexity requirements for production use.
+ */
+export const PASSWORD_MIN_LENGTH = 8;
+
+/**
+ * Length of two-factor authentication codes
+ *
+ * @remarks
+ * Standard 6-digit codes are widely used and provide good security balance.
+ * Must match the format expected by the 2FA service.
+ */
+export const TWO_FACTOR_CODE_LENGTH = 6;
