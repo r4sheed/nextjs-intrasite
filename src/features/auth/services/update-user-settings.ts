@@ -4,8 +4,15 @@ import { type Response, response } from '@/lib/response';
 
 import { getAccountByUserId } from '@/features/auth/data/account';
 import { getUserById } from '@/features/auth/data/user';
-import { invalidCredentials } from '@/features/auth/lib/errors';
+import {
+  invalidCredentials,
+  passwordIncorrect,
+  passwordUnchanged,
+} from '@/features/auth/lib/errors';
+import { User } from '@/features/auth/models';
 import { type UserSettingsInput } from '@/features/auth/schemas';
+
+import type { Prisma } from '@prisma/client';
 
 export type UpdateUserSettingsData = {
   id: string;
@@ -14,6 +21,7 @@ export type UpdateUserSettingsData = {
   image: string | null;
   role: string;
   isOAuth: boolean;
+  twoFactorEnabled: boolean;
 };
 
 export type UpdateUserSettingsParams = {
@@ -25,9 +33,12 @@ type UpdateContext = {
   isOAuth: boolean;
 };
 
-type FieldKey = keyof typeof FIELD_POLICIES;
-
-type UpdatePayload = Partial<Record<FieldKey, string>>;
+type ExtendedUserSettingsInput = UserSettingsInput & {
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+  twoFactorEnabled?: boolean;
+};
 
 type UserProjection = {
   id: string;
@@ -35,19 +46,8 @@ type UserProjection = {
   email: string;
   image: string | null;
   role: string;
+  twoFactorEnabled: boolean;
 };
-
-const FIELD_POLICIES = {
-  name: {
-    allow: () => true,
-  },
-  email: {
-    allow: (context: UpdateContext) => !context.isOAuth,
-  },
-} as const satisfies Record<
-  string,
-  { allow: (context: UpdateContext) => boolean }
->;
 
 const USER_SELECT = {
   id: true,
@@ -55,26 +55,8 @@ const USER_SELECT = {
   email: true,
   image: true,
   role: true,
+  twoFactorEnabled: true,
 } as const;
-
-const isManagedField = (key: string): key is FieldKey => key in FIELD_POLICIES;
-
-const buildUpdatePayload = (
-  values: UserSettingsInput,
-  context: UpdateContext
-): UpdatePayload => {
-  return Object.entries(values).reduce<UpdatePayload>((acc, [key, value]) => {
-    if (!isManagedField(key) || value === undefined) {
-      return acc;
-    }
-
-    if (FIELD_POLICIES[key].allow(context)) {
-      acc[key] = value;
-    }
-
-    return acc;
-  }, {});
-};
 
 const projectUser = (user: {
   id: string;
@@ -82,12 +64,14 @@ const projectUser = (user: {
   email: string;
   image: string | null;
   role: string;
+  twoFactorEnabled: boolean;
 }): UserProjection => ({
   id: user.id,
   name: user.name,
   email: user.email,
   image: user.image,
   role: user.role,
+  twoFactorEnabled: user.twoFactorEnabled,
 });
 
 const buildSuccessData = (
@@ -100,6 +84,7 @@ const buildSuccessData = (
   image: user.image,
   role: user.role,
   isOAuth: context.isOAuth,
+  twoFactorEnabled: user.twoFactorEnabled,
 });
 
 export const updateUserSettingsService = async ({
@@ -116,7 +101,46 @@ export const updateUserSettingsService = async ({
     const account = await getAccountByUserId(dbUser.id);
     const context: UpdateContext = { isOAuth: Boolean(account) };
 
-    const updatePayload = buildUpdatePayload(values, context);
+    const extendedValues = values as ExtendedUserSettingsInput;
+
+    const updatePayload: Prisma.UserUpdateInput = {};
+
+    if (values.name !== undefined && values.name !== dbUser.name) {
+      updatePayload.name = values.name;
+    }
+
+    if (
+      !context.isOAuth &&
+      values.email !== undefined &&
+      values.email !== dbUser.email
+    ) {
+      updatePayload.email = values.email;
+    }
+
+    if (
+      typeof extendedValues.twoFactorEnabled === 'boolean' &&
+      extendedValues.twoFactorEnabled !== dbUser.twoFactorEnabled
+    ) {
+      updatePayload.twoFactorEnabled = extendedValues.twoFactorEnabled;
+    }
+
+    const newPassword =
+      typeof extendedValues.newPassword === 'string'
+        ? extendedValues.newPassword.trim()
+        : '';
+
+    if (newPassword.length > 0) {
+      const currentPassword = extendedValues.currentPassword ?? '';
+      const userModel = new User(dbUser);
+      const isCurrentPasswordValid =
+        await userModel.verifyPassword(currentPassword);
+
+      if (!isCurrentPasswordValid) {
+        return response.failure(passwordIncorrect());
+      }
+
+      updatePayload.password = await User.hashPassword(newPassword);
+    }
 
     if (Object.keys(updatePayload).length === 0) {
       return response.success({
@@ -129,7 +153,14 @@ export const updateUserSettingsService = async ({
       data: updatePayload,
       select: USER_SELECT,
     });
+    const currentPassword =
+      typeof extendedValues.currentPassword === 'string'
+        ? extendedValues.currentPassword.trim()
+        : '';
 
+    if (currentPassword.length > 0 && currentPassword === newPassword) {
+      return response.failure(passwordUnchanged());
+    }
     return response.success({
       data: buildSuccessData(updatedUser, context),
     });
