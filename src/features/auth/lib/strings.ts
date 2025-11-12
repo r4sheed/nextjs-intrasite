@@ -26,11 +26,13 @@ export const AUTH_CODES = {
   verificationRequired: 'verification-required',
   twoFactorRequired: 'two-factor-required',
   twoFactorSessionMissing: 'two-factor-session-missing',
+  twoFactorProvisioningRequired: 'two-factor-provisioning-required',
   callbackError: 'callback-error',
   registrationFailed: 'registration-failed',
   loginFailed: 'login-failed',
   passwordResetFailed: 'password-reset-failed',
-  passwordUpdateFailed: 'password-update-failed',
+  passwordIncorrect: 'password-incorrect',
+  passwordUnchanged: 'password-unchanged',
   signupFailed: 'signup-failed',
   verificationFailed: 'verification-failed',
 
@@ -70,13 +72,16 @@ export const AUTH_ERRORS = {
   invalidCredentials: 'auth.errors.invalid-credentials',
   verificationRequired: 'auth.errors.verification-required',
   twoFactorRequired: 'auth.errors.two-factor-required',
+  twoFactorProvisioningRequired: 'auth.errors.two-factor-provisioning-required',
   callbackError: 'auth.errors.callback-error',
   registrationFailed: 'auth.errors.registration-failed',
   loginFailed: 'auth.errors.login-failed',
   passwordResetFailed: 'auth.errors.password-reset-failed',
-  passwordUpdateFailed: 'auth.errors.password-update-failed',
+  passwordIncorrect: 'auth.errors.password-incorrect',
+  passwordUnchanged: 'auth.errors.password-unchanged',
   signupFailed: 'auth.errors.signup-failed',
   verificationFailed: 'auth.errors.verification-failed',
+  securitySettingsUpdateFailed: 'auth.errors.security-settings-update-failed',
 
   // User errors
   userNotFound: 'auth.errors.user-not-found',
@@ -109,6 +114,19 @@ export const AUTH_SUCCESS = {
 } as const;
 
 /**
+ * Auth info messages (i18n keys)
+ * General informational messages, status updates, and transient UI feedback
+ */
+export const AUTH_INFO = {
+  savingPreferences: 'auth.info.saving-preferences',
+  noChangesToSave: 'auth.info.no-changes-to-save',
+  updatingSecuritySettings: 'auth.info.updating-security-settings',
+  updatingPassword: 'auth.info.updating-password',
+  twoFactorEnabled: 'auth.info.two-factor-enabled',
+  twoFactorDisabled: 'auth.info.two-factor-disabled',
+} as const;
+
+/**
  * Auth UI labels (i18n keys)
  * Static UI text: titles, labels, placeholders, buttons, links
  */
@@ -120,6 +138,8 @@ export const AUTH_LABELS = {
   verify2faTitle: 'auth.labels.verify-2fa-title',
   forgotPasswordTitle: 'auth.labels.forgot-password-title',
   newPasswordTitle: 'auth.labels.new-password-title',
+  changePasswordTitle: 'auth.labels.change-password-title',
+  twoFactorTitle: 'auth.labels.two-factor-title',
 
   // Page subtitles
   signupSubtitle: 'auth.labels.signup-subtitle',
@@ -134,13 +154,17 @@ export const AUTH_LABELS = {
     'auth.labels.verification-processing-subtitle',
   forgotPasswordSubtitle: 'auth.labels.forgot-password-subtitle',
   newPasswordSubtitle: 'auth.labels.new-password-subtitle',
+  changePasswordDescription: 'auth.labels.change-password-description',
+  twoFactorDescription: 'auth.labels.two-factor-description',
 
   // Form field labels
   emailLabel: 'auth.labels.email',
   nameLabel: 'auth.labels.name',
   passwordLabel: 'auth.labels.password',
+  currentPasswordLabel: 'auth.labels.current-password',
   confirmPasswordLabel: 'auth.labels.confirm-password',
   newPasswordLabel: 'auth.labels.new-password',
+  twoFactorToggleLabel: 'auth.labels.two-factor-toggle',
   otpLabel: 'auth.labels.otp-code',
 
   // Form placeholders
@@ -156,6 +180,8 @@ export const AUTH_LABELS = {
   emailDescription: 'auth.labels.email-description',
   passwordDescription: 'auth.labels.password-description',
   emailResetDescription: 'auth.labels.email-reset-description',
+  currentPasswordDescription: 'auth.labels.current-password-description',
+  twoFactorToggleDescription: 'auth.labels.two-factor-toggle-description',
 
   // Buttons
   loginButton: 'auth.labels.login-button',
@@ -167,6 +193,8 @@ export const AUTH_LABELS = {
   verifyButton: 'auth.labels.verify-button',
   resendCode: 'auth.labels.resend-code',
   resendCodeButton: 'auth.labels.resend-code-button',
+  updatePasswordButton: 'auth.labels.update-password-button',
+  saveChangesButton: 'auth.labels.save-changes-button',
 
   // Links and CTAs
   forgotPasswordLink: 'auth.labels.forgot-password',
