@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 export const verifyTwoFactorSchema = z.object({
-  sessionId: z.string().cuid({ message: AUTH_ERRORS.invalidFields }),
+  sessionId: z.cuid({ message: AUTH_ERRORS.invalidFields }),
   code: z
     .string({ message: AUTH_ERRORS.twoFactorCodeInvalid })
     .length(6, { message: AUTH_ERRORS.twoFactorCodeInvalid })
