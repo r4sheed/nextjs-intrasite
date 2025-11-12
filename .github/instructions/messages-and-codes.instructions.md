@@ -144,6 +144,18 @@ export const AUTH_SUCCESS = {
 } as const;
 
 /**
+ * Auth info messages (i18n keys)
+ * TypeScript properties: camelCase
+ * String values: kebab-case with dots
+ * General informational messages, status updates, and transient UI feedback
+ */
+export const AUTH_INFO = {
+  savingPreferences: 'auth.info.saving-preferences',
+  noChangesToSave: 'auth.info.no-changes-to-save',
+  updatingSecuritySettings: 'auth.info.updating-security-settings',
+} as const;
+
+/**
  * Auth UI labels (i18n keys)
  * TypeScript properties: camelCase
  * String values: kebab-case with dots
@@ -244,6 +256,83 @@ const CONFIG = {
 - **String Value:** `kebab-case` with dots (e.g., `'auth.labels.login-title'`)
 - **Purpose:** Static UI text (titles, labels, buttons, placeholders)
 - **Usage:** `<h1>{t(AUTH_LABELS.loginTitle)}</h1>` → i18n: `'auth.labels.login-title'`
+
+### Info Messages (`*_INFO`)
+
+- **TypeScript Property:** `camelCase` (e.g., `savingPreferences`)
+- **String Value:** `kebab-case` with dots (e.g., `'auth.info.saving-preferences'`)
+- **Purpose:** General informational messages, status updates, and transient UI feedback (e.g., "Saving...", "No changes to save")
+- **Usage:** `{t(AUTH_INFO.savingPreferences)}` → i18n: `'auth.info.saving-preferences'`
+
+---
+
+## Organization by Usage/Functionality (Not by Component)
+
+**IMPORTANT:** When adding new UI labels and messages, organize them by **usage** or **functionality** rather than by specific components. This ensures reusability and logical grouping.
+
+### ✅ CORRECT: Group by Usage
+
+```typescript
+export const AUTH_LABELS = {
+  // Page titles (used across different pages)
+  signupTitle: 'auth.labels.signup-title',
+  loginTitle: 'auth.labels.login-title',
+  changePasswordTitle: 'auth.labels.change-password-title',
+  twoFactorTitle: 'auth.labels.two-factor-title',
+
+  // Page descriptions (used for explanatory text)
+  signupSubtitle: 'auth.labels.signup-subtitle',
+  changePasswordDescription: 'auth.labels.change-password-description',
+  twoFactorDescription: 'auth.labels.two-factor-description',
+
+  // Form field labels (used in various forms)
+  emailLabel: 'auth.labels.email',
+  passwordLabel: 'auth.labels.password',
+  currentPasswordLabel: 'auth.labels.current-password',
+
+  // Field descriptions (used for help text)
+  currentPasswordDescription: 'auth.labels.current-password-description',
+  twoFactorToggleDescription: 'auth.labels.two-factor-toggle-description',
+
+  // Buttons (used across different forms/actions)
+  loginButton: 'auth.labels.login-button',
+  signupButton: 'auth.labels.signup-button',
+  updatePasswordButton: 'auth.labels.update-password-button',
+  saveChangesButton: 'auth.labels.save-changes-button',
+} as const;
+```
+
+### ❌ WRONG: Group by Component
+
+```typescript
+// DON'T DO THIS - component-specific grouping reduces reusability
+export const AUTH_LABELS = {
+  // Security section specific (what if we need these elsewhere?)
+  securitySection: {
+    changePasswordTitle: 'auth.labels.change-password-title',
+    updatePasswordButton: 'auth.labels.update-password-button',
+  },
+  twoFactorSection: {
+    twoFactorTitle: 'auth.labels.two-factor-title',
+    saveChangesButton: 'auth.labels.save-changes-button',
+  },
+} as const;
+```
+
+**Why wrong:**
+
+- **Reduced reusability** - Labels can't be used in other components
+- **Maintenance burden** - Changes require updating multiple places
+- **Poor discoverability** - Hard to find related labels
+- **Inconsistent structure** - Different components have different patterns
+
+**Benefits of usage-based organization:**
+
+- **Reusability** - Same labels can be used across multiple components
+- **Consistency** - Similar UI elements use the same labels
+- **Maintainability** - Changes affect all usages automatically
+- **Discoverability** - Related labels are grouped together
+- **Future-proof** - Easy to add new components without duplicating labels
 
 ---
 
@@ -363,6 +452,7 @@ When creating a new feature:
 - [ ] Define `{FEATURE}_CODES` with camelCase properties and kebab-case values
 - [ ] Define `{FEATURE}_ERRORS` with camelCase properties and kebab-case i18n keys (feature.errors.\*)
 - [ ] Define `{FEATURE}_SUCCESS` with camelCase properties and kebab-case i18n keys (feature.success.\*)
+- [ ] Define `{FEATURE}_INFO` with camelCase properties and kebab-case i18n keys (feature.info.\*)
 - [ ] Define `{FEATURE}_LABELS` with camelCase properties and kebab-case i18n keys (feature.labels.\*)
 - [ ] Create `src/locales/en/{feature}.json` with kebab-case keys
 - [ ] Create `src/locales/hu/{feature}.json` with kebab-case keys (Hungarian translations)
@@ -471,7 +561,7 @@ export const POSTS_LABELS = {
 - **i18n keys:** camelCase properties, kebab-case values with dots (`invalidCredentials: 'auth.errors.invalid-credentials'`)
 - **i18n files:** Domain-separated in `/locales/{lang}/{domain}.json`
 - **Organization:** Single `strings.ts` per feature
-- **Categories:** CODES, ERRORS, SUCCESS, LABELS
+- **Categories:** CODES, ERRORS, SUCCESS, INFO, LABELS
 - **Type-safe:** Export types for all constant objects
 - **Maintainable:** Clear separation of concerns
 - **Nesting:** Maximum 2-3 levels in i18n files

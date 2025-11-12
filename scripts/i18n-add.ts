@@ -298,7 +298,7 @@ async function interactiveMode(): Promise<{
 
   const domain = await rl.question('Domain (e.g., auth, bookmarks): ');
   const category = await rl.question(
-    'Category (errors/success/labels/warnings): '
+    'Category (errors/success/labels/warnings/info): '
   );
   const key = await rl.question('Key (kebab-case, e.g., new-error): ');
   const enText = await rl.question('English text: ');
