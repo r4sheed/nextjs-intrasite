@@ -57,14 +57,16 @@ const SecuritySection = () => {
   const passwordToastIdRef = useRef<string | number | undefined>(undefined);
   const twoFactorToastIdRef = useRef<string | number | undefined>(undefined);
 
+  const passwordFormDefaultValues: PasswordFormValues = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  };
+
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(PasswordSchema),
     mode: 'onTouched',
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
+    defaultValues: passwordFormDefaultValues,
   });
 
   const twoFactorForm = useForm<TwoFactorFormValues>({
@@ -97,11 +99,7 @@ const SecuritySection = () => {
     onSuccess: async () => {
       await session.update();
       toast.success(AUTH_SUCCESS.passwordUpdated);
-      passwordForm.reset({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
+      passwordForm.reset(passwordFormDefaultValues);
     },
     onError: () => {
       // Form level error surface handles messaging; toast is redundant.
@@ -148,24 +146,12 @@ const SecuritySection = () => {
   const handlePasswordSubmit = (values: PasswordFormData) => {
     if (passwordMutation.isPending) return;
 
-    const trimmedValues: PasswordFormData = {
-      currentPassword: values.currentPassword.trim(),
-      newPassword: values.newPassword.trim(),
-      confirmPassword: values.confirmPassword.trim(),
-    };
-
-    const defaults = passwordForm.formState.defaultValues ?? {};
-    const hasChanges =
-      trimmedValues.currentPassword !== (defaults.currentPassword ?? '') ||
-      trimmedValues.newPassword !== (defaults.newPassword ?? '') ||
-      trimmedValues.confirmPassword !== (defaults.confirmPassword ?? '');
-
-    if (!hasChanges) {
-      toast.info(AUTH_INFO.noChangesToSave);
+    if (values.newPassword === values.currentPassword) {
+      toast.info(AUTH_ERRORS.passwordUnchanged);
       return;
     }
 
-    passwordMutation.mutate(trimmedValues);
+    passwordMutation.mutate(values);
   };
 
   const handleTwoFactorSubmit = (values: TwoFactorFormData) => {
@@ -213,6 +199,7 @@ const SecuritySection = () => {
                       id={field.name}
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
+                      placeholder={AUTH_LABELS.passwordPlaceholder}
                       disabled={passwordMutation.isPending}
                       required
                     />
@@ -237,6 +224,7 @@ const SecuritySection = () => {
                         id={field.name}
                         autoComplete="new-password"
                         aria-invalid={fieldState.invalid}
+                        placeholder={AUTH_LABELS.newPasswordPlaceholder}
                         disabled={passwordMutation.isPending}
                         required
                       />
@@ -262,6 +250,7 @@ const SecuritySection = () => {
                         id={field.name}
                         autoComplete="new-password"
                         aria-invalid={fieldState.invalid}
+                        placeholder={AUTH_LABELS.confirmPasswordPlaceholder}
                         disabled={passwordMutation.isPending}
                         required
                       />
