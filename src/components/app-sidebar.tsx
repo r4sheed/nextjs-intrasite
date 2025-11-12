@@ -57,10 +57,18 @@ const TOP_LEVEL_SECTIONS = [
 const EXCLUDED_SECTIONS = ['installation', 'dark-mode'];
 const EXCLUDED_PAGES = ['/docs', '/docs/changelog'];
 
+interface DocsItem {
+  $id?: string;
+  name: string;
+  type: string;
+  url?: string;
+  children?: DocsItem[];
+}
+
 export function AppSidebar({
   items,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { items: { children: object } }) {
+}: React.ComponentProps<typeof Sidebar> & { items: { children: DocsItem[] } }) {
   const pathname = usePathname();
   const user = useCurrentUser();
 
@@ -112,7 +120,7 @@ export function AppSidebar({
                 {item.name}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                {item.type === 'folder' && (
+                {item.type === 'folder' && item.children && (
                   <SidebarMenu className="gap-0.5">
                     {item.children.map(item => {
                       if (item.type === 'page' && item.url?.includes('/mcp')) {
@@ -121,6 +129,7 @@ export function AppSidebar({
 
                       return (
                         item.type === 'page' &&
+                        item.url &&
                         !EXCLUDED_PAGES.includes(item.url) && (
                           <SidebarMenuItem key={item.url}>
                             <SidebarMenuButton
@@ -131,7 +140,7 @@ export function AppSidebar({
                               <Link href={item.url}>
                                 <span className="absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
                                 {item.name}
-                                {PAGES_NEW.includes(item.url) && (
+                                {item.url && PAGES_NEW.includes(item.url) && (
                                   <span
                                     className="flex size-2 rounded-full bg-blue-500"
                                     title="New"
