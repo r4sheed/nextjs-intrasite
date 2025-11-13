@@ -1052,4 +1052,81 @@ const UNITS_COMPACT = ['B', 'K', 'M', 'G', 'T', 'P'];
 
 ---
 
+### 👤 UserAvatar Component
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**  
+Create a reusable UserAvatar component that generates fallback avatars from user names, similar to the logic used in NavUser. This component should be flexible and reusable across the application for consistent user representation.
+
+**Features:**
+
+- **Name-based fallback:** Generate 2-character initials from user name (extracted from NavUser logic)
+- **Image support:** Display user profile image when available
+- **Size variants:** Different sizes (sm, md, lg, xl) with consistent scaling
+- **Fallback styles:** Consistent fallback design with user initials
+- **Accessibility:** Proper alt text and screen reader support
+- **Type safety:** Full TypeScript support with proper user interface
+
+**Implementation Details:**
+
+- Create component at `src/components/user-avatar.tsx`
+- Extract and reuse `generateInitials` logic from `src/components/nav-user.tsx`
+- Use existing `Avatar` component from `src/components/ui/avatar.tsx` as base
+- Support both image and text fallbacks
+- Add configurable size prop with predefined variants
+- Include proper TypeScript interfaces for user data
+
+**Example Usage:**
+
+```tsx
+// With full user data
+<UserAvatar
+  user={{ name: "John Doe", email: "john@example.com", image: "/avatar.jpg" }}
+  size="md"
+/>
+
+// With just name (fallback initials)
+<UserAvatar
+  user={{ name: "Jane Smith" }}
+  size="lg"
+/>
+
+// Minimal usage
+<UserAvatar
+  user={{ name: "Bob" }}
+/>
+
+// Custom size
+<UserAvatar
+  user={{ name: "Alice Cooper" }}
+  size="xl"
+/>
+```
+
+**Benefits:**
+
+- ✅ Reusable avatar component across the application
+- ✅ Consistent user representation and fallback logic
+- ✅ Better code organization (extract logic from NavUser)
+- ✅ Improved maintainability and type safety
+- ✅ Enhanced accessibility with proper alt text
+
+**Affected Files:**
+
+- `src/components/user-avatar.tsx` (new component)
+- `src/components/nav-user.tsx` (refactor to use new component)
+- `src/components/ui/index.ts` (export new component)
+
+**Testing:**
+
+- Test with different user data combinations (name, email, image)
+- Test various sizes and fallback scenarios
+- Test accessibility features (alt text, screen readers)
+- Test initials generation for different name formats
+- Ensure backward compatibility with existing NavUser usage
+
+---
+
 ---
