@@ -174,21 +174,83 @@ async function validateConstants(
 }
 
 /**
+ * Validate merged locale files
+ */
+async function validateMergedFiles(): Promise<void> {
+  const enMergedPath = join(process.cwd(), 'src/locales/en.json');
+  const huMergedPath = join(process.cwd(), 'src/locales/hu.json');
+
+  if (!existsSync(enMergedPath)) {
+    errors.push({
+      type: 'missing',
+      file: enMergedPath,
+      key: '',
+      details: 'Missing merged English locale file: en.json',
+    });
+    return;
+  }
+
+  if (!existsSync(huMergedPath)) {
+    errors.push({
+      type: 'missing',
+      file: huMergedPath,
+      key: '',
+      details: 'Missing merged Hungarian locale file: hu.json',
+    });
+    return;
+  }
+
+  // Compare merged EN vs HU
+  await compareLocaleFiles(enMergedPath, huMergedPath, 'merged');
+}
+
+/**
  * Main function
  */
 async function main() {
   console.log('\n🔍 Validating i18n files...\n');
 
-  const localesDir = join(process.cwd(), 'src/locales/en');
-  const files = await readdir(localesDir);
+  // Dynamically detect domains from features + common domains
+  const featuresDir = join(process.cwd(), 'src/features');
+  const featureDirs = existsSync(featuresDir) ? await readdir(featuresDir) : [];
+  const commonDomains = ['common', 'errors', 'navigation'];
+  const domains = [
+    ...featureDirs.filter(dir => !dir.startsWith('.')),
+    ...commonDomains,
+  ];
+
+  console.log(`📂 Detected domains: ${domains.join(', ')}\n`);
+
+  // Check if all domains have JSON files
+  for (const domain of domains) {
+    const enPath = join(process.cwd(), `src/locales/en/${domain}.json`);
+    const huPath = join(process.cwd(), `src/locales/hu/${domain}.json`);
+
+    if (!existsSync(enPath)) {
+      errors.push({
+        type: 'missing',
+        file: enPath,
+        key: '',
+        details: `Missing English locale file for domain: ${domain}`,
+      });
+    }
+
+    if (!existsSync(huPath)) {
+      errors.push({
+        type: 'missing',
+        file: huPath,
+        key: '',
+        details: `Missing Hungarian locale file for domain: ${domain}`,
+      });
+    }
+  }
 
   // Validate each domain
-  for (const file of files) {
-    if (!file.endsWith('.json')) continue;
+  for (const domain of domains) {
+    const enPath = join(process.cwd(), `src/locales/en/${domain}.json`);
+    const huPath = join(process.cwd(), `src/locales/hu/${domain}.json`);
 
-    const domain = file.replace('.json', '');
-    const enPath = join(process.cwd(), `src/locales/en/${file}`);
-    const huPath = join(process.cwd(), `src/locales/hu/${file}`);
+    if (!existsSync(enPath) || !existsSync(huPath)) continue;
 
     console.log(`📦 Checking ${domain}...`);
 
@@ -197,9 +259,7 @@ async function main() {
 
     // Validate constants (if exists)
     let constantsPath: string | undefined;
-    if (domain === 'auth') {
-      constantsPath = join(process.cwd(), 'src/features/auth/lib/strings.ts');
-    } else if (domain === 'errors') {
+    if (domain === 'errors') {
       constantsPath = join(process.cwd(), 'src/lib/errors/messages.ts');
     } else {
       // Try feature directory
@@ -213,6 +273,10 @@ async function main() {
       await validateConstants(constantsPath, enPath, domain);
     }
   }
+
+  // Validate merged files
+  console.log('\n📦 Checking merged files...');
+  await validateMergedFiles();
 
   // Print results
   console.log('\n' + '='.repeat(60));
