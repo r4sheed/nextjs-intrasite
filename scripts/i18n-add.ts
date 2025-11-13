@@ -16,30 +16,49 @@
  *   npm run i18n:add bookmarks.success.created "Bookmark created" "Könyvjelző létrehozva"
  */
 import { existsSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import readline from 'node:readline/promises';
 
 // Domain → file mapping
-const DOMAIN_CONFIG: Record<
-  string,
-  { locales: string; constants?: string; feature: boolean }
-> = {
-  auth: {
-    locales: 'src/locales/{lang}/auth.json',
-    constants: 'src/features/auth/lib/strings.ts',
-    feature: true,
-  },
-  common: {
+const getDomainConfig = () => {
+  const config: Record<
+    string,
+    { locales: string; constants?: string; feature: boolean }
+  > = {};
+
+  // Common domains
+  config.common = {
     locales: 'src/locales/{lang}/common.json',
     constants: undefined,
     feature: false,
-  },
-  errors: {
+  };
+  config.errors = {
     locales: 'src/locales/{lang}/errors.json',
     constants: 'src/lib/errors/messages.ts',
     feature: false,
-  },
+  };
+  config.navigation = {
+    locales: 'src/locales/{lang}/navigation.json',
+    constants: undefined,
+    feature: false,
+  };
+
+  // Feature domains - dynamically detect from src/features/
+  const featuresDir = join(process.cwd(), 'src/features');
+  if (existsSync(featuresDir)) {
+    const features = readdirSync(featuresDir).filter(dir => !dir.startsWith('.'));
+    for (const feature of features) {
+      config[feature] = {
+        locales: `src/locales/{lang}/${feature}.json`,
+        constants: `src/features/${feature}/lib/strings.ts`,
+        feature: true,
+      };
+    }
+  }
+
+  return config;
 };
 
 // Category → constant object mapping
@@ -358,6 +377,7 @@ async function main() {
     console.log(`   Key: ${parsedKey.key}\n`);
 
     // Check if domain exists
+    const DOMAIN_CONFIG = getDomainConfig();
     let domainConfig = DOMAIN_CONFIG[parsedKey.domain];
     if (!domainConfig) {
       console.log(

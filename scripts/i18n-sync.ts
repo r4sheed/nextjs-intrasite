@@ -385,9 +385,7 @@ async function main() {
 
     // Sync constants (if exists)
     let constantsPath: string | undefined;
-    if (domain === 'auth') {
-      constantsPath = join(process.cwd(), 'src/features/auth/lib/strings.ts');
-    } else if (domain === 'errors') {
+    if (domain === 'errors') {
       constantsPath = join(process.cwd(), 'src/lib/errors/messages.ts');
     } else {
       // Try feature directory
