@@ -270,11 +270,266 @@ describe('updateUserSettingsService', () => {
     expect(result.data?.twoFactorEnabled).toBe(true);
   });
 
-  it('updates profile fields when name or email change', async () => {
+  it('clears protected fields for OAuth accounts', async () => {
+    const dbUser = createUser({ id: 'oauth-user' });
+    const account = { id: 'account-id', userId: dbUser.id };
+
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(dbUser),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(account),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {
+        async verifyPassword() {
+          return true;
+        }
+
+        static hashPassword = vi.fn();
+      },
+    }));
+
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: dbUser.id,
+      name: 'New Name',
+      email: dbUser.email,
+      image: dbUser.image,
+      role: dbUser.role,
+      twoFactorEnabled: dbUser.twoFactorEnabled,
+    });
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: dbUser.id,
+      values: {
+        name: 'New Name',
+        email: 'new@example.com',
+        currentPassword: 'password',
+        newPassword: 'newpass',
+      },
+    });
+
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    const updateArgs = updateSpy.mock.calls[0]?.[0] as
+      | {
+          where: { id: string };
+          data: Record<string, unknown>;
+        }
+      | undefined;
+
+    if (!updateArgs) {
+      throw new Error('updateUserSettingsService did not call db.user.update');
+    }
+
+    expect(updateArgs.data).toMatchObject({
+      name: 'New Name',
+    });
+    expect(updateArgs.data).not.toHaveProperty('email');
+    expect(updateArgs.data).not.toHaveProperty('password');
+
+    expect(result.status).toBe('success');
+    if (result.status !== 'success') {
+      throw new Error('Expected success response');
+    }
+    expect(result.data?.isOAuthAccount).toBe(true);
+  });
+
+  it('returns current data when no changes are made', async () => {
+    const dbUser = createUser({ id: 'no-changes' });
+
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(dbUser),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {
+        async verifyPassword() {
+          return true;
+        }
+
+        static hashPassword = vi.fn();
+      },
+    }));
+
+    const updateSpy = vi.fn();
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: dbUser.id,
+      values: {},
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(result.status).toBe('success');
+    if (result.status !== 'success') {
+      throw new Error('Expected success response');
+    }
+    expect(result.data?.name).toBe(dbUser.name);
+  });
+
+  it('returns error when user is not found', async () => {
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {},
+    }));
+
+    const updateSpy = vi.fn();
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: 'nonexistent',
+      values: { name: 'New Name' },
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(result.status).toBe('error');
+    if (result.status !== 'error') {
+      throw new Error('Expected error response');
+    }
+    expect(result.code).toBe(AUTH_CODES.invalidCredentials);
+  });
+
+  it('handles password with leading/trailing spaces', async () => {
+    const dbUser = createUser({ id: 'user-spaces' });
+    const verifyPassword = vi.fn().mockResolvedValue(true);
+    const hashPassword = vi
+      .fn()
+      .mockImplementation(async (password: string) => `hashed:${password}`);
+
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(dbUser),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {
+        async verifyPassword(password: string) {
+          return verifyPassword(password);
+        }
+
+        static hashPassword = hashPassword;
+      },
+    }));
+
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      image: dbUser.image,
+      role: dbUser.role,
+      twoFactorEnabled: dbUser.twoFactorEnabled,
+    });
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: dbUser.id,
+      values: {
+        currentPassword: 'current-password',
+        newPassword: '  new-password  ',
+        confirmPassword: '  new-password  ',
+      },
+    });
+
+    expect(hashPassword).toHaveBeenCalledWith('new-password');
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+
+    expect(result.status).toBe('success');
+  });
+
+  it('ignores empty password after trimming', async () => {
+    const dbUser = createUser({ id: 'user-empty-password' });
+
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(dbUser),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {
+        async verifyPassword() {
+          return true;
+        }
+
+        static hashPassword = vi.fn();
+      },
+    }));
+
+    const updateSpy = vi.fn();
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: dbUser.id,
+      values: {
+        currentPassword: 'current',
+        newPassword: '   ',
+        confirmPassword: '   ',
+      },
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(result.status).toBe('success');
+  });
+
+  it('updates only name when only name is provided', async () => {
     const dbUser = createUser({
-      id: 'user-profile',
+      id: 'user-name-only',
       name: 'Old Name',
-      email: 'old@example.com',
+      email: 'email@example.com',
     });
 
     vi.doMock('@/features/auth/data/user', () => ({
@@ -298,7 +553,7 @@ describe('updateUserSettingsService', () => {
     const updateSpy = vi.fn().mockResolvedValue({
       id: dbUser.id,
       name: 'New Name',
-      email: 'new@example.com',
+      email: dbUser.email,
       image: dbUser.image,
       role: dbUser.role,
       twoFactorEnabled: dbUser.twoFactorEnabled,
@@ -314,37 +569,74 @@ describe('updateUserSettingsService', () => {
 
     const result = await updateUserSettingsService({
       userId: dbUser.id,
-      values: {
-        name: 'New Name',
-        email: 'new@example.com',
-      },
+      values: { name: 'New Name' },
     });
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    const updateArgs = updateSpy.mock.calls[0]?.[0] as
-      | {
-          where: { id: string };
-          data: Record<string, unknown>;
-        }
-      | undefined;
+    const updateArgs = updateSpy.mock.calls[0]?.[0];
 
-    if (!updateArgs) {
-      throw new Error('updateUserSettingsService did not call db.user.update');
-    }
+    expect(updateArgs.data).toMatchObject({ name: 'New Name' });
+    expect(updateArgs.data).not.toHaveProperty('email');
+    expect(updateArgs.data).not.toHaveProperty('twoFactorEnabled');
 
-    expect(updateArgs.where).toEqual({ id: dbUser.id });
-    expect(updateArgs.data).toMatchObject({
-      name: 'New Name',
-      email: 'new@example.com',
+    expect(result.status).toBe('success');
+  });
+
+  it('disables two-factor when toggled to false', async () => {
+    const dbUser = createUser({
+      id: 'user-2fa-disable',
+      twoFactorEnabled: true,
     });
+
+    vi.doMock('@/features/auth/data/user', () => ({
+      getUserById: vi.fn().mockResolvedValue(dbUser),
+    }));
+
+    vi.doMock('@/features/auth/data/account', () => ({
+      getAccountByUserId: vi.fn().mockResolvedValue(null),
+    }));
+
+    vi.doMock('@/features/auth/models', () => ({
+      User: class {
+        async verifyPassword() {
+          return true;
+        }
+
+        static hashPassword = vi.fn();
+      },
+    }));
+
+    const updateSpy = vi.fn().mockResolvedValue({
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      image: dbUser.image,
+      role: dbUser.role,
+      twoFactorEnabled: false,
+    });
+
+    vi.doMock('@/lib/prisma', () => ({
+      db: { user: { update: updateSpy } },
+    }));
+
+    const { updateUserSettingsService } = await import(
+      '@/features/auth/services/update-user-settings'
+    );
+
+    const result = await updateUserSettingsService({
+      userId: dbUser.id,
+      values: { twoFactorEnabled: false },
+    });
+
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    const updateArgs = updateSpy.mock.calls[0]?.[0];
+
+    expect(updateArgs.data).toMatchObject({ twoFactorEnabled: false });
 
     expect(result.status).toBe('success');
     if (result.status !== 'success') {
       throw new Error('Expected success response');
     }
-    expect(result.data).toMatchObject({
-      name: 'New Name',
-      email: 'new@example.com',
-    });
+    expect(result.data?.twoFactorEnabled).toBe(false);
   });
 });
