@@ -3,27 +3,27 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getVerificationTokenByEmail,
   getVerificationTokenByToken,
-} from '@/features/auth/data/verification-token';
+} from '@/features/auth/data/email-verification-token';
 import { TOKEN_LIFETIME_MS } from '@/features/auth/lib/config';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
   db: {
-    verificationToken: {
+    emailVerificationToken: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
     },
   },
 }));
 
-describe('Verification Token Data Layer', () => {
-  let mockFindUnique: any;
-  let mockFindFirst: any;
+describe('Email Verification Token Data Layer', () => {
+  let mockFindUnique: ReturnType<typeof vi.fn>;
+  let mockFindFirst: ReturnType<typeof vi.fn>;
 
   beforeAll(async () => {
     const { db } = await import('@/lib/prisma');
-    mockFindUnique = vi.mocked(db.verificationToken.findUnique);
-    mockFindFirst = vi.mocked(db.verificationToken.findFirst);
+    mockFindUnique = vi.mocked(db.emailVerificationToken.findUnique);
+    mockFindFirst = vi.mocked(db.emailVerificationToken.findFirst);
   });
 
   beforeEach(() => {
@@ -259,4 +259,3 @@ describe('Verification Token Data Layer', () => {
     });
   });
 });
-

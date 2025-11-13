@@ -1,10 +1,9 @@
 import { db } from '@/lib/prisma';
 
-import type { VerificationToken } from '@prisma/client';
-
+import type { EmailVerificationToken } from '@prisma/client';
 
 /**
- * Data access layer for VerificationToken entity.
+ * Data access layer for EmailVerificationToken entity.
  *
  * Provides methods to retrieve email verification tokens from the database.
  * Returns null on errors to let the service layer handle error responses.
@@ -23,14 +22,14 @@ type TokenSearch = { token: string } | { email: string };
  */
 const findVerificationToken = async (
   search: TokenSearch
-): Promise<VerificationToken | null> => {
+): Promise<EmailVerificationToken | null> => {
   try {
     if ('token' in search) {
-      return await db.verificationToken.findUnique({
+      return await db.emailVerificationToken.findUnique({
         where: { token: search.token },
       });
     } else {
-      return await db.verificationToken.findFirst({
+      return await db.emailVerificationToken.findFirst({
         where: { email: search.email },
       });
     }
@@ -57,7 +56,7 @@ const findVerificationToken = async (
  */
 export const getVerificationTokenByToken = async (
   token: string
-): Promise<VerificationToken | null> => {
+): Promise<EmailVerificationToken | null> => {
   return await findVerificationToken({ token });
 };
 
@@ -78,6 +77,6 @@ export const getVerificationTokenByToken = async (
  */
 export const getVerificationTokenByEmail = async (
   email: string
-): Promise<VerificationToken | null> => {
+): Promise<EmailVerificationToken | null> => {
   return await findVerificationToken({ email });
 };

@@ -29,7 +29,7 @@ import { rateLimitExceeded } from '@/features/auth/lib/errors';
 export const generateVerificationToken = async (email: string) => {
   const data = await getVerificationTokenByEmail(email);
   if (data) {
-    await db.verificationToken.delete({
+    await db.emailVerificationToken.delete({
       where: {
         id: data.id,
       },
@@ -40,7 +40,7 @@ export const generateVerificationToken = async (email: string) => {
   const currentTime = new Date().getTime();
   const expiresAt = new Date(currentTime + TOKEN_LIFETIME_MS);
 
-  const result = await db.verificationToken.create({
+  const result = await db.emailVerificationToken.create({
     data: {
       email: email,
       token: token,

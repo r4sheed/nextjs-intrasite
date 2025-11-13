@@ -9,7 +9,7 @@ import {
 // Mock dependencies
 vi.mock('@/lib/prisma', () => ({
   db: {
-    verificationToken: {
+    emailVerificationToken: {
       delete: vi.fn(),
       create: vi.fn(),
     },
@@ -20,7 +20,7 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-vi.mock('@/features/auth/data/verification-token', () => ({
+vi.mock('@/features/auth/data/email-verification-token', () => ({
   getVerificationTokenByEmail: vi.fn(),
 }));
 
@@ -33,17 +33,17 @@ vi.mock('uuid', () => ({
 }));
 
 describe('Token Generation Helpers', () => {
-  let mockGetVerificationTokenByEmail: any;
-  let mockGetPasswordResetTokenByEmail: any;
-  let mockVerificationTokenDelete: any;
-  let mockVerificationTokenCreate: any;
-  let mockPasswordResetTokenDelete: any;
-  let mockPasswordResetTokenCreate: any;
-  let mockUuidv4: any;
+  let mockGetVerificationTokenByEmail: ReturnType<typeof vi.fn>;
+  let mockGetPasswordResetTokenByEmail: ReturnType<typeof vi.fn>;
+  let mockVerificationTokenDelete: ReturnType<typeof vi.fn>;
+  let mockVerificationTokenCreate: ReturnType<typeof vi.fn>;
+  let mockPasswordResetTokenDelete: ReturnType<typeof vi.fn>;
+  let mockPasswordResetTokenCreate: ReturnType<typeof vi.fn>;
+  let mockUuidv4: ReturnType<typeof vi.fn>;
 
   beforeAll(async () => {
     const { getVerificationTokenByEmail } = await import(
-      '@/features/auth/data/verification-token'
+      '@/features/auth/data/email-verification-token'
     );
     const { getPasswordResetTokenByEmail } = await import(
       '@/features/auth/data/reset-token'
@@ -53,8 +53,8 @@ describe('Token Generation Helpers', () => {
 
     mockGetVerificationTokenByEmail = vi.mocked(getVerificationTokenByEmail);
     mockGetPasswordResetTokenByEmail = vi.mocked(getPasswordResetTokenByEmail);
-    mockVerificationTokenDelete = vi.mocked(db.verificationToken.delete);
-    mockVerificationTokenCreate = vi.mocked(db.verificationToken.create);
+    mockVerificationTokenDelete = vi.mocked(db.emailVerificationToken.delete);
+    mockVerificationTokenCreate = vi.mocked(db.emailVerificationToken.create);
     mockPasswordResetTokenDelete = vi.mocked(db.passwordResetToken.delete);
     mockPasswordResetTokenCreate = vi.mocked(db.passwordResetToken.create);
     mockUuidv4 = vi.mocked(v4);
@@ -98,7 +98,8 @@ describe('Token Generation Helpers', () => {
       });
 
       // Verify the expiry time is approximately 1 hour from now (within 1 second tolerance)
-      const callArg = mockVerificationTokenCreate.mock.calls[0][0];
+      expect(mockVerificationTokenCreate).toHaveBeenCalledTimes(1);
+      const callArg = mockVerificationTokenCreate.mock.calls[0]![0];
       const expectedExpiry = Date.now() + TOKEN_LIFETIME_MS;
       const actualExpiry = callArg.data.expires.getTime();
       expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);
@@ -241,7 +242,8 @@ describe('Token Generation Helpers', () => {
       });
 
       // Verify the expiry time is approximately 1 hour from now (within 1 second tolerance)
-      const callArg = mockPasswordResetTokenCreate.mock.calls[0][0];
+      expect(mockPasswordResetTokenCreate).toHaveBeenCalledTimes(1);
+      const callArg = mockPasswordResetTokenCreate.mock.calls[0]![0];
       const expectedExpiry = Date.now() + TOKEN_LIFETIME_MS;
       const actualExpiry = callArg.data.expires.getTime();
       expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);

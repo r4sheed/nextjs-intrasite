@@ -1,8 +1,8 @@
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
+import { getVerificationTokenByToken } from '@/features/auth/data/email-verification-token';
 import { getUserByEmail } from '@/features/auth/data/user';
-import { getVerificationTokenByToken } from '@/features/auth/data/verification-token';
 import {
   tokenExpired,
   tokenNotFound,
@@ -51,7 +51,7 @@ export const verifyEmail = async (
         email: existingToken.email,
       },
     }),
-    db.verificationToken.delete({
+    db.emailVerificationToken.delete({
       where: { id: existingToken.id },
     }),
   ]);

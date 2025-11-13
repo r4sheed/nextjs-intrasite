@@ -57,7 +57,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model VerificationToken {
+model EmailVerificationToken {
   id      String   @id @default(cuid())
   email   String
   token   String   @unique

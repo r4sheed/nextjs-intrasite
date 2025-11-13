@@ -31,4 +31,4 @@ export {
 export {
   getVerificationTokenByToken,
   getVerificationTokenByEmail,
-} from './verification-token';
+} from './email-verification-token';
