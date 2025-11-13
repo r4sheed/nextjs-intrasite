@@ -909,6 +909,69 @@ export class RateLimiter {
 
 ---
 
+### 🔄 Zod Validation with Reverse Parameterization
+
+**Priority:** Low  
+**Status:** Not Started
+
+**Description:**
+Currently, Zod validation uses i18n keys with parameters (e.g., `AUTH_ERRORS.passwordTooShort` with `{min}`), processed through feature-specific validation helpers like `authValidationFailed`. Consider implementing reverse parameterization where Zod messages are generic, and parameters are injected at the error handling level for better separation of concerns and easier testing.
+
+**Proposed Solution:**
+Instead of Zod messages containing i18n keys with parameters, use generic error codes in Zod and map them to parameterized i18n messages in the validation helper.
+
+**Current Pattern:**
+
+```typescript
+// Zod schema
+.min(PASSWORD_MIN_LENGTH, { message: AUTH_ERRORS.passwordTooShort })
+
+// Helper processes i18n key with params
+return new AppError({
+  message: { key: AUTH_ERRORS.passwordTooShort, params: { min: PASSWORD_MIN_LENGTH } }
+});
+```
+
+**Proposed Reverse Pattern:**
+
+```typescript
+// Zod schema
+.min(PASSWORD_MIN_LENGTH, { message: 'PASSWORD_TOO_SHORT' })
+
+// Helper maps code to i18n with params
+const errorMappings = {
+  'PASSWORD_TOO_SHORT': { key: AUTH_ERRORS.passwordTooShort, params: { min: PASSWORD_MIN_LENGTH } }
+};
+```
+
+**Benefits:**
+
+- ✅ Clearer separation between validation logic and i18n
+- ✅ Easier to test validation without i18n dependencies
+- ✅ More flexible parameter injection
+- ✅ Consistent error code patterns across features
+
+**Implementation Steps:**
+
+1. Update Zod schemas to use generic error codes instead of i18n keys
+2. Create error mapping utilities in validation helpers
+3. Update all auth validation schemas and helpers
+4. Consider extending to other features if beneficial
+5. Update tests to work with new pattern
+
+**Affected Files:**
+
+- `src/features/auth/schemas/user-fields.ts`
+- `src/features/auth/lib/errors.ts` (authValidationFailed helper)
+- `src/features/auth/schemas/login.ts`
+- Test files for validation logic
+
+**Testing:**
+
+- Verify error messages still display correctly with parameters
+- Test validation logic independently of i18n
+- Ensure backward compatibility with existing error handling
+
 ### 📏 FileSize Component
 
 **Priority:** Medium  
