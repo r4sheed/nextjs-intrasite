@@ -29,17 +29,6 @@ export type UpdateUserSettingsParams = {
   values: UserSettingsFormData;
 };
 
-type UpdateContext = {
-  isOAuthAccount: boolean;
-};
-
-type ExtendedUserSettingsInput = UserSettingsFormData & {
-  currentPassword?: string;
-  newPassword?: string;
-  confirmPassword?: string;
-  twoFactorEnabled?: boolean;
-};
-
 type UserProjection = {
   id: string;
   name: string | null;
@@ -58,6 +47,11 @@ const USER_SELECT = {
   twoFactorEnabled: true,
 } as const;
 
+/**
+ * Projects a user object to a simplified projection
+ * @param user - The full user object from database
+ * @returns Simplified user projection
+ */
 const projectUser = (user: {
   id: string;
   name: string | null;
@@ -74,16 +68,22 @@ const projectUser = (user: {
   twoFactorEnabled: user.twoFactorEnabled,
 });
 
+/**
+ * Builds success data for the update response
+ * @param user - The projected user data
+ * @param isOAuthAccount - Whether the user is an OAuth account
+ * @returns Formatted success data
+ */
 const buildSuccessData = (
   user: UserProjection,
-  context: UpdateContext
+  isOAuthAccount: boolean
 ): UpdateUserSettingsData => ({
   id: user.id,
   name: user.name,
   email: user.email,
   image: user.image,
   role: user.role,
-  isOAuthAccount: context.isOAuthAccount,
+  isOAuthAccount,
   twoFactorEnabled: user.twoFactorEnabled,
 });
 
@@ -99,38 +99,34 @@ export const updateUserSettingsService = async ({
     }
 
     const account = await getAccountByUserId(dbUser.id);
-    const context: UpdateContext = { isOAuthAccount: Boolean(account) };
+    const isOAuthAccount = Boolean(account);
 
-    const extendedValues = values as ExtendedUserSettingsInput;
+    // If OAuth account, clear protected fields
+    if (isOAuthAccount) {
+      values.email = undefined;
+      values.currentPassword = undefined;
+      values.newPassword = undefined;
+      values.confirmPassword = undefined;
+    }
 
     const updatePayload: Prisma.UserUpdateInput = {};
 
-    if (values.name !== undefined && values.name !== dbUser.name) {
+    if (values.name !== undefined) {
       updatePayload.name = values.name;
     }
 
-    if (
-      !context.isOAuthAccount &&
-      values.email !== undefined &&
-      values.email !== dbUser.email
-    ) {
+    if (values.email !== undefined) {
       updatePayload.email = values.email;
     }
 
-    if (
-      typeof extendedValues.twoFactorEnabled === 'boolean' &&
-      extendedValues.twoFactorEnabled !== dbUser.twoFactorEnabled
-    ) {
-      updatePayload.twoFactorEnabled = extendedValues.twoFactorEnabled;
+    if (values.twoFactorEnabled !== undefined) {
+      updatePayload.twoFactorEnabled = values.twoFactorEnabled;
     }
 
-    const newPassword =
-      typeof extendedValues.newPassword === 'string'
-        ? extendedValues.newPassword.trim()
-        : '';
+    const newPassword = values.newPassword?.trim() ?? '';
 
     if (newPassword.length > 0) {
-      const currentPassword = extendedValues.currentPassword ?? '';
+      const currentPassword = values.currentPassword ?? '';
       const userModel = new User(dbUser);
       const isCurrentPasswordValid =
         await userModel.verifyPassword(currentPassword);
@@ -139,7 +135,7 @@ export const updateUserSettingsService = async ({
         return response.failure(passwordIncorrect());
       }
 
-      if (currentPassword.length > 0 && currentPassword === newPassword) {
+      if (currentPassword === newPassword) {
         return response.failure(passwordUnchanged());
       }
 
@@ -148,7 +144,7 @@ export const updateUserSettingsService = async ({
 
     if (Object.keys(updatePayload).length === 0) {
       return response.success({
-        data: buildSuccessData(projectUser(dbUser), context),
+        data: buildSuccessData(projectUser(dbUser), isOAuthAccount),
       });
     }
 
@@ -159,7 +155,7 @@ export const updateUserSettingsService = async ({
     });
 
     return response.success({
-      data: buildSuccessData(updatedUser, context),
+      data: buildSuccessData(updatedUser, isOAuthAccount),
     });
   } catch (error) {
     console.error('Failed to update user settings', error);
