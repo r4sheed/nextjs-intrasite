@@ -1,12 +1,16 @@
-import type { Metadata } from 'next';
-
-import { Analytics } from '@/components/analitycs';
-import { Providers } from '@/components/providers';
-import { TailwindIndicator } from '@/components/tailwind-indicator';
-import { Toaster } from '@/components/ui/sonner';
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';
 import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
+
+import { Analytics } from '@/components/analitycs';
+import { TailwindIndicator } from '@/components/tailwind-indicator';
+import { Toaster } from '@/components/ui/sonner';
+
+import { auth } from '@/features/auth/lib/auth';
+
+import type { Metadata } from 'next';
+
+import { Providers } from '@/app/providers';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -26,13 +30,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -52,14 +57,14 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          'text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]',
+          'group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]',
           fontVariables
         )}
       >
-        <Providers>
+        <Providers session={session}>
           <main>{children}</main>
           <TailwindIndicator />
-          <Toaster position="top-center" />
+          <Toaster />
           <Analytics />
         </Providers>
       </body>

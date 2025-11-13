@@ -1,0 +1,34 @@
+'use server';
+
+import { validationFailed } from '@/lib/errors';
+import { type Response, response } from '@/lib/response';
+
+import { type ResetInput, resetSchema } from '@/features/auth/schemas';
+import { resetPassword as resetPasswordService } from '@/features/auth/services';
+
+import type { ResetPasswordData } from '@/features/auth/services/reset-password';
+
+/**
+ * Server Action to initiate a password reset request by email.
+ *
+ * This action validates the email input using the defined Zod schema, then
+ * delegates the reset process to the service layer which handles user lookup,
+ * token generation, and password reset email delivery. Returns a generic success
+ * message to prevent email enumeration attacks, even if the user doesn't exist.
+ *
+ * @param values - The input containing the user's email address.
+ * @returns A Response object containing success status or validation/service error.
+ */
+export const resetPassword = async (
+  values: ResetInput
+): Promise<Response<ResetPasswordData>> => {
+  const validation = resetSchema.safeParse(values);
+
+  if (!validation.success) {
+    // Return early with specific field validation errors
+    return response.failure(validationFailed(validation.error));
+  }
+
+  // Call the core service function which handles the business logic (token creation, email sending)
+  return await resetPasswordService(validation.data);
+};

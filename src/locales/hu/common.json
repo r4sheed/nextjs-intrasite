@@ -1,0 +1,12 @@
+{
+  "common": {
+    "success": "A művelet sikeresen befejeződött",
+    "loading": "Betöltés...",
+    "error": "Hiba történt",
+    "cancel": "Mégse",
+    "save": "Mentés",
+    "delete": "Törlés",
+    "confirm": "Megerősítés",
+    "back": "Vissza"
+  }
+}

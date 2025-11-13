@@ -1,6 +1,8 @@
 'use client';
 
-import { useThemeConfig } from '@/components/providers/active-theme';
+import { cn } from '@/lib/utils';
+
+import { useThemeConfig } from '@/components/active-theme';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -12,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 
 const DEFAULT_THEMES = [
   {

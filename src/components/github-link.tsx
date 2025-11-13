@@ -2,16 +2,17 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import { Icons } from '@/components/icons';
+import { siteConfig } from '@/lib/config';
+
+import { SocialIcons } from '@/components/social-icons';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { siteConfig } from '@/lib/config';
 
 export function GitHubLink() {
   return (
     <Button asChild size="sm" variant="ghost" className="h-8 shadow-none">
       <Link href={siteConfig.links.github} target="_blank" rel="noreferrer">
-        <Icons.gitHub />
+        <SocialIcons.github />
         <React.Suspense fallback={<Skeleton className="h-4 w-8" />}>
           <StarsCount />
         </React.Suspense>
@@ -22,15 +23,20 @@ export function GitHubLink() {
 
 export async function StarsCount() {
   const data = await fetch('https://api.github.com/repos/shadcn-ui/ui', {
-    next: { revalidate: 86400 }, // Cache for 1 day (86400 seconds)
+    next: { revalidate: 86400 }, // Cache for 1 day
   });
   const json = await data.json();
 
+  const formattedCount =
+    json.stargazers_count >= 1000
+      ? json.stargazers_count % 1000 === 0
+        ? `${Math.floor(json.stargazers_count / 1000)}k`
+        : `${(json.stargazers_count / 1000).toFixed(1)}k`
+      : json.stargazers_count.toLocaleString();
+
   return (
-    <span className="text-muted-foreground w-8 text-xs tabular-nums">
-      {json.stargazers_count >= 1000
-        ? `${(json.stargazers_count / 1000).toFixed(1)}k`
-        : json.stargazers_count.toLocaleString()}
+    <span className="text-muted-foreground w-fit text-xs tabular-nums">
+      {formattedCount.replace('.0k', 'k')}
     </span>
   );
 }

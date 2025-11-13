@@ -1,0 +1,12 @@
+{
+  "common": {
+    "success": "Operation completed successfully",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back"
+  }
+}

@@ -1,3 +1,28 @@
+import { navigationItems } from '@/lib/navigation';
+import { apiRoutes, routes } from '@/lib/routes';
+
+/**
+ * Middleware configuration for authentication and route protection.
+ * These values are derived from the routes tree to maintain single source of truth.
+ */
+export const middlewareConfig = {
+  /**
+   * API route prefix for authentication endpoints (e.g., NextAuth/Auth.js)
+   * Used by middleware for strict prefix matching.
+   */
+  authRoutePrefix: apiRoutes.auth,
+
+  /**
+   * Default redirect destination after successful login.
+   * Points to the first protected route or home if none exist.
+   */
+  defaultLoginRedirect: routes.settings.url,
+} as const;
+
+/**
+ * Core site configuration containing metadata, branding, and navigation settings.
+ * This configuration is used throughout the application for consistent branding and navigation.
+ */
 export const siteConfig = {
   name: 'shadcn/ui',
   author: 'shadcn',
@@ -9,34 +34,31 @@ export const siteConfig = {
     twitter: 'https://twitter.com/shadcn',
     github: 'https://github.com/shadcn-ui/ui',
   },
-  navItems: [
-    {
-      href: '/docs/installation',
-      label: 'Docs',
-    },
-    {
-      href: '/docs/components',
-      label: 'Components',
-    },
-    {
-      href: '/blocks',
-      label: 'Blocks',
-    },
-    {
-      href: '/charts/area',
-      label: 'Charts',
-    },
-    {
-      href: '/themes',
-      label: 'Themes',
-    },
-    {
-      href: '/colors',
-      label: 'Colors',
-    },
-  ],
+  navItems: navigationItems.map(item => ({
+    label: item.label,
+    href: item.href,
+    protected: item.protected,
+  })),
 } as const;
 
+export type SiteFeatures = typeof siteFeatures;
+
+/**
+ * Feature flags for enabling/disabling application features.
+ * These control the behavior of various parts of the application.
+ */
+export const siteFeatures = {
+  socialAuth: true, // Enables authentication via OAuth providers (e.g., Google, GitHub) - See AuthProvider for supported providers.
+  emailVerification: true, // Require email verification for signup and login
+  twoFactorAuth: true, // Enables two-factor authentication (2FA) via email codes
+} as const;
+
+export type SiteConfig = typeof siteConfig;
+
+/**
+ * Theme color constants for meta tags and PWA manifest.
+ * Used for consistent theming across light and dark modes.
+ */
 export const META_THEME_COLORS = {
   light: '#ffffff',
   dark: '#09090b',
