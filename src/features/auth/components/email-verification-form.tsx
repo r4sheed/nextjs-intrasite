@@ -27,7 +27,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { verifyEmail } from '@/features/auth/actions';
 import { REDIRECT_TIMEOUT_MS } from '@/features/auth/lib/config';
 import { AUTH_ERRORS, AUTH_LABELS } from '@/features/auth/lib/strings';
-import { verifyEmailSchema } from '@/features/auth/schemas';
+import {
+  type VerifyEmailInput,
+  verifyEmailSchema,
+} from '@/features/auth/schemas';
 
 /**
  * Email verification form component
@@ -37,35 +40,37 @@ export const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const email = searchParams.get('email');
   const hasToken = Boolean(token); // Check if token exists in URL
+  const hasEmail = Boolean(email); // Check if email exists in URL
 
   const mutation = useMutation<
     ActionSuccess<typeof verifyEmail>,
     ErrorResponse,
-    string
+    VerifyEmailInput
   >({
-    mutationFn: token => execute(verifyEmail, token),
+    mutationFn: values => execute(verifyEmail, values),
   });
 
   const { mutate, status, isPending, isSuccess, isError, data, error } =
     mutation; // Destructure mutation state
 
-  // Trigger verification when token is present and idle
+  // Trigger verification when both email and token are present and idle
   useEffect(() => {
-    if (!token) {
+    if (!token || !email) {
       return;
     }
 
-    // Validate token format before making API call
-    const validation = verifyEmailSchema.safeParse({ token });
+    // Validate token and email format before making API call
+    const validation = verifyEmailSchema.safeParse({ token, email });
     if (!validation.success) {
-      return; // Invalid token, will show error state
+      return; // Invalid token or email, will show error state
     }
 
     if (status === 'idle') {
-      mutate(validation.data.token);
+      mutate({ email: validation.data.email, token: validation.data.token });
     }
-  }, [token, mutate, status]);
+  }, [token, email, mutate, status]);
 
   // Redirect to login after successful verification
   useEffect(() => {
@@ -82,16 +87,17 @@ export const EmailVerificationForm = () => {
 
   const successMessage = data?.message?.key;
   const isTokenValid = token
-    ? verifyEmailSchema.safeParse({ token }).success
+    ? verifyEmailSchema.safeParse({ email: email || '', token }).success
     : false;
-  const errorMessage = !hasToken
-    ? AUTH_ERRORS.tokenInvalid
-    : !isTokenValid
+  const errorMessage =
+    !hasToken || !hasEmail
       ? AUTH_ERRORS.tokenInvalid
-      : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
-  const showError = !hasToken || !isTokenValid || isError; // Show error if no token, invalid token, or verification failed
+      : !isTokenValid
+        ? AUTH_ERRORS.tokenInvalid
+        : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
+  const showError = !hasToken || !hasEmail || !isTokenValid || isError; // Show error if missing params, invalid params, or verification failed
   const showLoading =
-    hasToken && isTokenValid && (status === 'idle' || isPending); // Show loading only for valid tokens
+    hasToken && hasEmail && isTokenValid && (status === 'idle' || isPending); // Show loading only for valid params
 
   // Success state
   if (isSuccess) {

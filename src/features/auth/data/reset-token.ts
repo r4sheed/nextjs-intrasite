@@ -2,7 +2,6 @@ import { db } from '@/lib/prisma';
 
 import type { PasswordResetToken } from '@prisma/client';
 
-
 /**
  * Data access layer for PasswordResetToken entity.
  *
@@ -80,4 +79,44 @@ export const getPasswordResetTokenByEmail = async (
   email: string
 ): Promise<PasswordResetToken | null> => {
   return await findPasswordResetToken({ email });
+};
+
+/**
+ * Retrieves a password reset token by both email and token for enhanced security and performance.
+ *
+ * Uses the composite unique index [email, token] for efficient database queries.
+ * This provides better performance than token-only lookups and additional validation
+ * that the token belongs to the expected email address.
+ *
+ * @param email - The user's email address.
+ * @param token - The unique password reset token string.
+ * @returns The password reset token if found and matches both email and token, null otherwise (including on database errors).
+ *
+ * @example
+ * const resetToken = await getPasswordResetTokenByEmailAndToken('user@example.com', 'xyz789...');
+ * if (resetToken && resetToken.expires > new Date()) {
+ *   // Token is valid and belongs to the correct email
+ * }
+ */
+export const getPasswordResetTokenByEmailAndToken = async (
+  email: string,
+  token: string
+): Promise<PasswordResetToken | null> => {
+  try {
+    return await db.passwordResetToken.findUnique({
+      where: {
+        email_token: {
+          email,
+          token,
+        },
+      },
+    });
+  } catch (error) {
+    // Log error for debugging but return null (let service layer handle the error)
+    console.error(
+      '[getPasswordResetTokenByEmailAndToken] Database error:',
+      error
+    );
+    return null;
+  }
 };

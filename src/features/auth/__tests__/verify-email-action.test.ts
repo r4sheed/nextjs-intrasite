@@ -28,32 +28,44 @@ describe('verifyEmail action', () => {
     });
     vi.mocked(verifyEmail).mockResolvedValue(mockResponse);
 
-    const response = await verifyEmailAction('valid-token-123');
+    const response = await verifyEmailAction({
+      email: 'user@example.com',
+      token: '550e8400-e29b-41d4-a716-446655440000', // Valid UUID
+    });
 
     expect(response.status).toBe(Status.Success);
     if (response.status === Status.Success) {
       expect(response.message?.key).toBe(AUTH_SUCCESS.emailVerified);
     }
-    expect(verifyEmail).toHaveBeenCalledWith('valid-token-123');
+    expect(verifyEmail).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      token: '550e8400-e29b-41d4-a716-446655440000',
+    });
   });
 
   it('should return error for empty token', async () => {
-    const response = await verifyEmailAction('');
+    const response = await verifyEmailAction({
+      email: 'user@example.com',
+      token: '',
+    });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
+      expect(response.code).toBe('validation-failed');
     }
     // Service should not be called for empty token
     expect(verifyEmail).not.toHaveBeenCalled();
   });
 
   it('should return error for null/undefined token', async () => {
-    const response = await verifyEmailAction(null as any);
+    const response = await verifyEmailAction({
+      email: 'user@example.com',
+      token: '',
+    });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
-      expect(response.code).toBe(AUTH_CODES.tokenInvalid);
+      expect(response.code).toBe('validation-failed');
     }
     expect(verifyEmail).not.toHaveBeenCalled();
   });
@@ -62,7 +74,10 @@ describe('verifyEmail action', () => {
     const mockResponse = responseFactory.failure(tokenNotFound());
     vi.mocked(verifyEmail).mockResolvedValue(mockResponse);
 
-    const response = await verifyEmailAction('nonexistent-token');
+    const response = await verifyEmailAction({
+      email: 'user@example.com',
+      token: '550e8400-e29b-41d4-a716-446655440001', // Valid UUID
+    });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
@@ -74,7 +89,10 @@ describe('verifyEmail action', () => {
     const mockResponse = responseFactory.failure(tokenExpired('expired-token'));
     vi.mocked(verifyEmail).mockResolvedValue(mockResponse);
 
-    const response = await verifyEmailAction('expired-token');
+    const response = await verifyEmailAction({
+      email: 'user@example.com',
+      token: '550e8400-e29b-41d4-a716-446655440002', // Valid UUID
+    });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {
@@ -88,7 +106,10 @@ describe('verifyEmail action', () => {
     );
     vi.mocked(verifyEmail).mockResolvedValue(mockResponse);
 
-    const response = await verifyEmailAction('valid-token-123');
+    const response = await verifyEmailAction({
+      email: 'test@example.com',
+      token: '550e8400-e29b-41d4-a716-446655440003', // Valid UUID
+    });
 
     expect(response.status).toBe(Status.Error);
     if (response.status === Status.Error) {

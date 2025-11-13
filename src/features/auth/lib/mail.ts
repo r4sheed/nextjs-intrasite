@@ -14,7 +14,7 @@ const BASE_TEMPLATE_PROPS = {
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}`;
+  const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
   console.log('\n========================================');
@@ -47,7 +47,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}`;
+  const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
   console.log('\n========================================');

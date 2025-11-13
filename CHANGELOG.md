@@ -70,3 +70,55 @@ This prioritizes user experience over full anti-enumeration protection. Users no
 - Show spinner only for active provider
 - Prevents double-clicks during authentication
 - **Status:** Completed
+
+#### Add Email Parameter to Verification URLs for Better Query Performance
+
+**Completed:** November 13, 2025
+
+**Description:**
+Added email parameter to verification URLs to leverage the composite unique index `[email, token]` for better database query performance and enhanced security.
+
+**Changes Made:**
+
+- **Mail URLs Updated:**
+  - Email verification: `?type=email&token=${token}&email=${encodeURIComponent(email)}`
+  - Password reset: `?token=${token}&email=${encodeURIComponent(email)}`
+
+- **New Data Functions:**
+  - `getVerificationTokenByEmailAndToken()` in `email-verification-token.ts`
+  - `getPasswordResetTokenByEmailAndToken()` in `reset-token.ts`
+  - Both use composite index `[email, token]` for efficient queries
+
+- **Service Layer Updates:**
+  - `verifyEmail()` service now accepts `(email, token)` parameters
+  - `updatePassword()` service now accepts `(email, token)` parameters
+  - Both use new email+token query functions
+
+- **Action Layer Updates:**
+  - `verifyEmail` action validates and passes both email and token
+  - `updatePassword` action validates and passes both email and token
+
+- **Schema Updates:**
+  - `verifyEmailSchema` now includes email validation
+  - `newPasswordSchema` now includes email validation
+
+- **Component Updates:**
+  - `EmailVerificationForm` extracts and validates both email and token from URL
+  - `NewPasswordForm` extracts and validates both email and token from URL
+
+- **Comprehensive Testing:**
+  - Added tests for `getVerificationTokenByEmailAndToken()` (6 test cases)
+  - Added tests for `getPasswordResetTokenByEmailAndToken()` (6 test cases)
+  - All existing tests pass (244 tests total)
+
+**Benefits:**
+
+- ✅ **Better Performance:** Uses composite index instead of token-only lookups
+- ✅ **Enhanced Security:** Validates token belongs to expected email
+- ✅ **Improved UX:** Prevents accidental token reuse across emails
+- ✅ **Future-Proof:** Email-based token management ready
+
+**Database Impact:**
+No schema changes needed - composite unique constraint `@@unique([email, token])` already exists.
+
+**Status:** Completed

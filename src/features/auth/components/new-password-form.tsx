@@ -40,24 +40,33 @@ import {
 import type React from 'react';
 
 /**
- * Hook for extracting and setting token from URL parameters
+ * Hook for extracting and setting token and email from URL parameters
  * @param form - React Hook Form instance
- * @returns Object with token value and missing token flag
+ * @returns Object with token and email values and missing params flags
  */
 const useTokenFromUrl = (
   form: ReturnType<typeof useForm<NewPasswordInput>>
 ) => {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const email = searchParams.get('email');
 
-  // Set token in form when URL param changes
+  // Set token and email in form when URL params change
   useEffect(() => {
     if (token) {
       form.setValue('token', token);
     }
-  }, [searchParams, form, token]);
+    if (email) {
+      form.setValue('email', email);
+    }
+  }, [searchParams, form, token, email]);
 
-  return { token, isTokenMissing: !token };
+  return {
+    token,
+    email,
+    isTokenMissing: !token,
+    isEmailMissing: !email,
+  };
 };
 
 /**
@@ -87,21 +96,24 @@ const useNewPasswordMutation = () => {
  * Hook for computing form state and messages
  * @param mutation - Password update mutation
  * @param isTokenMissing - Whether token is missing from URL
+ * @param isEmailMissing - Whether email is missing from URL
  * @returns Computed state object with loading states and messages
  */
 const useNewPasswordState = (
   mutation: ReturnType<typeof useNewPasswordMutation>,
-  isTokenMissing: boolean
+  isTokenMissing: boolean,
+  isEmailMissing: boolean
 ) => {
   const successMessage = mutation.data?.message?.key;
-  const errorMessage = isTokenMissing
-    ? AUTH_ERRORS.tokenInvalid
-    : mutation.error?.message?.key || '';
+  const errorMessage =
+    isTokenMissing || isEmailMissing
+      ? AUTH_ERRORS.tokenInvalid
+      : mutation.error?.message?.key || '';
 
   return {
     isPending: mutation.isPending,
     isSuccess: mutation.isSuccess,
-    isError: mutation.isError || isTokenMissing,
+    isError: mutation.isError || isTokenMissing || isEmailMissing,
     successMessage,
     errorMessage,
   };
@@ -117,14 +129,15 @@ const useNewPasswordForm = () => {
     resolver: zodResolver(newPasswordSchema),
     mode: 'onTouched',
     defaultValues: {
+      email: '',
       token: '',
       password: '',
     },
   });
 
-  const { isTokenMissing } = useTokenFromUrl(form);
+  const { isTokenMissing, isEmailMissing } = useTokenFromUrl(form);
   const mutation = useNewPasswordMutation();
-  const state = useNewPasswordState(mutation, isTokenMissing);
+  const state = useNewPasswordState(mutation, isTokenMissing, isEmailMissing);
 
   const onSubmit = (values: NewPasswordInput) => {
     if (state.isPending) return;

@@ -61,10 +61,50 @@ export const getVerificationTokenByToken = async (
 };
 
 /**
- * Retrieves the first verification token associated with an email address.
+ * Retrieves a verification token by both email and token for enhanced security and performance.
  *
- * Used to check if a verification token already exists for a user before
- * generating a new one.
+ * Uses the composite unique index [email, token] for efficient database queries.
+ * This provides better performance than token-only lookups and additional validation
+ * that the token belongs to the expected email address.
+ *
+ * @param email - The user's email address.
+ * @param token - The unique verification token string.
+ * @returns The verification token if found and matches both email and token, null otherwise (including on database errors).
+ *
+ * @example
+ * const verificationToken = await getVerificationTokenByEmailAndToken('user@example.com', 'abc123...');
+ * if (verificationToken && verificationToken.expires > new Date()) {
+ *   // Token is valid and belongs to the correct email
+ * }
+ */
+export const getVerificationTokenByEmailAndToken = async (
+  email: string,
+  token: string
+): Promise<EmailVerificationToken | null> => {
+  try {
+    return await db.emailVerificationToken.findUnique({
+      where: {
+        email_token: {
+          email,
+          token,
+        },
+      },
+    });
+  } catch (error) {
+    // Log error for debugging but return null (let service layer handle the error)
+    console.error(
+      '[getVerificationTokenByEmailAndToken] Database error:',
+      error
+    );
+    return null;
+  }
+};
+
+/**
+ * Retrieves a verification token by email address.
+ *
+ * Used to check if a verification token already exists for a user before generating
+ * a new one, preventing token spam.
  *
  * @param email - The user's email address.
  * @returns The first verification token for the email if found, null otherwise (including on database errors).

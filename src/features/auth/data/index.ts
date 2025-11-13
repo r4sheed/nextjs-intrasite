@@ -1,6 +1,7 @@
 export {
   getPasswordResetTokenByToken,
   getPasswordResetTokenByEmail,
+  getPasswordResetTokenByEmailAndToken,
 } from './reset-token';
 
 export {
@@ -30,5 +31,6 @@ export {
 
 export {
   getVerificationTokenByToken,
+  getVerificationTokenByEmailAndToken,
   getVerificationTokenByEmail,
 } from './email-verification-token';

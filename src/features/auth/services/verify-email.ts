@@ -1,7 +1,7 @@
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
-import { getVerificationTokenByToken } from '@/features/auth/data/email-verification-token';
+import { getVerificationTokenByEmailAndToken } from '@/features/auth/data/email-verification-token';
 import { getUserByEmail } from '@/features/auth/data/user';
 import {
   tokenExpired,
@@ -9,6 +9,7 @@ import {
   userNotFound,
 } from '@/features/auth/lib/errors';
 import { AUTH_SUCCESS } from '@/features/auth/lib/strings';
+import { type VerifyEmailInput } from '@/features/auth/schemas';
 
 export type VerifyEmailData = Record<string, never>;
 
@@ -20,15 +21,16 @@ export type VerifyEmailData = Record<string, never>;
  * verification status and delete the consumed token. Ensures data consistency
  * by using Prisma transactions.
  *
- * @param token - The verification token string from the email link or URL.
+ * @param values - Validated email verification input containing email and token.
  * @returns Response indicating success with verification message, or error details.
  *
  * @throws Never throws - all errors are returned as Response<T> error objects.
  */
 export const verifyEmail = async (
-  token: string
+  values: VerifyEmailInput
 ): Promise<Response<VerifyEmailData>> => {
-  const existingToken = await getVerificationTokenByToken(token);
+  const { email, token } = values;
+  const existingToken = await getVerificationTokenByEmailAndToken(email, token);
   if (!existingToken) {
     return response.failure(tokenNotFound());
   }

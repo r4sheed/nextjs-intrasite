@@ -30,6 +30,7 @@ describe('updatePassword action', () => {
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: 'valid-token-123',
       password: 'NewPassword123!',
     });
@@ -39,6 +40,7 @@ describe('updatePassword action', () => {
       expect(response.message?.key).toBe(AUTH_SUCCESS.passwordUpdated);
     }
     expect(updatePassword).toHaveBeenCalledWith({
+      email: 'user@example.com',
       token: 'valid-token-123',
       password: 'NewPassword123!',
     });
@@ -46,6 +48,7 @@ describe('updatePassword action', () => {
 
   it('should return error for invalid password (too short)', async () => {
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: 'valid-token-123',
       password: 'short',
     });
@@ -60,6 +63,7 @@ describe('updatePassword action', () => {
 
   it('should return error for empty password', async () => {
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: 'valid-token-123',
       password: '',
     });
@@ -73,6 +77,7 @@ describe('updatePassword action', () => {
 
   it('should return error for missing token', async () => {
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: '',
       password: 'NewPassword123!',
     });
@@ -89,6 +94,7 @@ describe('updatePassword action', () => {
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: 'invalid-token',
       password: 'NewPassword123!',
     });
@@ -104,6 +110,7 @@ describe('updatePassword action', () => {
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: 'expired-token',
       password: 'NewPassword123!',
     });
@@ -121,6 +128,7 @@ describe('updatePassword action', () => {
     vi.mocked(updatePassword).mockResolvedValue(mockResponse);
 
     const response = await updatePasswordAction({
+      email: 'test@example.com',
       token: 'valid-token-123',
       password: 'NewPassword123!',
     });
@@ -147,6 +155,7 @@ describe('updatePassword action', () => {
 
     for (const password of validPasswords) {
       const response = await updatePasswordAction({
+        email: 'user@example.com',
         token: 'valid-token',
         password,
       });
@@ -158,6 +167,7 @@ describe('updatePassword action', () => {
 
   it('should validate both token and password fields', async () => {
     const response = await updatePasswordAction({
+      email: 'user@example.com',
       token: '',
       password: '',
     });

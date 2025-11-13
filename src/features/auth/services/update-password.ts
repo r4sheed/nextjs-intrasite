@@ -2,7 +2,7 @@ import { internalServerError } from '@/lib/errors';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
-import { getPasswordResetTokenByToken } from '@/features/auth/data/reset-token';
+import { getPasswordResetTokenByEmailAndToken } from '@/features/auth/data/reset-token';
 import { getUserByEmail } from '@/features/auth/data/user';
 import {
   tokenExpired,
@@ -30,10 +30,13 @@ export type UpdatePasswordData = Record<string, never>;
 export const updatePassword = async (
   values: NewPasswordInput
 ): Promise<Response<UpdatePasswordData>> => {
-  const { token, password } = values;
+  const { email, token, password } = values;
 
   // Token validation
-  const existingToken = await getPasswordResetTokenByToken(token);
+  const existingToken = await getPasswordResetTokenByEmailAndToken(
+    email,
+    token
+  );
   if (!existingToken) {
     return response.failure(tokenNotFound());
   }
@@ -44,7 +47,6 @@ export const updatePassword = async (
   }
 
   // Retrieve user
-  const { email } = existingToken;
   const existingUser = await getUserByEmail(email);
   if (!existingUser) {
     // Should generally not happen if token was created correctly, but handles edge cases
