@@ -61,11 +61,6 @@ const useUrlParams = () => {
       ? AUTH_ERRORS.oauthNotLinked
       : '';
 
-  const isVerifySuccess = searchParams.get('verified') === '1';
-  const verifySuccessMessage = isVerifySuccess
-    ? AUTH_LABELS.verificationSuccessSubtitle
-    : undefined;
-
   const verifyError = searchParams.get('verify_error');
   const verifyErrorMessage = (() => {
     if (!verifyError) return '';
@@ -82,9 +77,7 @@ const useUrlParams = () => {
 
   return {
     urlError,
-    verifySuccessMessage,
     verifyErrorMessage,
-    isVerifySuccess,
   };
 };
 
@@ -152,22 +145,23 @@ const useFormState = (
   urlParams: ReturnType<typeof useUrlParams>,
   isRedirecting: boolean
 ) => {
-  const {
-    urlError,
-    verifySuccessMessage,
-    verifyErrorMessage,
-    isVerifySuccess,
-  } = urlParams;
+  const { urlError, verifyErrorMessage } = urlParams;
 
-  const isPending = mutation.isPending || isRedirecting;
-  const isSuccess = mutation.isSuccess || isVerifySuccess;
-  const isError = mutation.isError || !!urlError || !!verifyErrorMessage;
-
-  const successMessage = mutation.data?.message?.key || verifySuccessMessage;
+  const successMessage = mutation.data?.message?.key;
   const errorMessage =
     mutation.error?.message?.key || urlError || verifyErrorMessage;
 
-  return { isPending, isSuccess, isError, successMessage, errorMessage };
+  const isPending = mutation.isPending || isRedirecting;
+  const isSuccess = mutation.isSuccess;
+  const isError = mutation.isError || !!urlError || !!verifyErrorMessage;
+
+  return {
+    isPending,
+    isSuccess,
+    isError,
+    successMessage,
+    errorMessage,
+  };
 };
 
 /**
