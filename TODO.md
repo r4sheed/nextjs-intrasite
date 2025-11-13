@@ -1129,4 +1129,78 @@ Create a reusable UserAvatar component that generates fallback avatars from user
 
 ---
 
+### 📧 Email Change Verification Flow
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**  
+Implement a secure email change verification flow. Currently, when a user changes their email address, the system immediately updates the database and sets `emailVerified = null`. This is insecure because it allows email takeover without verification.
+
+**Proposed Solution:**  
+Instead of immediately updating the email, implement a two-step verification process:
+
+1. **Email Change Request:** When user submits new email, store the change request temporarily (e.g., in a new `EmailChangeRequest` model or in existing `VerificationToken` with a new type)
+2. **Send Verification Email:** Send a verification email to the NEW email address with a secure token
+3. **Token Verification:** When user clicks the link, verify the token and only then update the email in the database
+4. **Security:** The verification link should include both the token and the new email to prevent token reuse
+
+**Current Implementation (Temporary):**  
+The code currently sets `emailVerified = null` when email changes (commented out temporarily). This needs to be replaced with the proper verification flow.
+
+**Implementation Steps:**
+
+1. **Create Email Change Request Model:**
+   - Add `EmailChangeRequest` model to Prisma schema with fields: `id`, `userId`, `newEmail`, `token`, `expiresAt`, `createdAt`
+   - Or extend existing `VerificationToken` model with a `type` field to distinguish between email verification and email change
+
+2. **Update Email Change Service:**
+   - Instead of updating email directly, create an `EmailChangeRequest` record
+   - Send verification email to the new email address
+   - Return success message indicating verification email was sent
+
+3. **Create Email Change Verification Action/Service:**
+   - New endpoint to handle email change verification (e.g., `/auth/verify-email-change`)
+   - Verify token and new email match
+   - Update user's email and set `emailVerified = true`
+   - Delete the change request record
+
+4. **Update Mail Templates:**
+   - Add email template for email change verification
+   - Include clear instructions and expiration notice
+
+5. **Security Considerations:**
+   - Tokens should expire (e.g., 24 hours)
+   - Prevent multiple pending change requests per user
+   - Log security events for monitoring
+
+**Benefits:**
+
+- ✅ Prevents email takeover attacks
+- ✅ Ensures user controls the new email address
+- ✅ Better security posture for user account management
+- ✅ Clear user communication about the process
+
+**Affected Files:**
+
+- `prisma/schema.prisma` (new model or extend existing)
+- `src/features/auth/services/update-user-settings.ts` (replace direct email update)
+- `src/features/auth/lib/mail.ts` (add email change verification template)
+- `src/features/auth/actions/verify-email-change.ts` (new action)
+- `src/features/auth/services/verify-email-change.ts` (new service)
+- `src/features/auth/data/email-change-request.ts` (new data layer)
+- `src/locales/*/auth.json` (add email change messages)
+- `src/lib/routes.ts` (add verify-email-change route)
+
+**Testing:**
+
+- Test email change request creation
+- Test verification email sending
+- Test token verification with correct/incorrect emails
+- Test token expiration
+- Test multiple pending requests prevention
+- Test security logging
+
+---
+
 ---

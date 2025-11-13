@@ -3,11 +3,12 @@ import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
 import { getAccountByUserId } from '@/features/auth/data/account';
-import { getUserById } from '@/features/auth/data/user';
+import { getUserById, getUserByEmail } from '@/features/auth/data/user';
 import {
   invalidCredentials,
   passwordIncorrect,
   passwordUnchanged,
+  emailAlreadyExists,
 } from '@/features/auth/lib/errors';
 import { User } from '@/features/auth/models';
 import { type UserSettingsFormData } from '@/features/auth/schemas';
@@ -116,7 +117,14 @@ export const updateUserSettingsService = async ({
     }
 
     if (values.email !== undefined) {
-      updatePayload.email = values.email;
+      if (values.email !== dbUser.email) {
+        const existingUser = await getUserByEmail(values.email);
+        if (existingUser) {
+          return response.failure(emailAlreadyExists());
+        }
+        updatePayload.email = values.email;
+        // updatePayload.emailVerified = null;
+      }
     }
 
     if (values.twoFactorEnabled !== undefined) {
