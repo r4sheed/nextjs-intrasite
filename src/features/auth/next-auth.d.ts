@@ -27,3 +27,11 @@ declare module 'next-auth/jwt' {
     isOAuthAccount: boolean;
   }
 }
+
+declare module '@auth/core/adapters' {
+  interface AdapterUser {
+    role: UserRole;
+    twoFactorEnabled: boolean;
+    isOAuthAccount: boolean;
+  }
+}

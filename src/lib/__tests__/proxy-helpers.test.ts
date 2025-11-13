@@ -6,7 +6,7 @@ import {
   normalizePathname,
   routePatternToRegex,
   validateCallbackUrl,
-} from '../middleware-helpers';
+} from '../proxy-helpers';
 
 describe('normalizePathname', () => {
   it('should preserve root path', () => {

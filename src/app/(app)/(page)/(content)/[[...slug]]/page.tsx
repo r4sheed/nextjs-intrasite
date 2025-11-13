@@ -7,9 +7,9 @@ import { OpenInV0Cta } from '@/components/open-in-v0-cta';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-export const revalidate = false;
-export const dynamic = 'force-static';
-export const dynamicParams = false;
+// export const revalidate = false;
+// export const dynamic = 'force-static';
+// export const dynamicParams = false;
 
 const doc = {
   toc: [

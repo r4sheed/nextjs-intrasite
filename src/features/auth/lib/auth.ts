@@ -283,4 +283,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   events,
   callbacks: authCallbacks,
-});
+} as NextAuthConfig);

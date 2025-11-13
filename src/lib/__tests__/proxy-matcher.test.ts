@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 
 describe('middleware config.matcher patterns (source check)', () => {
-  const src = readFileSync('src/middleware.ts', 'utf8');
+  const src = readFileSync('src/proxy.ts', 'utf8');
 
   it('contains the path matcher that excludes static assets and _next internals', () => {
     // Check for a few key fragments rather than exact escaping-sensitive string

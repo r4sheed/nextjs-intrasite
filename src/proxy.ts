@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import { middlewareConfig } from '@/lib/config';
+import { routes } from '@/lib/navigation';
 import {
   createStrictPrefixMatcher,
   matchesRoute,
   normalizePathname,
   validateCallbackUrl,
-} from '@/lib/middleware-helpers';
-import { routes } from '@/lib/navigation';
+} from '@/lib/proxy-helpers';
 import { authRouteSet, protectedRouteSet, publicRouteSet } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';
