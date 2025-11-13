@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { randomString } from 'node_modules/zod/v4/core/util.cjs';
 import {
   Controller,
   useForm,
@@ -132,13 +131,6 @@ const buildFormPayload = (
   return payload;
 };
 
-/**
- * Generate random name string
- */
-const generateRandomName = (): string => {
-  return randomString(8);
-};
-
 const ProfileSection = () => {
   const session = useSession();
   const user = useCurrentUser();
@@ -177,14 +169,6 @@ const ProfileSection = () => {
       return;
     }
     mutation.mutate(payload);
-  };
-
-  const onGenerateName = () => {
-    form.setValue('name', generateRandomName(), {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
   };
 
   return (
@@ -240,15 +224,6 @@ const ProfileSection = () => {
                         disabled={isPending}
                         required
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={onGenerateName}
-                        disabled={isPending}
-                      >
-                        {AUTH_LABELS.randomButton}
-                      </Button>
                     </div>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
