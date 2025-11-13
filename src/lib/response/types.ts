@@ -48,19 +48,19 @@ export type Response<TData> =
   | PartialResponse<TData>;
 
 export type ActionSuccess<
-  TAction extends (...args: any[]) => Promise<Response<unknown>>,
+  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
 > = Exclude<Awaited<ReturnType<TAction>>, ErrorResponse>;
 
 export type ActionFailure<
-  TAction extends (...args: any[]) => Promise<Response<unknown>>,
+  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
 > = Extract<Awaited<ReturnType<TAction>>, ErrorResponse>;
 
 export type InferActionArgs<
-  TAction extends (...args: any[]) => Promise<Response<unknown>>,
+  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
 > = Parameters<TAction>[0];
 
 export type InferActionData<
-  TAction extends (...args: any[]) => Promise<Response<unknown>>,
+  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
 > =
   ActionSuccess<TAction> extends SuccessResponse<infer TData>
     ? TData
@@ -69,7 +69,7 @@ export type InferActionData<
       : never;
 
 export type InferPartialErrors<
-  TAction extends (...args: any[]) => Promise<Response<unknown>>,
+  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
 > =
   ActionSuccess<TAction> extends PartialResponse<unknown>
     ? ActionSuccess<TAction>['errors']
