@@ -36,12 +36,13 @@ describe('auth callbacks', () => {
       } as unknown as Parameters<NonNullable<typeof authCallbacks.jwt>>[0]);
 
       expect(mockedGetUserById).toHaveBeenCalledWith('user-1');
-      expect(result.role).toBe(UserRole.ADMIN);
-      expect(result.email).toBe('alice@example.com');
-      expect(result.picture).toBe('alice.png');
+      expect(result).not.toBeNull();
+      expect(result!.role).toBe(UserRole.ADMIN);
+      expect(result!.email).toBe('alice@example.com');
+      expect(result!.picture).toBe('alice.png');
     });
 
-    it('clears privileged fields when the user no longer exists', async () => {
+    it('invalidates the session when the user no longer exists', async () => {
       mockedGetUserById.mockResolvedValueOnce(null);
 
       const token = {
@@ -57,9 +58,7 @@ describe('auth callbacks', () => {
       } as unknown as Parameters<NonNullable<typeof authCallbacks.jwt>>[0]);
 
       expect(mockedGetUserById).toHaveBeenCalledWith('missing-user');
-      expect(result.role).toBe(UserRole.USER);
-      expect(result.email).toBeNull();
-      expect(result.picture).toBeNull();
+      expect(result).toBeNull();
     });
   });
 

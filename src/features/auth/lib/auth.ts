@@ -245,7 +245,8 @@ export const authCallbacks = {
     const databaseUser = await getUserById(token.sub);
 
     if (!databaseUser) {
-      return resetTokenUserSnapshot(token);
+      // User no longer exists in database, invalidate the session
+      return null;
     }
 
     const account = await getAccountByUserId(databaseUser.id);
