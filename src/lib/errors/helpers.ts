@@ -3,6 +3,7 @@ import { HTTP_STATUS } from '@/lib/http-status';
 
 import { CORE_CODES } from './codes';
 import { CORE_ERRORS } from './messages';
+import { getZodErrorMessage } from './zod';
 
 /**
  * These functional helpers create AppError instances for common, core application issues.
@@ -22,13 +23,15 @@ export const internalServerError = () =>
 /**
  * 422 - Validation error.
  * Used when input data validation (e.g., Zod schema check) fails.
- * @param details The raw validation errors (e.g., ZodError object) or a custom error structure.
- * @returns AppError with status 422.
+ * Extracts the primary message from the Zod error for better client-side
+ * feedback, while preserving the full error details.
+ * @param details - The Zod error object.
+ * @returns An AppError instance for validation failures with status 422.
  */
 export const validationFailed = (details: unknown) =>
   new AppError({
     code: CORE_CODES.validationFailed,
-    message: { key: CORE_ERRORS.validationFailed },
+    message: getZodErrorMessage(details),
     httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
     details,
   });
