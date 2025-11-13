@@ -23,7 +23,7 @@ type MutableToken = JWT & {
   picture?: string | null;
   role?: UserRole | undefined;
   twoFactorEnabled?: boolean | undefined;
-  isOAuth?: boolean | undefined;
+  isOAuthAccount?: boolean | undefined;
 };
 
 /**
@@ -31,7 +31,7 @@ type MutableToken = JWT & {
  */
 type UserSnapshot = Pick<
   SessionUser,
-  'name' | 'email' | 'image' | 'role' | 'twoFactorEnabled' | 'isOAuth'
+  'name' | 'email' | 'image' | 'role' | 'twoFactorEnabled' | 'isOAuthAccount'
 >;
 
 const asMutableToken = (token: JWT): MutableToken => token as MutableToken;
@@ -47,7 +47,7 @@ const resetTokenUserSnapshot = (token: JWT) => {
   mutable.picture = null;
   mutable.role = UserRole.USER;
   mutable.twoFactorEnabled = false;
-  mutable.isOAuth = false;
+  mutable.isOAuthAccount = false;
 
   return token;
 };
@@ -76,8 +76,8 @@ const updateTokenFromUser = (token: JWT, snapshot: Partial<UserSnapshot>) => {
   if (snapshot.twoFactorEnabled !== undefined) {
     mutable.twoFactorEnabled = snapshot.twoFactorEnabled;
   }
-  if (snapshot.isOAuth !== undefined) {
-    mutable.isOAuth = snapshot.isOAuth;
+  if (snapshot.isOAuthAccount !== undefined) {
+    mutable.isOAuthAccount = snapshot.isOAuthAccount;
   }
 
   return token;
@@ -114,8 +114,8 @@ const mergeTokenIntoSessionUser = (
   if (mutable.twoFactorEnabled !== undefined) {
     next.twoFactorEnabled = mutable.twoFactorEnabled ?? false;
   }
-  if (mutable.isOAuth !== undefined) {
-    next.isOAuth = mutable.isOAuth ?? false;
+  if (mutable.isOAuthAccount !== undefined) {
+    next.isOAuthAccount = mutable.isOAuthAccount ?? false;
   }
 
   return next;
@@ -232,7 +232,7 @@ export const authCallbacks = {
         image: user.image ?? null,
         role: user.role ?? UserRole.USER,
         twoFactorEnabled: user.twoFactorEnabled ?? false,
-        isOAuth: user.isOAuth,
+        isOAuthAccount: user.isOAuthAccount,
       });
     }
 
@@ -256,7 +256,7 @@ export const authCallbacks = {
       image: databaseUser.image ?? null,
       role: databaseUser.role ?? UserRole.USER,
       twoFactorEnabled: databaseUser.twoFactorEnabled ?? false,
-      isOAuth: !!account,
+      isOAuthAccount: !!account,
     });
   },
   /**

@@ -127,7 +127,7 @@ export const getUserByEmail = async (
 export const verifyUserCredentials = async (
   email: string,
   password: string
-): Promise<(UserWithoutPassword & { isOAuth: boolean }) | null> => {
+): Promise<(UserWithoutPassword & { isOAuthAccount: boolean }) | null> => {
   // Fetch user with password
   const data = await getUser({ email, includePassword: true });
 
@@ -150,6 +150,6 @@ export const verifyUserCredentials = async (
   // Return user without password for NextAuth
   return {
     ...user.toSafeObject(),
-    isOAuth: false,
+    isOAuthAccount: false,
   };
 };

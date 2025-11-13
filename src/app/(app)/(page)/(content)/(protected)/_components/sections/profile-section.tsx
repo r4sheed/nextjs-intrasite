@@ -82,11 +82,11 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
  */
 const getDefaultFormValues = (
   user: ReturnType<typeof useCurrentUser>,
-  isOAuth: boolean
+  isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {
     name: user?.name ?? '',
-    ...(isOAuth ? {} : { email: user?.email ?? '' }),
+    ...(isOAuthAccount ? {} : { email: user?.email ?? '' }),
   };
 };
 
@@ -95,11 +95,11 @@ const getDefaultFormValues = (
  */
 const getUpdatedFormValues = (
   data: NonNullable<ActionSuccess<typeof updateUserSettings>['data']>,
-  isOAuth: boolean
+  isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {
     name: data.name ?? '',
-    ...(isOAuth ? {} : { email: data.email }),
+    ...(isOAuthAccount ? {} : { email: data.email }),
   };
 };
 
@@ -109,11 +109,11 @@ const getUpdatedFormValues = (
  */
 const buildFormPayload = (
   values: UserSettingsFormData,
-  isOAuth: boolean
+  isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {
     ...(values.name !== undefined ? { name: values.name } : {}),
-    ...(isOAuth ? {} : { email: values.email }),
+    ...(isOAuthAccount ? {} : { email: values.email }),
   };
 };
 
@@ -127,13 +127,13 @@ const generateRandomName = (): string => {
 const ProfileSection = () => {
   const session = useSession();
   const user = useCurrentUser();
-  const isOAuth = user?.isOAuth ?? false;
+  const isOAuthAccount = user?.isOAuthAccount ?? false;
 
   const mutation = useProfileMutation(session);
   const form = useForm<UserSettingsFormData>({
     resolver: zodResolver(UserSettingsSchema),
     mode: 'onTouched',
-    defaultValues: getDefaultFormValues(user, isOAuth),
+    defaultValues: getDefaultFormValues(user, isOAuthAccount),
   });
 
   const isPending = mutation.isPending;
@@ -141,15 +141,15 @@ const ProfileSection = () => {
 
   // Sync form with user data changes
   useEffect(() => {
-    form.reset(getDefaultFormValues(user, isOAuth));
-  }, [user, isOAuth, form]);
+    form.reset(getDefaultFormValues(user, isOAuthAccount));
+  }, [user, isOAuthAccount, form]);
 
   // Sync form with mutation success data
   useEffect(() => {
     if (mutation.data?.status === Status.Success && mutation.data.data) {
-      form.reset(getUpdatedFormValues(mutation.data.data, isOAuth));
+      form.reset(getUpdatedFormValues(mutation.data.data, isOAuthAccount));
     }
-  }, [mutation.data, form, isOAuth]);
+  }, [mutation.data, form, isOAuthAccount]);
 
   const onSubmit = (values: UserSettingsFormData) => {
     if (isPending) return;
@@ -157,7 +157,7 @@ const ProfileSection = () => {
       toast.info(AUTH_INFO.noChangesToSave);
       return;
     }
-    mutation.mutate(buildFormPayload(values, isOAuth));
+    mutation.mutate(buildFormPayload(values, isOAuthAccount));
   };
 
   const onGenerateName = () => {
@@ -247,7 +247,7 @@ const ProfileSection = () => {
                   <FieldContent>
                     <FieldTitle>{AUTH_LABELS.emailLabel}</FieldTitle>
                     <FieldDescription>
-                      {isOAuth
+                      {isOAuthAccount
                         ? AUTH_LABELS.emailManagedDescription
                         : AUTH_LABELS.emailDescription}
                     </FieldDescription>
@@ -258,16 +258,16 @@ const ProfileSection = () => {
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
                       placeholder={AUTH_LABELS.emailPlaceholder}
-                      disabled={isPending || isOAuth}
-                      readOnly={isOAuth}
-                      required={!isOAuth}
+                      disabled={isPending || isOAuthAccount}
+                      readOnly={isOAuthAccount}
+                      required={!isOAuthAccount}
                     />
-                    {!isOAuth && (
+                    {!isOAuthAccount && (
                       <FieldDescription>
                         {AUTH_LABELS.emailNotificationsDescription}
                       </FieldDescription>
                     )}
-                    {isOAuth && (
+                    {isOAuthAccount && (
                       <FieldDescription>
                         {AUTH_LABELS.contactSupportDescription}
                       </FieldDescription>

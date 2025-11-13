@@ -44,7 +44,7 @@ export const authConfig = {
               // Note: TwoFactorConfirmation will be deleted in the signIn callback
               return {
                 ...user,
-                isOAuth: false,
+                isOAuthAccount: false,
               };
             }
           }

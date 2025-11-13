@@ -20,7 +20,7 @@ export type UpdateUserSettingsData = {
   email: string;
   image: string | null;
   role: string;
-  isOAuth: boolean;
+  isOAuthAccount: boolean;
   twoFactorEnabled: boolean;
 };
 
@@ -30,7 +30,7 @@ export type UpdateUserSettingsParams = {
 };
 
 type UpdateContext = {
-  isOAuth: boolean;
+  isOAuthAccount: boolean;
 };
 
 type ExtendedUserSettingsInput = UserSettingsFormData & {
@@ -83,7 +83,7 @@ const buildSuccessData = (
   email: user.email,
   image: user.image,
   role: user.role,
-  isOAuth: context.isOAuth,
+  isOAuthAccount: context.isOAuthAccount,
   twoFactorEnabled: user.twoFactorEnabled,
 });
 
@@ -99,7 +99,7 @@ export const updateUserSettingsService = async ({
     }
 
     const account = await getAccountByUserId(dbUser.id);
-    const context: UpdateContext = { isOAuth: Boolean(account) };
+    const context: UpdateContext = { isOAuthAccount: Boolean(account) };
 
     const extendedValues = values as ExtendedUserSettingsInput;
 
@@ -110,7 +110,7 @@ export const updateUserSettingsService = async ({
     }
 
     if (
-      !context.isOAuth &&
+      !context.isOAuthAccount &&
       values.email !== undefined &&
       values.email !== dbUser.email
     ) {

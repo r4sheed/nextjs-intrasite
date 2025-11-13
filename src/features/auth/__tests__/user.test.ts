@@ -231,7 +231,7 @@ describe('User Data Layer', () => {
         image: null,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
-        isOAuth: false,
+        isOAuthAccount: false,
       });
       expect(user).not.toHaveProperty('password');
     });

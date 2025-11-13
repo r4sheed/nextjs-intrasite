@@ -72,7 +72,7 @@ describe('auth callbacks', () => {
           email: null,
           image: null,
           role: UserRole.USER,
-          isOAuth: false,
+          isOAuthAccount: false,
         },
         expires: new Date().toISOString(),
       } as Session;
@@ -105,7 +105,7 @@ describe('auth callbacks', () => {
           email: 'persisted@example.com',
           image: 'persisted.png',
           role: UserRole.MODERATOR,
-          isOAuth: true,
+          isOAuthAccount: true,
         },
         expires: new Date().toISOString(),
       } as Session;

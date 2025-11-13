@@ -52,8 +52,8 @@ const UserCard = ({ user, title }: UserCardProps) => {
           text={{ true: 'Enabled', false: 'Disabled' }}
         />
         <UserData
-          label="isOAuth"
-          value={user?.isOAuth}
+          label="isOAuthAccount"
+          value={user?.isOAuthAccount}
           text={{ true: 'Yes', false: 'No' }}
         />
       </CardContent>

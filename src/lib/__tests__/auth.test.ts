@@ -32,7 +32,7 @@ describe('auth utilities', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: UserRole.USER,
-        isOAuth: false,
+        isOAuthAccount: false,
         twoFactorEnabled: false,
       };
 
@@ -64,7 +64,7 @@ describe('auth utilities', () => {
           id: '123',
           email: 'test@example.com',
           role: UserRole.USER,
-          isOAuth: false,
+          isOAuthAccount: false,
           twoFactorEnabled: false,
         },
         expires: '2025-12-31',
@@ -92,7 +92,7 @@ describe('auth utilities', () => {
         user: {
           id: '123',
           role: UserRole.ADMIN,
-          isOAuth: false,
+          isOAuthAccount: false,
           twoFactorEnabled: false,
         },
         expires: '2025-12-31',
@@ -110,7 +110,7 @@ describe('auth utilities', () => {
         user: {
           id: '123',
           role: UserRole.USER,
-          isOAuth: false,
+          isOAuthAccount: false,
           twoFactorEnabled: false,
         },
         expires: '2025-12-31',
@@ -138,7 +138,7 @@ describe('auth utilities', () => {
         id: '123',
         email: 'test@example.com',
         role: UserRole.USER,
-        isOAuth: false,
+        isOAuthAccount: false,
         twoFactorEnabled: false,
       };
       const mockSession: Session = {

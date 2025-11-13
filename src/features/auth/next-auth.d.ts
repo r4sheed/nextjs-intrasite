@@ -5,7 +5,7 @@ declare module 'next-auth' {
   interface User {
     role: UserRole;
     twoFactorEnabled: boolean;
-    isOAuth: boolean;
+    isOAuthAccount: boolean;
   }
   /**
    * Returned by `useSession`, `auth`, contains information about the active session.
@@ -15,7 +15,7 @@ declare module 'next-auth' {
       id: string;
       role: UserRole;
       twoFactorEnabled: boolean;
-      isOAuth: boolean;
+      isOAuthAccount: boolean;
     } & DefaultSession['user'];
   }
 }
@@ -24,6 +24,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role: UserRole;
     twoFactorEnabled: boolean;
-    isOAuth: boolean;
+    isOAuthAccount: boolean;
   }
 }

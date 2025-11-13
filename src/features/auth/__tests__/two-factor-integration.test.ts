@@ -80,7 +80,7 @@ describe('2FA Integration Tests', () => {
         updatedAt: new Date(),
         twoFactorEnabled: true,
         password: 'hashed-password',
-        isOAuth: false,
+        isOAuthAccount: false,
       };
 
       // Mock database calls
