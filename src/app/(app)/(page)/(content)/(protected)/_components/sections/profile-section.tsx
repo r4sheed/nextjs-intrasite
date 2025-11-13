@@ -59,7 +59,7 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
   const toastIdRef = useRef<string | number | undefined>(undefined);
 
   return useMutation<
-    ActionSuccess<typeof updateUserSettings>,
+    ActionSuccess<ReturnType<typeof updateUserSettings>>,
     ErrorResponse,
     UserSettingsFormData
   >({
@@ -100,7 +100,9 @@ const getDefaultFormValues = (
  * Get updated form values from mutation success data
  */
 const getUpdatedFormValues = (
-  data: NonNullable<ActionSuccess<typeof updateUserSettings>['data']>,
+  data: NonNullable<
+    ActionSuccess<ReturnType<typeof updateUserSettings>>['data']
+  >,
   isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {

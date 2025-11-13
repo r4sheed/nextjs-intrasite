@@ -86,7 +86,7 @@ const SecuritySection = () => {
   }, [user?.twoFactorEnabled, twoFactorForm]);
 
   const passwordMutation = useMutation<
-    ActionSuccess<typeof updateUserSettings>,
+    ActionSuccess<ReturnType<typeof updateUserSettings>>,
     ErrorResponse,
     PasswordFormData
   >({
@@ -120,7 +120,7 @@ const SecuritySection = () => {
   });
 
   const twoFactorMutation = useMutation<
-    ActionSuccess<typeof updateUserSettings>,
+    ActionSuccess<ReturnType<typeof updateUserSettings>>,
     ErrorResponse,
     TwoFactorFormData
   >({
