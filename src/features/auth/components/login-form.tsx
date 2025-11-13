@@ -9,8 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
@@ -51,11 +50,13 @@ import type React from 'react';
 
 /**
  * Hook for extracting URL parameters related to login state
+ * Parameters are consumed only once and cleaned on successful login
  * @returns Object with URL-based error and success messages
  */
 const useUrlParams = () => {
   const searchParams = useSearchParams();
 
+  // Extract parameters
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? AUTH_ERRORS.oauthNotLinked
@@ -168,6 +169,9 @@ const useFormState = (
  * Main hook for login form logic
  */
 const useLoginForm = () => {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const urlParams = useUrlParams();
   const { mutation, isRedirecting } = useLoginMutation();
   const formState = useFormState(mutation, urlParams, isRedirecting);
@@ -185,6 +189,16 @@ const useLoginForm = () => {
     if (formState.isPending) {
       return;
     }
+
+    // Clean auth-related parameters before submitting to prevent stale errors
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('error');
+    newSearchParams.delete('verified');
+    newSearchParams.delete('verify_error');
+
+    // Update URL without triggering navigation
+    router.replace(`${pathname}?${newSearchParams.toString()}`);
+
     mutation.mutate(values);
   };
 
