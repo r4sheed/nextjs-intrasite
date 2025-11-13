@@ -1,6 +1,3 @@
-import { PrismaClient, UserRole } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-
 import { db } from '@/lib/prisma';
 
 async function main() {}
