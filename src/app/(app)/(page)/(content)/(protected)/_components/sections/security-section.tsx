@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +9,6 @@ import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';
 
-import { FormError } from '@/components/form-status';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -36,10 +33,10 @@ import { PasswordInput } from '@/features/auth/components/password-input';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { useSession } from '@/features/auth/hooks/use-session';
 import {
-  AUTH_ERRORS,
   AUTH_INFO,
   AUTH_LABELS,
   AUTH_SUCCESS,
+  AUTH_ERRORS,
 } from '@/features/auth/lib/strings';
 import {
   PasswordSchema,
@@ -98,11 +95,15 @@ const SecuritySection = () => {
     },
     onSuccess: async () => {
       await session.update();
+
       toast.success(AUTH_SUCCESS.passwordUpdated);
       passwordForm.reset(passwordFormDefaultValues);
     },
-    onError: () => {
-      // Form level error surface handles messaging; toast is redundant.
+    onError: error => {
+      const errorMessage = error.message?.key;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      }
     },
     onSettled: () => {
       if (passwordToastIdRef.current !== undefined) {
@@ -125,15 +126,20 @@ const SecuritySection = () => {
     },
     onSuccess: async (result, variables) => {
       await session.update();
+
       const enabled =
         result.data?.twoFactorEnabled ?? variables.twoFactorEnabled ?? false;
-      twoFactorForm.reset({ twoFactorEnabled: enabled });
       toast.success(
         enabled ? AUTH_INFO.twoFactorEnabled : AUTH_INFO.twoFactorDisabled
       );
+
+      twoFactorForm.reset({ twoFactorEnabled: enabled });
     },
-    onError: () => {
-      toast.error(AUTH_ERRORS.securitySettingsUpdateFailed);
+    onError: error => {
+      const errorMessage = error.message?.key;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      }
     },
     onSettled: () => {
       if (twoFactorToastIdRef.current !== undefined) {
@@ -146,7 +152,9 @@ const SecuritySection = () => {
   const handlePasswordSubmit = (values: PasswordFormData) => {
     if (passwordMutation.isPending) return;
 
-    if (values.newPassword === values.currentPassword) {
+    const currentValue =
+      user?.twoFactorEnabled ?? passwordFormDefaultValues.newPassword;
+    if (values.newPassword === currentValue) {
       toast.info(AUTH_ERRORS.passwordUnchanged);
       return;
     }
@@ -165,9 +173,6 @@ const SecuritySection = () => {
 
     twoFactorMutation.mutate(values);
   };
-
-  const passwordErrorMessage = passwordMutation.error?.message?.key;
-  const twoFactorErrorMessage = twoFactorMutation.error?.message?.key;
 
   return (
     <div className="flex flex-col gap-6">
@@ -266,9 +271,7 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="w-full sm:max-w-[65%]">
-            <FormError message={passwordErrorMessage} />
-          </div>
+          <div className="w-full" />
           <Button
             type="submit"
             form="form-password-settings"
@@ -313,9 +316,7 @@ const SecuritySection = () => {
         </CardContent>
         <Separator />
         <CardFooter className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="w-full sm:max-w-[65%]">
-            <FormError message={twoFactorErrorMessage} />
-          </div>
+          <div className="w-full" />
           <Button
             type="submit"
             form="form-two-factor-settings"
