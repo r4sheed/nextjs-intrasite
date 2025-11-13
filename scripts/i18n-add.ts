@@ -48,7 +48,9 @@ const getDomainConfig = () => {
   // Feature domains - dynamically detect from src/features/
   const featuresDir = join(process.cwd(), 'src/features');
   if (existsSync(featuresDir)) {
-    const features = readdirSync(featuresDir).filter(dir => !dir.startsWith('.'));
+    const features = readdirSync(featuresDir).filter(
+      dir => !dir.startsWith('.')
+    );
     for (const feature of features) {
       config[feature] = {
         locales: `src/locales/{lang}/${feature}.json`,
