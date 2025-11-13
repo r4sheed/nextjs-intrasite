@@ -92,7 +92,7 @@ export const updateUserSettingsService = async ({
   values,
 }: UpdateUserSettingsParams): Promise<Response<UpdateUserSettingsData>> => {
   try {
-    const dbUser = await getUserById(userId);
+    const dbUser = await getUserById(userId, { includePassword: true });
 
     if (!dbUser) {
       return response.failure(invalidCredentials());

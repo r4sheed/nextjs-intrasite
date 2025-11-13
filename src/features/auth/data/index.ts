@@ -26,6 +26,7 @@ export {
   getUser,
   getUserById,
   getUserByEmail,
+  getUserData,
   verifyUserCredentials,
 } from './user';
 

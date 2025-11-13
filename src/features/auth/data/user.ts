@@ -2,7 +2,7 @@ import { db } from '@/lib/prisma';
 
 import { User } from '@/features/auth/models';
 
-import type { User as PrismaUser } from '@prisma/client';
+import type { Prisma, User as PrismaUser } from '@prisma/client';
 
 /**
  * Data access layer for User entity
@@ -45,8 +45,8 @@ export type UserLookupOptions = {
  * @returns User object if found, null on error
  */
 const findUser = async <T = PrismaUser>(
-  where: { id: string } | { email: string },
-  select?: Record<string, boolean>
+  where: Prisma.UserWhereUniqueInput,
+  select?: Prisma.UserSelect
 ): Promise<T | null> => {
   try {
     const user = await db.user.findUnique({
@@ -101,10 +101,48 @@ export const getUser = async (
  * @param userId - The user's unique identifier
  * @returns User object if found, null if not found or on database error
  */
-export const getUserById = async (
+export async function getUserById(
   userId: string
-): Promise<PrismaUser | null> => {
-  return await findUser({ id: userId });
+): Promise<UserWithoutPassword | null>;
+export async function getUserById(
+  userId: string,
+  options: { includePassword: true }
+): Promise<PrismaUser | null>;
+export async function getUserById(
+  userId: string,
+  options: { includePassword?: boolean } = {}
+): Promise<UserWithoutPassword | PrismaUser | null> {
+  const includePassword = options.includePassword ?? false;
+
+  if (includePassword) {
+    return await findUser({ id: userId });
+  }
+
+  return await findUser<UserWithoutPassword>(
+    { id: userId },
+    USER_WITHOUT_PASSWORD_SELECT
+  );
+}
+
+type SelectedUser<T extends Prisma.UserSelect> = Prisma.UserGetPayload<{
+  select: T;
+}>;
+
+/**
+ * Fetch a user projection by ID with the provided select clause.
+ * @param userId - The user's unique identifier
+ * @param select - Prisma select configuration describing the desired fields
+ * @returns Projected user data if found, null otherwise
+ */
+export const getUserData = async <T extends Prisma.UserSelect>(
+  userId: string,
+  select: T
+): Promise<SelectedUser<T> | null> => {
+  if (!userId) {
+    return null;
+  }
+
+  return await findUser<SelectedUser<T>>({ id: userId }, select);
 };
 
 /**

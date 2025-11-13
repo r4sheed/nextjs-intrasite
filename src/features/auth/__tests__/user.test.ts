@@ -4,6 +4,7 @@ import {
   getUser,
   getUserByEmail,
   getUserById,
+  getUserData,
   verifyUserCredentials,
 } from '@/features/auth/data/user';
 
@@ -39,7 +40,42 @@ describe('User Data Layer', () => {
   });
 
   describe('getUserById', () => {
-    it('should return success with user data when user exists', async () => {
+    it('returns user data without password by default', async () => {
+      const mockUser = {
+        id: 'user-123',
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'USER' as const,
+        emailVerified: null,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        twoFactorEnabled: false,
+      };
+
+      mockFindUnique.mockResolvedValueOnce(mockUser);
+
+      const response = await getUserById('user-123');
+
+      expect(response).toEqual(mockUser);
+      expect(response).not.toHaveProperty('password');
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          emailVerified: true,
+          image: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          twoFactorEnabled: true,
+        },
+      });
+    });
+
+    it('returns user with password when explicitly requested', async () => {
       const mockUser = {
         id: 'user-123',
         name: 'Test User',
@@ -50,30 +86,33 @@ describe('User Data Layer', () => {
         image: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        twoFactorEnabled: false,
       };
 
-      mockFindUnique.mockResolvedValue(mockUser);
+      mockFindUnique.mockResolvedValueOnce(mockUser);
 
-      const response = await getUserById('user-123');
+      const response = await getUserById('user-123', {
+        includePassword: true,
+      });
 
       expect(response).toEqual(mockUser);
-      expect(response?.id).toBe('user-123');
+      expect(response?.password).toBe('hashedpassword');
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-123' },
       });
     });
 
-    it('should return success with null when user does not exist', async () => {
-      mockFindUnique.mockResolvedValue(null);
+    it('returns null when user does not exist', async () => {
+      mockFindUnique.mockResolvedValueOnce(null);
 
       const response = await getUserById('nonexistent-user');
 
       expect(response).toBeNull();
     });
 
-    it('should return null when database fails', async () => {
+    it('returns null when database lookup fails', async () => {
       const dbError = new Error('Database connection failed');
-      mockFindUnique.mockRejectedValue(dbError);
+      mockFindUnique.mockRejectedValueOnce(dbError);
 
       const response = await getUserById('user-123');
 
@@ -129,7 +168,7 @@ describe('User Data Layer', () => {
         updatedAt: new Date(),
       };
 
-      mockFindUnique.mockResolvedValue(mockUser);
+      mockFindUnique.mockResolvedValueOnce(mockUser);
 
       const response = await getUser({
         id: 'user-123',
@@ -156,7 +195,7 @@ describe('User Data Layer', () => {
         updatedAt: new Date(),
       };
 
-      mockFindUnique.mockResolvedValue(mockUser);
+      mockFindUnique.mockResolvedValueOnce(mockUser);
 
       const response = await getUser({
         email: 'test@example.com',
@@ -179,9 +218,10 @@ describe('User Data Layer', () => {
         image: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        twoFactorEnabled: false,
       };
 
-      mockFindUnique.mockResolvedValue(mockUser);
+      mockFindUnique.mockResolvedValueOnce(mockUser);
 
       const response = await getUser({
         id: 'user-123',
@@ -190,6 +230,20 @@ describe('User Data Layer', () => {
 
       expect(response).toEqual(mockUser);
       expect(response).not.toHaveProperty('password');
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          emailVerified: true,
+          image: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          twoFactorEnabled: true,
+        },
+      });
     });
 
     it('should return success with null when neither ID nor email provided', async () => {
@@ -197,6 +251,43 @@ describe('User Data Layer', () => {
 
       expect(response).toBeNull();
       expect(mockFindUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getUserData', () => {
+    it('returns selected fields for an existing user', async () => {
+      const projection = {
+        id: 'user-456',
+        email: 'partial@example.com',
+      };
+
+      mockFindUnique.mockResolvedValueOnce(projection);
+
+      const result = await getUserData('user-456', {
+        id: true,
+        email: true,
+      });
+
+      expect(result).toEqual(projection);
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { id: 'user-456' },
+        select: { id: true, email: true },
+      });
+    });
+
+    it('returns null when userId is empty', async () => {
+      const result = await getUserData('', { id: true });
+
+      expect(result).toBeNull();
+      expect(mockFindUnique).not.toHaveBeenCalled();
+    });
+
+    it('returns null when the database lookup fails', async () => {
+      mockFindUnique.mockRejectedValueOnce(new Error('db failure'));
+
+      const result = await getUserData('user-789', { id: true });
+
+      expect(result).toBeNull();
     });
   });
 
@@ -294,6 +385,7 @@ describe('User Data Layer', () => {
         () => getUserByEmail('test@example.com'),
         () => getUser({ id: 'test-user-id' }),
         () => getUser({ email: 'test@example.com' }),
+        () => getUserData('test-user-id', { id: true }),
       ];
 
       for (const fn of functionsToTest) {

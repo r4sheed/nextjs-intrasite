@@ -227,11 +227,11 @@ export const authCallbacks = {
     // During sign-in we already have fresh user data provided by the adapter.
     if (user) {
       return updateTokenFromUser(token, {
-        name: user.name ?? null,
-        email: user.email ?? null,
-        image: user.image ?? null,
-        role: user.role ?? UserRole.USER,
-        twoFactorEnabled: user.twoFactorEnabled ?? false,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        role: user.role,
+        twoFactorEnabled: user.twoFactorEnabled,
         isOAuthAccount: user.isOAuthAccount,
       });
     }
@@ -252,11 +252,11 @@ export const authCallbacks = {
     const account = await getAccountByUserId(databaseUser.id);
 
     return updateTokenFromUser(token, {
-      name: databaseUser.name ?? null,
-      email: databaseUser.email ?? null,
-      image: databaseUser.image ?? null,
-      role: databaseUser.role ?? UserRole.USER,
-      twoFactorEnabled: databaseUser.twoFactorEnabled ?? false,
+      name: databaseUser.name,
+      email: databaseUser.email,
+      image: databaseUser.image,
+      role: databaseUser.role,
+      twoFactorEnabled: databaseUser.twoFactorEnabled,
       isOAuthAccount: !!account,
     });
   },
