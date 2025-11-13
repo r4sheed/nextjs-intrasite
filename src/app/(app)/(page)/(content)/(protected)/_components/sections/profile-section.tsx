@@ -92,8 +92,8 @@ const getDefaultFormValues = (
   isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {
-    name: user?.name ?? '',
-    ...(isOAuthAccount ? {} : { email: user?.email ?? '' }),
+    name: user?.name ?? undefined,
+    ...(isOAuthAccount ? {} : { email: user?.email ?? undefined }),
   };
 };
 
@@ -105,7 +105,7 @@ const getUpdatedFormValues = (
   isOAuthAccount: boolean
 ): UserSettingsFormData => {
   return {
-    name: data.name ?? '',
+    name: data.name ?? undefined,
     ...(isOAuthAccount ? {} : { email: data.email }),
   };
 };

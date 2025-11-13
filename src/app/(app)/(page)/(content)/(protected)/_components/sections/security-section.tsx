@@ -46,22 +46,19 @@ import {
   type TwoFactorFormData,
 } from '@/features/auth/schemas';
 
-type PasswordFormValues = PasswordFormData;
-type TwoFactorFormValues = TwoFactorFormData;
-
 const SecuritySection = () => {
   const session = useSession();
   const user = useCurrentUser();
   const passwordToastIdRef = useRef<string | number | undefined>(undefined);
   const twoFactorToastIdRef = useRef<string | number | undefined>(undefined);
 
-  const passwordFormDefaultValues: PasswordFormValues = {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+  const passwordFormDefaultValues = {
+    currentPassword: undefined,
+    newPassword: undefined,
+    confirmPassword: undefined,
   };
 
-  const passwordForm = useForm<PasswordFormValues>({
+  const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(PasswordSchema),
     mode: 'onTouched',
     defaultValues: passwordFormDefaultValues,
@@ -71,7 +68,7 @@ const SecuritySection = () => {
     control: passwordForm.control,
   });
 
-  const twoFactorForm = useForm<TwoFactorFormValues>({
+  const twoFactorForm = useForm<TwoFactorFormData>({
     resolver: zodResolver(TwoFactorSchema),
     defaultValues: {
       twoFactorEnabled: user?.twoFactorEnabled ?? false,
