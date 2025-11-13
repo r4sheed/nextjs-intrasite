@@ -941,36 +941,6 @@ export class RateLimiter {
 
 ---
 
-### ✅ Fix naming conventions in routes.ts
-
-- Changed `PUBLIC_ROUTES` → `publicRoutes`
-- Changed `AUTH_ROUTES` → `authRoutes`
-- Updated all imports and usages in `middleware.ts`
-- **Status:** Completed
-
-### ✅ Remove unnecessary JSDoc @example comments
-
-- Cleaned up 5 auth service files
-- Cleaned up 5 auth action files
-- Removed redundant examples per guidelines: "avoid @example comments unless absolutely necessary"
-- **Status:** Completed
-
-### ✅ Consolidate instruction file redundancies
-
-- Removed duplicate CORE_CODES and CORE_ERRORS definitions from `messages-and-codes.instructions.md`
-- Added cross-references between instruction files
-- **Status:** Completed
-
-### ✅ Social Provider Login UX Improvements
-
-- Added provider-specific loading state tracking
-- Disabled all buttons during OAuth flow
-- Show spinner only for active provider
-- Prevents double-clicks during authentication
-- **Status:** Completed
-
----
-
 ### 📏 FileSize Component
 
 **Priority:** Medium  
@@ -1111,5 +1081,35 @@ const UNITS_COMPACT = ['B', 'K', 'M', 'G', 'T', 'P'];
   Used: <FileSize value={usedBytes} /> / <FileSize value={totalBytes} />
 </div>;
 ```
+
+---
+
+### ✅ Fix naming conventions in routes.ts
+
+- Changed `PUBLIC_ROUTES` → `publicRoutes`
+- Changed `AUTH_ROUTES` → `authRoutes`
+- Updated all imports and usages in `middleware.ts`
+- **Status:** Completed
+
+### ✅ Remove unnecessary JSDoc @example comments
+
+- Cleaned up 5 auth service files
+- Cleaned up 5 auth action files
+- Removed redundant examples per guidelines: "avoid @example comments unless absolutely necessary"
+- **Status:** Completed
+
+### ✅ Consolidate instruction file redundancies
+
+- Removed duplicate CORE_CODES and CORE_ERRORS definitions from `messages-and-codes.instructions.md`
+- Added cross-references between instruction files
+- **Status:** Completed
+
+### ✅ Social Provider Login UX Improvements
+
+- Added provider-specific loading state tracking
+- Disabled all buttons during OAuth flow
+- Show spinner only for active provider
+- Prevents double-clicks during authentication
+- **Status:** Completed
 
 ---
