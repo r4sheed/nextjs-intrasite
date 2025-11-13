@@ -1,9 +1,16 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { randomString } from 'node_modules/zod/v4/core/util.cjs';
-import { Controller, useForm } from 'react-hook-form';
+import {
+  Controller,
+  useForm,
+  useFormState,
+  type FieldNamesMarkedBoolean,
+} from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
@@ -109,12 +116,20 @@ const getUpdatedFormValues = (
  */
 const buildFormPayload = (
   values: UserSettingsFormData,
+  dirtyFields: FieldNamesMarkedBoolean<UserSettingsFormData>,
   isOAuthAccount: boolean
 ): UserSettingsFormData => {
-  return {
-    ...(values.name !== undefined ? { name: values.name } : {}),
-    ...(isOAuthAccount ? {} : { email: values.email }),
-  };
+  const payload: UserSettingsFormData = {};
+
+  if (dirtyFields.name && values.name !== undefined) {
+    payload.name = values.name;
+  }
+
+  if (!isOAuthAccount && dirtyFields.email && values.email !== undefined) {
+    payload.email = values.email;
+  }
+
+  return payload;
 };
 
 /**
@@ -136,6 +151,8 @@ const ProfileSection = () => {
     defaultValues: getDefaultFormValues(user, isOAuthAccount),
   });
 
+  const { dirtyFields } = useFormState({ control: form.control });
+
   const isPending = mutation.isPending;
   const errorMessage = mutation.error?.message?.key;
 
@@ -153,11 +170,13 @@ const ProfileSection = () => {
 
   const onSubmit = (values: UserSettingsFormData) => {
     if (isPending) return;
-    if (!form.formState.isDirty) {
+    const payload = buildFormPayload(values, dirtyFields, isOAuthAccount);
+
+    if (Object.keys(payload).length === 0) {
       toast.info(AUTH_INFO.noChangesToSave);
       return;
     }
-    mutation.mutate(buildFormPayload(values, isOAuthAccount));
+    mutation.mutate(payload);
   };
 
   const onGenerateName = () => {

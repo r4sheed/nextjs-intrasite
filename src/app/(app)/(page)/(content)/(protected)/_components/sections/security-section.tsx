@@ -1,8 +1,10 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useFormState } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
@@ -36,7 +38,6 @@ import {
   AUTH_INFO,
   AUTH_LABELS,
   AUTH_SUCCESS,
-  AUTH_ERRORS,
 } from '@/features/auth/lib/strings';
 import {
   PasswordSchema,
@@ -66,11 +67,19 @@ const SecuritySection = () => {
     defaultValues: passwordFormDefaultValues,
   });
 
+  const { isDirty: isPasswordDirty } = useFormState({
+    control: passwordForm.control,
+  });
+
   const twoFactorForm = useForm<TwoFactorFormValues>({
     resolver: zodResolver(TwoFactorSchema),
     defaultValues: {
       twoFactorEnabled: user?.twoFactorEnabled ?? false,
     },
+  });
+
+  const { isDirty: isTwoFactorDirty } = useFormState({
+    control: twoFactorForm.control,
   });
 
   useEffect(() => {
@@ -152,10 +161,8 @@ const SecuritySection = () => {
   const handlePasswordSubmit = (values: PasswordFormData) => {
     if (passwordMutation.isPending) return;
 
-    const currentValue =
-      user?.twoFactorEnabled ?? passwordFormDefaultValues.newPassword;
-    if (values.newPassword === currentValue) {
-      toast.info(AUTH_ERRORS.passwordUnchanged);
+    if (!isPasswordDirty) {
+      toast.info(AUTH_INFO.noChangesToSave);
       return;
     }
 
@@ -165,8 +172,7 @@ const SecuritySection = () => {
   const handleTwoFactorSubmit = (values: TwoFactorFormData) => {
     if (twoFactorMutation.isPending) return;
 
-    const currentValue = user?.twoFactorEnabled ?? false;
-    if (values.twoFactorEnabled === currentValue) {
+    if (!isTwoFactorDirty) {
       toast.info(AUTH_INFO.noChangesToSave);
       return;
     }
