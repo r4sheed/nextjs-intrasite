@@ -1,14 +1,17 @@
 {
   "navigation": {
     "home": "Kezdőlap",
-    "settings": "Beállítások",
     "error": "Hiba",
     "auth": {
       "login": "Bejelentkezés",
       "sign-up": "Regisztráció",
       "forgot-password": "Elfelejtett jelszó",
       "new-password": "Új jelszó",
-      "verify-email": "Email megerősítés"
+      "verify-email": "Email megerősítés",
+      "settings": "Beállítások",
+      "admin": "Admin",
+      "client": "Kliens",
+      "server": "Szerver"
     }
   }
 }

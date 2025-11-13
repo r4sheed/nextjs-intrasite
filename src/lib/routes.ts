@@ -83,7 +83,7 @@ export const routes = {
   },
   settings: {
     url: '/settings',
-    label: 'settings',
+    label: 'auth.settings',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -92,7 +92,7 @@ export const routes = {
   },
   admin: {
     url: '/test/admin',
-    label: 'admin',
+    label: 'auth.admin',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -101,7 +101,7 @@ export const routes = {
   },
   client: {
     url: '/test/client',
-    label: 'client',
+    label: 'auth.client',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -109,7 +109,7 @@ export const routes = {
   },
   server: {
     url: '/test/server',
-    label: 'server',
+    label: 'auth.server',
     access: 'protected',
     meta: {
       showInNavigation: true,

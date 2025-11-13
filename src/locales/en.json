@@ -149,14 +149,17 @@
   },
   "navigation": {
     "auth": {
+      "admin": "Admin",
+      "client": "Client",
       "forgot-password": "Forgot password",
       "login": "Sign in",
       "new-password": "New password",
+      "server": "Server",
+      "settings": "Settings",
       "sign-up": "Sign up",
       "verify-email": "Verify email"
     },
     "error": "Error",
-    "home": "Home",
-    "settings": "Settings"
+    "home": "Home"
   }
 }
