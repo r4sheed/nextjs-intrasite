@@ -24,6 +24,8 @@ export const AUTH_CODES = {
   // Authentication errors
   invalidCredentials: 'invalid-credentials',
   verificationRequired: 'verification-required',
+  verificationRequiredForPasswordReset:
+    'verification-required-for-password-reset',
   twoFactorRequired: 'two-factor-required',
   twoFactorSessionMissing: 'two-factor-session-missing',
   twoFactorProvisioningRequired: 'two-factor-provisioning-required',
@@ -71,6 +73,8 @@ export const AUTH_ERRORS = {
   // Authentication errors
   invalidCredentials: 'auth.errors.invalid-credentials',
   verificationRequired: 'auth.errors.verification-required',
+  verificationRequiredForPasswordReset:
+    'auth.errors.verification-required-for-password-reset',
   twoFactorRequired: 'auth.errors.two-factor-required',
   twoFactorProvisioningRequired: 'auth.errors.two-factor-provisioning-required',
   callbackError: 'auth.errors.callback-error',

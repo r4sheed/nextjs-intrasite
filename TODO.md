@@ -391,36 +391,6 @@ export const logger = {
 
 ---
 
-### �📝 Email Verification Check in Password Reset
-
-**Priority:** Low  
-**Status:** Not Started
-
-**Issue:**
-
-- `src/features/auth/services/reset-password.ts:40` - "TODO: Implement check for email verified status if applicable before proceeding"
-
-**Description:**
-Currently, the password reset flow does not verify if the user's email is verified before sending the reset email. This could be a security consideration depending on the application's requirements.
-
-**Proposed Solution:**
-Add an optional check to ensure the user's email is verified before allowing password reset:
-
-```typescript
-// In resetPassword service
-if (siteFeatures.emailVerification && user && !user.emailVerified) {
-  // Either:
-  // 1. Return generic success (anti-enumeration)
-  // 2. Send verification email instead
-  // 3. Return specific error (reveals email exists)
-}
-```
-
-**Decision Required:**
-
-- Should unverified users be able to reset their password?
-- What message should be shown to maintain anti-enumeration protection?
-
 ---
 
 ### 🔐 Stronger Password Requirements in Schema
@@ -1083,33 +1053,5 @@ const UNITS_COMPACT = ['B', 'K', 'M', 'G', 'T', 'P'];
 ```
 
 ---
-
-### ✅ Fix naming conventions in routes.ts
-
-- Changed `PUBLIC_ROUTES` → `publicRoutes`
-- Changed `AUTH_ROUTES` → `authRoutes`
-- Updated all imports and usages in `middleware.ts`
-- **Status:** Completed
-
-### ✅ Remove unnecessary JSDoc @example comments
-
-- Cleaned up 5 auth service files
-- Cleaned up 5 auth action files
-- Removed redundant examples per guidelines: "avoid @example comments unless absolutely necessary"
-- **Status:** Completed
-
-### ✅ Consolidate instruction file redundancies
-
-- Removed duplicate CORE_CODES and CORE_ERRORS definitions from `messages-and-codes.instructions.md`
-- Added cross-references between instruction files
-- **Status:** Completed
-
-### ✅ Social Provider Login UX Improvements
-
-- Added provider-specific loading state tracking
-- Disabled all buttons during OAuth flow
-- Show spinner only for active provider
-- Prevents double-clicks during authentication
-- **Status:** Completed
 
 ---

@@ -113,6 +113,18 @@ export const emailVerificationRequired = () =>
   });
 
 /**
+ * 422 - Email verification required for password reset error.
+ * Used when a user attempts to reset their password but their email address is not yet verified.
+ * @returns AppError with status 422.
+ */
+export const emailVerificationRequiredForPasswordReset = () =>
+  new AppError({
+    code: AUTH_CODES.verificationRequiredForPasswordReset,
+    message: { key: AUTH_ERRORS.verificationRequiredForPasswordReset },
+    httpStatus: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+  });
+
+/**
  * 404 - Token not found or invalid.
  * Used when a verification/reset token can't be located or is invalid.
  * @param tokenId Optional token identifier for debugging/details
