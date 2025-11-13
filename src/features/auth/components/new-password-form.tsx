@@ -77,7 +77,7 @@ const useNewPasswordMutation = () => {
   const router = useRouter();
 
   return useMutation<
-    ActionSuccess<typeof updatePassword>,
+    ActionSuccess<ReturnType<typeof updatePassword>>,
     ErrorResponse,
     NewPasswordInput
   >({

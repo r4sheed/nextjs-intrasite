@@ -45,7 +45,7 @@ export const EmailVerificationForm = () => {
   const hasEmail = Boolean(email); // Check if email exists in URL
 
   const mutation = useMutation<
-    ActionSuccess<typeof verifyEmail>,
+    ActionSuccess<ReturnType<typeof verifyEmail>>,
     ErrorResponse,
     VerifyEmailInput
   >({

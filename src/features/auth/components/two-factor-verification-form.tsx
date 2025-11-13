@@ -77,7 +77,7 @@ const useTwoFactorMutations = () => {
   const email = searchParams.get('email');
 
   const verifyMutation = useMutation<
-    ActionSuccess<typeof verifyTwoFactor>,
+    ActionSuccess<ReturnType<typeof verifyTwoFactor>>,
     ErrorResponse,
     VerifyTwoFactorInput
   >({
@@ -100,7 +100,7 @@ const useTwoFactorMutations = () => {
   });
 
   const resendMutation = useMutation<
-    ActionSuccess<typeof resendTwoFactor>,
+    ActionSuccess<ReturnType<typeof resendTwoFactor>>,
     ErrorResponse,
     ResendTwoFactorInput
   >({

@@ -52,7 +52,7 @@ const useSignupForm = () => {
 
   // Mutation for user registration
   const mutation = useMutation<
-    ActionSuccess<typeof registerUser>,
+    ActionSuccess<ReturnType<typeof registerUser>>,
     ErrorResponse,
     RegisterInput
   >({

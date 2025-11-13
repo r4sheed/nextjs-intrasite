@@ -48,7 +48,7 @@ const useForgotPasswordForm = () => {
 
   // Mutation for password reset
   const mutation = useMutation<
-    ActionSuccess<typeof resetPassword>,
+    ActionSuccess<ReturnType<typeof resetPassword>>,
     ErrorResponse,
     ResetInput
   >({
