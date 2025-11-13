@@ -111,7 +111,10 @@ describe('i18n Scripts', () => {
         },
       };
 
-      const getAllKeys = (obj: any, prefix = ''): string[] => {
+      const getAllKeys = (
+        obj: Record<string, unknown>,
+        prefix = ''
+      ): string[] => {
         const keys: string[] = [];
 
         for (const [key, value] of Object.entries(obj)) {
@@ -122,7 +125,7 @@ describe('i18n Scripts', () => {
             value !== null &&
             !Array.isArray(value)
           ) {
-            keys.push(...getAllKeys(value, fullKey));
+            keys.push(...getAllKeys(value as Record<string, unknown>, fullKey));
           } else {
             keys.push(fullKey);
           }
@@ -267,7 +270,7 @@ describe('i18n Scripts', () => {
     });
 
     it('should throw for invalid key format', () => {
-      function parseKey(key: string): any {
+      function parseKey(key: string): string[] {
         const parts = key.split('.');
         if (parts.length < 3) {
           throw new Error('Invalid key format');
@@ -295,16 +298,16 @@ describe('i18n Scripts', () => {
 
   describe('sortObjectKeys utility', () => {
     it('should sort object keys alphabetically', () => {
-      function sortObjectKeys(obj: any): any {
+      function sortObjectKeys(obj: unknown): unknown {
         if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
           return obj;
         }
 
-        const sorted: any = {};
+        const sorted: Record<string, unknown> = {};
         const keys = Object.keys(obj).sort();
 
         for (const key of keys) {
-          sorted[key] = sortObjectKeys(obj[key]);
+          sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
         }
 
         return sorted;
@@ -320,10 +323,13 @@ describe('i18n Scripts', () => {
         },
       };
 
-      const sorted = sortObjectKeys(unsorted);
+      const sorted = sortObjectKeys(unsorted) as Record<string, unknown>;
 
       expect(Object.keys(sorted)).toEqual(['a', 'm', 'nested', 'z']);
-      expect(Object.keys(sorted.nested)).toEqual(['a', 'z']);
+      expect(Object.keys(sorted.nested as Record<string, unknown>)).toEqual([
+        'a',
+        'z',
+      ]);
     });
   });
 

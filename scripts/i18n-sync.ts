@@ -30,16 +30,18 @@ const actions: SyncAction[] = [];
  * Get all keys from a nested object with their values
  */
 function getAllKeysWithValues(
-  obj: any,
+  obj: Record<string, unknown>,
   prefix = ''
-): Array<{ key: string; value: any }> {
-  const result: Array<{ key: string; value: any }> = [];
+): Array<{ key: string; value: unknown }> {
+  const result: Array<{ key: string; value: unknown }> = [];
 
   for (const [key, value] of Object.entries(obj)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      result.push(...getAllKeysWithValues(value, fullKey));
+      result.push(
+        ...getAllKeysWithValues(value as Record<string, unknown>, fullKey)
+      );
     } else {
       result.push({ key: fullKey, value });
     }
@@ -51,7 +53,11 @@ function getAllKeysWithValues(
 /**
  * Set nested property in object
  */
-function setNestedProperty(obj: any, path: string, value: any): void {
+function setNestedProperty(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown
+): void {
   const parts = path.split('.');
   let current = obj;
 
@@ -61,7 +67,7 @@ function setNestedProperty(obj: any, path: string, value: any): void {
     if (!current[part]) {
       current[part] = {};
     }
-    current = current[part];
+    current = current[part] as Record<string, unknown>;
   }
 
   const lastPart = parts[parts.length - 1];
@@ -73,14 +79,17 @@ function setNestedProperty(obj: any, path: string, value: any): void {
 /**
  * Remove nested property from object
  */
-function removeNestedProperty(obj: any, path: string): void {
+function removeNestedProperty(
+  obj: Record<string, unknown>,
+  path: string
+): void {
   const parts = path.split('.');
   let current = obj;
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
     if (!part || !current[part]) return;
-    current = current[part];
+    current = current[part] as Record<string, unknown>;
   }
 
   const lastPart = parts[parts.length - 1];
@@ -92,16 +101,16 @@ function removeNestedProperty(obj: any, path: string): void {
 /**
  * Sort object keys alphabetically (recursive)
  */
-function sortObjectKeys(obj: any): any {
+function sortObjectKeys(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
     return obj;
   }
 
-  const sorted: any = {};
+  const sorted: Record<string, unknown> = {};
   const keys = Object.keys(obj).sort();
 
   for (const key of keys) {
-    sorted[key] = sortObjectKeys(obj[key]);
+    sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
   }
 
   return sorted;
@@ -180,7 +189,7 @@ function kebabToCamel(str: string): string {
  */
 async function syncFlatConstants(
   constantsPath: string,
-  localeKeys: Array<{ key: string; value: any }>,
+  localeKeys: Array<{ key: string; value: unknown }>,
   domain: string,
   constantsContent: string
 ): Promise<void> {

@@ -147,14 +147,14 @@ async function addToLocaleFile(
   const json = JSON.parse(content);
 
   // Navigate to the correct nested object
-  let current: any = json;
+  let current: Record<string, unknown> = json;
   for (let i = 0; i < parsedKey.fullPath.length - 1; i++) {
     const part = parsedKey.fullPath[i];
     if (!part) continue;
-    if (!current[part]) {
+    if (!current[part] || typeof current[part] !== 'object') {
       current[part] = {};
     }
-    current = current[part];
+    current = current[part] as Record<string, unknown>;
   }
 
   // Add the key
@@ -173,11 +173,11 @@ async function addToLocaleFile(
   if (!parentKey) {
     throw new Error('Invalid key path');
   }
-  let parent: any = json;
+  let parent: Record<string, unknown> = json;
   for (let i = 0; i < parsedKey.fullPath.length - 2; i++) {
     const pathPart = parsedKey.fullPath[i];
     if (!pathPart) continue;
-    parent = parent[pathPart];
+    parent = parent[pathPart] as Record<string, unknown>;
   }
   parent[parentKey] = sorted;
 
@@ -188,16 +188,16 @@ async function addToLocaleFile(
 /**
  * Sort object keys alphabetically (recursive)
  */
-function sortObjectKeys(obj: any): any {
+function sortObjectKeys(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
     return obj;
   }
 
-  const sorted: any = {};
+  const sorted: Record<string, unknown> = {};
   const keys = Object.keys(obj).sort();
 
   for (const key of keys) {
-    sorted[key] = sortObjectKeys(obj[key]);
+    sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
   }
 
   return sorted;
