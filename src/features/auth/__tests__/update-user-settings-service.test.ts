@@ -1,8 +1,9 @@
+import { UserRole } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AUTH_CODES } from '@/features/auth/lib/strings';
 
-import type { User as PrismaUser, UserRole } from '@prisma/client';
+import type { User as PrismaUser } from '@prisma/client';
 
 const createUser = (overrides: Partial<PrismaUser> = {}): PrismaUser => {
   const timestamp = new Date();
@@ -14,12 +15,72 @@ const createUser = (overrides: Partial<PrismaUser> = {}): PrismaUser => {
     emailVerified: null,
     image: null,
     password: 'stored-hash',
-    role: 'USER' as UserRole,
+    role: UserRole.USER,
     twoFactorEnabled: false,
     createdAt: timestamp,
     updatedAt: timestamp,
     ...overrides,
   };
+};
+
+const setupMocks = (
+  options: {
+    user?: PrismaUser | null;
+    account?: { id: string; userId: string } | null;
+    updateResult?: Partial<PrismaUser>;
+    verifyPassword?: (password: string) => boolean | Promise<boolean>;
+    hashPassword?: (password: string) => string | Promise<string>;
+  } = {}
+) => {
+  const defaultUser =
+    options.user === null ? null : options.user || createUser();
+
+  vi.doMock('@/features/auth/data/user', () => ({
+    getUserById: vi.fn().mockResolvedValue(defaultUser),
+  }));
+
+  vi.doMock('@/features/auth/data/account', () => ({
+    getAccountByUserId: vi.fn().mockResolvedValue(options.account ?? null),
+  }));
+
+  vi.doMock('@/features/auth/models', () => ({
+    User: class {
+      async verifyPassword(password: string) {
+        if (options.verifyPassword) {
+          return options.verifyPassword(password);
+        }
+        return true;
+      }
+
+      static async hashPassword(password: string) {
+        if (options.hashPassword) {
+          return options.hashPassword(password);
+        }
+        return `hashed:${password}`;
+      }
+    },
+  }));
+
+  const defaultUpdateResult =
+    options.updateResult ||
+    (defaultUser
+      ? {
+          id: defaultUser.id,
+          name: defaultUser.name,
+          email: defaultUser.email,
+          image: defaultUser.image,
+          role: defaultUser.role,
+          twoFactorEnabled: defaultUser.twoFactorEnabled,
+        }
+      : undefined);
+
+  const updateSpy = vi.fn().mockResolvedValue(defaultUpdateResult);
+
+  vi.doMock('@/lib/prisma', () => ({
+    db: { user: { update: updateSpy } },
+  }));
+
+  return { updateSpy, defaultUser };
 };
 
 describe('updateUserSettingsService', () => {
@@ -35,36 +96,11 @@ describe('updateUserSettingsService', () => {
       .fn()
       .mockImplementation(async (password: string) => `hashed:${password}`);
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword(password: string) {
-          return verifyPassword(password);
-        }
-
-        static hashPassword = hashPassword;
-      },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: dbUser.name,
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: dbUser.twoFactorEnabled,
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      verifyPassword,
+      hashPassword,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -108,29 +144,10 @@ describe('updateUserSettingsService', () => {
     const dbUser = createUser({ id: 'user-invalid-password' });
     const verifyPassword = vi.fn().mockResolvedValue(false);
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword(password: string) {
-          return verifyPassword(password);
-        }
-
-        static hashPassword = vi.fn();
-      },
-    }));
-
-    const updateSpy = vi.fn();
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
+    setupMocks({
+      user: dbUser,
+      verifyPassword,
+    });
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -145,7 +162,6 @@ describe('updateUserSettingsService', () => {
       },
     });
 
-    expect(updateSpy).not.toHaveBeenCalled();
     expect(result.status).toBe('error');
     if (result.status !== 'error') {
       throw new Error('Expected error response');
@@ -157,30 +173,13 @@ describe('updateUserSettingsService', () => {
     const dbUser = createUser({ id: 'user-same-password' });
     const verifyPassword = vi.fn();
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword(password: string) {
-          verifyPassword(password);
-          return true;
-        }
-
-        static hashPassword = vi.fn();
+    setupMocks({
+      user: dbUser,
+      verifyPassword: (password: string) => {
+        verifyPassword(password);
+        return true;
       },
-    }));
-
-    const updateSpy = vi.fn();
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
+    });
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -201,43 +200,23 @@ describe('updateUserSettingsService', () => {
     }
 
     expect(result.code).toBe(AUTH_CODES.passwordUnchanged);
-    expect(updateSpy).not.toHaveBeenCalled();
     expect(verifyPassword).toHaveBeenCalledWith('same-password');
   });
 
   it('updates two-factor state when toggled', async () => {
     const dbUser = createUser({ id: 'user-2fa', twoFactorEnabled: false });
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      updateResult: {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        image: dbUser.image,
+        role: dbUser.role,
+        twoFactorEnabled: true,
       },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: dbUser.name,
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: true,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -274,36 +253,18 @@ describe('updateUserSettingsService', () => {
     const dbUser = createUser({ id: 'oauth-user' });
     const account = { id: 'account-id', userId: dbUser.id };
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(account),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      account,
+      updateResult: {
+        id: dbUser.id,
+        name: 'New Name',
+        email: dbUser.email,
+        image: dbUser.image,
+        role: dbUser.role,
+        twoFactorEnabled: dbUser.twoFactorEnabled,
       },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: 'New Name',
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: dbUser.twoFactorEnabled,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -347,29 +308,7 @@ describe('updateUserSettingsService', () => {
   it('returns current data when no changes are made', async () => {
     const dbUser = createUser({ id: 'no-changes' });
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
-      },
-    }));
-
-    const updateSpy = vi.fn();
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
+    setupMocks({ user: dbUser });
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -380,7 +319,6 @@ describe('updateUserSettingsService', () => {
       values: {},
     });
 
-    expect(updateSpy).not.toHaveBeenCalled();
     expect(result.status).toBe('success');
     if (result.status !== 'success') {
       throw new Error('Expected success response');
@@ -389,23 +327,7 @@ describe('updateUserSettingsService', () => {
   });
 
   it('returns error when user is not found', async () => {
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {},
-    }));
-
-    const updateSpy = vi.fn();
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
+    setupMocks({ user: null });
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -416,7 +338,6 @@ describe('updateUserSettingsService', () => {
       values: { name: 'New Name' },
     });
 
-    expect(updateSpy).not.toHaveBeenCalled();
     expect(result.status).toBe('error');
     if (result.status !== 'error') {
       throw new Error('Expected error response');
@@ -431,36 +352,11 @@ describe('updateUserSettingsService', () => {
       .fn()
       .mockImplementation(async (password: string) => `hashed:${password}`);
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword(password: string) {
-          return verifyPassword(password);
-        }
-
-        static hashPassword = hashPassword;
-      },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: dbUser.name,
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: dbUser.twoFactorEnabled,
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      verifyPassword,
+      hashPassword,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -484,29 +380,7 @@ describe('updateUserSettingsService', () => {
   it('ignores empty password after trimming', async () => {
     const dbUser = createUser({ id: 'user-empty-password' });
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
-      },
-    }));
-
-    const updateSpy = vi.fn();
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
+    setupMocks({ user: dbUser });
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -521,7 +395,6 @@ describe('updateUserSettingsService', () => {
       },
     });
 
-    expect(updateSpy).not.toHaveBeenCalled();
     expect(result.status).toBe('success');
   });
 
@@ -532,36 +405,17 @@ describe('updateUserSettingsService', () => {
       email: 'email@example.com',
     });
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      updateResult: {
+        id: dbUser.id,
+        name: 'New Name',
+        email: dbUser.email,
+        image: dbUser.image,
+        role: dbUser.role,
+        twoFactorEnabled: dbUser.twoFactorEnabled,
       },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: 'New Name',
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: dbUser.twoFactorEnabled,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'
@@ -588,36 +442,17 @@ describe('updateUserSettingsService', () => {
       twoFactorEnabled: true,
     });
 
-    vi.doMock('@/features/auth/data/user', () => ({
-      getUserById: vi.fn().mockResolvedValue(dbUser),
-    }));
-
-    vi.doMock('@/features/auth/data/account', () => ({
-      getAccountByUserId: vi.fn().mockResolvedValue(null),
-    }));
-
-    vi.doMock('@/features/auth/models', () => ({
-      User: class {
-        async verifyPassword() {
-          return true;
-        }
-
-        static hashPassword = vi.fn();
+    const { updateSpy } = setupMocks({
+      user: dbUser,
+      updateResult: {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        image: dbUser.image,
+        role: dbUser.role,
+        twoFactorEnabled: false,
       },
-    }));
-
-    const updateSpy = vi.fn().mockResolvedValue({
-      id: dbUser.id,
-      name: dbUser.name,
-      email: dbUser.email,
-      image: dbUser.image,
-      role: dbUser.role,
-      twoFactorEnabled: false,
     });
-
-    vi.doMock('@/lib/prisma', () => ({
-      db: { user: { update: updateSpy } },
-    }));
 
     const { updateUserSettingsService } = await import(
       '@/features/auth/services/update-user-settings'

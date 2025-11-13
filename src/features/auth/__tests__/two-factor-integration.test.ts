@@ -56,6 +56,74 @@ vi.mock('@/features/auth/data/user', () => ({
   getUserById: vi.fn(),
 }));
 
+const createMockUser = (
+  overrides: Partial<{
+    id: string;
+    email: string;
+    name: string;
+    emailVerified: Date;
+    image: string | null;
+    role: UserRole;
+    createdAt: Date;
+    updatedAt: Date;
+    twoFactorEnabled: boolean;
+    password: string;
+    isOAuthAccount: boolean;
+  }> = {}
+) => ({
+  id: 'user-123',
+  email: 'test@example.com',
+  name: 'Test User',
+  emailVerified: new Date(),
+  image: null,
+  role: UserRole.USER,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  twoFactorEnabled: true,
+  password: 'hashed-password',
+  isOAuthAccount: false,
+  ...overrides,
+});
+
+const createMockToken = (
+  overrides: Partial<{
+    id: string;
+    userId: string;
+    token: string;
+    attempts: number;
+    expires: Date;
+    createdAt: Date;
+  }> = {}
+) => ({
+  id: 'token-123',
+  userId: 'user-123',
+  token: '123456',
+  attempts: 0,
+  expires: new Date(Date.now() + 5 * 60 * 1000),
+  createdAt: new Date(),
+  ...overrides,
+});
+
+const setupMocks = (
+  options: {
+    user?: ReturnType<typeof createMockUser>;
+    token?: ReturnType<typeof createMockToken>;
+    signInResult?: unknown;
+    verifyCredentialsResult?: unknown;
+    getUserByIdResult?: unknown;
+  } = {}
+) => {
+  const defaultUser = options.user || createMockUser();
+  const defaultToken = options.token || createMockToken();
+
+  vi.mocked(db.user.findUnique).mockResolvedValue(defaultUser);
+  vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(defaultToken);
+
+  vi.mocked(signIn).mockResolvedValue(options.signInResult ?? undefined);
+
+  return { defaultUser, defaultToken };
+};
+
 describe('2FA Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,51 +137,35 @@ describe('2FA Integration Tests', () => {
   describe('Successful 2FA Flow', () => {
     it('completes full 2FA authentication flow successfully', async () => {
       // Mock user with 2FA enabled
-      const mockUser = {
+      const mockUser = createMockUser({
         id: 'cjld2cjxh0000qzrmn831i7rn',
         email: 'test@example.com',
         name: 'Test User',
-        emailVerified: new Date(),
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        twoFactorEnabled: true,
-        password: 'hashed-password',
-        isOAuthAccount: false,
-      };
+      });
 
-      // Mock database calls
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
+      const mockToken = createMockToken({
+        id: 'clld0k6sr0000t3l8p17ykq5g',
+        userId: mockUser.id,
+        token: '123456',
+      });
+
+      setupMocks({ user: mockUser, token: mockToken });
+
+      // Additional specific mocks for this test
+      vi.mocked(db.twoFactorToken.create).mockResolvedValue(mockToken);
+      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(mockToken);
+      vi.mocked(db.twoFactorConfirmation.findUnique).mockResolvedValue({
+        id: 'confirmation-123',
+        userId: mockUser.id,
+        createdAt: new Date(),
+      });
+
+      // Mock data layer functions
       const { verifyUserCredentials, getUserById } = await import(
         '@/features/auth/data/user'
       );
       vi.mocked(verifyUserCredentials).mockResolvedValue(mockUser);
       vi.mocked(getUserById).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.create).mockResolvedValue({
-        id: 'clld0k6sr0000t3l8p17ykq5g',
-        userId: 'cjld2cjxh0000qzrmn831i7rn',
-        token: '123456',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      });
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue({
-        id: 'clld0k6sr0000t3l8p17ykq5g',
-        userId: 'cjld2cjxh0000qzrmn831i7rn',
-        token: '123456',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      });
-      vi.mocked(db.twoFactorConfirmation.findUnique).mockResolvedValue({
-        id: 'confirmation-123',
-        userId: 'cjld2cjxh0000qzrmn831i7rn',
-        createdAt: new Date(),
-      });
-
-      // Mock signIn calls
-      vi.mocked(signIn).mockResolvedValue(undefined);
 
       // Step 1: Login with valid credentials (should trigger 2FA)
       const loginResult = await loginUser({
@@ -150,33 +202,16 @@ describe('2FA Integration Tests', () => {
 
   describe('Failed Attempts Lockout', () => {
     it('locks out user after maximum failed verification attempts', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Mock token with max attempts
-      const maxAttemptsToken = {
+      const mockUser = createMockUser({ id: 'user-123' });
+      const maxAttemptsToken = createMockToken({
         id: 'clld0k6sr0000t3l8p17ykq5g',
         userId: 'user-123',
-        token: '123456',
         attempts: TWO_FACTOR_MAX_ATTEMPTS,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      };
+      });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(
-        maxAttemptsToken
-      );
+      setupMocks({ user: mockUser, token: maxAttemptsToken });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.delete).mockResolvedValue(maxAttemptsToken);
       const { getUserById } = await import('@/features/auth/data/user');
       vi.mocked(getUserById).mockResolvedValue(mockUser);
@@ -197,30 +232,16 @@ describe('2FA Integration Tests', () => {
     });
 
     it('increments attempts on failed verification', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const token = {
+      const mockUser = createMockUser({ id: 'user-123' });
+      const token = createMockToken({
         id: 'cjld2cjxh0000qzrmn831i7rn',
         userId: 'user-123',
-        token: '123456',
         attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      };
+      });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(token);
+      setupMocks({ user: mockUser, token });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.update).mockResolvedValue({
         ...token,
         attempts: 1,
@@ -247,31 +268,16 @@ describe('2FA Integration Tests', () => {
 
   describe('Resend Rate Limiting', () => {
     it('prevents resend within cooldown period', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Mock existing token within cooldown
-      const recentToken = {
+      const mockUser = createMockUser({ id: 'user-123' });
+      const recentToken = createMockToken({
         id: 'clld0k6sr0000t3l8p17ykq5g',
         userId: 'user-123',
-        token: '123456',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
         createdAt: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
-      };
+      });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(recentToken);
+      setupMocks({ user: mockUser, token: recentToken });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.findFirst).mockResolvedValue(recentToken);
       vi.mocked(db.twoFactorToken.count).mockResolvedValue(2);
       const { getUserById } = await import('@/features/auth/data/user');
@@ -289,40 +295,21 @@ describe('2FA Integration Tests', () => {
     });
 
     it('allows resend after cooldown period', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Mock old token outside cooldown
-      const oldToken = {
+      const mockUser = createMockUser({ id: 'user-123' });
+      const oldToken = createMockToken({
         id: 'clld0k6sr0000t3l8p17ykq5g',
         userId: 'user-123',
-        token: '123456',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
         createdAt: new Date(Date.now() - 6 * 60 * 1000), // 6 minutes ago
-      };
-
-      const newToken = {
+      });
+      const newToken = createMockToken({
         id: 'clld0k6sr0000t3l8p17ykq5h',
         userId: 'user-123',
         token: '654321',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      };
+      });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(oldToken);
+      setupMocks({ user: mockUser, token: oldToken });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.findFirst).mockResolvedValue(null); // No recent token
       vi.mocked(db.twoFactorToken.count).mockResolvedValue(1);
       vi.mocked(db.twoFactorToken.create).mockResolvedValue(newToken);
@@ -344,31 +331,16 @@ describe('2FA Integration Tests', () => {
 
   describe('Token Expiry', () => {
     it('rejects verification with expired token', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-        image: null,
-        role: UserRole.USER,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      // Mock expired token
-      const expiredToken = {
+      const mockUser = createMockUser({ id: 'user-123' });
+      const expiredToken = createMockToken({
         id: 'clld0k6sr0000t3l8p17ykq5g',
         userId: 'user-123',
-        token: '123456',
-        attempts: 0,
         expires: new Date(Date.now() - 60 * 1000), // 1 minute ago
-        createdAt: new Date(Date.now() - 6 * 60 * 1000),
-      };
+      });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
-      vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(expiredToken);
+      setupMocks({ user: mockUser, token: expiredToken });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.delete).mockResolvedValue(expiredToken);
       const { getUserById } = await import('@/features/auth/data/user');
       vi.mocked(getUserById).mockResolvedValue(mockUser);
@@ -389,27 +361,21 @@ describe('2FA Integration Tests', () => {
     });
 
     it('automatically cleans up expired tokens during generation', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'hashed-password',
-        emailVerified: new Date(),
-        twoFactorEnabled: true,
-        name: 'Test User',
-      };
+      const mockUser = createMockUser({ id: 'user-123' });
 
-      vi.mocked(db.user.findUnique).mockResolvedValue(mockUser);
+      setupMocks({ user: mockUser });
+
+      // Additional mocks for this test
       vi.mocked(db.twoFactorToken.findUnique).mockResolvedValue(null);
       vi.mocked(db.twoFactorToken.findFirst).mockResolvedValue(null);
       vi.mocked(db.twoFactorToken.count).mockResolvedValue(0);
-      vi.mocked(db.twoFactorToken.create).mockResolvedValue({
-        id: 'token-123',
-        userId: 'user-123',
-        token: '123456',
-        attempts: 0,
-        expires: new Date(Date.now() + 5 * 60 * 1000),
-        createdAt: new Date(),
-      });
+      vi.mocked(db.twoFactorToken.create).mockResolvedValue(
+        createMockToken({
+          id: 'token-123',
+          userId: 'user-123',
+          token: '123456',
+        })
+      );
       vi.mocked(db.twoFactorToken.deleteMany).mockResolvedValue({ count: 2 });
 
       // Generate token (should clean up expired ones)
