@@ -10,15 +10,26 @@ interface UserCardProps {
 
 interface UserDataProps {
   label: string;
-  value: string | null | undefined;
+  value: string | boolean | null | undefined;
+  text?: {
+    true: string;
+    false: string;
+  };
 }
 
-const UserData = ({ label, value }: UserDataProps) => {
+const UserData = ({ label, value, text }: UserDataProps) => {
+  const displayValue =
+    typeof value === 'boolean' && text
+      ? value
+        ? text.true
+        : text.false
+      : value;
+
   return (
     <div className="flex flex-row items-center justify-between rounded-lg border p-3">
       <Badge>{label}</Badge>
       <p className="max-w-[180px] truncate">
-        <Badge variant="secondary">{value}</Badge>
+        <Badge variant="secondary">{displayValue}</Badge>
       </p>
     </div>
   );
@@ -35,7 +46,16 @@ const UserCard = ({ user, title }: UserCardProps) => {
         <UserData label="email" value={user?.email} />
         <UserData label="name" value={user?.name} />
         <UserData label="role" value={user?.role} />
-        <UserData label="isOAuth" value={user?.isOAuth ? 'YES' : 'NO'} />
+        <UserData
+          label="twoFactorEnabled"
+          value={user?.twoFactorEnabled}
+          text={{ true: 'Enabled', false: 'Disabled' }}
+        />
+        <UserData
+          label="isOAuth"
+          value={user?.isOAuth}
+          text={{ true: 'Yes', false: 'No' }}
+        />
       </CardContent>
     </Card>
   );
