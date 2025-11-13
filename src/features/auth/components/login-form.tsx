@@ -16,6 +16,7 @@ import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
 import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -260,7 +261,9 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       {t(AUTH_LABELS.emailDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
@@ -295,7 +298,9 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       {t(AUTH_LABELS.passwordDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
