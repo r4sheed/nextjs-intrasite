@@ -217,5 +217,6 @@ export const AUTH_LABELS = {
   rememberPasswordCtaText: 'labels.remember-password-cta-text',
   signupCtaText: 'labels.signup-cta-text',
   verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
+
   twoFactorToggle: 'labels.two-factor-toggle',
 } as const;

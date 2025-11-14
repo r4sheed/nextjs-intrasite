@@ -78,7 +78,7 @@ function addLabelGroupSeparators(lines: string[]): string[] {
       if (
         prevRank !== null &&
         rank !== prevRank &&
-        (groupCounts.get(rank) || 0) > 1
+        (groupCounts.get(rank) || 0) >= 1
       ) {
         result.push('');
       }
