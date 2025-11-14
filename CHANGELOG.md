@@ -137,7 +137,7 @@ Implemented comprehensive environment validation using Zod schemas with fail-fas
 
 - **New Validation System (`src/lib/env.ts`):**
   - Centralized Zod schema for all environment variables
-  - Custom URL validation supporting long Prisma Accelerate URLs (up to 2000 chars)
+  - Custom URL validation supporting long Prisma Accelerate URLs
   - Fail-fast validation with clear error messages
   - Type-safe exports replacing `process.env` usage
 
