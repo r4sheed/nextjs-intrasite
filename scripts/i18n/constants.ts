@@ -26,6 +26,7 @@ export const LABEL_SUFFIX_ORDER = [
   'title',
   'subtitle',
   'description',
+  'tab',
   'label',
   'placeholder',
   'button',
