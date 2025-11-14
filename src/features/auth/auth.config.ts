@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 
-import { env, envHelpers } from '@/lib/env';
+import { env } from '@/lib/env';
 import { db } from '@/lib/prisma';
 import { routes } from '@/lib/routes';
 
@@ -12,26 +12,29 @@ import { getUserByEmail, verifyUserCredentials } from '@/features/auth/data';
 import { loginSchema } from '@/features/auth/schemas';
 
 // Build providers array conditionally based on available environment variables
-const providers = [
-  // Only include Google provider if credentials are available
-  ...(envHelpers.hasGoogleOAuth()
-    ? [
-        Google({
-          clientId: env.GOOGLE_CLIENT_ID!,
-          clientSecret: env.GOOGLE_CLIENT_SECRET!,
-        }),
-      ]
-    : []),
-  // Only include GitHub provider if credentials are available
-  ...(envHelpers.hasGithubOAuth()
-    ? [
-        Github({
-          clientId: env.GITHUB_CLIENT_ID!,
-          clientSecret: env.GITHUB_CLIENT_SECRET!,
-        }),
-      ]
-    : []),
+const providers = [];
 
+// Only include Google provider if credentials are available
+if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+  providers.push(
+    Google({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    })
+  );
+}
+
+// Only include GitHub provider if credentials are available
+if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+  providers.push(
+    Github({
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+    })
+  );
+}
+
+providers.push(
   Credentials({
     async authorize(credentials) {
       const parsed = loginSchema.safeParse(credentials);
@@ -63,8 +66,8 @@ const providers = [
       const verifiedUser = await verifyUserCredentials(email, password);
       return verifiedUser;
     },
-  }),
-];
+  })
+);
 
 export const authConfig = {
   adapter: PrismaAdapter(db),
