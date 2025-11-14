@@ -201,7 +201,9 @@ const SecuritySection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{t(AUTH_LABELS.currentPassword)}</FieldTitle>
+                    <FieldTitle>
+                      {t(AUTH_LABELS.currentPasswordLabel)}
+                    </FieldTitle>
                     <FieldDescription>
                       {t(AUTH_LABELS.currentPasswordDescription)}
                     </FieldDescription>
@@ -257,7 +259,9 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>{t(AUTH_LABELS.confirmPassword)}</FieldTitle>
+                      <FieldTitle>
+                        {t(AUTH_LABELS.confirmPasswordLabel)}
+                      </FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}

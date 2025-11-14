@@ -312,7 +312,7 @@ export const TwoFactorVerificationForm = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="sr-only">
-                    {t(AUTH_LABELS.otpCode)}
+                    {t(AUTH_LABELS.otpCodeLabel)}
                   </FieldLabel>
                   <InputOTP
                     {...field}
