@@ -209,5 +209,7 @@ export const envHelpers = {
   hasMinIO: () => !!(env.MINIO_ROOT_USER && env.MINIO_ROOT_PASSWORD),
 } as const;
 
+// Convenience exports for easier importing
+export const { isDev, isProduction, isTest, isDevOrTest, getEnvironment, isEdgeRuntime, hasEmail, hasGoogleOAuth, hasGithubOAuth, hasOAuth, hasMinIO } = envHelpers;
 // Export the schema for testing purposes
 export { envSchema };
