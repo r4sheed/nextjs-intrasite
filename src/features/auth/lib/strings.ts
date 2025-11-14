@@ -216,7 +216,7 @@ export const AUTH_LABELS = {
   signupCtaText: 'labels.signup-cta-text',
   verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
 
-  hidePassword: 'labels.hide-password',
-  showPassword: 'labels.show-password',
+  hidePasswordButton: 'labels.hide-password-button',
+  showPasswordButton: 'labels.show-password-button',
   twoFactorToggle: 'labels.two-factor-toggle',
 } as const;

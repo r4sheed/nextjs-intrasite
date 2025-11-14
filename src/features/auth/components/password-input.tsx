@@ -36,8 +36,8 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
           disabled={props.disabled}
           aria-label={
             showPassword
-              ? t(AUTH_LABELS.hidePassword)
-              : t(AUTH_LABELS.showPassword)
+              ? t(AUTH_LABELS.hidePasswordButton)
+              : t(AUTH_LABELS.showPasswordButton)
           }
         >
           {showPassword ? (
