@@ -235,7 +235,7 @@ const NewPasswordForm = ({
               </Field>
 
               <FieldDescription className="text-center">
-                {t(AUTH_LABELS.rememberPasswordCta)}{' '}
+                {t(AUTH_LABELS.rememberPasswordCtaText)}{' '}
                 <Link href={routes.auth.login.url}>
                   {t(AUTH_LABELS.backToLoginButton)}
                 </Link>

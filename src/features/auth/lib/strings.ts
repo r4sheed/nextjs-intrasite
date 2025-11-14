@@ -173,7 +173,7 @@ export const AUTH_LABELS = {
   confirmPassword: 'labels.confirm-password',
   newPassword: 'labels.new-password',
   twoFactorToggle: 'labels.two-factor-toggle',
-  otp: 'labels.otp-code',
+  otpCode: 'labels.otp-code',
 
   // Form placeholders
   emailPlaceholder: 'labels.email-placeholder',
@@ -198,24 +198,25 @@ export const AUTH_LABELS = {
   // Buttons
   loginButton: 'labels.login-button',
   signupButton: 'labels.signup-button',
-  forgotPasswordButton: 'labels.forgot-password-button',
   newPasswordButton: 'labels.new-password-button',
   backToLoginButton: 'labels.back-to-login-button',
   verifyEmailButton: 'labels.verify-email-button',
   verifyButton: 'labels.verify-button',
   resendCodeButton: 'labels.resend-code-button',
+  resetPasswordButton: 'labels.reset-password-button',
   updatePasswordButton: 'labels.update-password-button',
   saveChangesButton: 'labels.save-changes-button',
   changeAvatarButton: 'labels.change-avatar-button',
   randomButton: 'labels.random-button',
 
   // Links and CTAs
-  forgotPasswordLink: 'labels.forgot-password-link',
   signupCtaText: 'labels.signup-cta-text',
   signupCtaLink: 'labels.signup-cta-link',
   loginCtaText: 'labels.login-cta-text',
   loginCtaLink: 'labels.login-cta-link',
-  rememberPasswordCta: 'labels.remember-password-cta',
+  forgotPasswordLink: 'labels.forgot-password-link',
+  rememberPasswordCtaText: 'labels.remember-password-cta-text',
+  rememberPasswordLink: 'labels.remember-password-link',
 
   // Other UI text
   orContinueWith: 'labels.or-continue-with',
