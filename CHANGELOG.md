@@ -122,3 +122,42 @@ Added email parameter to verification URLs to leverage the composite unique inde
 No schema changes needed - composite unique constraint `@@unique([email, token])` already exists.
 
 **Status:** Completed
+
+#### Environment Validation with Zod
+
+**Completed:** November 2025
+
+**Issue:**
+Environment variables were not properly validated, causing runtime errors when DATABASE_URL or AUTH_SECRET were undefined or invalid.
+
+**Description:**
+Implemented comprehensive environment validation using Zod schemas with fail-fast approach, supporting long Prisma Accelerate URLs and providing user-friendly error messages.
+
+**Changes Made:**
+
+- **New Validation System (`src/lib/env.ts`):**
+  - Centralized Zod schema for all environment variables
+  - Custom URL validation supporting long Prisma Accelerate URLs (up to 2000 chars)
+  - Fail-fast validation with clear error messages
+  - Type-safe exports replacing `process.env` usage
+
+- **Environment Configuration:**
+  - Updated `.env` and `.env.example` with proper structure and documentation
+
+- **Test Environment Setup:**
+  - Updated `vitest.config.ts` to load test environment variables
+  - Added comprehensive test suite (12 test cases) for validation logic
+
+- **Error Handling Improvements:**
+  - Simplified error messages with actionable quick fixes
+  - Better developer experience with clear validation feedback
+
+**Benefits:**
+
+- ✅ **Type Safety:** All environment variables are now type-safe
+- ✅ **Fail-Fast Validation:** Catches configuration issues at startup
+- ✅ **Long URL Support:** Handles Prisma Accelerate URLs properly
+- ✅ **Developer Experience:** Clear error messages with quick fixes
+- ✅ **Test Coverage:** Comprehensive validation testing (12 tests)
+
+**Status:** Completed
