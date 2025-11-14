@@ -5,8 +5,8 @@ applyTo: '**'
 
 # Error Codes, Messages, and i18n Keys Guidelines
 
-> **Version:** 2.0  
-> **Last Updated:** January 2025  
+> **Version:** 2.1  
+> **Last Updated:** November 2025  
 > **Target:** Next.js 15+, TypeScript 5+, i18n-ready
 
 ---
@@ -25,7 +25,7 @@ This document establishes a **unified, consistent pattern** for defining error c
 
 ## Core Principles
 
-1. **kebab-case for i18n keys and error code values** - `'invalid-credentials'`, `'auth.errors.email-required'`
+1. **kebab-case for i18n keys and error code values** - `'invalid-credentials'`, `'errors.email-required'`
 2. **camelCase for TypeScript property names** - `AUTH_CODES.invalidCredentials` (property name), value: `'invalid-credentials'`
 3. **Domain-separated i18n files** - `/locales/{lang}/{domain}.json` (common.json, errors.json, auth.json)
 4. **Feature constants in one file** - `strings.ts` contains all codes and message keys for a feature
@@ -113,19 +113,19 @@ export type AuthCode = (typeof AUTH_CODES)[keyof typeof AUTH_CODES];
  */
 export const AUTH_ERRORS = {
   // Validation errors
-  invalidFields: 'auth.errors.invalid-fields',
-  emailRequired: 'auth.errors.email-required',
-  emailInvalid: 'auth.errors.email-invalid',
-  passwordRequired: 'auth.errors.password-required',
-  passwordTooShort: 'auth.errors.password-too-short',
+  invalidFields: 'errors.invalid-fields',
+  emailRequired: 'errors.email-required',
+  emailInvalid: 'errors.email-invalid',
+  passwordRequired: 'errors.password-required',
+  passwordTooShort: 'errors.password-too-short',
 
   // Authentication errors
-  invalidCredentials: 'auth.errors.invalid-credentials',
-  verificationRequired: 'auth.errors.verification-required',
+  invalidCredentials: 'errors.invalid-credentials',
+  verificationRequired: 'errors.verification-required',
 
   // User errors
-  userNotFound: 'auth.errors.user-not-found',
-  emailExists: 'auth.errors.email-exists',
+  userNotFound: 'errors.user-not-found',
+  emailExists: 'errors.email-exists',
 } as const;
 
 /**
@@ -135,12 +135,12 @@ export const AUTH_ERRORS = {
  * Confirmation messages for successful operations
  */
 export const AUTH_SUCCESS = {
-  login: 'auth.success.login',
-  signup: 'auth.success.signup',
-  emailVerified: 'auth.success.email-verified',
-  verificationSent: 'auth.success.verification-sent',
-  passwordUpdated: 'auth.success.password-updated',
-  passwordResetSent: 'auth.success.password-reset-sent',
+  login: 'success.login',
+  signup: 'success.signup',
+  emailVerified: 'success.email-verified',
+  verificationSent: 'success.verification-sent',
+  passwordUpdated: 'success.password-updated',
+  passwordResetSent: 'success.password-reset-sent',
 } as const;
 
 /**
@@ -150,9 +150,9 @@ export const AUTH_SUCCESS = {
  * General informational messages, status updates, and transient UI feedback
  */
 export const AUTH_INFO = {
-  savingPreferences: 'auth.info.saving-preferences',
-  noChangesToSave: 'auth.info.no-changes-to-save',
-  updatingSecuritySettings: 'auth.info.updating-security-settings',
+  savingPreferences: 'info.saving-preferences',
+  noChangesToSave: 'info.no-changes-to-save',
+  updatingSecuritySettings: 'info.updating-security-settings',
 } as const;
 
 /**
@@ -163,25 +163,25 @@ export const AUTH_INFO = {
  */
 export const AUTH_LABELS = {
   // Page titles
-  signupTitle: 'auth.labels.signup-title',
-  loginTitle: 'auth.labels.login-title',
-  verificationTitle: 'auth.labels.verification-title',
-  forgotPasswordTitle: 'auth.labels.forgot-password-title',
-  newPasswordTitle: 'auth.labels.new-password-title',
+  signupTitle: 'labels.signup-title',
+  loginTitle: 'labels.login-title',
+  verificationTitle: 'labels.verification-title',
+  forgotPasswordTitle: 'labels.forgot-password-title',
+  newPasswordTitle: 'labels.new-password-title',
 
   // Form fields
-  emailLabel: 'auth.labels.email',
-  emailPlaceholder: 'auth.labels.email-placeholder',
-  passwordLabel: 'auth.labels.password',
-  passwordPlaceholder: 'auth.labels.password-placeholder',
+  emailLabel: 'labels.email',
+  emailPlaceholder: 'labels.email-placeholder',
+  passwordLabel: 'labels.password',
+  passwordPlaceholder: 'labels.password-placeholder',
 
   // Buttons
-  loginButton: 'auth.labels.login-button',
-  signupButton: 'auth.labels.signup-button',
+  loginButton: 'labels.login-button',
+  signupButton: 'labels.signup-button',
 
   // Links
-  forgotPasswordLink: 'auth.labels.forgot-password',
-  backToLogin: 'auth.labels.back-to-login',
+  forgotPasswordLink: 'labels.forgot-password',
+  backToLogin: 'labels.back-to-login',
 } as const;
 ```
 
@@ -239,30 +239,30 @@ const CONFIG = {
 ### Error Messages (`*_ERRORS`)
 
 - **TypeScript Property:** `camelCase` (e.g., `invalidCredentials`)
-- **String Value:** `kebab-case` with dots (e.g., `'auth.errors.invalid-credentials'`)
+- **String Value:** `kebab-case` with dots (e.g., `'errors.invalid-credentials'`)
 - **Purpose:** User-facing error messages
-- **Usage:** `message: { key: AUTH_ERRORS.invalidCredentials }` → i18n: `'auth.errors.invalid-credentials'`
+- **Usage:** `message: { key: AUTH_ERRORS.invalidCredentials }` → i18n: `'errors.invalid-credentials'`
 
 ### Success Messages (`*_SUCCESS`)
 
 - **TypeScript Property:** `camelCase` (e.g., `emailVerified`)
-- **String Value:** `kebab-case` with dots (e.g., `'auth.success.email-verified'`)
+- **String Value:** `kebab-case` with dots (e.g., `'success.email-verified'`)
 - **Purpose:** Confirmation messages for successful operations
-- **Usage:** `message: { key: AUTH_SUCCESS.emailVerified }` → i18n: `'auth.success.email-verified'`
+- **Usage:** `message: { key: AUTH_SUCCESS.emailVerified }` → i18n: `'success.email-verified'`
 
 ### UI Labels (`*_LABELS`)
 
 - **TypeScript Property:** `camelCase` (e.g., `loginTitle`)
-- **String Value:** `kebab-case` with dots (e.g., `'auth.labels.login-title'`)
+- **String Value:** `kebab-case` with dots (e.g., `'labels.login-title'`)
 - **Purpose:** Static UI text (titles, labels, buttons, placeholders)
-- **Usage:** `<h1>{t(AUTH_LABELS.loginTitle)}</h1>` → i18n: `'auth.labels.login-title'`
+- **Usage:** `<h1>{t(AUTH_LABELS.loginTitle)}</h1>` → i18n: `'labels.login-title'`
 
 ### Info Messages (`*_INFO`)
 
 - **TypeScript Property:** `camelCase` (e.g., `savingPreferences`)
-- **String Value:** `kebab-case` with dots (e.g., `'auth.info.saving-preferences'`)
+- **String Value:** `kebab-case` with dots (e.g., `'info.saving-preferences'`)
 - **Purpose:** General informational messages, status updates, and transient UI feedback (e.g., "Saving...", "No changes to save")
-- **Usage:** `{t(AUTH_INFO.savingPreferences)}` → i18n: `'auth.info.saving-preferences'`
+- **Usage:** `{t(AUTH_INFO.savingPreferences)}` → i18n: `'info.saving-preferences'`
 
 ---
 
@@ -275,30 +275,30 @@ const CONFIG = {
 ```typescript
 export const AUTH_LABELS = {
   // Page titles (used across different pages)
-  signupTitle: 'auth.labels.signup-title',
-  loginTitle: 'auth.labels.login-title',
-  changePasswordTitle: 'auth.labels.change-password-title',
-  twoFactorTitle: 'auth.labels.two-factor-title',
+  signupTitle: 'labels.signup-title',
+  loginTitle: 'labels.login-title',
+  changePasswordTitle: 'labels.change-password-title',
+  twoFactorTitle: 'labels.two-factor-title',
 
   // Page descriptions (used for explanatory text)
-  signupSubtitle: 'auth.labels.signup-subtitle',
-  changePasswordDescription: 'auth.labels.change-password-description',
-  twoFactorDescription: 'auth.labels.two-factor-description',
+  signupSubtitle: 'labels.signup-subtitle',
+  changePasswordDescription: 'labels.change-password-description',
+  twoFactorDescription: 'labels.two-factor-description',
 
   // Form field labels (used in various forms)
-  emailLabel: 'auth.labels.email',
-  passwordLabel: 'auth.labels.password',
-  currentPasswordLabel: 'auth.labels.current-password',
+  emailLabel: 'labels.email',
+  passwordLabel: 'labels.password',
+  currentPasswordLabel: 'labels.current-password',
 
   // Field descriptions (used for help text)
-  currentPasswordDescription: 'auth.labels.current-password-description',
-  twoFactorToggleDescription: 'auth.labels.two-factor-toggle-description',
+  currentPasswordDescription: 'labels.current-password-description',
+  twoFactorToggleDescription: 'labels.two-factor-toggle-description',
 
   // Buttons (used across different forms/actions)
-  loginButton: 'auth.labels.login-button',
-  signupButton: 'auth.labels.signup-button',
-  updatePasswordButton: 'auth.labels.update-password-button',
-  saveChangesButton: 'auth.labels.save-changes-button',
+  loginButton: 'labels.login-button',
+  signupButton: 'labels.signup-button',
+  updatePasswordButton: 'labels.update-password-button',
+  saveChangesButton: 'labels.save-changes-button',
 } as const;
 ```
 
@@ -309,12 +309,12 @@ export const AUTH_LABELS = {
 export const AUTH_LABELS = {
   // Security section specific (what if we need these elsewhere?)
   securitySection: {
-    changePasswordTitle: 'auth.labels.change-password-title',
-    updatePasswordButton: 'auth.labels.update-password-button',
+    changePasswordTitle: 'labels.change-password-title',
+    updatePasswordButton: 'labels.update-password-button',
   },
   twoFactorSection: {
-    twoFactorTitle: 'auth.labels.two-factor-title',
-    saveChangesButton: 'auth.labels.save-changes-button',
+    twoFactorTitle: 'labels.two-factor-title',
+    saveChangesButton: 'labels.save-changes-button',
   },
 } as const;
 ```
@@ -426,7 +426,7 @@ export const AUTH_LABELS = {
 4. **Separate by purpose** - ERRORS, SUCCESS, LABELS
 5. **Export types** for all constant objects (`as const`)
 6. **Document sections** with clear comments
-7. **Use namespaced keys** - `auth.errors.*`, `posts.success.*`
+7. **Use domain-relative keys** - `errors.*`, `success.*`, `labels.*` (relative to the domain namespace)
 8. **Keep code self-documenting** - avoid unnecessary @example comments
 9. **Organize by domain** - Separate i18n files for common, errors, and feature-specific strings
 10. **Maximum 2-3 nesting levels** - Keep i18n structure flat and readable
@@ -450,10 +450,10 @@ When creating a new feature:
 
 - [ ] Create `src/features/{feature}/lib/strings.ts`
 - [ ] Define `{FEATURE}_CODES` with camelCase properties and kebab-case values
-- [ ] Define `{FEATURE}_ERRORS` with camelCase properties and kebab-case i18n keys (feature.errors.\*)
-- [ ] Define `{FEATURE}_SUCCESS` with camelCase properties and kebab-case i18n keys (feature.success.\*)
-- [ ] Define `{FEATURE}_INFO` with camelCase properties and kebab-case i18n keys (feature.info.\*)
-- [ ] Define `{FEATURE}_LABELS` with camelCase properties and kebab-case i18n keys (feature.labels.\*)
+- [ ] Define `{FEATURE}_ERRORS` with camelCase properties and kebab-case i18n keys (errors.\*)
+- [ ] Define `{FEATURE}_SUCCESS` with camelCase properties and kebab-case i18n keys (success.\*)
+- [ ] Define `{FEATURE}_INFO` with camelCase properties and kebab-case i18n keys (info.\*)
+- [ ] Define `{FEATURE}_LABELS` with camelCase properties and kebab-case i18n keys (labels.\*)
 - [ ] Create `src/locales/en/{feature}.json` with kebab-case keys
 - [ ] Create `src/locales/hu/{feature}.json` with kebab-case keys (Hungarian translations)
 - [ ] Update error helpers in `src/features/{feature}/lib/errors.ts`
@@ -528,8 +528,8 @@ If a new message category is needed (e.g., `INFO`, `WARNING`):
 
 ```typescript
 export const AUTH_INFO = {
-  sessionExpiring: 'auth.info.sessionExpiring',
-  rateLimitWarning: 'auth.info.rateLimitWarning',
+  sessionExpiring: 'info.sessionExpiring',
+  rateLimitWarning: 'info.rateLimitWarning',
 } as const;
 ```
 
@@ -558,7 +558,7 @@ export const POSTS_LABELS = {
 ## Summary
 
 - **Codes:** camelCase properties, kebab-case values (`invalidCredentials: 'invalid-credentials'`)
-- **i18n keys:** camelCase properties, kebab-case values with dots (`invalidCredentials: 'auth.errors.invalid-credentials'`)
+- **i18n keys:** camelCase properties, kebab-case values with dots (`invalidCredentials: 'errors.invalid-credentials'`)
 - **i18n files:** Domain-separated in `/locales/{lang}/{domain}.json`
 - **Organization:** Single `strings.ts` per feature
 - **Categories:** CODES, ERRORS, SUCCESS, INFO, LABELS

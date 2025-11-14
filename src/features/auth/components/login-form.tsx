@@ -218,7 +218,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
     errorMessage,
   } = useLoginForm();
 
-  const t = useTranslations();
+  const t = useTranslations('auth');
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
