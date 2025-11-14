@@ -203,7 +203,6 @@ export const AUTH_LABELS = {
   backToLoginButton: 'labels.back-to-login-button',
   verifyEmailButton: 'labels.verify-email-button',
   verifyButton: 'labels.verify-button',
-  resendCode: 'labels.resend-code-button',
   resendCodeButton: 'labels.resend-code-button',
   updatePasswordButton: 'labels.update-password-button',
   saveChangesButton: 'labels.save-changes-button',
