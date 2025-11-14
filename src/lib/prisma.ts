@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
-import { isDevelopment } from '@/lib/env';
+import { envHelpers } from '@/lib/env';
 
 /**
  * Creates a singleton PrismaClient instance with Accelerate extension.
@@ -30,4 +30,4 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 export const db = prisma;
 
 // Persist the instance in development to avoid connection issues during hot reloads
-if (isDevelopment()) globalThis.prismaGlobal = prisma;
+if (envHelpers.isDev()) globalThis.prismaGlobal = prisma;

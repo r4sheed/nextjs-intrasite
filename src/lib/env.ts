@@ -209,34 +209,5 @@ export const envHelpers = {
   hasMinIO: () => !!(env.MINIO_ROOT_USER && env.MINIO_ROOT_PASSWORD),
 } as const;
 
-/**
- * Convenience functions for common environment checks
- * These are direct exports for easier importing
- */
-
-/**
- * Check if the application is running in production mode
- * @returns true if NODE_ENV is 'production'
- */
-export const isProduction = envHelpers.isProduction;
-
-/**
- * Check if the application is running in development mode
- * @returns true if NODE_ENV is 'development'
- */
-export const isDevelopment = envHelpers.isDev;
-
-/**
- * Alias for isDevelopment() - shorter name for convenience
- * @returns true if NODE_ENV is 'development'
- */
-export const isDev = envHelpers.isDev;
-
-/**
- * Check if the application is running in test mode
- * @returns true if NODE_ENV is 'test'
- */
-export const isTest = envHelpers.isTest;
-
 // Export the schema for testing purposes
 export { envSchema };
