@@ -128,11 +128,11 @@
       "or-continue-with-text": "Or continue with",
       "remember-password-cta-text": "Remember your password?",
       "signup-cta-text": "Don't have an account?",
+      "verify-2fa-code-sent-text": "Code sent to <tag>{email}</tag>",
       "hide-password": "Hide password",
       "new-password": "New password",
       "show-password": "Show password",
-      "two-factor-toggle": "Enable two-factor authentication",
-      "verify-2fa-code-sent": "Code sent to <tag>{email}</tag>"
+      "two-factor-toggle": "Enable two-factor authentication"
     },
     "success": {
       "email-verified": "Email verified! You can now log in.",

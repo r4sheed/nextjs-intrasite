@@ -218,5 +218,5 @@ export const AUTH_LABELS = {
   orContinueWithText: 'labels.or-continue-with-text',
   showPassword: 'labels.show-password',
   twoFactorToggle: 'labels.two-factor-toggle',
-  verify2faCodeSent: 'labels.verify-2fa-code-sent',
+  verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
 } as const;

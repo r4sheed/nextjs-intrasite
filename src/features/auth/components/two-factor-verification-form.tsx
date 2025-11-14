@@ -296,7 +296,7 @@ export const TwoFactorVerificationForm = () => {
               </p>
               {urlParams.email && (
                 <p className="text-muted-foreground text-sm">
-                  {t.rich(AUTH_LABELS.verify2faCodeSent, {
+                  {t.rich(AUTH_LABELS.verify2faCodeSentText, {
                     email: urlParams.email,
                     tag: chunks => (
                       <span className="font-medium">{chunks}</span>

@@ -129,10 +129,10 @@
       "or-continue-with-text": "Vagy folytasd ezzel",
       "remember-password-cta-text": "Emlékszel a jelszavadra?",
       "signup-cta-text": "Nincs még fiókod?",
+      "verify-2fa-code-sent-text": "Kód elküldve ide: <tag>{email}</tag>",
       "hide-password": "Jelszó elrejtése",
       "show-password": "Jelszó megjelenítése",
-      "two-factor-toggle": "Kétlépcsős hitelesítés engedélyezése",
-      "verify-2fa-code-sent": "Kód elküldve ide: <tag>{email}</tag>"
+      "two-factor-toggle": "Kétlépcsős hitelesítés engedélyezése"
     },
     "success": {
       "email-verified": "E-mail címed megerősítve! Most már be tudsz jelentkezni.",
