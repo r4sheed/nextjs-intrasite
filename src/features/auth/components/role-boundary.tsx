@@ -8,6 +8,7 @@ import { useCurrentRole } from '@/features/auth/hooks/use-current-role';
 import { AUTH_ERRORS } from '@/features/auth/lib/strings';
 
 import type { UserRole } from '@prisma/client';
+
 interface RoleBoundaryProps {
   role: UserRole;
   children: React.ReactNode;
