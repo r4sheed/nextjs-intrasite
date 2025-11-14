@@ -7,6 +7,7 @@
       "email-exists": "This email is already registered.",
       "email-invalid": "Please enter a valid email address.",
       "email-required": "Email is required.",
+      "insufficient-permissions": "You do not have permission to view this content.",
       "invalid-credentials": "Invalid email or password.",
       "invalid-fields": "Please check your input and try again.",
       "login-failed": "Login failed. Please try again.",

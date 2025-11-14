@@ -58,6 +58,7 @@ export const AUTH_ERRORS = {
   emailExists: 'errors.email-exists',
   emailInvalid: 'errors.email-invalid',
   emailRequired: 'errors.email-required',
+  insufficientPermissions: 'errors.insufficient-permissions',
   invalidCredentials: 'errors.invalid-credentials',
   invalidFields: 'errors.invalid-fields',
   loginFailed: 'errors.login-failed',
@@ -74,7 +75,6 @@ export const AUTH_ERRORS = {
   registrationFailed: 'errors.registration-failed',
   securitySettingsUpdateFailed: 'errors.security-settings-update-failed',
   signupFailed: 'errors.signup-failed',
-  testKey: 'errors.test-key',
   tokenExpired: 'errors.token-expired',
   tokenInvalid: 'errors.token-invalid',
   twoFactorCodeExpired: 'errors.two-factor-code-expired',
@@ -86,6 +86,8 @@ export const AUTH_ERRORS = {
   userNotFound: 'errors.user-not-found',
   verificationFailed: 'errors.verification-failed',
   verificationRequired: 'errors.verification-required',
+  verificationRequiredForPasswordReset:
+    'errors.verification-required-for-password-reset',
 } as const;
 
 /**
