@@ -1,12 +1,12 @@
 {
   "common": {
-    "success": "A művelet sikeresen befejeződött",
-    "loading": "Betöltés...",
-    "error": "Hiba történt",
+    "back": "Vissza",
     "cancel": "Mégse",
-    "save": "Mentés",
-    "delete": "Törlés",
     "confirm": "Megerősítés",
-    "back": "Vissza"
+    "delete": "Törlés",
+    "error": "Hiba történt",
+    "loading": "Betöltés...",
+    "save": "Mentés",
+    "success": "A művelet sikeresen befejeződött"
   }
 }

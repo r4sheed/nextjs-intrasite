@@ -1,17 +1,17 @@
 {
   "navigation": {
-    "home": "Home",
-    "error": "Error",
     "auth": {
-      "login": "Sign in",
-      "sign-up": "Sign up",
-      "forgot-password": "Forgot password",
-      "new-password": "New password",
-      "verify-email": "Verify email",
-      "settings": "Settings",
       "admin": "Admin",
       "client": "Client",
-      "server": "Server"
-    }
+      "forgot-password": "Forgot password",
+      "login": "Sign in",
+      "new-password": "New password",
+      "server": "Server",
+      "settings": "Settings",
+      "sign-up": "Sign up",
+      "verify-email": "Verify email"
+    },
+    "error": "Error",
+    "home": "Home"
   }
 }
