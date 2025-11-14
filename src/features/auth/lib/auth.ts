@@ -126,7 +126,7 @@ const mergeTokenIntoSessionUser = (
  * Guards database lookups in the JWT callback when running in an Edge runtime, where Prisma is unavailable.
  */
 const canQueryDatabaseForToken =
-  typeof process === 'undefined' || envHelpers.isEdgeRuntime();
+  typeof process === 'undefined' || !envHelpers.isEdgeRuntime();
 
 const events = {
   /**
