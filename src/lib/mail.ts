@@ -1,3 +1,5 @@
 import { Resend } from 'resend';
 
-export const mail = new Resend(process.env.RESEND_API_KEY);
+import { env } from '@/lib/env';
+
+export const mail = new Resend(env.RESEND_API_KEY);

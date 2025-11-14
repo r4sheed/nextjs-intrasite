@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
+import { env } from '@/lib/env';
+
 /**
  * Creates a singleton PrismaClient instance with Accelerate extension.
  * This ensures a single database connection across the application.
@@ -28,4 +30,4 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 export const db = prisma;
 
 // Persist the instance in development to avoid connection issues during hot reloads
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+if (env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
