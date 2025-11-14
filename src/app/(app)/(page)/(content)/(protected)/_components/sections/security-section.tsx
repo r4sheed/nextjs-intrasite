@@ -4,10 +4,12 @@ import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm, useFormState } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 
 import { execute } from '@/hooks/use-action';
 
@@ -49,6 +51,7 @@ import {
 const SecuritySection = () => {
   const session = useSession();
   const user = useCurrentUser();
+  const t = useTranslations('auth');
   const passwordToastIdRef = useRef<string | number | undefined>(undefined);
   const twoFactorToastIdRef = useRef<string | number | undefined>(undefined);
 
@@ -97,12 +100,12 @@ const SecuritySection = () => {
         confirmPassword: data.confirmPassword,
       }),
     onMutate: () => {
-      passwordToastIdRef.current = toast.loading(AUTH_INFO.updatingPassword);
+      passwordToastIdRef.current = toast.loading(t(AUTH_INFO.updatingPassword));
     },
     onSuccess: async () => {
       await session.update();
 
-      toast.success(AUTH_SUCCESS.passwordUpdated);
+      toast.success(t(AUTH_SUCCESS.passwordUpdated));
       passwordForm.reset(passwordFormDefaultValues);
     },
     onError: error => {
@@ -127,7 +130,7 @@ const SecuritySection = () => {
     mutationFn: data => execute(updateUserSettings, data),
     onMutate: () => {
       twoFactorToastIdRef.current = toast.loading(
-        AUTH_INFO.updatingSecuritySettings
+        t(AUTH_INFO.updatingSecuritySettings)
       );
     },
     onSuccess: async (result, variables) => {
@@ -136,7 +139,7 @@ const SecuritySection = () => {
       const enabled =
         result.data?.twoFactorEnabled ?? variables.twoFactorEnabled ?? false;
       toast.success(
-        enabled ? AUTH_INFO.twoFactorEnabled : AUTH_INFO.twoFactorDisabled
+        enabled ? t(AUTH_INFO.twoFactorEnabled) : t(AUTH_INFO.twoFactorDisabled)
       );
 
       twoFactorForm.reset({ twoFactorEnabled: enabled });
@@ -144,7 +147,7 @@ const SecuritySection = () => {
     onError: error => {
       const errorMessage = error.message?.key;
       if (errorMessage) {
-        toast.error(errorMessage);
+        toast.error(t(errorMessage));
       }
     },
     onSettled: () => {
@@ -159,7 +162,7 @@ const SecuritySection = () => {
     if (passwordMutation.isPending) return;
 
     if (!isPasswordDirty) {
-      toast.info(AUTH_INFO.noChangesToSave);
+      toast.info(t(AUTH_INFO.noChangesToSave));
       return;
     }
 
@@ -170,7 +173,7 @@ const SecuritySection = () => {
     if (twoFactorMutation.isPending) return;
 
     if (!isTwoFactorDirty) {
-      toast.info(AUTH_INFO.noChangesToSave);
+      toast.info(t(AUTH_INFO.noChangesToSave));
       return;
     }
 
@@ -181,9 +184,9 @@ const SecuritySection = () => {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{AUTH_LABELS.changePasswordTitle}</CardTitle>
+          <CardTitle>{t(AUTH_LABELS.changePasswordTitle)}</CardTitle>
           <CardDescription>
-            {AUTH_LABELS.changePasswordDescription}
+            {t(AUTH_LABELS.changePasswordDescription)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -198,21 +201,23 @@ const SecuritySection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.currentPassword}</FieldTitle>
+                    <FieldTitle>{t(AUTH_LABELS.currentPassword)}</FieldTitle>
                     <FieldDescription>
-                      {AUTH_LABELS.currentPasswordDescription}
+                      {t(AUTH_LABELS.currentPasswordDescription)}
                     </FieldDescription>
                     <PasswordInput
                       {...field}
                       id={field.name}
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.passwordPlaceholder}
+                      placeholder={t(AUTH_LABELS.passwordPlaceholder)}
                       disabled={passwordMutation.isPending}
                       required
                     />
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </FieldContent>
                 </Field>
@@ -226,18 +231,20 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>{AUTH_LABELS.newPassword}</FieldTitle>
+                      <FieldTitle>{t(AUTH_LABELS.newPassword)}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
                         autoComplete="new-password"
                         aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_LABELS.newPasswordPlaceholder}
+                        placeholder={t(AUTH_LABELS.newPasswordPlaceholder)}
                         disabled={passwordMutation.isPending}
                         required
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError
+                          errors={translateFieldErrors(t, fieldState.error)}
+                        />
                       )}
                     </FieldContent>
                   </Field>
@@ -250,18 +257,20 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>{AUTH_LABELS.confirmPassword}</FieldTitle>
+                      <FieldTitle>{t(AUTH_LABELS.confirmPassword)}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
                         autoComplete="new-password"
                         aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_LABELS.confirmPasswordPlaceholder}
+                        placeholder={t(AUTH_LABELS.confirmPasswordPlaceholder)}
                         disabled={passwordMutation.isPending}
                         required
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError
+                          errors={translateFieldErrors(t, fieldState.error)}
+                        />
                       )}
                     </FieldContent>
                   </Field>
@@ -278,15 +287,17 @@ const SecuritySection = () => {
             form="form-password-settings"
             disabled={passwordMutation.isPending}
           >
-            {AUTH_LABELS.updatePasswordButton}
+            {t(AUTH_LABELS.updatePasswordButton)}
           </Button>
         </CardFooter>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>{AUTH_LABELS.twoFactorTitle}</CardTitle>
-          <CardDescription>{AUTH_LABELS.twoFactorDescription}</CardDescription>
+          <CardTitle>{t(AUTH_LABELS.twoFactorTitle)}</CardTitle>
+          <CardDescription>
+            {t(AUTH_LABELS.twoFactorDescription)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form
@@ -296,9 +307,9 @@ const SecuritySection = () => {
           >
             <Field orientation="horizontal">
               <FieldContent>
-                <FieldTitle>{AUTH_LABELS.twoFactorToggle}</FieldTitle>
+                <FieldTitle>{t(AUTH_LABELS.twoFactorToggle)}</FieldTitle>
                 <FieldDescription>
-                  {AUTH_LABELS.twoFactorToggleDescription}
+                  {t(AUTH_LABELS.twoFactorToggleDescription)}
                 </FieldDescription>
               </FieldContent>
               <Controller
@@ -323,7 +334,7 @@ const SecuritySection = () => {
             form="form-two-factor-settings"
             disabled={twoFactorMutation.isPending}
           >
-            {AUTH_LABELS.saveChangesButton}
+            {t(AUTH_LABELS.saveChangesButton)}
           </Button>
         </CardFooter>
       </Card>
