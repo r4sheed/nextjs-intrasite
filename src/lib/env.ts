@@ -96,7 +96,7 @@ const validateEnv = (): EnvSchema => {
       '⚠️  Environment variables not loaded. Make sure .env file exists and dotenv is configured.'
     );
     console.warn(
-      "💡 For testing, use: node -p \"require('dotenv').config(); require('./src/lib/env.ts')\""
+      "💡 For testing, add a .env.test file or set variables in vitest.config.ts. Example: loadEnv('test', process.cwd(), '')"
     );
   }
 
