@@ -442,7 +442,9 @@ describe('i18n Manage Script', () => {
         expect(content).not.toContain(
           "invalidCredentials: 'auth.errors.invalid-credentials'"
         );
-        expect(content).toContain("emailRequired: 'auth.errors.email-required'");
+        expect(content).toContain(
+          "emailRequired: 'auth.errors.email-required'"
+        );
       });
 
       it('should throw if property does not exist', async () => {
