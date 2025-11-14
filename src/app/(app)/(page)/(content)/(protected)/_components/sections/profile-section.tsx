@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   Controller,
   useForm,
@@ -13,6 +14,7 @@ import {
 import { toast } from 'sonner';
 
 import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 
 import { execute } from '@/hooks/use-action';
 
@@ -56,6 +58,8 @@ import {
  * Handles loading toast, session update, and success/error notifications
  */
 const useProfileMutation = (session: ReturnType<typeof useSession>) => {
+  const t = useTranslations('auth');
+
   const toastIdRef = useRef<string | number | undefined>(undefined);
 
   return useMutation<
@@ -65,14 +69,14 @@ const useProfileMutation = (session: ReturnType<typeof useSession>) => {
   >({
     mutationFn: data => execute(updateUserSettings, data),
     onMutate: () => {
-      toastIdRef.current = toast.loading(AUTH_INFO.updatingProfile);
+      toastIdRef.current = toast.loading(t(AUTH_INFO.updatingProfile));
     },
     onSuccess: async () => {
       await session.update();
-      toast.success(AUTH_SUCCESS.profileUpdated);
+      toast.success(t(AUTH_SUCCESS.profileUpdated));
     },
     onError: () => {
-      toast.error(AUTH_ERRORS.profileUpdateFailed);
+      toast.error(t(AUTH_ERRORS.profileUpdateFailed));
     },
     onSettled: () => {
       if (toastIdRef.current !== undefined) {
@@ -136,6 +140,8 @@ const buildFormPayload = (
 const ProfileSection = () => {
   const session = useSession();
   const user = useCurrentUser();
+  const t = useTranslations('auth');
+
   const isOAuthAccount = user?.isOAuthAccount ?? false;
 
   const mutation = useProfileMutation(session);
@@ -167,7 +173,7 @@ const ProfileSection = () => {
     const payload = buildFormPayload(values, dirtyFields, isOAuthAccount);
 
     if (Object.keys(payload).length === 0) {
-      toast.info(AUTH_INFO.noChangesToSave);
+      toast.info(t(AUTH_INFO.noChangesToSave));
       return;
     }
     mutation.mutate(payload);
@@ -177,8 +183,8 @@ const ProfileSection = () => {
     <div className="flex flex-col gap-8">
       <Card>
         <CardHeader>
-          <CardTitle>{AUTH_LABELS.profileTitle}</CardTitle>
-          <CardDescription>{AUTH_LABELS.profileDescription}</CardDescription>
+          <CardTitle>{t(AUTH_LABELS.profileTitle)}</CardTitle>
+          <CardDescription>{t(AUTH_LABELS.profileDescription)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-6">
@@ -189,11 +195,10 @@ const ProfileSection = () => {
             <div className="space-y-2">
               {/* TODO: A modal where the user can select or remove avatar */}
               <Button variant="outline" size="sm" disabled={isPending}>
-                {AUTH_LABELS.changeAvatarButton}
+                {t(AUTH_LABELS.changeAvatarButton)}
               </Button>
               <p className="text-muted-foreground text-xs">
-                {/* TODO: set maxSize to translation */}
-                {AUTH_LABELS.avatarDescription}
+                {t(AUTH_LABELS.avatarDescription, { maxSize: '2MB' })}
               </p>
             </div>
           </div>
@@ -211,9 +216,9 @@ const ProfileSection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.name}</FieldTitle>
+                    <FieldTitle>{t(AUTH_LABELS.name)}</FieldTitle>
                     <FieldDescription>
-                      {AUTH_LABELS.nameDescription}
+                      {t(AUTH_LABELS.nameDescription)}
                     </FieldDescription>
                     <div className="flex gap-2">
                       <Input
@@ -222,13 +227,15 @@ const ProfileSection = () => {
                         type="text"
                         autoComplete="name"
                         aria-invalid={fieldState.invalid}
-                        placeholder={AUTH_LABELS.namePlaceholder}
+                        placeholder={t(AUTH_LABELS.namePlaceholder)}
                         disabled={isPending}
                         required
                       />
                     </div>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </FieldContent>
                 </Field>
@@ -241,11 +248,11 @@ const ProfileSection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.email}</FieldTitle>
+                    <FieldTitle>{t(AUTH_LABELS.email)}</FieldTitle>
                     <FieldDescription>
                       {isOAuthAccount
-                        ? AUTH_LABELS.emailManagedDescription
-                        : AUTH_LABELS.emailDescription}
+                        ? t(AUTH_LABELS.emailManagedDescription)
+                        : t(AUTH_LABELS.emailDescription)}
                     </FieldDescription>
                     <Input
                       {...field}
@@ -253,23 +260,25 @@ const ProfileSection = () => {
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.emailPlaceholder}
+                      placeholder={t(AUTH_LABELS.emailPlaceholder)}
                       disabled={isPending || isOAuthAccount}
                       readOnly={isOAuthAccount}
                       required={!isOAuthAccount}
                     />
                     {!isOAuthAccount && (
                       <FieldDescription>
-                        {AUTH_LABELS.emailNotificationsDescription}
+                        {t(AUTH_LABELS.emailNotificationsDescription)}
                       </FieldDescription>
                     )}
                     {isOAuthAccount && (
                       <FieldDescription>
-                        {AUTH_LABELS.contactSupportDescription}
+                        {t(AUTH_LABELS.contactSupportDescription)}
                       </FieldDescription>
                     )}
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </FieldContent>
                 </Field>
@@ -280,10 +289,10 @@ const ProfileSection = () => {
         <Separator />
         <CardFooter className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full sm:max-w-[65%]">
-            <FormError message={errorMessage} />
+            {errorMessage && <FormError message={t(errorMessage)} />}
           </div>
           <Button type="submit" form="form-rhf-profile" disabled={isPending}>
-            {AUTH_LABELS.saveChangesButton}
+            {t(AUTH_LABELS.saveChangesButton)}
           </Button>
         </CardFooter>
       </Card>
