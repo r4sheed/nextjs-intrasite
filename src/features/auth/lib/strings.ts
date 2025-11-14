@@ -211,12 +211,12 @@ export const AUTH_LABELS = {
   randomButton: 'labels.random-button',
 
   // Links and CTAs
-  forgotPasswordLink: 'labels.forgot-password',
+  forgotPasswordLink: 'labels.forgot-password-link',
   signupCtaText: 'labels.signup-cta-text',
   signupCtaLink: 'labels.signup-cta-link',
   loginCtaText: 'labels.login-cta-text',
   loginCtaLink: 'labels.login-cta-link',
-  rememberPasswordCta: 'labels.remember-password',
+  rememberPasswordCta: 'labels.remember-password-cta',
 
   // Other UI text
   orContinueWith: 'labels.or-continue-with',
