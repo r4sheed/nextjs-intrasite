@@ -125,11 +125,11 @@
       "remember-password-link": "Remember your password?",
       "signup-cta-link": "Sign up",
       "login-cta-text": "Already have an account?",
+      "or-continue-with-text": "Or continue with",
       "remember-password-cta-text": "Remember your password?",
       "signup-cta-text": "Don't have an account?",
       "hide-password": "Hide password",
       "new-password": "New password",
-      "or-continue-with": "Or continue with",
       "show-password": "Show password",
       "two-factor-toggle": "Enable two-factor authentication",
       "verify-2fa-code-sent": "Code sent to <tag>{email}</tag>"

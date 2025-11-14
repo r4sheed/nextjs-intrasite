@@ -215,7 +215,7 @@ export const AUTH_LABELS = {
 
   hidePassword: 'labels.hide-password',
   newPassword: 'labels.new-password',
-  orContinueWith: 'labels.or-continue-with',
+  orContinueWithText: 'labels.or-continue-with-text',
   showPassword: 'labels.show-password',
   twoFactorToggle: 'labels.two-factor-toggle',
   verify2faCodeSent: 'labels.verify-2fa-code-sent',

@@ -326,7 +326,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               {siteFeatures.socialAuth && (
                 <>
                   <FieldSeparator>
-                    {t(AUTH_LABELS.orContinueWith)}
+                    {t(AUTH_LABELS.orContinueWithText)}
                   </FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders disabled={isPending} />
