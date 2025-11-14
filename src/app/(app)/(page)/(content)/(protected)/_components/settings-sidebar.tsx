@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
+
 import type { LucideIcon } from 'lucide-react';
 
 type SettingsSidebarItem = {
@@ -34,9 +36,11 @@ const SettingsSidebar = ({
   return (
     <div className={cn('flex flex-col gap-2 p-4 pt-0 text-sm', className)}>
       <div className="bg-background sticky">
-        <h2 className="text-foreground text-lg font-semibold">Settings</h2>
+        <h2 className="text-foreground text-lg font-semibold">
+          {t(AUTH_LABELS.settingsSidebarTitle)}
+        </h2>
         <p className="text-muted-foreground top-0 h-6 text-xs">
-          Manage your account settings
+          {t(AUTH_LABELS.settingsSidebarDescription)}
         </p>
       </div>
 

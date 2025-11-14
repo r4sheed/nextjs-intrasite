@@ -180,6 +180,8 @@ export const AUTH_LABELS = {
   saveChangesButton: 'labels.save-changes-button',
   securityTab: 'labels.security-tab',
   settingsDescription: 'labels.settings-description',
+  settingsSidebarDescription: 'labels.settings-sidebar-description',
+  settingsSidebarTitle: 'labels.settings-sidebar-title',
   settingsTitle: 'labels.settings-title',
   showPassword: 'labels.show-password',
   signInWithGithubButton: 'labels.sign-in-with-github-button',
