@@ -53,6 +53,37 @@ import { ProfileSection } from './sections/profile-section';
 import { SecuritySection } from './sections/security-section';
 import { SettingsSidebar } from './settings-sidebar';
 
+/**
+ * Settings sidebar configuration
+ * Contains the sidebar groups and their items with icons and labels
+ */
+const sidebarGroups = [
+  {
+    title: AUTH_LABELS.generalGroupTitle,
+    items: [
+      { id: 'profile', label: AUTH_LABELS.profileTab, icon: User },
+      { id: 'security', label: AUTH_LABELS.securityTab, icon: Shield },
+      { id: 'notifications', label: AUTH_LABELS.notificationsTab, icon: Bell },
+    ],
+  },
+  {
+    title: AUTH_LABELS.personalizationGroupTitle,
+    items: [
+      { id: 'appearance', label: AUTH_LABELS.appearanceTab, icon: Palette },
+    ],
+  },
+  {
+    title: AUTH_LABELS.systemGroupTitle,
+    items: [{ id: 'advanced', label: AUTH_LABELS.advancedTab, icon: Settings }],
+  },
+] as const;
+
+/**
+ * Type for settings section IDs
+ * Derived from the sidebar groups configuration
+ */
+type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
+
 const NotificationsSection = () => {
   return (
     <div className="flex flex-col gap-6">
@@ -381,27 +412,6 @@ const AdvancedSection = () => {
     </div>
   );
 };
-
-const sidebarGroups = [
-  {
-    title: 'General',
-    items: [
-      { id: 'profile', label: 'Profile', icon: User },
-      { id: 'security', label: 'Security', icon: Shield },
-      { id: 'notifications', label: 'Notifications', icon: Bell },
-    ],
-  },
-  {
-    title: 'Personalization',
-    items: [{ id: 'appearance', label: 'Appearance', icon: Palette }],
-  },
-  {
-    title: 'System',
-    items: [{ id: 'advanced', label: 'Advanced', icon: Settings }],
-  },
-] as const;
-
-type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
 
 const SettingsPage = () => {
   const t = useTranslations('auth');

@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Shield, Bell, Palette, Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 
@@ -17,38 +17,20 @@ type SettingsSidebarGroup = {
   items: readonly SettingsSidebarItem[];
 };
 
-const defaultNavItems: readonly SettingsSidebarGroup[] = [
-  {
-    title: 'General',
-    items: [
-      { id: 'profile', label: 'Profile', icon: User },
-      { id: 'security', label: 'Security', icon: Shield },
-      { id: 'notifications', label: 'Notifications', icon: Bell },
-    ],
-  },
-  {
-    title: 'Personalization',
-    items: [{ id: 'appearance', label: 'Appearance', icon: Palette }],
-  },
-  {
-    title: 'System',
-    items: [{ id: 'advanced', label: 'Advanced', icon: Settings }],
-  },
-];
-
 type SettingsSidebarProps = {
   activeSection: string;
   onSectionSelect: (sectionId: string) => void;
-  groups?: readonly SettingsSidebarGroup[];
+  groups: readonly SettingsSidebarGroup[];
   className?: string;
 };
 
 const SettingsSidebar = ({
   activeSection,
   onSectionSelect,
-  groups = defaultNavItems,
+  groups,
   className,
 }: SettingsSidebarProps) => {
+  const t = useTranslations('auth');
   return (
     <div className={cn('flex flex-col gap-2 p-4 pt-0 text-sm', className)}>
       <div className="bg-background sticky">
@@ -61,7 +43,7 @@ const SettingsSidebar = ({
       {groups.map(section => (
         <div key={section.title}>
           <h3 className="text-muted-foreground mb-2 text-xs font-medium">
-            {section.title}
+            {t(section.title)}
           </h3>
           <ul className="space-y-1">
             {section.items.map(item => {
@@ -81,7 +63,7 @@ const SettingsSidebar = ({
                     onClick={() => onSectionSelect(item.id)}
                   >
                     <Icon className="size-4" />
-                    {item.label}
+                    {t(item.label)}
                   </button>
                 </li>
               );
