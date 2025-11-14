@@ -1,9 +1,10 @@
-import { isProduction } from '@/lib/env';
+// Use process.env directly in client components to avoid importing server-only helpers
+// which can pull in non-client-safe dependencies.
 
 const SHOW = false;
 
 export function TailwindIndicator() {
-  if (isProduction() || !SHOW) {
+  if (process.env.NODE_ENV === 'production' || !SHOW) {
     return null;
   }
 
