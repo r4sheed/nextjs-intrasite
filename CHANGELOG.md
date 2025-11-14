@@ -118,6 +118,8 @@ Added email parameter to verification URLs to leverage the composite unique inde
 - ✅ **Improved UX:** Prevents accidental token reuse across emails
 - ✅ **Future-Proof:** Email-based token management ready
 
+**Benefits:**
+
 **Database Impact:**
 No schema changes needed - composite unique constraint `@@unique([email, token])` already exists.
 
@@ -145,15 +147,11 @@ Moved environment validation to a centralized, build-time flow and made the Zod 
 
 - **Tests:**
   - `scripts/__tests__/validate-env.test.ts` tests the validator with good/bad env cases.
-  - `src/lib/__tests__/env.test.ts` now focuses on `envHelpers` (client-safe checks).
-
-- **Client safety:**
-  - Avoids importing `zod` into client bundles and replaces a handful of client imports of `env` with `process.env` for compatibility (e.g., `tailwind-indicator.tsx`).
 
 **Benefits:**
 
 - ✅ **Build-time Safety:** Environment validation runs during build/CI — catches misconfig at build time.
-- ✅ **No client-bundling issues:** `zod` is loaded lazily so it isn't bundled into client artifacts.
+- ✅ **No client-bundling issues for env validation:** the environment validation Zod schema is lazy-loaded and only used on the server, so it is not bundled into client artifacts. (Note: Zod is still used in some client-side form schemas and validators; those remain.)
 - ✅ **Centralized schema:** Single source of truth for env definitions and validation.
 - ✅ **Testable:** `validateEnv()` is unit-tested for success/failure cases.
 
