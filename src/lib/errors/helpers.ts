@@ -2,7 +2,7 @@ import { AppError } from '@/lib/errors';
 import { HTTP_STATUS } from '@/lib/http-status';
 
 import { CORE_CODES } from './codes';
-import { CORE_ERRORS } from './messages';
+import { CORE_ERRORS } from './strings';
 import { getZodErrorMessage } from './zod';
 
 /**

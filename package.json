@@ -15,7 +15,7 @@
     "test:watch": "vitest --project=all",
     "test:feature": "tsx scripts/test-feature.ts",
     "feature:create": "tsx scripts/create-feature.ts",
-    "i18n:add": "tsx scripts/i18n/add.ts",
+    "i18n:manage": "tsx scripts/i18n/manage.ts",
     "i18n:validate": "tsx scripts/i18n/validate.ts",
     "i18n:sync": "tsx scripts/i18n/sync.ts",
     "i18n:merge": "tsx scripts/i18n/merge.ts",

@@ -11,7 +11,7 @@ export const LOCALES_DIR = 'src/locales';
 export const FEATURES_DIR = 'src/features';
 
 // File paths
-export const CORE_STRINGS_PATH = 'src/lib/errors/messages.ts';
+export const CORE_STRINGS_PATH = 'src/lib/errors/strings.ts';
 export const STRINGS_DIR = 'lib';
 export const STRINGS_FILE_NAME = 'strings.ts';
 
