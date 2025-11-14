@@ -43,6 +43,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         type="button"
         size="lg"
         variant="outline"
+        title="Sign in with Google"
         disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.Google)}
       >
@@ -56,6 +57,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         type="button"
         size="lg"
         variant="outline"
+        title="Sign in with GitHub"
         disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.GitHub)}
       >
