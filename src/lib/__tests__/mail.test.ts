@@ -17,7 +17,10 @@ describe('mail module', () => {
     // Ensure a clean module load
     vi.resetModules();
 
-    process.env.RESEND_API_KEY = 'sk_test_local';
+    // Mock the env module to return the test API key
+    vi.doMock('@/lib/env', () => ({
+      env: { RESEND_API_KEY: 'sk_test_local' },
+    }));
 
     // Use doMock so we can set the mock before importing the mail module
     vi.doMock('resend', () => {
