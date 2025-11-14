@@ -1,9 +1,9 @@
-import { env } from '@/lib/env';
+import { isProduction } from '@/lib/env';
 
 const SHOW = false;
 
 export function TailwindIndicator() {
-  if (env.NODE_ENV === 'production' || !SHOW) {
+  if (isProduction() || !SHOW) {
     return null;
   }
 
