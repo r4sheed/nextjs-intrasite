@@ -86,7 +86,6 @@ type EnvSchema = z.infer<typeof envSchema>;
  * Throws an error with detailed information if validation fails
  * @returns Validated and typed environment variables
  */
-// Using arrow function as requested in preferences
 const validateEnv = (): EnvSchema => {
   // Check if we're in a Node.js environment without dotenv
   const hasEnvVars = process.env.DATABASE_URL && process.env.AUTH_SECRET;
