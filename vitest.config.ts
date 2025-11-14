@@ -9,7 +9,7 @@ export default defineConfig(async () => {
       environment: 'jsdom',
       include: process.env.VITEST_INCLUDE
         ? process.env.VITEST_INCLUDE.split(',')
-        : ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+        : ['src/**/*.test.ts', 'src/**/*.test.tsx', 'scripts/**/*.test.ts'],
       globals: true,
       setupFiles: ['src/test/setup.ts'],
     },

@@ -27,8 +27,8 @@ vi.mock('../../scripts/i18n/helpers', () => ({
 }));
 
 // Import after mocking
-import { ROOT_LOCALE_FILES } from '../../scripts/i18n/constants';
-import { getLanguages } from '../../scripts/i18n/helpers';
+import { ROOT_LOCALE_FILES } from '../constants';
+import { getLanguages } from '../helpers';
 
 /**
  * Setup test environment
