@@ -48,7 +48,7 @@ const envSchema = z.object({
       'RESEND_API_KEY must start with "re_" if provided'
     ),
 
-  // Docker/PostgreSQ
+  // Docker/PostgreSQL
   POSTGRES_USER: z.string().optional(),
   POSTGRES_PASSWORD: z.string().optional(),
   POSTGRES_DB: z.string().optional(),
@@ -86,7 +86,8 @@ type EnvSchema = z.infer<typeof envSchema>;
  * Throws an error with detailed information if validation fails
  * @returns Validated and typed environment variables
  */
-function validateEnv(): EnvSchema {
+// Using arrow function as requested in preferences
+const validateEnv = (): EnvSchema => {
   // Check if we're in a Node.js environment without dotenv
   const hasEnvVars = process.env.DATABASE_URL && process.env.AUTH_SECRET;
 
@@ -107,7 +108,9 @@ function validateEnv(): EnvSchema {
 
     // Main error message
     console.error(
-      `❌ Environment validation failed (${errorCount} issue${errorCount === 1 ? '' : 's'}):`
+      `❌ Environment validation failed (${errorCount} issue${
+        errorCount === 1 ? '' : 's'
+      }):`
     );
 
     // List the specific errors
@@ -123,13 +126,15 @@ function validateEnv(): EnvSchema {
     console.log('  3. Generate AUTH_SECRET: openssl rand -base64 32');
 
     throw new Error(
-      `Environment validation failed with ${errorCount} error${errorCount === 1 ? '' : 's'}. ` +
+      `Environment validation failed with ${errorCount} error${
+        errorCount === 1 ? '' : 's'
+      }. ` +
         'Please check the configuration guide above and update your .env file.'
     );
   }
 
   return result.data;
-}
+};
 
 /**
  * Validated and type-safe environment variables
@@ -142,6 +147,96 @@ function validateEnv(): EnvSchema {
  * const dbUrl = env.DATABASE_URL;
  */
 export const env = validateEnv();
+
+/**
+ * Environment helper functions
+ * Use these for environment-specific logic throughout the application
+ */
+export const envHelpers = {
+  /**
+   * Check if running in development environment
+   */
+  isDev: () => env.NODE_ENV === 'development',
+
+  /**
+   * Check if running in production environment
+   */
+  isProduction: () => env.NODE_ENV === 'production',
+
+  /**
+   * Check if running in test environment
+   */
+  isTest: () => env.NODE_ENV === 'test',
+
+  /**
+   * Check if running in development or test environment
+   */
+  isDevOrTest: () => env.NODE_ENV === 'development' || env.NODE_ENV === 'test',
+
+  /**
+   * Get current environment name
+   */
+  getEnvironment: () => env.NODE_ENV,
+
+  /**
+   * Check if Next.js is running on Edge Runtime
+   */
+  isEdgeRuntime: () => env.NEXT_RUNTIME === 'edge',
+
+  /**
+   * Check if email service is configured
+   */
+  hasEmail: () => !!env.RESEND_API_KEY,
+
+  /**
+   * Check if Google OAuth is fully configured
+   */
+  hasGoogleOAuth: () => !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+
+  /**
+   * Check if GitHub OAuth is fully configured
+   */
+  hasGithubOAuth: () => !!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET),
+
+  /**
+   * Check if any OAuth provider is configured
+   */
+  hasOAuth: () => envHelpers.hasGoogleOAuth() || envHelpers.hasGithubOAuth(),
+
+  /**
+   * Check if MinIO is configured
+   */
+  hasMinIO: () => !!(env.MINIO_ROOT_USER && env.MINIO_ROOT_PASSWORD),
+} as const;
+
+/**
+ * Convenience functions for common environment checks
+ * These are direct exports for easier importing
+ */
+
+/**
+ * Check if the application is running in production mode
+ * @returns true if NODE_ENV is 'production'
+ */
+export const isProduction = envHelpers.isProduction;
+
+/**
+ * Check if the application is running in development mode
+ * @returns true if NODE_ENV is 'development'
+ */
+export const isDevelopment = envHelpers.isDev;
+
+/**
+ * Alias for isDevelopment() - shorter name for convenience
+ * @returns true if NODE_ENV is 'development'
+ */
+export const isDev = envHelpers.isDev;
+
+/**
+ * Check if the application is running in test mode
+ * @returns true if NODE_ENV is 'test'
+ */
+export const isTest = envHelpers.isTest;
 
 // Export the schema for testing purposes
 export { envSchema };
