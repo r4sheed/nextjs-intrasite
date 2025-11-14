@@ -33,7 +33,6 @@ vi.mock('../../scripts/i18n/constants', () => ({
 }));
 
 // Import after mocking
-import { getLanguages, kebabToCamel } from '../helpers';
 import {
   parseKey,
   getConstantName,
@@ -45,7 +44,6 @@ import {
   deleteFromConstantsFile,
   getRelativeKey,
   getDomainConfig,
-  main,
 } from '../manage';
 
 /**
