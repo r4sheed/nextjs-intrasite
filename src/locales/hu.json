@@ -9,7 +9,7 @@
       "email-required": "Email cím megadása kötelező.",
       "insufficient-permissions": "Nincs jogosultságod megtekinteni ezt a tartalmat.",
       "invalid-credentials": "Hibás email cím vagy jelszó.",
-      "invalid-labels": "Kérjük, ellenőrizze az adatokat és próbálja újra.",
+      "invalid-fields": "Kérjük, ellenőrizze az adatokat és próbálja újra.",
       "login-failed": "A bejelentkezés sikertelen. Kérjük, próbálja újra.",
       "name-required": "Név megadása kötelező.",
       "name-too-short": "A névnek legalább 2 karakter hosszúnak kell lennie.",

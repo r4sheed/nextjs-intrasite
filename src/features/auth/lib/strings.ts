@@ -179,6 +179,7 @@ export const AUTH_LABELS = {
   currentPasswordLabel: 'labels.current-password-label',
   emailLabel: 'labels.email-label',
   nameLabel: 'labels.name-label',
+  newPasswordLabel: 'labels.new-password-label',
   otpCodeLabel: 'labels.otp-code-label',
   passwordLabel: 'labels.password-label',
 
@@ -210,13 +211,12 @@ export const AUTH_LABELS = {
   signupCtaLink: 'labels.signup-cta-link',
 
   loginCtaText: 'labels.login-cta-text',
+  orContinueWithText: 'labels.or-continue-with-text',
   rememberPasswordCtaText: 'labels.remember-password-cta-text',
   signupCtaText: 'labels.signup-cta-text',
+  verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
 
   hidePassword: 'labels.hide-password',
-  newPassword: 'labels.new-password',
-  orContinueWithText: 'labels.or-continue-with-text',
   showPassword: 'labels.show-password',
   twoFactorToggle: 'labels.two-factor-toggle',
-  verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
 } as const;

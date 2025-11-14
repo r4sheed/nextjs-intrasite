@@ -233,7 +233,7 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>{t(AUTH_LABELS.newPassword)}</FieldTitle>
+                      <FieldTitle>{t(AUTH_LABELS.newPasswordLabel)}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
