@@ -286,13 +286,16 @@ describe('i18n Scripts', () => {
   describe('kebabToCamel utility', () => {
     it('should convert kebab-case to camelCase', () => {
       function kebabToCamel(str: string): string {
-        return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+        return str.replace(/-([a-z0-9])/g, (_, letter) =>
+          /[0-9]/.test(letter) ? letter : letter.toUpperCase()
+        );
       }
 
       expect(kebabToCamel('invalid-email')).toBe('invalidEmail');
       expect(kebabToCamel('password-too-short')).toBe('passwordTooShort');
       expect(kebabToCamel('user-not-found')).toBe('userNotFound');
       expect(kebabToCamel('simple')).toBe('simple');
+      expect(kebabToCamel('verify-2fa-code-sent')).toBe('verify2faCodeSent');
     });
   });
 

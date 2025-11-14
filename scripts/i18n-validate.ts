@@ -108,14 +108,31 @@ function extractConstantValues(content: string): string[] {
     const constantBody = match[2];
     if (!constantBody) continue;
 
-    // Extract values from the constant body
-    const valueRegex = /:\s*'([^']+)'/g;
-    let valueMatch;
+    const lines = constantBody.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i]!;
+      const trimmed = line.trim();
 
-    while ((valueMatch = valueRegex.exec(constantBody)) !== null) {
-      const value = valueMatch[1];
-      if (value) {
-        values.push(value);
+      const singleLineMatch = trimmed.match(/^([A-Za-z0-9_]+):\s*'([^']+)',?$/);
+      if (singleLineMatch) {
+        const value = singleLineMatch[2];
+        if (value) {
+          values.push(value);
+        }
+        continue;
+      }
+
+      const multiLineKeyMatch = trimmed.match(/^([A-Za-z0-9_]+):$/);
+      if (multiLineKeyMatch && i + 1 < lines.length) {
+        const nextLine = lines[i + 1]!;
+        const nextValueMatch = nextLine.trim().match(/^'([^']+)',?$/);
+        if (nextValueMatch) {
+          const value = nextValueMatch[1];
+          if (value) {
+            values.push(value);
+          }
+          i += 1;
+        }
       }
     }
   }
@@ -144,30 +161,43 @@ async function validateConstants(
   const constantsContent = await readFile(constantsPath, 'utf-8');
   const localeContent = await readFile(localePath, 'utf-8');
 
+  const domain = _domain;
   const constantValues = extractConstantValues(constantsContent);
   const localeJson = JSON.parse(localeContent);
   const localeKeys = getAllKeys(localeJson);
 
+  const domainPrefix = `${domain}.`;
+  const domainLocaleKeys = localeKeys
+    .filter(key => key.startsWith(domainPrefix))
+    .map(key => key.slice(domainPrefix.length));
+
+  const normalizedConstants = constantValues.map(value =>
+    value.startsWith(domainPrefix) ? value.slice(domainPrefix.length) : value
+  );
+
+  const localeKeySet = new Set(domainLocaleKeys);
+  const constantSet = new Set(normalizedConstants);
+
   // Find keys in constants but not in locale
-  for (const value of constantValues) {
-    if (!localeKeys.includes(value)) {
+  for (const value of normalizedConstants) {
+    if (!localeKeySet.has(value)) {
       errors.push({
         type: 'mismatch',
         file: constantsPath,
-        key: value,
-        details: `Constant references non-existent key: ${value}`,
+        key: `${domainPrefix}${value}`,
+        details: `Constant references non-existent key: ${domainPrefix}${value}`,
       });
     }
   }
 
   // Find keys in locale but not in constants
-  for (const key of localeKeys) {
-    if (!constantValues.includes(key)) {
+  for (const relativeKey of domainLocaleKeys) {
+    if (!constantSet.has(relativeKey)) {
       warnings.push({
         type: 'mismatch',
         file: constantsPath,
-        key,
-        details: `Key exists in locale but not in constants: ${key}`,
+        key: `${domainPrefix}${relativeKey}`,
+        details: `Key exists in locale but not in constants: ${domainPrefix}${relativeKey}`,
       });
     }
   }

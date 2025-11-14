@@ -18,10 +18,11 @@ import { join } from 'node:path';
 const isDryRun = process.argv.includes('--dry-run');
 
 interface SyncAction {
-  type: 'add' | 'remove' | 'update';
+  type: 'add' | 'remove' | 'update' | 'missing';
   file: string;
   key: string;
   value?: string;
+  detail?: string;
 }
 
 const actions: SyncAction[] = [];
@@ -117,6 +118,18 @@ function sortObjectKeys(obj: unknown): unknown {
 }
 
 /**
+ * Remove the domain prefix from a translation key
+ */
+function getRelativeKey(fullKey: string, domain: string): string {
+  const prefix = `${domain}.`;
+  if (fullKey.startsWith(prefix)) {
+    return fullKey.slice(prefix.length);
+  }
+
+  return fullKey;
+}
+
+/**
  * Sync locale files (EN → HU)
  */
 async function syncLocaleFiles(
@@ -181,7 +194,103 @@ async function syncLocaleFiles(
  * Convert kebab-case to camelCase
  */
 function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  return str.replace(/-([a-z0-9])/g, (_, char) =>
+    /[0-9]/.test(char) ? char : char.toUpperCase()
+  );
+}
+
+function mergeConstantLines(
+  lines: string[],
+  desired: Map<string, string>
+): {
+  lines: string[];
+  changed: boolean;
+  changes: Array<{
+    key: string;
+    type: 'update';
+    oldValue?: string;
+    newValue: string;
+  }>;
+  missing: Array<{ key: string; newValue: string }>;
+} {
+  const updatedLines: string[] = [];
+  const changes: Array<{
+    key: string;
+    type: 'update';
+    oldValue?: string;
+    newValue: string;
+  }> = [];
+  const missing: Array<{ key: string; newValue: string }> = [];
+  let changed = false;
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index]!;
+    const trimmed = line.trim();
+
+    const singleLineMatch = trimmed.match(/^([A-Za-z0-9_]+):\s*'([^']+)',?$/);
+    if (singleLineMatch) {
+      const key = singleLineMatch[1] as string;
+      const value = singleLineMatch[2] as string;
+      const existingValue = desired.get(key);
+      if (existingValue !== undefined) {
+        desired.delete(key);
+        if (existingValue !== value) {
+          changed = true;
+          changes.push({
+            key,
+            type: 'update',
+            oldValue: value,
+            newValue: existingValue,
+          });
+          const indent = line.slice(0, line.indexOf(trimmed));
+          updatedLines.push(`${indent}${key}: '${existingValue}',`);
+          continue;
+        }
+      }
+    }
+
+    const multiLineKeyMatch = trimmed.match(/^([A-Za-z0-9_]+):$/);
+    if (multiLineKeyMatch && index + 1 < lines.length) {
+      const nextLine = lines[index + 1]!;
+      const nextTrimmed = nextLine.trim();
+      const multiLineValueMatch = nextTrimmed.match(/^'([^']+)',?$/);
+
+      if (multiLineValueMatch) {
+        const key = multiLineKeyMatch[1] as string;
+        const value = multiLineValueMatch[1] as string;
+        const existingValue = desired.get(key);
+        if (existingValue !== undefined) {
+          desired.delete(key);
+          updatedLines.push(line);
+          if (existingValue !== value) {
+            changed = true;
+            changes.push({
+              key,
+              type: 'update',
+              oldValue: value,
+              newValue: existingValue,
+            });
+            const indent = nextLine.slice(0, nextLine.indexOf(nextTrimmed));
+            updatedLines.push(`${indent}'${existingValue}',`);
+          } else {
+            updatedLines.push(nextLine);
+          }
+          index += 1;
+          continue;
+        }
+      }
+    }
+
+    updatedLines.push(line);
+  }
+
+  if (desired.size > 0) {
+    for (const [key, value] of desired.entries()) {
+      missing.push({ key, newValue: value });
+    }
+  }
+
+  return { lines: updatedLines, changed, changes, missing };
 }
 
 /**
@@ -201,7 +310,7 @@ async function syncFlatConstants(
       const parts = key.split('.');
       if (parts.length < 2) return null;
       const keyName = parts.slice(1).join('-'); // errors.not-found → not-found
-      return { key: keyName, value: key };
+      return { key: keyName, value: getRelativeKey(key, domain) };
     })
     .filter((item): item is { key: string; value: string } => item !== null);
 
@@ -217,24 +326,49 @@ async function syncFlatConstants(
     return;
   }
 
-  // Update existing constant
-  const props = keys
+  const camelizedEntries = [...keys]
     .sort((a, b) => a.key.localeCompare(b.key))
-    .map(({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`)
-    .join('\n');
+    .map(({ key, value }) => [kebabToCamel(key), value] as const);
+  const body = match[1] as string;
+  const lines = body.split(/\r?\n/);
+  const {
+    lines: mergedLines,
+    changed,
+    changes,
+    missing,
+  } = mergeConstantLines(lines, new Map(camelizedEntries));
 
+  if (missing.length > 0) {
+    for (const item of missing) {
+      actions.push({
+        type: 'missing',
+        file: constantsPath,
+        key: `${constantName}.${item.key}`,
+        detail: `key ${item.key} not present in ${constantName}`,
+        value: item.newValue,
+      });
+    }
+  }
+
+  if (!changed) {
+    return;
+  }
+
+  const newProps = mergedLines.join('\n');
   const newConstant = `export const ${constantName} = {
-${props}
+${newProps}
 } as const;`;
-
-  const oldConstant = match[0];
-  if (oldConstant && oldConstant !== newConstant) {
-    const updatedContent = constantsContent.replace(regex, newConstant);
+  const updatedContent = constantsContent.replace(regex, newConstant);
+  if (!isDryRun) {
     await writeFile(constantsPath, updatedContent, 'utf-8');
+  }
+  for (const change of changes) {
     actions.push({
       type: 'update',
       file: constantsPath,
-      key: constantName,
+      key: `${constantName}.${change.key}`,
+      detail: `${change.key}: ${change.oldValue} → ${change.newValue}`,
+      value: change.newValue,
     });
   }
 }
@@ -291,7 +425,10 @@ async function syncConstants(
       categorized.set(category, []);
     }
 
-    categorized.get(category)?.push({ key: getKeyName(key), value: key });
+    categorized.get(category)?.push({
+      key: getKeyName(key),
+      value: getRelativeKey(key, domain),
+    });
   }
 
   // Update constants file
@@ -333,23 +470,46 @@ ${props}
       changed = true;
     } else {
       // Update existing constant
-      const props = keys
+      const camelizedEntries = [...keys]
         .sort((a, b) => a.key.localeCompare(b.key))
-        .map(({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`)
-        .join('\n');
+        .map(({ key, value }) => [kebabToCamel(key), value] as const);
 
-      const newConstant = `export const ${constantName} = {
-${props}
+      const body = match[1] as string;
+      const lines = body.split(/\r?\n/);
+      const {
+        lines: mergedLines,
+        changed: hasChanges,
+        changes,
+        missing,
+      } = mergeConstantLines(lines, new Map(camelizedEntries));
+
+      if (missing.length > 0) {
+        for (const item of missing) {
+          actions.push({
+            type: 'missing',
+            file: constantsPath,
+            key: `${constantName}.${item.key}`,
+            detail: `key ${item.key} not present in ${constantName}`,
+            value: item.newValue,
+          });
+        }
+      }
+
+      if (hasChanges) {
+        const newProps = mergedLines.join('\n');
+        const newConstant = `export const ${constantName} = {
+${newProps}
 } as const;`;
-
-      const oldConstant = match[0];
-      if (oldConstant && oldConstant !== newConstant) {
         updatedContent = updatedContent.replace(regex, newConstant);
-        actions.push({
-          type: 'update',
-          file: constantsPath,
-          key: constantName,
-        });
+        for (const change of changes) {
+          actions.push({
+            type: change.type,
+            file: constantsPath,
+            key: `${constantName}.${change.key}`,
+            detail: `${change.key}: ${change.oldValue} → ${change.newValue}`,
+            value: change.newValue,
+          });
+        }
         changed = true;
       }
     }
@@ -421,14 +581,17 @@ async function main() {
   for (const [file, fileActions] of grouped.entries()) {
     console.log(`   ${file}`);
     for (const action of fileActions) {
+      const detailSuffix = action.detail ? ` (${action.detail})` : '';
       if (action.type === 'add') {
         console.log(
-          `      + Add: ${action.key}${action.value ? ` = ${action.value}` : ''}`
+          `      + Add: ${action.key}${action.value ? ` = ${action.value}` : ''}${detailSuffix}`
         );
       } else if (action.type === 'remove') {
-        console.log(`      - Remove: ${action.key}`);
+        console.log(`      - Remove: ${action.key}${detailSuffix}`);
+      } else if (action.type === 'missing') {
+        console.log(`      ! Missing: ${action.key}${detailSuffix}`);
       } else {
-        console.log(`      ~ Update: ${action.key}`);
+        console.log(`      ~ Update: ${action.key}${detailSuffix}`);
       }
     }
     console.log('');

@@ -138,7 +138,21 @@ function parseKey(key: string): ParsedKey {
  * Example: "new-error" → "newError"
  */
 function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  return str.replace(/-([a-z0-9])/g, (_, char) =>
+    /[0-9]/.test(char) ? char : char.toUpperCase()
+  );
+}
+
+/**
+ * Remove the domain prefix from a translation key
+ */
+function getRelativeKey(fullKey: string, domain: string): string {
+  const prefix = `${domain}.`;
+  if (fullKey.startsWith(prefix)) {
+    return fullKey.slice(prefix.length);
+  }
+
+  return fullKey;
 }
 
 /**
@@ -235,6 +249,7 @@ async function addToConstantsFile(
   const constantName = getConstantName(parsedKey.domain, parsedKey.category);
   const propertyName = kebabToCamel(parsedKey.key);
   const fullKey = parsedKey.fullPath.join('.');
+  const relativeKey = getRelativeKey(fullKey, parsedKey.domain);
 
   // Find the constant object
   const regex = new RegExp(
@@ -250,7 +265,7 @@ async function addToConstantsFile(
  * ${parsedKey.domain.charAt(0).toUpperCase() + parsedKey.domain.slice(1)} ${parsedKey.category} messages (i18n keys)
  */
 export const ${constantName} = {
-  ${propertyName}: '${fullKey}',
+    ${propertyName}: '${relativeKey}',
 } as const;
 `;
 
@@ -284,7 +299,7 @@ export const ${constantName} = {
   }
 
   // Add new property
-  existingProps.push({ key: propertyName, value: fullKey });
+  existingProps.push({ key: propertyName, value: relativeKey });
 
   // Sort properties alphabetically by key
   const sortedProps = existingProps.sort((a, b) => a.key.localeCompare(b.key));
