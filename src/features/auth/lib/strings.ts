@@ -174,6 +174,8 @@ export const AUTH_LABELS = {
   newPassword: 'labels.new-password',
   twoFactorToggle: 'labels.two-factor-toggle',
   otpCode: 'labels.otp-code',
+  showPassword: 'labels.show-password',
+  hidePassword: 'labels.hide-password',
 
   // Form placeholders
   emailPlaceholder: 'labels.email-placeholder',
@@ -208,6 +210,8 @@ export const AUTH_LABELS = {
   saveChangesButton: 'labels.save-changes-button',
   changeAvatarButton: 'labels.change-avatar-button',
   randomButton: 'labels.random-button',
+  signInWithGoogleButton: 'labels.sign-in-with-google-button',
+  signInWithGithubButton: 'labels.sign-in-with-github-button',
 
   // Links and CTAs
   signupCtaText: 'labels.signup-cta-text',

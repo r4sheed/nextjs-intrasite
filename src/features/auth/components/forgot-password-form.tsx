@@ -143,10 +143,10 @@ const ForgotPasswordForm = ({
               />
               <Field>
                 {isSuccess && successMessage && (
-                  <FormSuccess message={successMessage} />
+                  <FormSuccess message={t(successMessage)} />
                 )}
                 {isError && errorMessage && (
-                  <FormError message={errorMessage} />
+                  <FormError message={t(errorMessage)} />
                 )}
                 <LoadingButton type="submit" loading={isPending}>
                   {t(AUTH_LABELS.resetPasswordButton)}
