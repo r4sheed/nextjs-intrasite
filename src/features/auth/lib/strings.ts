@@ -192,12 +192,14 @@ export const AUTH_LABELS = {
 
   backToLoginButton: 'labels.back-to-login-button',
   changeAvatarButton: 'labels.change-avatar-button',
+  hidePasswordButton: 'labels.hide-password-button',
   loginButton: 'labels.login-button',
   newPasswordButton: 'labels.new-password-button',
   randomButton: 'labels.random-button',
   resendCodeButton: 'labels.resend-code-button',
   resetPasswordButton: 'labels.reset-password-button',
   saveChangesButton: 'labels.save-changes-button',
+  showPasswordButton: 'labels.show-password-button',
   signInWithGithubButton: 'labels.sign-in-with-github-button',
   signInWithGoogleButton: 'labels.sign-in-with-google-button',
   signupButton: 'labels.signup-button',
@@ -215,8 +217,5 @@ export const AUTH_LABELS = {
   rememberPasswordCtaText: 'labels.remember-password-cta-text',
   signupCtaText: 'labels.signup-cta-text',
   verify2faCodeSentText: 'labels.verify-2fa-code-sent-text',
-
-  hidePasswordButton: 'labels.hide-password-button',
-  showPasswordButton: 'labels.show-password-button',
   twoFactorToggle: 'labels.two-factor-toggle',
 } as const;
