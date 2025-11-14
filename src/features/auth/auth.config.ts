@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 
-import { env } from '@/lib/env';
+import { env, hasGoogleOAuth, hasGithubOAuth } from '@/lib/env';
 import { db } from '@/lib/prisma';
 import { routes } from '@/lib/routes';
 
@@ -14,8 +14,7 @@ import { loginSchema } from '@/features/auth/schemas';
 // Build providers array conditionally based on available environment variables
 const providers = [];
 
-// Only include Google provider if credentials are available
-if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+if (hasGoogleOAuth()) {
   providers.push(
     Google({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -24,8 +23,7 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-// Only include GitHub provider if credentials are available
-if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+if (hasGithubOAuth()) {
   providers.push(
     Github({
       clientId: env.GITHUB_CLIENT_ID,
