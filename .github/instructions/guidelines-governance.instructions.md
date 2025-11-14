@@ -3,11 +3,14 @@ description: 'Guidelines Governance - How to maintain, update, and enforce proje
 applyTo: '**'
 ---
 
-# Guidelines Governance & Enforcement
-
-**Version:** 1.0  
+**Version:** 1.1  
 **Last Updated:** November 2025  
 **Target:** All contributors (AI and human developers)
+
+**Changelog:**
+
+- **Version 1.1 (2025-11-14):** Added AI testing behavior guidelines with examples for when to run tests.
+- **Version 1.0 (2025-11-03):** Initial guideline added.
 
 ---
 
@@ -253,6 +256,27 @@ Example:
 - ✅ **DO** maintain consistent formatting
 - ❌ **DON'T** delete old examples without replacing them
 - ❌ **DON'T** change rules without documenting the reason
+
+### When Running Tests
+
+- ✅ **DO** run tests only if the change affects functionality, types, or could introduce bugs (e.g., new logic, API modifications, state changes)
+- ✅ **DO** provide examples in responses when explaining testing decisions
+- ❌ **DON'T** run tests for trivial changes like comments, whitespace, simple renames without impact, or documentation updates
+- ❌ **DON'T** assume every edit requires testing; evaluate relevance first
+
+**Examples when to run tests:**
+
+- New feature or logic addition (e.g., new API endpoint, interactive component)
+- Type/interface modifications (e.g., prop types, API responses)
+- Bug fixes or refactors affecting behavior (e.g., calculation changes, condition updates)
+- Data/state handling changes (e.g., React hooks, database schema)
+
+**Examples when not to run tests:**
+
+- Comment or documentation changes only
+- Whitespace or formatting fixes
+- Simple variable renames without functional impact
+- Import/export structure updates without logic changes
 
 ---
 
