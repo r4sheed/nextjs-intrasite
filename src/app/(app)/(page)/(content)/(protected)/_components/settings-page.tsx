@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { User, Shield, Bell, Palette, Settings, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
@@ -45,6 +46,8 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+
+import { AUTH_LABELS } from '@/features/auth/lib/strings';
 
 import { ProfileSection } from './sections/profile-section';
 import { SecuritySection } from './sections/security-section';
@@ -401,6 +404,8 @@ const sidebarGroups = [
 type SettingsSectionId = (typeof sidebarGroups)[number]['items'][number]['id'];
 
 const SettingsPage = () => {
+  const t = useTranslations('auth');
+
   const [activeSection, setActiveSection] =
     useState<SettingsSectionId>('profile');
 
@@ -430,12 +435,12 @@ const SettingsPage = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-start justify-between">
                 <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl">
-                  Profile Settings
+                  {t(AUTH_LABELS.settingsTitle)}
                 </h1>
                 <div className="docs-nav bg-background/80 border-border/50 fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-t px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none" />
               </div>
               <p className="text-muted-foreground text-[1.05rem] text-balance sm:text-base">
-                Manage your profile information and preferences
+                {t(AUTH_LABELS.settingsDescription)}
               </p>
             </div>
           </div>
