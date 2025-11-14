@@ -9,6 +9,11 @@ applyTo: '**'
 > **Last Updated:** November 2025  
 > **Target:** Next.js 15+, TypeScript 5+, i18n-ready
 
+**Changelog:**
+
+- **Version 2.1 (2025-11-14):** Added naming patterns for UI labels with descriptive suffixes and flat structure guidelines.
+- **Version 2.0 (2025-10-15):** Initial structured version.
+
 ---
 
 ## Overview
@@ -184,6 +189,23 @@ export const AUTH_LABELS = {
   backToLogin: 'labels.back-to-login',
 } as const;
 ```
+
+#### Naming Patterns for UI Labels
+
+To maintain consistency and readability, follow these patterns when naming UI label keys:
+
+- **Use descriptive suffixes** to indicate the type of UI element:
+  - `-button` for buttons (e.g., `login-button`, `signup-button`)
+  - `-link` for links (e.g., `forgot-password-link`, `back-to-login-link`)
+  - `-title` for page or section titles (e.g., `signup-title`, `verification-title`)
+  - `-description` for explanatory text or help text (e.g., `change-password-description`, `email-description`)
+  - `-placeholder` for input placeholders (e.g., `email-placeholder`, `password-placeholder`)
+  - `-label` for form field labels (e.g., `email-label`, `password-label`)
+  - `-subtitle` for secondary titles or subtitles (e.g., `signup-subtitle`, `verification-subtitle`)
+
+- **Keep the structure flat** under `labels` - do not create sub-objects like `buttons`, `links`, or `fields` to avoid over-complication and maintain searchability.
+
+- **Consistency check**: When adding new labels, ensure they follow the existing patterns in the file. For example, if adding a new button, use `-button`; if adding a new link, use `-link`.
 
 ---
 
