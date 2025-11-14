@@ -119,7 +119,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {t(AUTH_LABELS.nameLabel)}
+                      {t(AUTH_LABELS.name)}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -147,7 +147,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {t(AUTH_LABELS.emailLabel)}
+                      {t(AUTH_LABELS.email)}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -176,7 +176,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {t(AUTH_LABELS.passwordLabel)}
+                      {t(AUTH_LABELS.password)}
                     </FieldLabel>
                     <PasswordInput
                       {...field}

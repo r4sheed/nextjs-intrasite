@@ -198,7 +198,7 @@ const SecuritySection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.currentPasswordLabel}</FieldTitle>
+                    <FieldTitle>{AUTH_LABELS.currentPassword}</FieldTitle>
                     <FieldDescription>
                       {AUTH_LABELS.currentPasswordDescription}
                     </FieldDescription>
@@ -226,7 +226,7 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>{AUTH_LABELS.newPasswordLabel}</FieldTitle>
+                      <FieldTitle>{AUTH_LABELS.newPassword}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
@@ -250,9 +250,7 @@ const SecuritySection = () => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldContent>
-                      <FieldTitle>
-                        {AUTH_LABELS.confirmPasswordLabel}
-                      </FieldTitle>
+                      <FieldTitle>{AUTH_LABELS.confirmPassword}</FieldTitle>
                       <PasswordInput
                         {...field}
                         id={field.name}
@@ -298,7 +296,7 @@ const SecuritySection = () => {
           >
             <Field orientation="horizontal">
               <FieldContent>
-                <FieldTitle>{AUTH_LABELS.twoFactorToggleLabel}</FieldTitle>
+                <FieldTitle>{AUTH_LABELS.twoFactorToggle}</FieldTitle>
                 <FieldDescription>
                   {AUTH_LABELS.twoFactorToggleDescription}
                 </FieldDescription>

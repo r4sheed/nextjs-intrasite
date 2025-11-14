@@ -211,7 +211,7 @@ const ProfileSection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.nameLabel}</FieldTitle>
+                    <FieldTitle>{AUTH_LABELS.name}</FieldTitle>
                     <FieldDescription>
                       {AUTH_LABELS.nameDescription}
                     </FieldDescription>
@@ -241,7 +241,7 @@ const ProfileSection = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldContent>
-                    <FieldTitle>{AUTH_LABELS.emailLabel}</FieldTitle>
+                    <FieldTitle>{AUTH_LABELS.email}</FieldTitle>
                     <FieldDescription>
                       {isOAuthAccount
                         ? AUTH_LABELS.emailManagedDescription

@@ -118,7 +118,7 @@ const ForgotPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {t(AUTH_LABELS.emailLabel)}
+                      {t(AUTH_LABELS.email)}
                     </FieldLabel>
                     <Input
                       {...field}

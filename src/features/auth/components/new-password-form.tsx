@@ -194,7 +194,7 @@ const NewPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {t(AUTH_LABELS.passwordLabel)}
+                      {t(AUTH_LABELS.password)}
                     </FieldLabel>
                     <PasswordInput
                       {...field}
