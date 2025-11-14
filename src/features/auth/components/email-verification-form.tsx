@@ -39,7 +39,6 @@ import {
 export const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useTranslations('auth');
   const token = searchParams.get('token');
   const email = searchParams.get('email');
   const hasToken = Boolean(token); // Check if token exists in URL
@@ -86,22 +85,29 @@ export const EmailVerificationForm = () => {
     return () => clearTimeout(timer);
   }, [isSuccess, router]);
 
-  const isTokenValid = token
-    ? verifyEmailSchema.safeParse({ email: email || '', token }).success
-    : false;
+  // Helper function to determine verification state and messages
+  const getVerificationState = () => {
+    const isTokenValid = token
+      ? verifyEmailSchema.safeParse({ email: email || '', token }).success
+      : false;
 
-  const successMessage =
-    data?.message?.key || AUTH_LABELS.verificationSuccessSubtitle;
-  const errorMessage =
-    !hasToken || !hasEmail
-      ? AUTH_ERRORS.tokenInvalid
-      : !isTokenValid
+    const hasValidParams = hasToken && hasEmail && isTokenValid;
+
+    return {
+      isTokenValid,
+      hasValidParams,
+      successMessage:
+        data?.message?.key || AUTH_LABELS.verificationSuccessSubtitle,
+      errorMessage: !hasValidParams
         ? AUTH_ERRORS.tokenInvalid
-        : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
+        : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle,
+      showError: !hasValidParams || isError,
+      showLoading: hasValidParams && (status === 'idle' || isPending),
+    };
+  };
 
-  const showError = !hasToken || !hasEmail || !isTokenValid || isError; // Show error if missing params, invalid params, or verification failed
-  const showLoading =
-    hasToken && hasEmail && isTokenValid && (status === 'idle' || isPending); // Show loading only for valid params
+  const t = useTranslations('auth');
+  const state = getVerificationState();
 
   // Success state
   if (isSuccess) {
@@ -114,7 +120,7 @@ export const EmailVerificationForm = () => {
                 <CircleCheck className="size-10" />
               </EmptyMedia>
               <EmptyTitle>{t(AUTH_LABELS.verificationSuccessTitle)}</EmptyTitle>
-              <EmptyDescription>{t(successMessage)}</EmptyDescription>
+              <EmptyDescription>{t(state.successMessage)}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         </CardContent>
@@ -123,7 +129,7 @@ export const EmailVerificationForm = () => {
   }
 
   // Error state
-  if (showError) {
+  if (state.showError) {
     return (
       <Card>
         <CardContent>
@@ -133,7 +139,7 @@ export const EmailVerificationForm = () => {
                 <CircleX className="size-10" />
               </EmptyMedia>
               <EmptyTitle>{t(AUTH_LABELS.verificationFailedTitle)}</EmptyTitle>
-              <EmptyDescription>{t(errorMessage)}</EmptyDescription>
+              <EmptyDescription>{t(state.errorMessage)}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button
@@ -153,7 +159,7 @@ export const EmailVerificationForm = () => {
   }
 
   // Loading state
-  if (showLoading) {
+  if (state.showLoading) {
     return (
       <Card>
         <CardContent>
