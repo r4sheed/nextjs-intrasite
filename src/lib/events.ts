@@ -1,7 +1,7 @@
 // import va from '@vercel/analytics';
 import { z } from 'zod';
 
-import { env } from '@/lib/env';
+import { isDevelopment } from '@/lib/env';
 
 const eventSchema = z.object({
   name: z.enum(['set_layout']),
@@ -20,7 +20,7 @@ export function trackEvent(input: Event): void {
   const event = eventSchema.parse(input);
   if (event) {
     // va.track(event.name, event.properties);
-    if (env.NODE_ENV === 'development') {
+    if (isDevelopment()) {
       console.log('Tracking event:', event.name, event.properties);
     }
   }
