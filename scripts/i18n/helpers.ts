@@ -8,7 +8,6 @@ import {
   STRINGS_DIR,
   STRINGS_FILE_NAME,
   LABEL_SUFFIX_ORDER,
-  type LabelSuffix,
 } from './constants';
 
 /**
@@ -78,10 +77,23 @@ export function kebabToCamel(str: string): string {
  * Lower rank = higher priority (appears first)
  */
 export function getLabelSuffixRank(key: string): number {
-  // Extract suffix from key (everything after the last dash or underscore)
-  const parts = key.split(/[-_]/);
-  const suffix = parts[parts.length - 1] || '';
+  const normalized = key.toLowerCase();
+  let fallbackIndex = LABEL_SUFFIX_ORDER.length as number;
 
-  const index = LABEL_SUFFIX_ORDER.indexOf(suffix as LabelSuffix);
-  return index === -1 ? LABEL_SUFFIX_ORDER.length : index;
+  for (let index = 0; index < LABEL_SUFFIX_ORDER.length; index++) {
+    const suffix = LABEL_SUFFIX_ORDER[index]!;
+
+    if (suffix === '') {
+      fallbackIndex = index;
+      continue;
+    }
+
+    if (normalized.length > suffix.length && normalized.endsWith(suffix)) {
+      return index;
+    }
+  }
+
+  return fallbackIndex === LABEL_SUFFIX_ORDER.length
+    ? LABEL_SUFFIX_ORDER.length
+    : fallbackIndex;
 }

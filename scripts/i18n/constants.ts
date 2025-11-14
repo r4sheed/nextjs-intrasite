@@ -22,7 +22,6 @@ export const ROOT_LOCALE_FILES = getLanguages().map(
 
 // Label suffix ordering (lower number = higher priority)
 export const LABEL_SUFFIX_ORDER = [
-  '', // suffix-less keys first
   'title',
   'subtitle',
   'description',
@@ -38,6 +37,7 @@ export const LABEL_SUFFIX_ORDER = [
   'success',
   'info',
   'warning',
+  '', // suffix-less keys last
 ] as const;
 
 export type LabelSuffix = (typeof LABEL_SUFFIX_ORDER)[number];

@@ -19,7 +19,7 @@
     "i18n:validate": "tsx scripts/i18n/validate.ts",
     "i18n:sync": "tsx scripts/i18n/sync.ts",
     "i18n:merge": "tsx scripts/i18n/merge.ts",
-    "i18n:sort": "tsx scripts/i18n/sort-all.ts"
+    "i18n:sort": "tsx scripts/i18n/sort.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

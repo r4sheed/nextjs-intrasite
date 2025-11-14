@@ -24,7 +24,7 @@ import {
   kebabToCamel,
   getLabelSuffixRank,
 } from './helpers';
-import { sortObjectKeys, compareLabelKeys } from './sort';
+import { sortAllI18nFiles, sortObjectKeys, compareLabelKeys } from './sort';
 
 const isDryRun = process.argv.includes('--dry-run');
 
@@ -625,6 +625,9 @@ async function main() {
   }
 
   // Print results
+  if (!isDryRun) {
+    await sortAllI18nFiles();
+  }
   console.log('\n' + '='.repeat(60));
 
   if (actions.length === 0) {
