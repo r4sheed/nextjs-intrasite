@@ -5,6 +5,7 @@ import { useState, startTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
@@ -15,6 +16,7 @@ import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
 import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -92,7 +94,7 @@ const useLoginMutation = () => {
   const { update: updateSession } = useSession();
 
   const mutation = useMutation<
-    ActionSuccess<typeof loginUser>,
+    ActionSuccess<ReturnType<typeof loginUser>>,
     ErrorResponse,
     LoginFormInput
   >({
@@ -216,6 +218,8 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
     errorMessage,
   } = useLoginForm();
 
+  const t = useTranslations('auth');
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -227,9 +231,11 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">{AUTH_LABELS.loginTitle}</h1>
+                <h1 className="text-2xl font-bold">
+                  {t(AUTH_LABELS.loginTitle)}
+                </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_LABELS.loginSubtitle}
+                  {t(AUTH_LABELS.loginSubtitle)}
                 </p>
               </div>
 
@@ -239,7 +245,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.emailLabel}
+                      {t(AUTH_LABELS.emailLabel)}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -247,15 +253,17 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.emailPlaceholder}
+                      placeholder={t(AUTH_LABELS.emailPlaceholder)}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.emailDescription}
+                      {t(AUTH_LABELS.emailDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
@@ -268,13 +276,13 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                   <Field data-invalid={fieldState.invalid}>
                     <div className="flex items-center">
                       <FieldLabel htmlFor={field.name}>
-                        {AUTH_LABELS.passwordLabel}
+                        {t(AUTH_LABELS.passwordLabel)}
                       </FieldLabel>
                       <Link
                         href={routes.auth.forgotPassword.url}
                         className="text-foreground ml-auto text-sm underline-offset-2 hover:underline"
                       >
-                        {AUTH_LABELS.forgotPasswordLink}
+                        {t(AUTH_LABELS.forgotPasswordLink)}
                       </Link>
                     </div>
                     <PasswordInput
@@ -282,35 +290,44 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       id={field.name}
                       autoComplete="current-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.passwordPlaceholder}
+                      placeholder={t(AUTH_LABELS.passwordPlaceholder)}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.passwordDescription}
+                      {t(AUTH_LABELS.passwordDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
               />
 
               <Field>
-                {isSuccess && <FormSuccess message={successMessage} />}
-                {isError && <FormError message={errorMessage} />}
+                {isSuccess && successMessage && (
+                  <FormSuccess message={t(successMessage)} />
+                )}
+                {isError && errorMessage && (
+                  <FormError message={t(errorMessage)} />
+                )}
+
                 <LoadingButton
                   type="submit"
                   loading={isPending}
                   disabled={isSuccess}
                 >
-                  {AUTH_LABELS.loginButton}
+                  {t(AUTH_LABELS.loginButton)}
                 </LoadingButton>
               </Field>
 
               {siteFeatures.socialAuth && (
                 <>
-                  <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
+                  <FieldSeparator>
+                    {t(AUTH_LABELS.orContinueWithText)}
+                  </FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders disabled={isPending} />
                   </Field>
@@ -318,9 +335,9 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
               )}
 
               <FieldDescription className="text-center">
-                {AUTH_LABELS.signupCtaText}{' '}
+                {t(AUTH_LABELS.signupCtaText)}{' '}
                 <Link href={routes.auth.signUp.url}>
-                  {AUTH_LABELS.signupCtaLink}
+                  {t(AUTH_LABELS.signupCtaLink)}
                 </Link>
               </FieldDescription>
             </FieldGroup>

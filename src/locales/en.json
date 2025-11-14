@@ -145,5 +145,38 @@
       "two-factor-verified": "Two-factor authentication successful! Redirecting to your dashboard...",
       "verification-sent": "A verification email has been sent to your address ({email}). Please check your inbox and follow the instructions to verify your account."
     }
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "save": "Save",
+    "success": "Operation completed successfully"
+  },
+  "errors": {
+    "database-error": "A database error occurred. Please try again later.",
+    "forbidden": "Access forbidden.",
+    "internal-server-error": "An unexpected error occurred. Please try again later.",
+    "not-found": "{resource} could not be found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "validation-failed": "Input validation failed. Please check your entries."
+  },
+  "navigation": {
+    "auth": {
+      "admin": "Admin",
+      "client": "Client",
+      "forgot-password": "Forgot password",
+      "login": "Sign in",
+      "new-password": "New password",
+      "server": "Server",
+      "settings": "Settings",
+      "sign-up": "Sign up",
+      "verify-email": "Verify email"
+    },
+    "error": "Error",
+    "home": "Home"
   }
 }

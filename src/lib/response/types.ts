@@ -47,9 +47,7 @@ export type Response<TData> =
   | ErrorResponse
   | PartialResponse<TData>;
 
-export type ActionSuccess<
-  TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,
-> = Exclude<Awaited<ReturnType<TAction>>, ErrorResponse>;
+export type ActionSuccess<T> = Exclude<Awaited<T>, ErrorResponse>;
 
 export type ActionFailure<
   TAction extends (...args: readonly unknown[]) => Promise<Response<unknown>>,

@@ -1,3 +1,5 @@
+import { getLocale, getMessages } from 'next-intl/server';
+
 import { META_THEME_COLORS, siteConfig } from '@/lib/config';
 import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
@@ -36,8 +38,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
-    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -61,7 +65,7 @@ export default async function RootLayout({
           fontVariables
         )}
       >
-        <Providers session={session}>
+        <Providers session={session} locale={locale} messages={messages}>
           <main>{children}</main>
           <TailwindIndicator />
           <Toaster />

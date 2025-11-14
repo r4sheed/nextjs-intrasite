@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { CORE_ERRORS } from '@/lib/errors/messages';
+import { CORE_ERRORS } from '@/lib/errors/strings';
 import { type Message } from '@/lib/response';
 
 /**

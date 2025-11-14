@@ -145,5 +145,38 @@
       "two-factor-verified": "Kétlépcsős hitelesítés sikeres! Átirányítás a vezérlőpultra...",
       "verification-sent": "Egy megerősítő e-mailt küldtünk az e-mail címedre ({email}). Kérjük, ellenőrizd a postafiókodat és kövesd az utasításokat a fiókod megerősítéséhez."
     }
+  },
+  "common": {
+    "back": "Vissza",
+    "cancel": "Mégse",
+    "confirm": "Megerősítés",
+    "delete": "Törlés",
+    "error": "Hiba történt",
+    "loading": "Betöltés...",
+    "save": "Mentés",
+    "success": "A művelet sikeresen befejeződött"
+  },
+  "errors": {
+    "database-error": "Adatbázis hiba történt. Kérjük, próbálja újra később.",
+    "forbidden": "Hozzáférés megtagadva.",
+    "internal-server-error": "Váratlan hiba történt. Kérjük, próbálja újra később.",
+    "not-found": "{resource} nem található.",
+    "unauthorized": "Nincs jogosultsága ehhez a művelethez.",
+    "validation-failed": "Az adatok ellenőrzése sikertelen. Kérjük, ellenőrizze a bevitt adatokat."
+  },
+  "navigation": {
+    "auth": {
+      "admin": "Admin",
+      "client": "Kliens",
+      "forgot-password": "Elfelejtett jelszó",
+      "login": "Bejelentkezés",
+      "new-password": "Új jelszó",
+      "server": "Szerver",
+      "settings": "Beállítások",
+      "sign-up": "Regisztráció",
+      "verify-email": "Email megerősítés"
+    },
+    "error": "Hiba",
+    "home": "Kezdőlap"
   }
 }

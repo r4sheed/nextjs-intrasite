@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
 import { CircleCheck, CircleX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -31,7 +32,6 @@ import {
   type VerifyEmailInput,
   verifyEmailSchema,
 } from '@/features/auth/schemas';
-
 /**
  * Email verification form component
  * Handles email verification token processing and redirects
@@ -45,7 +45,7 @@ export const EmailVerificationForm = () => {
   const hasEmail = Boolean(email); // Check if email exists in URL
 
   const mutation = useMutation<
-    ActionSuccess<typeof verifyEmail>,
+    ActionSuccess<ReturnType<typeof verifyEmail>>,
     ErrorResponse,
     VerifyEmailInput
   >({
@@ -85,19 +85,29 @@ export const EmailVerificationForm = () => {
     return () => clearTimeout(timer);
   }, [isSuccess, router]);
 
-  const successMessage = data?.message?.key;
-  const isTokenValid = token
-    ? verifyEmailSchema.safeParse({ email: email || '', token }).success
-    : false;
-  const errorMessage =
-    !hasToken || !hasEmail
-      ? AUTH_ERRORS.tokenInvalid
-      : !isTokenValid
+  // Helper function to determine verification state and messages
+  const getVerificationState = () => {
+    const isTokenValid = token
+      ? verifyEmailSchema.safeParse({ email: email || '', token }).success
+      : false;
+
+    const hasValidParams = hasToken && hasEmail && isTokenValid;
+
+    return {
+      isTokenValid,
+      hasValidParams,
+      successMessage:
+        data?.message?.key || AUTH_LABELS.verifyEmailSuccessSubtitle,
+      errorMessage: !hasValidParams
         ? AUTH_ERRORS.tokenInvalid
-        : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle;
-  const showError = !hasToken || !hasEmail || !isTokenValid || isError; // Show error if missing params, invalid params, or verification failed
-  const showLoading =
-    hasToken && hasEmail && isTokenValid && (status === 'idle' || isPending); // Show loading only for valid params
+        : error?.message?.key || AUTH_LABELS.verifyEmailFailedSubtitle,
+      showError: !hasValidParams || isError,
+      showLoading: hasValidParams && (status === 'idle' || isPending),
+    };
+  };
+
+  const t = useTranslations('auth');
+  const state = getVerificationState();
 
   // Success state
   if (isSuccess) {
@@ -109,10 +119,8 @@ export const EmailVerificationForm = () => {
               <EmptyMedia>
                 <CircleCheck className="size-10" />
               </EmptyMedia>
-              <EmptyTitle>{AUTH_LABELS.verificationSuccessTitle}</EmptyTitle>
-              <EmptyDescription>
-                {successMessage || AUTH_LABELS.verificationSuccessSubtitle}
-              </EmptyDescription>
+              <EmptyTitle>{t(AUTH_LABELS.verifyEmailSuccessTitle)}</EmptyTitle>
+              <EmptyDescription>{t(state.successMessage)}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         </CardContent>
@@ -121,7 +129,7 @@ export const EmailVerificationForm = () => {
   }
 
   // Error state
-  if (showError) {
+  if (state.showError) {
     return (
       <Card>
         <CardContent>
@@ -130,10 +138,8 @@ export const EmailVerificationForm = () => {
               <EmptyMedia variant="icon">
                 <CircleX className="size-10" />
               </EmptyMedia>
-              <EmptyTitle>{AUTH_LABELS.verificationFailedTitle}</EmptyTitle>
-              <EmptyDescription>
-                {errorMessage || AUTH_LABELS.verificationFailedSubtitle}
-              </EmptyDescription>
+              <EmptyTitle>{t(AUTH_LABELS.verifyEmailFailedTitle)}</EmptyTitle>
+              <EmptyDescription>{t(state.errorMessage)}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button
@@ -143,7 +149,7 @@ export const EmailVerificationForm = () => {
                   router.replace(routes.auth.login.url);
                 }}
               >
-                {AUTH_LABELS.backToLoginButton}
+                {t(AUTH_LABELS.backToLoginButton)}
               </Button>
             </EmptyContent>
           </Empty>
@@ -153,7 +159,7 @@ export const EmailVerificationForm = () => {
   }
 
   // Loading state
-  if (showLoading) {
+  if (state.showLoading) {
     return (
       <Card>
         <CardContent>
@@ -162,9 +168,11 @@ export const EmailVerificationForm = () => {
               <EmptyMedia>
                 <Spinner className="size-10" />
               </EmptyMedia>
-              <EmptyTitle>{AUTH_LABELS.verificationProcessingTitle}</EmptyTitle>
+              <EmptyTitle>
+                {t(AUTH_LABELS.verifyEmailProcessingTitle)}
+              </EmptyTitle>
               <EmptyDescription>
-                {AUTH_LABELS.verificationProcessingSubtitle}
+                {t(AUTH_LABELS.verifyEmailProcessingSubtitle)}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

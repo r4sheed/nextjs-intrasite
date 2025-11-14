@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { middlewareConfig } from '@/lib/config';
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 
 import { execute } from '@/hooks/use-action';
 
@@ -55,12 +57,9 @@ const useTwoFactorUrlParams = () => {
 
   const sessionId = searchParams.get('sessionId');
   const email = searchParams.get('email');
-  const codeFromQuery = searchParams.get('code');
+  const code = searchParams.get('code');
 
-  const [codeSentPrefix, codeSentSuffix = ''] =
-    AUTH_LABELS.verify2faCodeSent.split('{email}');
-
-  return { sessionId, email, codeFromQuery, codeSentPrefix, codeSentSuffix };
+  return { sessionId, email, code };
 };
 
 /**
@@ -77,7 +76,7 @@ const useTwoFactorMutations = () => {
   const email = searchParams.get('email');
 
   const verifyMutation = useMutation<
-    ActionSuccess<typeof verifyTwoFactor>,
+    ActionSuccess<ReturnType<typeof verifyTwoFactor>>,
     ErrorResponse,
     VerifyTwoFactorInput
   >({
@@ -100,7 +99,7 @@ const useTwoFactorMutations = () => {
   });
 
   const resendMutation = useMutation<
-    ActionSuccess<typeof resendTwoFactor>,
+    ActionSuccess<ReturnType<typeof resendTwoFactor>>,
     ErrorResponse,
     ResendTwoFactorInput
   >({
@@ -131,14 +130,14 @@ const useTwoFactorMutations = () => {
 /**
  * Automatically submits the verification code when a valid code is provided via URL parameters.
  *
- * @param codeFromQuery Code sourced from the URL query string.
+ * @param code Code sourced from the URL query string.
  * @param sessionId Active 2FA session identifier.
  * @param form React Hook Form instance managing the OTP input.
  * @param verifyMutation Mutation used for verifying the code with the server.
  * @param isRedirecting Indicates whether a redirect is already in progress.
  */
 const useTwoFactorAutoSubmit = (
-  codeFromQuery: string | null,
+  code: string | null,
   sessionId: string | null,
   form: ReturnType<typeof useForm<VerifyTwoFactorCodeInput>>,
   verifyMutation: ReturnType<typeof useTwoFactorMutations>['verifyMutation'],
@@ -166,24 +165,24 @@ const useTwoFactorAutoSubmit = (
       return;
     }
 
-    if (!codeFromQuery || !sessionId) {
+    if (!code || !sessionId) {
       return;
     }
 
-    if (!isValidTwoFactorCode(codeFromQuery)) {
+    if (!isValidTwoFactorCode(code)) {
       return;
     }
 
-    if (lastAutoSubmitCode.current === codeFromQuery) {
+    if (lastAutoSubmitCode.current === code) {
       return;
     }
 
-    lastAutoSubmitCode.current = codeFromQuery;
+    lastAutoSubmitCode.current = code;
 
     void (async () => {
       const currentCode = form.getValues('code');
-      if (currentCode !== codeFromQuery) {
-        form.setValue('code', codeFromQuery, { shouldValidate: true });
+      if (currentCode !== code) {
+        form.setValue('code', code, { shouldValidate: true });
       }
 
       const isValid = await form.trigger('code');
@@ -196,9 +195,9 @@ const useTwoFactorAutoSubmit = (
         return;
       }
 
-      verifyMutation.mutate({ sessionId, code: codeFromQuery });
+      verifyMutation.mutate({ sessionId, code: code });
     })();
-  }, [codeFromQuery, form, sessionId, verifyMutation, isRedirecting]);
+  }, [code, form, sessionId, verifyMutation, isRedirecting]);
 };
 
 /**
@@ -234,6 +233,7 @@ const FATAL_VERIFY_ERROR_CODES = new Set<string>([
 export const TwoFactorVerificationForm = () => {
   const router = useRouter();
   const urlParams = useTwoFactorUrlParams();
+  const t = useTranslations('auth');
   const { sessionId, isRedirecting, verifyMutation, resendMutation } =
     useTwoFactorMutations();
   const { isPending, errorMessage, isSessionLocked } = useTwoFactorState(
@@ -248,7 +248,7 @@ export const TwoFactorVerificationForm = () => {
   });
 
   useTwoFactorAutoSubmit(
-    urlParams.codeFromQuery,
+    urlParams.code,
     sessionId,
     form,
     verifyMutation,
@@ -289,18 +289,19 @@ export const TwoFactorVerificationForm = () => {
           <FieldGroup>
             <div className="flex flex-col items-center gap-2 text-center">
               <h1 className="text-2xl font-bold">
-                {AUTH_LABELS.verify2faTitle}
+                {t(AUTH_LABELS.verify2faTitle)}
               </h1>
               <p className="text-muted-foreground text-balance">
-                {AUTH_LABELS.verify2faSubtitle}
+                {t(AUTH_LABELS.verify2faSubtitle)}
               </p>
               {urlParams.email && (
                 <p className="text-muted-foreground text-sm">
-                  {urlParams.codeSentPrefix}
-                  <span className="font-medium">{urlParams.email}</span>
-                  {urlParams.codeSentSuffix
-                    ? ` ${urlParams.codeSentSuffix}`
-                    : ''}
+                  {t.rich(AUTH_LABELS.verify2faCodeSentText, {
+                    email: urlParams.email,
+                    tag: chunks => (
+                      <span className="font-medium">{chunks}</span>
+                    ),
+                  })}
                 </p>
               )}
             </div>
@@ -311,7 +312,7 @@ export const TwoFactorVerificationForm = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="sr-only">
-                    {AUTH_LABELS.otpLabel}
+                    {t(AUTH_LABELS.otpCodeLabel)}
                   </FieldLabel>
                   <InputOTP
                     {...field}
@@ -334,17 +335,19 @@ export const TwoFactorVerificationForm = () => {
                     </InputOTPGroup>
                   </InputOTP>
                   <FieldDescription className="text-center">
-                    {AUTH_LABELS.verify2faDescription}
+                    {t(AUTH_LABELS.verify2faDescription)}
                   </FieldDescription>
                   {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+                    <FieldError
+                      errors={translateFieldErrors(t, fieldState.error)}
+                    />
                   )}
                 </Field>
               )}
             />
 
             <Field>
-              {errorMessage && <FormError message={errorMessage} />}
+              {errorMessage && <FormError message={t(errorMessage)} />}
 
               {isSessionLocked ? (
                 <Button
@@ -354,7 +357,7 @@ export const TwoFactorVerificationForm = () => {
                   }}
                   className="w-full"
                 >
-                  {AUTH_LABELS.backToLoginButton}
+                  {t(AUTH_LABELS.backToLoginButton)}
                 </Button>
               ) : (
                 <LoadingButton
@@ -362,7 +365,7 @@ export const TwoFactorVerificationForm = () => {
                   loading={isPending}
                   className="w-full"
                 >
-                  {AUTH_LABELS.verifyButton}
+                  {t(AUTH_LABELS.verifyButton)}
                 </LoadingButton>
               )}
 
@@ -375,7 +378,7 @@ export const TwoFactorVerificationForm = () => {
                 }
                 className="w-full"
               >
-                {AUTH_LABELS.resendCodeButton}
+                {t(AUTH_LABELS.resendCodeButton)}
               </Button>
             </Field>
           </FieldGroup>

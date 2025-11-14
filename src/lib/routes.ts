@@ -43,13 +43,13 @@ type RouteNode = {
 export const routes = {
   home: {
     url: '/',
-    label: 'navigation.home',
+    label: 'home',
     access: 'public',
   },
   auth: {
     login: {
       url: '/auth/login',
-      label: 'navigation.auth.login',
+      label: 'auth.login',
       access: 'auth',
       meta: {
         showInNavigation: true,
@@ -58,7 +58,7 @@ export const routes = {
     },
     signUp: {
       url: '/auth/signup',
-      label: 'navigation.auth.sign-up',
+      label: 'auth.sign-up',
       access: 'auth',
       meta: {
         showInNavigation: true,
@@ -67,23 +67,23 @@ export const routes = {
     },
     forgotPassword: {
       url: '/auth/forgot-password',
-      label: 'navigation.auth.forgot-password',
+      label: 'auth.forgot-password',
       access: 'auth',
     },
     newPassword: {
       url: '/auth/new-password',
-      label: 'navigation.auth.new-password',
+      label: 'auth.new-password',
       access: 'auth',
     },
     verify: {
       url: '/auth/verify',
-      label: 'navigation.auth.verify',
+      label: 'auth.verify',
       access: 'public',
     },
   },
   settings: {
     url: '/settings',
-    label: 'navigation.settings',
+    label: 'auth.settings',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -92,7 +92,7 @@ export const routes = {
   },
   admin: {
     url: '/test/admin',
-    label: 'navigation.admin',
+    label: 'auth.admin',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -101,7 +101,7 @@ export const routes = {
   },
   client: {
     url: '/test/client',
-    label: 'navigation.client',
+    label: 'auth.client',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -109,7 +109,7 @@ export const routes = {
   },
   server: {
     url: '/test/server',
-    label: 'navigation.server',
+    label: 'auth.server',
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -117,7 +117,7 @@ export const routes = {
   },
   error: {
     url: '/error',
-    label: 'navigation.error',
+    label: 'error',
     access: 'public',
   },
 } as const satisfies RouteNode;

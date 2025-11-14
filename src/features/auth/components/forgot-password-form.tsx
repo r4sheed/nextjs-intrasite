@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
@@ -9,6 +10,7 @@ import Link from 'next/link';
 
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -48,7 +50,7 @@ const useForgotPasswordForm = () => {
 
   // Mutation for password reset
   const mutation = useMutation<
-    ActionSuccess<typeof resetPassword>,
+    ActionSuccess<ReturnType<typeof resetPassword>>,
     ErrorResponse,
     ResetInput
   >({
@@ -90,6 +92,8 @@ const ForgotPasswordForm = ({
     errorMessage,
   } = useForgotPasswordForm();
 
+  const t = useTranslations('auth');
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -102,10 +106,10 @@ const ForgotPasswordForm = ({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_LABELS.forgotPasswordTitle}
+                  {t(AUTH_LABELS.forgotPasswordTitle)}
                 </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_LABELS.forgotPasswordSubtitle}
+                  {t(AUTH_LABELS.forgotPasswordSubtitle)}
                 </p>
               </div>
               <Controller
@@ -114,7 +118,7 @@ const ForgotPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.emailLabel}
+                      {t(AUTH_LABELS.emailLabel)}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -122,30 +126,36 @@ const ForgotPasswordForm = ({
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.emailPlaceholder}
+                      placeholder={t(AUTH_LABELS.emailPlaceholder)}
                       disabled={isPending}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.emailResetDescription}
+                      {t(AUTH_LABELS.emailResetDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Field>
-                {isSuccess && <FormSuccess message={successMessage} />}
-                {isError && <FormError message={errorMessage} />}
+                {isSuccess && successMessage && (
+                  <FormSuccess message={t(successMessage)} />
+                )}
+                {isError && errorMessage && (
+                  <FormError message={t(errorMessage)} />
+                )}
                 <LoadingButton type="submit" loading={isPending}>
-                  {AUTH_LABELS.forgotPasswordButton}
+                  {t(AUTH_LABELS.resetPasswordButton)}
                 </LoadingButton>
               </Field>
               <FieldDescription className="text-center">
-                {AUTH_LABELS.rememberPasswordCta}{' '}
+                {t(AUTH_LABELS.rememberPasswordCtaText)}{' '}
                 <Link href={routes.auth.login.url}>
-                  {AUTH_LABELS.backToLoginButton}
+                  {t(AUTH_LABELS.backToLoginButton)}
                 </Link>
               </FieldDescription>
             </FieldGroup>

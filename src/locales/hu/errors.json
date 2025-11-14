@@ -1,10 +1,10 @@
 {
   "errors": {
-    "internal-server-error": "Váratlan hiba történt. Kérjük, próbálja újra később.",
-    "validation-failed": "Az adatok ellenőrzése sikertelen. Kérjük, ellenőrizze a bevitt adatokat.",
     "database-error": "Adatbázis hiba történt. Kérjük, próbálja újra később.",
-    "unauthorized": "Nincs jogosultsága ehhez a művelethez.",
     "forbidden": "Hozzáférés megtagadva.",
-    "not-found": "{resource} nem található."
+    "internal-server-error": "Váratlan hiba történt. Kérjük, próbálja újra később.",
+    "not-found": "{resource} nem található.",
+    "unauthorized": "Nincs jogosultsága ehhez a művelethez.",
+    "validation-failed": "Az adatok ellenőrzése sikertelen. Kérjük, ellenőrizze a bevitt adatokat."
   }
 }

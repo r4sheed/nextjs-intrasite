@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
@@ -12,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -77,7 +79,7 @@ const useNewPasswordMutation = () => {
   const router = useRouter();
 
   return useMutation<
-    ActionSuccess<typeof updatePassword>,
+    ActionSuccess<ReturnType<typeof updatePassword>>,
     ErrorResponse,
     NewPasswordInput
   >({
@@ -165,6 +167,8 @@ const NewPasswordForm = ({
     errorMessage,
   } = useNewPasswordForm();
 
+  const t = useTranslations('auth');
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -177,10 +181,10 @@ const NewPasswordForm = ({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_LABELS.newPasswordTitle}
+                  {t(AUTH_LABELS.newPasswordTitle)}
                 </h1>
                 <p className="text-muted-foreground text-balance">
-                  {AUTH_LABELS.newPasswordSubtitle}
+                  {t(AUTH_LABELS.newPasswordSubtitle)}
                 </p>
               </div>
 
@@ -190,43 +194,50 @@ const NewPasswordForm = ({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.passwordLabel}
+                      {t(AUTH_LABELS.passwordLabel)}
                     </FieldLabel>
                     <PasswordInput
                       {...field}
                       id={field.name}
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.passwordPlaceholder}
+                      placeholder={t(AUTH_LABELS.passwordPlaceholder)}
                       disabled={isPending || isSuccess || isError}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.passwordDescription}
+                      {t(AUTH_LABELS.passwordDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
               />
 
               <Field>
-                {isSuccess && <FormSuccess message={successMessage} />}
-                {isError && <FormError message={errorMessage} />}
+                {isSuccess && successMessage && (
+                  <FormSuccess message={successMessage} />
+                )}
+                {isError && errorMessage && (
+                  <FormError message={errorMessage} />
+                )}
+
                 <LoadingButton
                   type="submit"
                   loading={isPending}
                   disabled={isSuccess || isError}
                 >
-                  {AUTH_LABELS.newPasswordButton}
+                  {t(AUTH_LABELS.newPasswordButton)}
                 </LoadingButton>
               </Field>
 
               <FieldDescription className="text-center">
-                {AUTH_LABELS.rememberPasswordCta}{' '}
+                {t(AUTH_LABELS.rememberPasswordCtaText)}{' '}
                 <Link href={routes.auth.login.url}>
-                  {AUTH_LABELS.backToLoginButton}
+                  {t(AUTH_LABELS.backToLoginButton)}
                 </Link>
               </FieldDescription>
             </FieldGroup>

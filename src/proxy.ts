@@ -7,7 +7,7 @@ import {
   matchesRoute,
   normalizePathname,
   validateCallbackUrl,
-} from '@/lib/proxy-helpers';
+} from '@/lib/proxy';
 import { authRouteSet, protectedRouteSet, publicRouteSet } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';

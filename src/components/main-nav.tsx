@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,6 +17,7 @@ export function MainNav({
   items: ReadonlyArray<{ href: string; label: string }>;
 }) {
   const pathname = usePathname();
+  const t = useTranslations('navigation');
 
   return (
     <nav className={cn('items-center', className)} {...props}>
@@ -24,7 +27,7 @@ export function MainNav({
             href={item.href}
             className={cn(pathname === item.href && 'text-primary')}
           >
-            {item.label}
+            {t(item.label)}
           </Link>
         </Button>
       ))}

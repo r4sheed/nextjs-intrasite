@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { signIn } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
@@ -13,11 +14,14 @@ import { Spinner } from '@/components/ui/spinner';
 
 import { AuthProvider } from '@/features/auth/types/auth-provider';
 
+import { AUTH_LABELS } from '../lib/strings';
+
 interface SocialProvidersProps {
   disabled: boolean;
 }
 
 export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
+  const t = useTranslations('auth');
   const [loadingProvider, setLoadingProvider] = useState<AuthProvider | null>(
     null
   );
@@ -43,6 +47,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         type="button"
         size="lg"
         variant="outline"
+        title={t(AUTH_LABELS.signInWithGoogleButton)}
         disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.Google)}
       >
@@ -56,6 +61,7 @@ export const SocialProviders = ({ disabled }: SocialProvidersProps) => {
         type="button"
         size="lg"
         variant="outline"
+        title={t(AUTH_LABELS.signInWithGithubButton)}
         disabled={disabled || loadingProvider !== null}
         onClick={() => onClick(AuthProvider.GitHub)}
       >

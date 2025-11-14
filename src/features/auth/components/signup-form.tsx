@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 
 import Image from 'next/image';
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { siteFeatures } from '@/lib/config';
 import { routes } from '@/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
+import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';
 
 import { execute } from '@/hooks/use-action';
@@ -52,7 +54,7 @@ const useSignupForm = () => {
 
   // Mutation for user registration
   const mutation = useMutation<
-    ActionSuccess<typeof registerUser>,
+    ActionSuccess<ReturnType<typeof registerUser>>,
     ErrorResponse,
     RegisterInput
   >({
@@ -91,6 +93,8 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
     errorMessage,
   } = useSignupForm();
 
+  const t = useTranslations('auth');
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -103,10 +107,10 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">
-                  {AUTH_LABELS.signupTitle}
+                  {t(AUTH_LABELS.signupTitle)}
                 </h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  {AUTH_LABELS.signupSubtitle}
+                  {t(AUTH_LABELS.signupSubtitle)}
                 </p>
               </div>
               <Controller
@@ -115,22 +119,24 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.nameLabel}
+                      {t(AUTH_LABELS.nameLabel)}
                     </FieldLabel>
                     <Input
                       {...field}
                       id={field.name}
                       autoComplete="name"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.namePlaceholder}
+                      placeholder={t(AUTH_LABELS.namePlaceholder)}
                       disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.nameDescription}
+                      {t(AUTH_LABELS.nameDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
@@ -141,7 +147,7 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.emailLabel}
+                      {t(AUTH_LABELS.emailLabel)}
                     </FieldLabel>
                     <Input
                       {...field}
@@ -149,15 +155,17 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                       type="email"
                       autoComplete="email"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.emailPlaceholder}
+                      placeholder={t(AUTH_LABELS.emailPlaceholder)}
                       disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.emailDescription}
+                      {t(AUTH_LABELS.emailDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
@@ -168,49 +176,58 @@ const SignupForm = ({ className, ...props }: React.ComponentProps<'div'>) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      {AUTH_LABELS.passwordLabel}
+                      {t(AUTH_LABELS.passwordLabel)}
                     </FieldLabel>
                     <PasswordInput
                       {...field}
                       id={field.name}
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid}
-                      placeholder={AUTH_LABELS.passwordPlaceholder}
+                      placeholder={t(AUTH_LABELS.passwordPlaceholder)}
                       disabled={isPending || isSuccess}
                       required
                     />
                     <FieldDescription>
-                      {AUTH_LABELS.passwordDescription}
+                      {t(AUTH_LABELS.passwordDescription)}
                     </FieldDescription>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError
+                        errors={translateFieldErrors(t, fieldState.error)}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Field>
-                {isSuccess && <FormSuccess message={successMessage} />}
-                {isError && <FormError message={errorMessage} />}
+                {isSuccess && successMessage && (
+                  <FormSuccess message={t(successMessage)} />
+                )}
+                {isError && errorMessage && (
+                  <FormError message={t(errorMessage)} />
+                )}
+
                 <LoadingButton
                   type="submit"
                   disabled={isSuccess}
                   loading={isPending}
                 >
-                  {AUTH_LABELS.signupButton}
+                  {t(AUTH_LABELS.signupButton)}
                 </LoadingButton>
               </Field>
               {siteFeatures.socialAuth && (
                 <>
-                  <FieldSeparator>{AUTH_LABELS.orContinueWith}</FieldSeparator>
+                  <FieldSeparator>
+                    {t(AUTH_LABELS.orContinueWithText)}
+                  </FieldSeparator>
                   <Field className="grid grid-cols-2 gap-4">
                     <SocialProviders disabled={isPending} />
                   </Field>
                 </>
               )}
               <FieldDescription className="text-center">
-                {AUTH_LABELS.loginCtaText}{' '}
+                {t(AUTH_LABELS.loginCtaText)}{' '}
                 <Link href={routes.auth.login.url}>
-                  {AUTH_LABELS.loginCtaLink}
+                  {t(AUTH_LABELS.loginCtaLink)}
                 </Link>
               </FieldDescription>
             </FieldGroup>
