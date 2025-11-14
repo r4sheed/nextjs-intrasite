@@ -97,10 +97,10 @@ export const EmailVerificationForm = () => {
       isTokenValid,
       hasValidParams,
       successMessage:
-        data?.message?.key || AUTH_LABELS.verificationSuccessSubtitle,
+        data?.message?.key || AUTH_LABELS.verifyEmailSuccessSubtitle,
       errorMessage: !hasValidParams
         ? AUTH_ERRORS.tokenInvalid
-        : error?.message?.key || AUTH_LABELS.verificationFailedSubtitle,
+        : error?.message?.key || AUTH_LABELS.verifyEmailFailedSubtitle,
       showError: !hasValidParams || isError,
       showLoading: hasValidParams && (status === 'idle' || isPending),
     };
@@ -119,7 +119,7 @@ export const EmailVerificationForm = () => {
               <EmptyMedia>
                 <CircleCheck className="size-10" />
               </EmptyMedia>
-              <EmptyTitle>{t(AUTH_LABELS.verificationSuccessTitle)}</EmptyTitle>
+              <EmptyTitle>{t(AUTH_LABELS.verifyEmailSuccessTitle)}</EmptyTitle>
               <EmptyDescription>{t(state.successMessage)}</EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -138,7 +138,7 @@ export const EmailVerificationForm = () => {
               <EmptyMedia variant="icon">
                 <CircleX className="size-10" />
               </EmptyMedia>
-              <EmptyTitle>{t(AUTH_LABELS.verificationFailedTitle)}</EmptyTitle>
+              <EmptyTitle>{t(AUTH_LABELS.verifyEmailFailedTitle)}</EmptyTitle>
               <EmptyDescription>{t(state.errorMessage)}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
@@ -169,10 +169,10 @@ export const EmailVerificationForm = () => {
                 <Spinner className="size-10" />
               </EmptyMedia>
               <EmptyTitle>
-                {t(AUTH_LABELS.verificationProcessingTitle)}
+                {t(AUTH_LABELS.verifyEmailProcessingTitle)}
               </EmptyTitle>
               <EmptyDescription>
-                {t(AUTH_LABELS.verificationProcessingSubtitle)}
+                {t(AUTH_LABELS.verifyEmailProcessingSubtitle)}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
