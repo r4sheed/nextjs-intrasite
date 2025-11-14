@@ -5,12 +5,13 @@ applyTo: '**'
 
 # Error Codes, Messages, and i18n Keys Guidelines
 
-> **Version:** 2.1  
+> **Version:** 2.2  
 > **Last Updated:** November 2025  
 > **Target:** Next.js 15+, TypeScript 5+, i18n-ready
 
 **Changelog:**
 
+- **Version 2.2 (2025-11-14):** Simplified namespace usage patterns - removed full dotted paths, kept only namespaced translation with relative keys.
 - **Version 2.1 (2025-11-14):** Added naming patterns for UI labels with descriptive suffixes and flat structure guidelines.
 - **Version 2.0 (2025-10-15):** Initial structured version.
 
@@ -37,7 +38,8 @@ This document establishes a **unified, consistent pattern** for defining error c
 5. **Maximum 2-3 nesting levels** - Keep i18n structure flat and readable
 6. **Type-safe constants** - Use `as const` and export types for all constant objects
 7. **Clear separation** - Don't mix error messages with UI labels
-8. **No unnecessary examples** - Code should be self-documenting; avoid @example comments unless absolutely necessary
+8. **Namespace-aware keys** - Use relative keys within namespaces, not full dotted paths
+9. **No unnecessary examples** - Code should be self-documenting; avoid @example comments unless absolutely necessary
 
 ---
 
@@ -358,83 +360,109 @@ export const AUTH_LABELS = {
 
 ---
 
-## i18n File Structure
+## Namespace Usage Patterns
 
-```json
-// src/locales/en/common.json
+This project uses **namespaced translation** consistently. All components call `useTranslations(namespace)` with a specific namespace, and i18n keys are stored as **relative keys within that namespace**.
+
+### ✅ CORRECT: Namespaced Translation (Relative Keys)
+
+Always use `useTranslations(namespace)` and relative keys within that namespace:
+
+```typescript
+// Translation file structure
 {
-  "common": {
-    "success": "Operation completed successfully",
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "confirm": "Confirm",
-    "back": "Back"
+  "navigation": {
+    "auth": {
+      "login": "Sign in",
+      "signup": "Sign up"
+    },
+    "home": "Home",
+    "error": "Error"
   }
 }
+
+// Component usage
+const t = useTranslations('navigation'); // With namespace
+t('auth.login'); // ✅ Relative key within 'navigation' namespace
+t('home'); // ✅ Relative key within 'navigation' namespace
+t('error'); // ✅ Relative key within 'navigation' namespace
 ```
 
-```json
-// src/locales/en/errors.json
-{
-  "errors": {
-    "internal-server-error": "An unexpected error occurred. Please try again later.",
-    "validation-failed": "Input validation failed. Please check your entries.",
-    "unauthorized": "You are not authorized to perform this action.",
-    "forbidden": "Access forbidden.",
-    "not-found": "{resource} could not be found.",
-    "database-error": "A database error occurred. Please try again later."
-  }
-}
+### ❌ WRONG: Direct Translation (Full Dotted Paths)
+
+Do not use `useTranslations()` without namespace or full dotted paths:
+
+```typescript
+// Component usage - DON'T DO THIS
+const t = useTranslations('navigation');
+t('navigation.auth.login'); // ❌ Wrong - would look for 'navigation.navigation.auth.login'
 ```
 
-```json
-// src/locales/en/auth.json
+### Route Labels Example
+
+The application's route system uses **relative keys within the 'navigation' namespace**:
+
+```typescript
+// routes.ts - Route definitions use relative keys
+export const routes = {
+  home: { label: 'home' }, // → navigation.home
+  auth: {
+    login: { label: 'auth.login' }, // → navigation.auth.login
+  },
+};
+
+// Component usage
+const t = useTranslations('navigation');
+t(route.label); // Works with relative keys
+```
+
+**Why relative keys?**
+
+- **Consistency**: All components use namespaced translation
+- **Performance**: Namespace scoping reduces lookup overhead
+- **Maintainability**: Clear separation between translation domains
+- **Type Safety**: Easier to catch missing translations per namespace
+
+---
+
+### Rich Text Translation with Custom Styling
+
+For complex text with embedded styling or components, use `t.rich()` with custom tag handlers:
+
+```typescript
+// Translation file structure
 {
   "auth": {
-    "errors": {
-      "invalid-fields": "Please check your input and try again.",
-      "email-required": "Email is required.",
-      "email-invalid": "Please enter a valid email address.",
-      "password-required": "Password is required.",
-      "password-too-short": "Password must be at least {min} characters long.",
-      "invalid-credentials": "Invalid email or password.",
-      "verification-required": "You need to verify your email before logging in.",
-      "user-not-found": "User with email {email} could not be found.",
-      "email-exists": "This email is already registered.",
-      "token-invalid": "The requested token was not found or is invalid.",
-      "token-expired": "The token has expired. Please request a new one."
-    },
-    "success": {
-      "login": "Welcome back!",
-      "signup": "Account created successfully!",
-      "email-verified": "Email verified! You can now log in.",
-      "verification-sent": "A verification email has been sent to {email}.",
-      "password-updated": "Your password has been updated successfully.",
-      "password-reset-sent": "Password reset instructions have been sent to {email}."
-    },
-    "labels": {
-      "signup-title": "Create an account",
-      "login-title": "Sign in",
-      "verification-title": "Email verification",
-      "forgot-password-title": "Forgot password",
-      "new-password-title": "Set new password",
-      "email": "Email",
-      "email-placeholder": "Enter your email",
-      "password": "Password",
-      "password-placeholder": "Enter your password",
-      "confirm-password": "Confirm password",
-      "name": "Name",
-      "login-button": "Sign in",
-      "signup-button": "Create account",
-      "forgot-password": "Forgot password?",
-      "back-to-login": "Back to login"
-    }
+    "verify-2fa-code-sent-text": "Code sent to <tag>{email}</tag>"
   }
 }
+
+// Component usage with custom styling
+const t = useTranslations('auth');
+
+<p className="text-muted-foreground text-sm">
+  {t.rich('verify-2fa-code-sent-text', {
+    email: userEmail,
+    tag: chunks => (
+      <span className="font-medium text-primary">{chunks}</span>
+    ),
+  })}
+</p>
 ```
+
+**Why this pattern?**
+
+- **Flexible styling**: Apply custom CSS classes or components to specific text parts
+- **Type safety**: Tag names are validated at runtime
+- **Reusable**: Same translation key can be styled differently in different contexts
+- **Accessibility**: Maintains semantic meaning while allowing visual customization
+
+**Common use cases:**
+
+- Highlighting important information (bold, colored text)
+- Creating links within translated text
+- Adding icons or special formatting
+- Conditional styling based on context
 
 ---
 
@@ -449,9 +477,10 @@ export const AUTH_LABELS = {
 5. **Export types** for all constant objects (`as const`)
 6. **Document sections** with clear comments
 7. **Use domain-relative keys** - `errors.*`, `success.*`, `labels.*` (relative to the domain namespace)
-8. **Keep code self-documenting** - avoid unnecessary @example comments
-9. **Organize by domain** - Separate i18n files for common, errors, and feature-specific strings
-10. **Maximum 2-3 nesting levels** - Keep i18n structure flat and readable
+8. **Always use namespaced translation** - `useTranslations('namespace')` with relative keys
+9. **Keep code self-documenting** - avoid unnecessary @example comments
+10. **Organize by domain** - Separate i18n files for common, errors, and feature-specific strings
+11. **Maximum 2-3 nesting levels** - Keep i18n structure flat and readable
 
 ### ❌ DON'T
 

@@ -31,22 +31,22 @@ src/
 export const routes = {
   home: {
     url: '/',
-    label: 'navigation.home',
+    label: 'home',
   },
   auth: {
     login: {
       url: '/auth/login',
-      label: 'navigation.auth.login',
+      label: 'auth.login',
     },
     signUp: {
       url: '/auth/signup',
-      label: 'navigation.auth.sign-up',
+      label: 'auth.sign-up',
     },
     // ...
   },
   settings: {
     url: '/settings',
-    label: 'navigation.settings',
+    label: 'settings',
   },
 } as const;
 
