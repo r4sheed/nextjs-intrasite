@@ -70,7 +70,7 @@ This will:
 - Update `src/features/auth/lib/strings.ts`:
   ```typescript
   export const AUTH_ERRORS = {
-    passwordMismatch: 'auth.errors.password-mismatch',
+    passwordMismatch: 'errors.password-mismatch',
     // ... other errors
   } as const;
   ```
@@ -218,21 +218,21 @@ The scripts automatically map domains to their corresponding files:
 
 Keys are organized by category, which maps to TypeScript constant objects:
 
-| Category   | Constant Object     | Example Key                                                        |
-| ---------- | ------------------- | ------------------------------------------------------------------ |
-| `errors`   | `{DOMAIN}_ERRORS`   | `auth.errors.invalid-email` → `AUTH_ERRORS.invalidEmail`           |
-| `success`  | `{DOMAIN}_SUCCESS`  | `auth.success.login` → `AUTH_SUCCESS.login`                        |
-| `labels`   | `{DOMAIN}_LABELS`   | `auth.labels.email` → `AUTH_LABELS.email`                          |
-| `warnings` | `{DOMAIN}_WARNINGS` | `auth.warnings.session-expiring` → `AUTH_WARNINGS.sessionExpiring` |
+| Category   | Constant Object     | Example Key                                                   |
+| ---------- | ------------------- | ------------------------------------------------------------- |
+| `errors`   | `{DOMAIN}_ERRORS`   | `errors.invalid-email` → `AUTH_ERRORS.invalidEmail`           |
+| `success`  | `{DOMAIN}_SUCCESS`  | `success.login` → `AUTH_SUCCESS.login`                        |
+| `labels`   | `{DOMAIN}_LABELS`   | `labels.email` → `AUTH_LABELS.email`                          |
+| `warnings` | `{DOMAIN}_WARNINGS` | `warnings.session-expiring` → `AUTH_WARNINGS.sessionExpiring` |
 
 ---
 
 ## Key Naming Conventions
 
-**i18n keys (JSON):**
+- **i18n keys (JSON):**
 
 - Use kebab-case: `password-too-short`, `email-required`
-- Dots for nesting: `auth.errors.password-too-short`
+- Dots for nesting: `errors.password-too-short`
 - Max 2-3 nesting levels
 
 **TypeScript properties:**
@@ -243,12 +243,12 @@ Keys are organized by category, which maps to TypeScript constant objects:
 **Example:**
 
 ```typescript
-// JSON key: "auth.errors.password-too-short"
+// JSON key: "errors.password-too-short"
 // TypeScript: AUTH_ERRORS.passwordTooShort
 
 export const AUTH_ERRORS = {
-  passwordTooShort: 'auth.errors.password-too-short',
-  emailRequired: 'auth.errors.email-required',
+  passwordTooShort: 'errors.password-too-short',
+  emailRequired: 'errors.email-required',
 } as const;
 ```
 
