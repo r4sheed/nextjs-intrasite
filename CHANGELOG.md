@@ -123,41 +123,38 @@ No schema changes needed - composite unique constraint `@@unique([email, token])
 
 **Status:** Completed
 
-#### Environment Validation with Zod
+#### Environment Validation with Zod (build-time)
 
 **Completed:** November 2025
 
 **Issue:**
-Environment variables were not properly validated, causing runtime errors when DATABASE_URL or AUTH_SECRET were undefined or invalid.
+Environment variables caused brittle behavior when missing or malformed. Runtime validation led to client-bundle issues and poor developer experience.
 
 **Description:**
-Implemented comprehensive environment validation using Zod schemas with fail-fast approach, supporting long Prisma Accelerate URLs and providing user-friendly error messages.
+Moved environment validation to a centralized, build-time flow and made the Zod schema lazy-loaded so it doesn't enter browser bundles. This keeps type safety while avoiding runtime validation in client code.
 
 **Changes Made:**
 
-- **New Validation System (`src/lib/env.ts`):**
-  - Centralized Zod schema for all environment variables
-  - Custom URL validation supporting long Prisma Accelerate URLs
-  - Fail-fast validation with clear error messages
-  - Type-safe exports replacing `process.env` usage
+- **Centralized schema (`src/lib/env.ts`):**
+  - `getEnvValidationSchema()` exports a Zod schema factory (lazy `import('zod')`).
+  - Keeps `env` typed as `process.env` with `EnvSchema` and an export of `envHelpers` for runtime feature checks.
 
-- **Environment Configuration:**
-  - Updated `.env` and `.env.example` with proper structure and documentation
+- **Build-time validator (`scripts/validate-env.ts`):**
+  - Node CLI that runs validation using the shared schema. Exported `validateEnv()` for unit tests.
+  - Added script `npm run validate:env` and hooked it into the `build` step so CI fails early on misconfiguration.
 
-- **Test Environment Setup:**
-  - Updated `vitest.config.ts` to load test environment variables
-  - Added comprehensive test suite (22 test cases) for validation logic
+- **Tests:**
+  - `scripts/__tests__/validate-env.test.ts` tests the validator with good/bad env cases.
+  - `src/lib/__tests__/env.test.ts` now focuses on `envHelpers` (client-safe checks).
 
-- **Error Handling Improvements:**
-  - Simplified error messages with actionable quick fixes
-  - Better developer experience with clear validation feedback
+- **Client safety:**
+  - Avoids importing `zod` into client bundles and replaces a handful of client imports of `env` with `process.env` for compatibility (e.g., `tailwind-indicator.tsx`).
 
 **Benefits:**
 
-- ✅ **Type Safety:** All environment variables are now type-safe
-- ✅ **Fail-Fast Validation:** Catches configuration issues at startup
-- ✅ **Long URL Support:** Handles Prisma Accelerate URLs properly
-- ✅ **Developer Experience:** Clear error messages with quick fixes
-- ✅ **Test Coverage:** Comprehensive validation testing (22 tests)
+- ✅ **Build-time Safety:** Environment validation runs during build/CI — catches misconfig at build time.
+- ✅ **No client-bundling issues:** `zod` is loaded lazily so it isn't bundled into client artifacts.
+- ✅ **Centralized schema:** Single source of truth for env definitions and validation.
+- ✅ **Testable:** `validateEnv()` is unit-tested for success/failure cases.
 
 **Status:** Completed
