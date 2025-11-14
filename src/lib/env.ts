@@ -139,12 +139,6 @@ const validateEnv = (): EnvSchema => {
 /**
  * Validated and type-safe environment variables
  * Use this instead of process.env throughout the application
- *
- * @example
- * import { env } from '@/lib/env';
- *
- * // Instead of: process.env.DATABASE_URL
- * const dbUrl = env.DATABASE_URL;
  */
 export const env = validateEnv();
 
@@ -210,6 +204,19 @@ export const envHelpers = {
 } as const;
 
 // Convenience exports for easier importing
-export const { isDev, isProduction, isTest, isDevOrTest, getEnvironment, isEdgeRuntime, hasEmail, hasGoogleOAuth, hasGithubOAuth, hasOAuth, hasMinIO } = envHelpers;
+export const {
+  isDev,
+  isProduction,
+  isTest,
+  isDevOrTest,
+  getEnvironment,
+  isEdgeRuntime,
+  hasEmail,
+  hasGoogleOAuth,
+  hasGithubOAuth,
+  hasOAuth,
+  hasMinIO,
+} = envHelpers;
+
 // Export the schema for testing purposes
 export { envSchema };
