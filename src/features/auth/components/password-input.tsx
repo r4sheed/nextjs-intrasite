@@ -16,9 +16,9 @@ type PasswordInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ className, ...props }, ref) => {
-    const t = useTranslations('auth');
     const [showPassword, setShowPassword] = React.useState(false);
 
+    const t = useTranslations('auth');
     return (
       <div className="relative">
         <Input
