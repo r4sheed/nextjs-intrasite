@@ -347,9 +347,7 @@ export const TwoFactorVerificationForm = () => {
             />
 
             <Field>
-              {errorMessage && errorMessage && (
-                <FormError message={t(errorMessage)} />
-              )}
+              {errorMessage && <FormError message={t(errorMessage)} />}
 
               {isSessionLocked ? (
                 <Button
