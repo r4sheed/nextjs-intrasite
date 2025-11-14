@@ -62,10 +62,29 @@ npm run feature:create <name>  # Generate new feature scaffold
 # i18n management
 npm run i18n:add <key> <en> <hu>  # Add new translation
 npm run i18n:validate             # Validate translations
-npm run i18n:sync                 # Sync translations
+npm run i18n:sync                 # Sync translations (includes validate + merge)
+npm run i18n:sort                 # Sort all translation files
+npm run i18n:merge                # Merge domain files into combined files
 ```
 
 **See [i18n Scripts Reference](docs/i18n-scripts-reference.md) for detailed i18n management guide.**
+
+### i18n Workflow
+
+For comprehensive i18n management, use this workflow:
+
+```bash
+# 1. Add new translations
+npm run i18n:add auth.errors.new-error "Invalid input" "Érvénytelen bemenet"
+
+# 2. Sync everything (adds missing HU translations, updates constants, validates, merges)
+npm run i18n:sync
+
+# 3. Sort all files (optional - sync already sorts)
+npm run i18n:sort
+```
+
+The `i18n:sync` command automatically runs validation and merge, so it's usually all you need.
 
 ---
 

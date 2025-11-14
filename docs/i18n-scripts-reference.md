@@ -6,6 +6,13 @@ This directory contains automated scripts for managing internationalization (i18
 
 These scripts help maintain consistency between translation files and TypeScript constants, reducing manual work and preventing errors when adding or updating translations.
 
+**Key Features:**
+
+- **Dynamic Language Support**: Automatically detects and handles any number of languages
+- **Type-Safe Constants**: Generates TypeScript constants from JSON translations
+- **Validation & Sync**: Ensures consistency across all language files
+- **Sorted Keys**: Maintains alphabetical ordering for better git diffs
+
 ## Scripts
 
 ### 1. `i18n:add` - Add New Translation Key
@@ -175,28 +182,104 @@ npm run i18n:sync
 
 ---
 
-## File Structure
+## Dynamic Language Support
 
-The scripts work with the following file structure:
+All scripts automatically detect available languages from the `src/locales/` directory structure. This means:
+
+- **No hardcoded languages**: Scripts work with any language codes (en, hu, de, fr, es, etc.)
+- **Automatic scaling**: Adding a new language requires only creating the locale files
+- **Base language assumption**: English (`en`) is treated as the base language for comparisons
+
+### Language Detection
+
+Languages are detected by scanning the `src/locales/` directory for subdirectories:
 
 ```
-src/
-  locales/
-    en/
-      auth.json        # English translations for auth
-      common.json      # English common strings
-      errors.json      # English error messages
-    hu/
-      auth.json        # Hungarian translations for auth
-      common.json      # Hungarian common strings
-      errors.json      # Hungarian error messages
-  features/
-    auth/
-      lib/
-        strings.ts     # TypeScript constants for auth
-  lib/
-    errors/
-      messages.ts      # TypeScript constants for core errors
+src/locales/
+  en/          # English (base language)
+  hu/          # Hungarian
+  de/          # German (auto-detected)
+  fr/          # French (auto-detected)
+```
+
+### Multi-Language Validation
+
+The `validate` script compares each language against the base language (English):
+
+```bash
+# With 4 languages: en, hu, de, fr
+npm run i18n:validate
+
+# Output:
+📂 Detected languages: en, hu, de, fr
+📦 Checking auth...
+   auth: 124 keys, 0 missing, 0 extra (en vs hu)
+   auth: 124 keys, 0 missing, 0 extra (en vs de)
+   auth: 124 keys, 0 missing, 0 extra (en vs fr)
+```
+
+### Multi-Language Sync
+
+The `sync` script synchronizes all languages from the base language:
+
+```bash
+# Syncs en → hu, en → de, en → fr
+npm run i18n:sync
+```
+
+---
+
+## Domain → File Mapping
+
+```
+
+---
+
+## Dynamic Language Support
+
+All scripts automatically detect available languages from the `src/locales/` directory structure. This means:
+
+- **No hardcoded languages**: Scripts work with any language codes (en, hu, de, fr, es, etc.)
+- **Automatic scaling**: Adding a new language requires only creating the locale files
+- **Base language assumption**: English (`en`) is treated as the base language for comparisons
+
+### Language Detection
+
+Languages are detected by scanning the `src/locales/` directory for subdirectories:
+
+```
+
+src/locales/
+en/ # English (base language)
+hu/ # Hungarian
+de/ # German (auto-detected)
+fr/ # French (auto-detected)
+
+````
+
+### Multi-Language Validation
+
+The `validate` script compares each language against the base language (English):
+
+```bash
+# With 4 languages: en, hu, de, fr
+npm run i18n:validate
+
+# Output:
+📂 Detected languages: en, hu, de, fr
+📦 Checking auth...
+   auth: 124 keys, 0 missing, 0 extra (en vs hu)
+   auth: 124 keys, 0 missing, 0 extra (en vs de)
+   auth: 124 keys, 0 missing, 0 extra (en vs fr)
+````
+
+### Multi-Language Sync
+
+The `sync` script synchronizes all languages from the base language:
+
+```bash
+# Syncs en → hu, en → de, en → fr
+npm run i18n:sync
 ```
 
 ---

@@ -11,8 +11,13 @@
  *   npm run i18n:validate
  */
 import { existsSync } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { LOCALES_DIR } from './constants';
+import { getLanguages, getDomains, getConstantsPath } from './helpers';
+
+import { defaultLocale } from '@/i18n/config';
 
 interface ValidationError {
   type: 'missing' | 'extra' | 'mismatch';
@@ -44,48 +49,50 @@ function getAllKeys(obj: Record<string, unknown>, prefix = ''): string[] {
 }
 
 /**
- * Compare two JSON files
+ * Compare two locale files for a specific language pair
  */
 async function compareLocaleFiles(
-  enPath: string,
-  huPath: string,
+  sourcePath: string,
+  targetPath: string,
+  sourceLang: string,
+  targetLang: string,
   domain: string
 ): Promise<void> {
-  const enContent = await readFile(enPath, 'utf-8');
-  const huContent = await readFile(huPath, 'utf-8');
+  const sourceContent = await readFile(sourcePath, 'utf-8');
+  const targetContent = await readFile(targetPath, 'utf-8');
 
-  const enJson = JSON.parse(enContent);
-  const huJson = JSON.parse(huContent);
+  const sourceJson = JSON.parse(sourceContent);
+  const targetJson = JSON.parse(targetContent);
 
-  const enKeys = getAllKeys(enJson);
-  const huKeys = getAllKeys(huJson);
+  const sourceKeys = getAllKeys(sourceJson);
+  const targetKeys = getAllKeys(targetJson);
 
-  // Find missing keys (in EN but not in HU)
-  for (const key of enKeys) {
-    if (!huKeys.includes(key)) {
+  // Find missing keys (in source but not in target)
+  for (const key of sourceKeys) {
+    if (!targetKeys.includes(key)) {
       errors.push({
         type: 'missing',
-        file: huPath,
+        file: targetPath,
         key,
-        details: `Missing Hungarian translation for: ${key}`,
+        details: `Missing ${targetLang} translation for: ${key}`,
       });
     }
   }
 
-  // Find extra keys (in HU but not in EN)
-  for (const key of huKeys) {
-    if (!enKeys.includes(key)) {
+  // Find extra keys (in target but not in source)
+  for (const key of targetKeys) {
+    if (!sourceKeys.includes(key)) {
       warnings.push({
         type: 'extra',
-        file: huPath,
+        file: targetPath,
         key,
-        details: `Extra Hungarian translation (not in EN): ${key}`,
+        details: `Extra ${targetLang} translation (not in ${sourceLang}): ${key}`,
       });
     }
   }
 
   console.log(
-    `   ${domain}: ${enKeys.length} keys, ${errors.length} missing, ${warnings.length} extra`
+    `   ${domain}: ${sourceKeys.length} keys, ${errors.length} missing, ${warnings.length} extra`
   );
 }
 
@@ -207,31 +214,46 @@ async function validateConstants(
  * Validate merged locale files
  */
 async function validateMergedFiles(): Promise<void> {
-  const enMergedPath = join(process.cwd(), 'src/locales/en.json');
-  const huMergedPath = join(process.cwd(), 'src/locales/hu.json');
+  const baseLang = 'en';
+  const otherLanguages = getLanguages().filter(lang => lang !== baseLang);
 
-  if (!existsSync(enMergedPath)) {
-    errors.push({
-      type: 'missing',
-      file: enMergedPath,
-      key: '',
-      details: 'Missing merged English locale file: en.json',
-    });
-    return;
+  for (const targetLang of otherLanguages) {
+    const baseMergedPath = join(process.cwd(), LOCALES_DIR, `${baseLang}.json`);
+    const targetMergedPath = join(
+      process.cwd(),
+      LOCALES_DIR,
+      `${targetLang}.json`
+    );
+
+    if (!existsSync(baseMergedPath)) {
+      errors.push({
+        type: 'missing',
+        file: baseMergedPath,
+        key: '',
+        details: `Missing merged base language (${baseLang}) file: ${baseLang}.json`,
+      });
+      continue;
+    }
+
+    if (!existsSync(targetMergedPath)) {
+      errors.push({
+        type: 'missing',
+        file: targetMergedPath,
+        key: '',
+        details: `Missing merged ${targetLang} locale file: ${targetLang}.json`,
+      });
+      continue;
+    }
+
+    // Compare merged base vs target
+    await compareLocaleFiles(
+      baseMergedPath,
+      targetMergedPath,
+      baseLang,
+      targetLang,
+      'merged'
+    );
   }
-
-  if (!existsSync(huMergedPath)) {
-    errors.push({
-      type: 'missing',
-      file: huMergedPath,
-      key: '',
-      details: 'Missing merged Hungarian locale file: hu.json',
-    });
-    return;
-  }
-
-  // Compare merged EN vs HU
-  await compareLocaleFiles(enMergedPath, huMergedPath, 'merged');
 }
 
 /**
@@ -240,67 +262,75 @@ async function validateMergedFiles(): Promise<void> {
 async function main() {
   console.log('\n🔍 Validating i18n files...\n');
 
-  // Dynamically detect domains from features + common domains
-  const featuresDir = join(process.cwd(), 'src/features');
-  const featureDirs = existsSync(featuresDir) ? await readdir(featuresDir) : [];
-  const commonDomains = ['common', 'errors', 'navigation'];
-  const domains = [
-    ...featureDirs.filter(dir => !dir.startsWith('.')),
-    ...commonDomains,
-  ];
+  const languages = getLanguages();
+  const baseLang = defaultLocale;
 
-  console.log(`📂 Detected domains: ${domains.join(', ')}\n`);
-
-  // Check if all domains have JSON files
-  for (const domain of domains) {
-    const enPath = join(process.cwd(), `src/locales/en/${domain}.json`);
-    const huPath = join(process.cwd(), `src/locales/hu/${domain}.json`);
-
-    if (!existsSync(enPath)) {
-      errors.push({
-        type: 'missing',
-        file: enPath,
-        key: '',
-        details: `Missing English locale file for domain: ${domain}`,
-      });
-    }
-
-    if (!existsSync(huPath)) {
-      errors.push({
-        type: 'missing',
-        file: huPath,
-        key: '',
-        details: `Missing Hungarian locale file for domain: ${domain}`,
-      });
-    }
+  if (!languages.includes(baseLang)) {
+    console.error(`❌ Base language (${baseLang}) must exist`);
+    process.exit(1);
   }
 
-  // Validate each domain
-  for (const domain of domains) {
-    const enPath = join(process.cwd(), `src/locales/en/${domain}.json`);
-    const huPath = join(process.cwd(), `src/locales/hu/${domain}.json`);
+  const domains = getDomains(baseLang);
 
-    if (!existsSync(enPath) || !existsSync(huPath)) continue;
+  console.log(`📂 Detected languages: ${languages.join(', ')}`);
+  console.log(`📂 Detected domains: ${domains.join(', ')}\n`);
+
+  // Validate each domain - compare all languages against the base language (en)
+  const otherLanguages = languages.filter(lang => lang !== baseLang);
+
+  for (const domain of domains) {
+    const basePath = join(
+      process.cwd(),
+      LOCALES_DIR,
+      baseLang,
+      `${domain}.json`
+    );
+
+    if (!existsSync(basePath)) {
+      errors.push({
+        type: 'missing',
+        file: basePath,
+        key: '',
+        details: `Missing base language (${baseLang}) file for domain: ${domain}`,
+      });
+      continue;
+    }
 
     console.log(`📦 Checking ${domain}...`);
 
-    // Compare EN vs HU
-    await compareLocaleFiles(enPath, huPath, domain);
-
-    // Validate constants (if exists)
-    let constantsPath: string | undefined;
-    if (domain === 'errors') {
-      constantsPath = join(process.cwd(), 'src/lib/errors/messages.ts');
-    } else {
-      // Try feature directory
-      constantsPath = join(
+    // Compare base language against each other language
+    for (const targetLang of otherLanguages) {
+      const targetPath = join(
         process.cwd(),
-        `src/features/${domain}/lib/strings.ts`
+        LOCALES_DIR,
+        targetLang,
+        `${domain}.json`
+      );
+
+      if (!existsSync(targetPath)) {
+        errors.push({
+          type: 'missing',
+          file: targetPath,
+          key: '',
+          details: `Missing ${targetLang} locale file for domain: ${domain}`,
+        });
+        continue;
+      }
+
+      await compareLocaleFiles(
+        basePath,
+        targetPath,
+        baseLang,
+        targetLang,
+        domain
       );
     }
 
+    // Validate constants (if exists) - using base language
+    const constantsPath = getConstantsPath(domain);
+
     if (constantsPath && existsSync(constantsPath)) {
-      await validateConstants(constantsPath, enPath, domain);
+      await validateConstants(constantsPath, basePath, domain);
     }
   }
 

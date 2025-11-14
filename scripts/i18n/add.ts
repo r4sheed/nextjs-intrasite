@@ -3,9 +3,9 @@
  * i18n Add Script
  *
  * Adds a new translation key to all required files:
- * - src/locales/en/{domain}.json
- * - src/locales/hu/{domain}.json
- * - src/features/{domain}/lib/strings.ts (if feature exists)
+ * - {LOCALES_DIR}/en/{domain}.json
+ * - {LOCALES_DIR}/hu/{domain}.json
+ * - {FEATURES_DIR}/{domain}/lib/strings.ts (if feature exists)
  *
  * Usage:
  *   npm run i18n:add <key> <en-text> <hu-text>
@@ -21,6 +21,15 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import readline from 'node:readline/promises';
 
+import {
+  LOCALES_DIR,
+  FEATURES_DIR,
+  CORE_STRINGS_PATH,
+  STRINGS_DIR,
+  STRINGS_FILE_NAME,
+} from './constants';
+import { getLanguages, kebabToCamel } from './helpers';
+
 // Domain → file mapping
 const getDomainConfig = () => {
   const config: Record<
@@ -30,31 +39,31 @@ const getDomainConfig = () => {
 
   // Common domains
   config.common = {
-    locales: 'src/locales/{lang}/common.json',
+    locales: `${LOCALES_DIR}/{lang}/common.json`,
     constants: undefined,
     feature: false,
   };
   config.errors = {
-    locales: 'src/locales/{lang}/errors.json',
-    constants: 'src/lib/errors/messages.ts',
+    locales: `${LOCALES_DIR}/{lang}/errors.json`,
+    constants: CORE_STRINGS_PATH,
     feature: false,
   };
   config.navigation = {
-    locales: 'src/locales/{lang}/navigation.json',
+    locales: `${LOCALES_DIR}/{lang}/navigation.json`,
     constants: undefined,
     feature: false,
   };
 
-  // Feature domains - dynamically detect from src/features/
-  const featuresDir = join(process.cwd(), 'src/features');
+  // Feature domains - dynamically detect from {FEATURES_DIR}/
+  const featuresDir = join(process.cwd(), FEATURES_DIR);
   if (existsSync(featuresDir)) {
     const features = readdirSync(featuresDir).filter(
       dir => !dir.startsWith('.')
     );
     for (const feature of features) {
       config[feature] = {
-        locales: `src/locales/{lang}/${feature}.json`,
-        constants: `src/features/${feature}/lib/strings.ts`,
+        locales: `${LOCALES_DIR}/{lang}/${feature}.json`,
+        constants: `${FEATURES_DIR}/${feature}/${STRINGS_DIR}/${STRINGS_FILE_NAME}`,
         feature: true,
       };
     }
@@ -131,16 +140,6 @@ function parseKey(key: string): ParsedKey {
     key: rest.join('.'),
     fullPath: parts,
   };
-}
-
-/**
- * Convert kebab-case to camelCase
- * Example: "new-error" → "newError"
- */
-function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z0-9])/g, (_, char) =>
-    /[0-9]/.test(char) ? char : char.toUpperCase()
-  );
 }
 
 /**
@@ -401,38 +400,33 @@ async function main() {
         `⚠️  Domain '${parsedKey.domain}' not in config, assuming feature domain...`
       );
       domainConfig = {
-        locales: `src/locales/{lang}/${parsedKey.domain}.json`,
-        constants: `src/features/${parsedKey.domain}/lib/strings.ts`,
+        locales: `${LOCALES_DIR}/{lang}/${parsedKey.domain}.json`,
+        constants: `${FEATURES_DIR}/${parsedKey.domain}/${STRINGS_DIR}/${STRINGS_FILE_NAME}`,
         feature: true,
       };
     }
 
-    // Add to English locale
-    const enPath = join(
-      process.cwd(),
-      domainConfig.locales.replace('{lang}', 'en')
-    );
-    if (!existsSync(enPath)) {
-      console.error(`❌ File not found: ${enPath}`);
-      console.error(
-        `   Run: npm run feature:create ${parsedKey.domain} (if it's a feature)`
-      );
-      process.exit(1);
-    }
-    await addToLocaleFile(enPath, parsedKey, enText);
-    console.log(`✅ Added to ${enPath}`);
+    // Add to all language locales
+    const languages = getLanguages();
+    const texts: Record<string, string> = { en: enText, hu: huText };
 
-    // Add to Hungarian locale
-    const huPath = join(
-      process.cwd(),
-      domainConfig.locales.replace('{lang}', 'hu')
-    );
-    if (!existsSync(huPath)) {
-      console.error(`❌ File not found: ${huPath}`);
-      process.exit(1);
+    for (const lang of languages) {
+      const langPath = join(
+        process.cwd(),
+        domainConfig.locales.replace('{lang}', lang)
+      );
+      if (!existsSync(langPath)) {
+        console.error(`❌ File not found: ${langPath}`);
+        process.exit(1);
+      }
+      const text = texts[lang];
+      if (!text) {
+        console.error(`❌ No text provided for language: ${lang}`);
+        process.exit(1);
+      }
+      await addToLocaleFile(langPath, parsedKey, text);
+      console.log(`✅ Added to ${langPath}`);
     }
-    await addToLocaleFile(huPath, parsedKey, huText);
-    console.log(`✅ Added to ${huPath}`);
 
     // Add to TypeScript constants (if exists)
     if (domainConfig.constants) {

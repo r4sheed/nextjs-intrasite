@@ -3,8 +3,8 @@
  * i18n Merge Script
  *
  * Merges all domain-specific JSON files into single locale files:
- * - src/locales/en/*.json → src/locales/en.json
- * - src/locales/hu/*.json → src/locales/hu.json
+ * - {LOCALES_DIR}/en/*.json → {LOCALES_DIR}/en.json
+ * - {LOCALES_DIR}/hu/*.json → {LOCALES_DIR}/hu.json
  *
  * Usage:
  *   npm run i18n:merge
@@ -13,8 +13,9 @@ import { existsSync, readdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const LOCALES_DIR = 'src/locales';
-const LOCALES = ['en', 'hu'] as const;
+import { LOCALES_DIR } from './constants';
+import { getLanguages } from './helpers';
+import { sortObjectKeys } from './sort';
 
 /**
  * Merge all JSON files in a locale directory into a single file
@@ -64,31 +65,15 @@ async function mergeLocaleFiles(locale: string): Promise<void> {
 }
 
 /**
- * Sort object keys alphabetically (recursive)
- */
-function sortObjectKeys(obj: unknown): unknown {
-  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-    return obj;
-  }
-
-  const sorted: Record<string, unknown> = {};
-  const keys = Object.keys(obj).sort();
-
-  for (const key of keys) {
-    sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
-  }
-
-  return sorted;
-}
-
-/**
  * Main function
  */
 async function main() {
   console.log('🔄 Starting i18n merge process...\n');
 
   try {
-    for (const locale of LOCALES) {
+    const languages = getLanguages();
+
+    for (const locale of languages) {
       await mergeLocaleFiles(locale);
     }
 

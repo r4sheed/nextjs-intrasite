@@ -11,9 +11,20 @@
  *   npm run i18n:sync
  *   npm run i18n:sync --dry-run  # Preview changes without applying
  */
+import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { LOCALES_DIR } from './constants';
+import {
+  getLanguages,
+  getDomains,
+  getConstantsPath,
+  kebabToCamel,
+  getLabelSuffixRank,
+} from './helpers';
+import { sortObjectKeys, compareLabelKeys } from './sort';
 
 const isDryRun = process.argv.includes('--dry-run');
 
@@ -100,24 +111,6 @@ function removeNestedProperty(
 }
 
 /**
- * Sort object keys alphabetically (recursive)
- */
-function sortObjectKeys(obj: unknown): unknown {
-  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-    return obj;
-  }
-
-  const sorted: Record<string, unknown> = {};
-  const keys = Object.keys(obj).sort();
-
-  for (const key of keys) {
-    sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
-  }
-
-  return sorted;
-}
-
-/**
  * Remove the domain prefix from a translation key
  */
 function getRelativeKey(fullKey: string, domain: string): string {
@@ -133,31 +126,33 @@ function getRelativeKey(fullKey: string, domain: string): string {
  * Sync locale files (EN → HU)
  */
 async function syncLocaleFiles(
-  enPath: string,
-  huPath: string,
+  sourcePath: string,
+  targetPath: string,
+  sourceLang: string,
+  targetLang: string,
   domain: string
 ): Promise<void> {
-  const enContent = await readFile(enPath, 'utf-8');
-  const huContent = await readFile(huPath, 'utf-8');
+  const sourceContent = await readFile(sourcePath, 'utf-8');
+  const targetContent = await readFile(targetPath, 'utf-8');
 
-  const enJson = JSON.parse(enContent);
-  const huJson = JSON.parse(huContent);
+  const sourceJson = JSON.parse(sourceContent);
+  const targetJson = JSON.parse(targetContent);
 
-  const enKeys = getAllKeysWithValues(enJson);
-  const huKeys = getAllKeysWithValues(huJson);
+  const sourceKeys = getAllKeysWithValues(sourceJson);
+  const targetKeys = getAllKeysWithValues(targetJson);
 
   let changed = false;
 
-  // Add missing keys to HU
-  for (const { key, value } of enKeys) {
-    const huHasKey = huKeys.some(item => item.key === key);
+  // Add missing keys to target
+  for (const { key, value } of sourceKeys) {
+    const targetHasKey = targetKeys.some(item => item.key === key);
 
-    if (!huHasKey) {
-      const placeholder = `[HU] ${value}`;
-      setNestedProperty(huJson, key, placeholder);
+    if (!targetHasKey) {
+      const placeholder = `[${targetLang.toUpperCase()}] ${value}`;
+      setNestedProperty(targetJson, key, placeholder);
       actions.push({
         type: 'add',
-        file: huPath,
+        file: targetPath,
         key,
         value: placeholder,
       });
@@ -165,14 +160,14 @@ async function syncLocaleFiles(
     }
   }
 
-  // Remove extra keys from HU
-  const enKeyStrings = enKeys.map(item => item.key);
-  for (const { key } of huKeys) {
-    if (!enKeyStrings.includes(key)) {
-      removeNestedProperty(huJson, key);
+  // Remove extra keys from target
+  const sourceKeyStrings = sourceKeys.map(item => item.key);
+  for (const { key } of targetKeys) {
+    if (!sourceKeyStrings.includes(key)) {
+      removeNestedProperty(targetJson, key);
       actions.push({
         type: 'remove',
-        file: huPath,
+        file: targetPath,
         key,
       });
       changed = true;
@@ -181,21 +176,16 @@ async function syncLocaleFiles(
 
   // Write back if changed
   if (changed && !isDryRun) {
-    const sorted = sortObjectKeys(huJson);
-    await writeFile(huPath, JSON.stringify(sorted, null, 2) + '\n', 'utf-8');
+    const sorted = sortObjectKeys(targetJson);
+    await writeFile(
+      targetPath,
+      JSON.stringify(sorted, null, 2) + '\n',
+      'utf-8'
+    );
   }
 
   console.log(
-    `   ${domain}: ${actions.filter(a => a.file === huPath).length} changes`
-  );
-}
-
-/**
- * Convert kebab-case to camelCase
- */
-function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z0-9])/g, (_, char) =>
-    /[0-9]/.test(char) ? char : char.toUpperCase()
+    `   ${domain}: ${actions.filter(a => a.file === targetPath).length} changes`
   );
 }
 
@@ -381,6 +371,26 @@ function getKeyName(fullKey: string): string {
   return parts[parts.length - 1] || fullKey;
 }
 
+function addLabelGroupSeparators(lines: string[]): string[] {
+  const result: string[] = [];
+  let prevRank: number | null = null;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const match = trimmed.match(/^([A-Za-z0-9_]+):/);
+    if (match) {
+      const rank = getLabelSuffixRank(match[1]!);
+      if (prevRank !== null && rank !== prevRank) {
+        result.push('');
+      }
+      prevRank = rank;
+    }
+    result.push(line);
+  }
+
+  return result;
+}
+
 /**
  * Sync TypeScript constants file
  */
@@ -437,6 +447,13 @@ async function syncConstants(
 
   for (const [category, keys] of categorized.entries()) {
     const constantName = `${domain.toUpperCase()}_${category.toUpperCase()}`;
+    const compareEntries =
+      category === 'labels'
+        ? (a: { key: string }, b: { key: string }) =>
+            compareLabelKeys(a.key, b.key)
+        : (a: { key: string }, b: { key: string }) =>
+            a.key.localeCompare(b.key);
+    const sortedKeys = [...keys].sort(compareEntries);
 
     // Check if constant exists
     const regex = new RegExp(
@@ -447,10 +464,14 @@ async function syncConstants(
 
     if (!match) {
       // Create new constant
-      const props = keys
-        .sort((a, b) => a.key.localeCompare(b.key))
-        .map(({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`)
-        .join('\n');
+      const propsLines = sortedKeys.map(
+        ({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`
+      );
+      const propsWithSeparators =
+        category === 'labels'
+          ? addLabelGroupSeparators(propsLines)
+          : propsLines;
+      const props = propsWithSeparators.join('\n');
 
       const newConstant = `
 /**
@@ -470,9 +491,9 @@ ${props}
       changed = true;
     } else {
       // Update existing constant
-      const camelizedEntries = [...keys]
-        .sort((a, b) => a.key.localeCompare(b.key))
-        .map(({ key, value }) => [kebabToCamel(key), value] as const);
+      const camelizedEntries = sortedKeys.map(
+        ({ key, value }) => [kebabToCamel(key), value] as const
+      );
 
       const body = match[1] as string;
       const lines = body.split(/\r?\n/);
@@ -496,7 +517,11 @@ ${props}
       }
 
       if (hasChanges) {
-        const newProps = mergedLines.join('\n');
+        const processedLines =
+          category === 'labels'
+            ? addLabelGroupSeparators(mergedLines)
+            : mergedLines;
+        const newProps = processedLines.join('\n');
         const newConstant = `export const ${constantName} = {
 ${newProps}
 } as const;`;
@@ -521,39 +546,78 @@ ${newProps}
   }
 }
 
+async function runMergeScript(): Promise<void> {
+  console.log(
+    '🔗 Running i18n merge to regenerate the combined locale files...'
+  );
+  return new Promise((resolve, reject) => {
+    const mergeProcess = spawn('npm', ['run', 'i18n:merge'], {
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    mergeProcess.on('close', code => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(new Error(`i18n merge exited with status ${code}`));
+    });
+
+    mergeProcess.on('error', error => reject(error));
+  });
+}
+
+async function runValidateScript(): Promise<void> {
+  console.log('� Running i18n validate to check for any issues...');
+  return new Promise((resolve, reject) => {
+    const validateProcess = spawn('npm', ['run', 'i18n:validate'], {
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    validateProcess.on('close', code => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      console.log(`⚠️  Validation found issues (exit code: ${code})`);
+      resolve(); // Don't fail the sync, just warn
+    });
+
+    validateProcess.on('error', error => reject(error));
+  });
+}
+
 /**
  * Main function
  */
 async function main() {
   console.log(`\n🔄 Syncing i18n files${isDryRun ? ' (DRY RUN)' : ''}...\n`);
 
-  const localesDir = join(process.cwd(), 'src/locales/en');
-  const files = await readdir(localesDir);
+  const languages = getLanguages();
+  const enIndex = languages.indexOf('en');
+  const huIndex = languages.indexOf('hu');
+
+  if (enIndex === -1 || huIndex === -1) {
+    console.error('❌ English and Hungarian languages must exist');
+    process.exit(1);
+  }
+
+  const domains = getDomains('en');
 
   // Sync each domain
-  for (const file of files) {
-    if (!file.endsWith('.json')) continue;
-
-    const domain = file.replace('.json', '');
-    const enPath = join(process.cwd(), `src/locales/en/${file}`);
-    const huPath = join(process.cwd(), `src/locales/hu/${file}`);
+  for (const domain of domains) {
+    const enPath = join(process.cwd(), LOCALES_DIR, 'en', `${domain}.json`);
+    const huPath = join(process.cwd(), LOCALES_DIR, 'hu', `${domain}.json`);
 
     console.log(`📦 Syncing ${domain}...`);
 
     // Sync EN → HU
-    await syncLocaleFiles(enPath, huPath, domain);
+    await syncLocaleFiles(enPath, huPath, 'en', 'hu', domain);
 
     // Sync constants (if exists)
-    let constantsPath: string | undefined;
-    if (domain === 'errors') {
-      constantsPath = join(process.cwd(), 'src/lib/errors/messages.ts');
-    } else {
-      // Try feature directory
-      constantsPath = join(
-        process.cwd(),
-        `src/features/${domain}/lib/strings.ts`
-      );
-    }
+    const constantsPath = getConstantsPath(domain);
 
     if (constantsPath && existsSync(constantsPath)) {
       await syncConstants(constantsPath, enPath, domain);
@@ -565,6 +629,10 @@ async function main() {
 
   if (actions.length === 0) {
     console.log('✅ Everything is already in sync!\n');
+    if (!isDryRun) {
+      await runValidateScript();
+      await runMergeScript();
+    }
     return;
   }
 
@@ -602,6 +670,8 @@ async function main() {
     console.log('   Run without --dry-run to apply changes\n');
   } else {
     console.log('✅ Sync complete!\n');
+    await runValidateScript();
+    await runMergeScript();
   }
 }
 
