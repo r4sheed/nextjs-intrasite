@@ -2,7 +2,7 @@ import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
-import { env } from '@/lib/env';
+import { envHelpers } from '@/lib/env';
 import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
@@ -126,7 +126,7 @@ const mergeTokenIntoSessionUser = (
  * Guards database lookups in the JWT callback when running in an Edge runtime, where Prisma is unavailable.
  */
 const canQueryDatabaseForToken =
-  typeof process === 'undefined' || env.NEXT_RUNTIME !== 'edge';
+  typeof process === 'undefined' || envHelpers.isEdgeRuntime();
 
 const events = {
   /**
