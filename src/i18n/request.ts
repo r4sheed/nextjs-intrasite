@@ -8,6 +8,7 @@ export default getRequestConfig(async ({ locale }) => {
   const currentLocale = locale || defaultLocale;
 
   return {
+    timeZone: 'Europe/Budapest',
     locale: currentLocale,
     messages: (await import(`../locales/${currentLocale}.json`)).default,
   };
