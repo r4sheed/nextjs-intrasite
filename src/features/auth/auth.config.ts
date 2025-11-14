@@ -26,8 +26,8 @@ const providers = [
   ...(envHelpers.hasGithubOAuth()
     ? [
         Github({
-          clientId: env.GITHUB_CLIENT_ID,
-          clientSecret: env.GITHUB_CLIENT_SECRET,
+          clientId: env.GITHUB_CLIENT_ID!,
+          clientSecret: env.GITHUB_CLIENT_SECRET!,
         }),
       ]
     : []),
