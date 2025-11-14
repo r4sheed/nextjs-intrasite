@@ -466,6 +466,87 @@ export const AUTH_LABELS = {
 
 ---
 
+## Text Management Policy
+
+### ⚠️ Mandatory Script Usage
+
+**All text additions, updates, and organization must be done through the i18n management script.**
+
+- ❌ **Do not manually edit** locale JSON files or constants files
+- ❌ **Do not add hardcoded strings** to components or services
+- ✅ **Always use the script** for any text changes
+- ✅ **Use constants** from `strings.ts` files in your code
+
+This ensures:
+
+- Consistency across all languages
+- Automatic TypeScript constant updates
+- Proper key sorting and formatting
+- Prevention of duplicate or missing translations
+
+### Script Usage
+
+Use the unified i18n management script for all text operations:
+
+```bash
+# Add new translation key
+npm run i18n:manage add <key> <en-text> <hu-text>
+
+# Update existing translation key
+npm run i18n:manage update <key> <en-text> <hu-text>
+
+# Delete translation key
+npm run i18n:manage delete <key>
+```
+
+**Examples:**
+
+```bash
+# Add new error message
+npm run i18n:manage add auth.errors.new-error "New error occurred" "Új hiba történt"
+
+# Update existing success message
+npm run i18n:manage update auth.success.login "Welcome back!" "Üdvözöljük újra!"
+
+# Delete old error message
+npm run i18n:manage delete auth.errors.old-error
+
+# Add core error (flat structure)
+npm run i18n:manage add errors.database-error "Database error occurred" "Adatbázis hiba történt"
+```
+
+### Key Format Requirements
+
+**Nested Structure (Most Domains):**
+
+```
+domain.category.key
+├── domain: auth, posts, common, etc.
+├── category: errors, success, labels, info
+└── key: kebab-case-identifier
+```
+
+**Examples:**
+
+- `auth.errors.invalid-credentials`
+- `auth.success.login`
+- `auth.labels.email-placeholder`
+
+**Flat Structure (Errors Domain):**
+
+```
+errors.key
+├── domain: errors (fixed)
+└── key: kebab-case-identifier
+```
+
+**Examples:**
+
+- `errors.not-found`
+- `errors.internal-server-error`
+
+---
+
 ## Migration Checklist
 
 When creating a new feature:
@@ -476,8 +557,7 @@ When creating a new feature:
 - [ ] Define `{FEATURE}_SUCCESS` with camelCase properties and kebab-case i18n keys (success.\*)
 - [ ] Define `{FEATURE}_INFO` with camelCase properties and kebab-case i18n keys (info.\*)
 - [ ] Define `{FEATURE}_LABELS` with camelCase properties and kebab-case i18n keys (labels.\*)
-- [ ] Create `src/locales/en/{feature}.json` with kebab-case keys
-- [ ] Create `src/locales/hu/{feature}.json` with kebab-case keys (Hungarian translations)
+- [ ] Use `npm run i18n:manage add` to add all translation keys (script creates locale files automatically)
 - [ ] Update error helpers in `src/features/{feature}/lib/errors.ts`
 - [ ] Import constants in schemas, services, components
 - [ ] Write tests using the new constants
