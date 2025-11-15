@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { TwoFactorConfirmation } from '@prisma/client';
@@ -16,7 +17,12 @@ export const getTwoFactorConfirmationByUserId = async (
       where: { userId },
     });
   } catch (error) {
-    console.error('[getTwoFactorConfirmationByUserId] Database error:', error);
+    logger
+      .forDatabase()
+      .error('Database error in getTwoFactorConfirmationByUserId', {
+        userId,
+        error,
+      });
     return null;
   }
 };
@@ -42,7 +48,12 @@ export const createTwoFactorConfirmation = async (
       data: { userId },
     });
   } catch (error) {
-    console.error('[createTwoFactorConfirmation] Database error:', error);
+    logger
+      .forDatabase()
+      .error('Database error in createTwoFactorConfirmation', {
+        userId,
+        error,
+      });
     return null;
   }
 };
@@ -63,7 +74,12 @@ export const deleteTwoFactorConfirmation = async (
 
     return result.count > 0;
   } catch (error) {
-    console.error('[deleteTwoFactorConfirmation] Database error:', error);
+    logger
+      .forDatabase()
+      .error('Database error in deleteTwoFactorConfirmation', {
+        userId,
+        error,
+      });
     return null;
   }
 };

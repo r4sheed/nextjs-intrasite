@@ -83,7 +83,7 @@ const useTwoFactorMutations = () => {
     mutationFn: data => execute(verifyTwoFactor, data),
     onSuccess: async data => {
       if (!data.data) {
-        console.error('[2FA] Missing data in verification response');
+        // Missing data in verification response - should not happen
         return;
       }
 
@@ -91,8 +91,8 @@ const useTwoFactorMutations = () => {
 
       try {
         router.replace(middlewareConfig.defaultLoginRedirect);
-      } catch (error) {
-        console.error('[2FA] Redirect failed', error);
+      } catch {
+        // Redirect failed - reset loading state
         setIsRedirecting(false);
       }
     },
@@ -107,7 +107,7 @@ const useTwoFactorMutations = () => {
     onSuccess: result => {
       const nextSessionId = result.data?.sessionId;
       if (!nextSessionId) {
-        console.error('[2FA] Missing sessionId in resend response');
+        // Missing sessionId in resend response - should not happen
         return;
       }
 

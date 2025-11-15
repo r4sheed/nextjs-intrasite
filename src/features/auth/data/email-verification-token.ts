@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { EmailVerificationToken } from '@prisma/client';
@@ -35,7 +36,10 @@ const findVerificationToken = async (
     }
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findVerificationToken] Database error:', error);
+    logger.forDatabase().error('Database error in findVerificationToken', {
+      search,
+      error,
+    });
     return null;
   }
 };
@@ -92,10 +96,13 @@ export const getVerificationTokenByEmailAndToken = async (
     });
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error(
-      '[getVerificationTokenByEmailAndToken] Database error:',
-      error
-    );
+    logger
+      .forDatabase()
+      .error('Database error in getVerificationTokenByEmailAndToken', {
+        email,
+        token,
+        error,
+      });
     return null;
   }
 };

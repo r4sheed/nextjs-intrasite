@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { mail } from '@/lib/mail';
 import { routes } from '@/lib/navigation';
 import { maskEmail } from '@/lib/utils';
@@ -17,11 +18,11 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  console.log('\n========================================');
-  console.log('🔐 EMAIL VERIFICATION (DEVELOPMENT MODE)');
-  console.log('========================================');
-  console.log(`URL:  ${url}`);
-  console.log('========================================\n');
+  logger.forModule('mail').info('Email verification URL (development mode)', {
+    email,
+    token,
+    url,
+  });
 
   return { success: true };
 
@@ -39,7 +40,11 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    return console.error('Error sending verification email:', error);
+    logger.forModule('mail').error('Error sending verification email', {
+      email,
+      error,
+    });
+    return;
   }
 
   return data;
@@ -50,11 +55,11 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  console.log('\n========================================');
-  console.log('🔐 PASSWORD RESET (DEVELOPMENT MODE)');
-  console.log('========================================');
-  console.log(`URL:  ${url}`);
-  console.log('========================================\n');
+  logger.forModule('mail').info('Password reset URL (development mode)', {
+    email,
+    token,
+    url,
+  });
 
   return { success: true };
 
@@ -72,7 +77,11 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    return console.error('Error sending reset password email:', error);
+    logger.forModule('mail').error('Error sending reset password email', {
+      email,
+      error,
+    });
+    return;
   }
 
   return data;
@@ -96,13 +105,14 @@ export const sendTwoFactorTokenEmail = async (
   )}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  console.log('\n========================================');
-  console.log('🔐 TWO-FACTOR CODE (DEVELOPMENT MODE)');
-  console.log('========================================');
-  console.log(`Email: ${options.email}`);
-  console.log(`Code: ${options.token}`);
-  console.log(`URL:  ${verificationUrl}`);
-  console.log('========================================\n');
+  logger
+    .forModule('mail')
+    .info('Two-factor authentication code (development mode)', {
+      email: options.email,
+      token: options.token,
+      sessionId: options.sessionId,
+      verificationUrl,
+    });
 
   return { success: true };
 
@@ -119,7 +129,12 @@ export const sendTwoFactorTokenEmail = async (
     react: TwoFactorTemplate(templateProps),
   });
   if (error) {
-    return console.error('Error sending two-factor code email:', error);
+    logger.forModule('mail').error('Error sending two-factor code email', {
+      email: options.email,
+      sessionId: options.sessionId,
+      error,
+    });
+    return;
   }
   return data;
   */
