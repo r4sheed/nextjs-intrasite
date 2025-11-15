@@ -149,24 +149,7 @@ export const logger = {
    * Useful for adding context that applies to multiple log calls
    */
   child: (context: Record<string, unknown>) => {
-    const childLogger = rootLogger.child(context);
-    return {
-      debug: (message: string, extraContext?: Record<string, unknown>) => {
-        childLogger.debug(extraContext ?? {}, message);
-      },
-      info: (message: string, extraContext?: Record<string, unknown>) => {
-        childLogger.info(extraContext ?? {}, message);
-      },
-      warn: (message: string, extraContext?: Record<string, unknown>) => {
-        childLogger.warn(extraContext ?? {}, message);
-      },
-      error: (message: string, extraContext?: Record<string, unknown>) => {
-        childLogger.error(extraContext ?? {}, message);
-      },
-      fatal: (message: string, extraContext?: Record<string, unknown>) => {
-        childLogger.fatal(extraContext ?? {}, message);
-      },
-    };
+    return rootLogger.child(context);
   },
 
   /**
@@ -174,47 +157,34 @@ export const logger = {
    * Accepts both predefined modules from LOG_MODULES and custom module names
    */
   forModule: (moduleName: LogModule | string) => {
-    return logger.child({ module: moduleName });
+    return rootLogger.child({ module: moduleName });
   },
 
   /**
    * Create a logger for HTTP requests
    */
   forRequest: (requestId: string) => {
-    return logger.child({ requestId, module: LOG_MODULES.HTTP });
+    return rootLogger.child({ requestId, module: LOG_MODULES.HTTP });
   },
 
   /**
    * Create a logger for database operations
    */
   forDatabase: () => {
-    return logger.child({ module: LOG_MODULES.DATABASE });
+    return rootLogger.child({ module: LOG_MODULES.DATABASE });
   },
 
   /**
    * Create a logger for authentication operations
    */
   forAuth: () => {
-    return logger.child({ module: LOG_MODULES.AUTH });
+    return rootLogger.child({ module: LOG_MODULES.AUTH });
   },
 
   /**
    * Create a logger for analytics operations
    */
   forAnalytics: () => {
-    return logger.child({ module: LOG_MODULES.ANALYTICS });
+    return rootLogger.child({ module: LOG_MODULES.ANALYTICS });
   },
 };
-
-/**
- * Legacy export for backward compatibility
- * @deprecated Use the logger object methods instead
- */
-export const createLogger = (context: Record<string, unknown>) =>
-  logger.child(context);
-
-/**
- * Default logger instance for simple usage
- * @deprecated Use the logger object methods instead
- */
-export const defaultLogger = logger;
