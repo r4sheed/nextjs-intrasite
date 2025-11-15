@@ -21,10 +21,13 @@ export function trackEvent(input: Event): void {
   if (event) {
     // va.track(event.name, event.properties);
     if (process.env.NODE_ENV === 'development') {
-      logger.forAnalytics().info('Tracking event', {
-        name: event.name,
-        properties: event.properties,
-      });
+      logger.forAnalytics().info(
+        {
+          name: event.name,
+          properties: event.properties,
+        },
+        'Tracking event'
+      );
     }
   }
 }

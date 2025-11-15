@@ -24,10 +24,13 @@ export const getTwoFactorTokenByUserId = async (
       orderBy: { createdAt: 'desc' },
     });
   } catch (error) {
-    logger.forDatabase().error('Error fetching 2FA token by userId', {
-      userId,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        userId,
+        error,
+      },
+      'Error fetching 2FA token by userId'
+    );
     return null;
   }
 };
@@ -48,10 +51,13 @@ export const getTwoFactorTokenByToken = async (
       where: { token },
     });
   } catch (error) {
-    logger.forDatabase().error('Error fetching 2FA token by token', {
-      token,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        token,
+        error,
+      },
+      'Error fetching 2FA token by token'
+    );
     return null;
   }
 };
@@ -70,10 +76,13 @@ export const getTwoFactorTokenById = async (
       where: { id },
     });
   } catch (error) {
-    logger.forDatabase().error('Error fetching 2FA token by id', {
-      id,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        id,
+        error,
+      },
+      'Error fetching 2FA token by id'
+    );
     return null;
   }
 };
@@ -102,12 +111,15 @@ export const createTwoFactorToken = async (
       },
     });
   } catch (error) {
-    logger.forDatabase().error('Error creating 2FA token', {
-      userId,
-      token,
-      expires,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        userId,
+        token,
+        expires,
+        error,
+      },
+      'Error creating 2FA token'
+    );
     return null;
   }
 };
@@ -132,11 +144,14 @@ export const deleteTwoFactorTokensBefore = async (
     });
     return true;
   } catch (error) {
-    logger.forDatabase().error('Error deleting stale 2FA tokens', {
-      userId,
-      before,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        userId,
+        before,
+        error,
+      },
+      'Error deleting stale 2FA tokens'
+    );
     return null;
   }
 };
@@ -156,10 +171,13 @@ export const incrementTwoFactorAttempts = async (
       data: { attempts: { increment: 1 } },
     });
   } catch (error) {
-    logger.forDatabase().error('Error incrementing 2FA attempts', {
-      tokenId,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        tokenId,
+        error,
+      },
+      'Error incrementing 2FA attempts'
+    );
     return null;
   }
 };
@@ -179,10 +197,13 @@ export const deleteTwoFactorToken = async (
     });
     return true;
   } catch (error) {
-    logger.forDatabase().error('Error deleting 2FA token', {
-      tokenId,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        tokenId,
+        error,
+      },
+      'Error deleting 2FA token'
+    );
     return null;
   }
 };

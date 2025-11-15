@@ -18,11 +18,14 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger.forModule('mail').info('Email verification URL (development mode)', {
-    email,
-    token,
-    url,
-  });
+  logger.forModule('mail').info(
+    {
+      email,
+      token,
+      url,
+    },
+    'Email verification URL (development mode)'
+  );
 
   return { success: true };
 
@@ -55,11 +58,14 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger.forModule('mail').info('Password reset URL (development mode)', {
-    email,
-    token,
-    url,
-  });
+  logger.forModule('mail').info(
+    {
+      email,
+      token,
+      url,
+    },
+    'Password reset URL (development mode)'
+  );
 
   return { success: true };
 
@@ -105,14 +111,15 @@ export const sendTwoFactorTokenEmail = async (
   )}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger
-    .forModule('mail')
-    .info('Two-factor authentication code (development mode)', {
+  logger.forModule('mail').info(
+    {
       email: options.email,
       token: options.token,
       sessionId: options.sessionId,
       verificationUrl,
-    });
+    },
+    'Two-factor authentication code (development mode)'
+  );
 
   return { success: true };
 

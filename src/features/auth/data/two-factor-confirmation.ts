@@ -17,12 +17,13 @@ export const getTwoFactorConfirmationByUserId = async (
       where: { userId },
     });
   } catch (error) {
-    logger
-      .forDatabase()
-      .error('Database error in getTwoFactorConfirmationByUserId', {
+    logger.forDatabase().error(
+      {
         userId,
         error,
-      });
+      },
+      'Database error in getTwoFactorConfirmationByUserId'
+    );
     return null;
   }
 };
@@ -48,12 +49,13 @@ export const createTwoFactorConfirmation = async (
       data: { userId },
     });
   } catch (error) {
-    logger
-      .forDatabase()
-      .error('Database error in createTwoFactorConfirmation', {
+    logger.forDatabase().error(
+      {
         userId,
         error,
-      });
+      },
+      'Database error in createTwoFactorConfirmation'
+    );
     return null;
   }
 };
@@ -74,12 +76,13 @@ export const deleteTwoFactorConfirmation = async (
 
     return result.count > 0;
   } catch (error) {
-    logger
-      .forDatabase()
-      .error('Database error in deleteTwoFactorConfirmation', {
+    logger.forDatabase().error(
+      {
         userId,
         error,
-      });
+      },
+      'Database error in deleteTwoFactorConfirmation'
+    );
     return null;
   }
 };

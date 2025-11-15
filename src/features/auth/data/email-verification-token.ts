@@ -36,10 +36,13 @@ const findVerificationToken = async (
     }
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    logger.forDatabase().error('Database error in findVerificationToken', {
-      search,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        search,
+        error,
+      },
+      'Database error in findVerificationToken'
+    );
     return null;
   }
 };
@@ -96,13 +99,14 @@ export const getVerificationTokenByEmailAndToken = async (
     });
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    logger
-      .forDatabase()
-      .error('Database error in getVerificationTokenByEmailAndToken', {
+    logger.forDatabase().error(
+      {
         email,
         token,
         error,
-      });
+      },
+      'Database error in getVerificationTokenByEmailAndToken'
+    );
     return null;
   }
 };

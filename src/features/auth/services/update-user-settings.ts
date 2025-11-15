@@ -167,10 +167,13 @@ export const updateUserSettingsService = async ({
       data: buildSuccessData(updatedUser, isOAuthAccount),
     });
   } catch (error) {
-    logger.forAuth().error('Failed to update user settings', {
-      userId,
-      error,
-    });
+    logger.forAuth().error(
+      {
+        userId,
+        error,
+      },
+      'Failed to update user settings'
+    );
     return response.failure(internalServerError());
   }
 };

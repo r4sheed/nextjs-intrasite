@@ -52,10 +52,13 @@ export const resendTwoFactorCode = async (
       return response.failure(error);
     }
 
-    logger.forAuth().error('Error resending 2FA code', {
-      sessionId,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logger.forAuth().error(
+      {
+        sessionId,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Error resending 2FA code'
+    );
     return response.failure(internalServerError());
   }
 };

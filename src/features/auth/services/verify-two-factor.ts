@@ -100,11 +100,14 @@ export const verifyTwoFactorCode = async (
     } catch (error) {
       if (error instanceof AuthError) {
         // Handle NextAuth errors
-        logger.forAuth().error('Sign-in failed after 2FA verification', {
-          sessionId,
-          userId: user.id,
-          error,
-        });
+        logger.forAuth().error(
+          {
+            sessionId,
+            userId: user.id,
+            error,
+          },
+          'Sign-in failed after 2FA verification'
+        );
         return response.failure(internalServerError());
       }
       throw error; // Re-throw unexpected errors
@@ -119,10 +122,13 @@ export const verifyTwoFactorCode = async (
       },
     });
   } catch (error) {
-    logger.forAuth().error('Error verifying 2FA code', {
-      sessionId,
-      error,
-    });
+    logger.forAuth().error(
+      {
+        sessionId,
+        error,
+      },
+      'Error verifying 2FA code'
+    );
     return response.failure(internalServerError());
   }
 };

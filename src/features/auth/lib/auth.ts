@@ -197,12 +197,15 @@ export const authCallbacks = {
           where: { id: twoFactorConfirmation.id },
         });
       } catch (error) {
-        logger.forAuth().error('Failed to delete 2FA confirmation', {
-          userId: existingUser.id,
-          confirmationId: twoFactorConfirmation.id,
-          error: error instanceof Error ? error.message : String(error),
-          code: 'AUTH_2FA_CLEANUP_FAILED',
-        });
+        logger.forAuth().error(
+          {
+            userId: existingUser.id,
+            confirmationId: twoFactorConfirmation.id,
+            error: error instanceof Error ? error.message : String(error),
+            code: 'AUTH_2FA_CLEANUP_FAILED',
+          },
+          'Failed to delete 2FA confirmation'
+        );
         // Don't allow sign-in if cleanup fails
         return false;
       }

@@ -58,11 +58,14 @@ const findUser = async <T = PrismaUser>(
     return user as T | null;
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    logger.forDatabase().error('Database error in findUser', {
-      where,
-      select,
-      error,
-    });
+    logger.forDatabase().error(
+      {
+        where,
+        select,
+        error,
+      },
+      'Database error in findUser'
+    );
     return null;
   }
 };
