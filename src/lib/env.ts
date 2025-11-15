@@ -6,6 +6,7 @@ interface RequiredEnv {
 
 interface OptionalEnv {
   NODE_ENV?: string;
+  LOG_LEVEL?: string;
   POSTGRES_USER?: string;
   POSTGRES_PASSWORD?: string;
   POSTGRES_DB?: string;
