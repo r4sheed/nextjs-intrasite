@@ -77,11 +77,14 @@ export const updatePassword = async (
     });
   } catch (error) {
     // Catch any Prisma errors related to the transaction (e.g., connection failure, constraint violation)
-    logger.error('Failed to update password during transaction', {
-      userId: existingUser.id,
-      email,
-      error,
-    });
+    logger.error(
+      {
+        userId: existingUser.id,
+        email,
+        error,
+      },
+      'Failed to update password during transaction'
+    );
     return response.failure(internalServerError());
   }
 };

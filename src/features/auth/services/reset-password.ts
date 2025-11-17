@@ -59,10 +59,13 @@ export const resetPassword = async (
     if (error instanceof AppError) {
       return response.failure(error);
     }
-    logger.error('Unexpected error during password reset', {
-      error,
-      email: values.email,
-    });
+    logger.error(
+      {
+        error,
+        email: values.email,
+      },
+      'Unexpected error during password reset'
+    );
     return response.failure(internalServerError());
   }
 };

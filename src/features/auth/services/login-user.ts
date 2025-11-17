@@ -174,10 +174,13 @@ export const loginUser = async (
       return response.failure(error);
     }
 
-    logger.error('Unexpected error during user login', {
-      error,
-      email: values.email,
-    });
+    logger.error(
+      {
+        error,
+        email: values.email,
+      },
+      'Unexpected error during user login'
+    );
 
     // Return generic error for unexpected errors
     return response.failure(internalServerError());
