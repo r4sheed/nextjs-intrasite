@@ -62,15 +62,10 @@ const getLoggerConfig = (): pino.LoggerOptions => {
      * Allows custom preprocessing of log calls.
      */
     hooks: {
-      logMethod(inputArgs, method) {
-        // inputArgs: [object, msg?]
-        if (
-          typeof inputArgs[1] === 'string' &&
-          typeof inputArgs[0] === 'object'
-        ) {
-          inputArgs[0] = { ...inputArgs[0], logEvent: inputArgs[1] };
-        }
-        method.apply(this, inputArgs);
+      logMethod(inputArgs, method, _level) {
+        // Pino's logMethod hook allows modifying arguments before logging
+        // inputArgs: [msg?, obj?, ...args]
+        return method.apply(this, inputArgs);
       },
     },
   };
