@@ -12,6 +12,9 @@ import { getUserById } from '@/features/auth/data/user';
 
 import type { NextAuthConfig, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
+import type { Account, Profile, User } from 'next-auth';
+import type { AdapterUser } from 'next-auth/adapters';
+import type { NextURL } from 'next/dist/server/web/next-url';
 
 type SessionUser = Session['user'];
 
@@ -131,35 +134,50 @@ const canQueryDatabaseForToken =
 const events = {
   /**
    * Marks the user's email as verified when linking an OAuth account.
-   * @param user - The user whose account is being linked.
    */
-  async linkAccount({ user }) {
+  async linkAccount(message: {
+    user: User | AdapterUser;
+    account: Account;
+    profile: User | AdapterUser;
+  }) {
     // Mark email as verified when linking an OAuth account
     await db.user.update({
-      where: { id: user.id },
+      where: { id: message.user.id },
       data: { emailVerified: new Date() },
     });
+
+    console.log(
+      `Linked account for user: ${message.user.id} via ${message.account.provider}`
+    );
+  },
+  async signIn(message: {
+    user: User;
+    account?: Account | null;
+    profile?: Profile;
+    isNewUser?: boolean;
+  }) {
+    console.log(
+      `User signed in: ${message.user.id} via ${message.account?.provider}`
+    );
   },
 } satisfies NonNullable<NextAuthConfig['events']>;
 
 export const authCallbacks = {
   /**
    * Checks if the user is authorized to access a protected route.
-   * @param auth - The current authentication state.
-   * @returns True if authorized, false otherwise.
    */
-  async authorized({ auth }) {
-    return !!auth;
+  async authorized(message: {
+    auth: Session | null;
+    request: { nextUrl: NextURL };
+  }) {
+    return !!message.auth;
   },
   /**
    * Handles the sign-in process, including validation for credentials and OAuth.
-   * @param user - The user attempting to sign in.
-   * @param account - The account information (e.g., provider).
-   * @returns True if sign-in is allowed, false otherwise.
    */
-  async signIn({ user, account }) {
+  async signIn(message: { user: User; account?: Account | null }) {
     // Allow OAuth without email verification
-    if (account?.provider !== 'credentials') {
+    if (message.account?.provider !== 'credentials') {
       return true;
     }
 
@@ -169,11 +187,11 @@ export const authCallbacks = {
     }
 
     // Check for a valid user.
-    if (!user.id) {
+    if (!message.user.id) {
       return false;
     }
 
-    const existingUser = await getUserById(user.id);
+    const existingUser = await getUserById(message.user.id);
 
     // Prevent sign in without email verification
     const emailVerified = !!existingUser?.emailVerified;
@@ -215,39 +233,36 @@ export const authCallbacks = {
   },
   /**
    * Handles JWT token creation and updates during authentication.
-   * @param token - The JWT token.
-   * @param user - The user data (present during sign-in).
-   * @returns The updated JWT token.
    */
-  async jwt({ token, user }) {
+  async jwt(message: { token: JWT; user?: User }) {
     // Ensure the subject claim always mirrors the authenticated user's id.
-    if (user?.id) {
-      token.sub = user.id;
+    if (message.user?.id) {
+      message.token.sub = message.user.id;
     }
 
-    if (!token.sub) {
-      return resetTokenUserSnapshot(token);
+    if (!message.token.sub) {
+      return resetTokenUserSnapshot(message.token);
     }
 
     // During sign-in we already have fresh user data provided by the adapter.
-    if (user) {
-      return updateTokenFromUser(token, {
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        role: user.role,
-        twoFactorEnabled: user.twoFactorEnabled,
-        isOAuthAccount: user.isOAuthAccount,
+    if (message.user) {
+      return updateTokenFromUser(message.token, {
+        name: message.user.name,
+        email: message.user.email,
+        image: message.user.image,
+        role: message.user.role,
+        twoFactorEnabled: message.user.twoFactorEnabled,
+        isOAuthAccount: message.user.isOAuthAccount,
       });
     }
 
     // When running on the Edge we cannot reach Prisma, so we skip the refresh.
     if (!canQueryDatabaseForToken) {
-      return token;
+      return message.token;
     }
 
     // On subsequent requests, refresh the snapshot from the database so role/2FA changes propagate.
-    const databaseUser = await getUserById(token.sub);
+    const databaseUser = await getUserById(message.token.sub);
 
     if (!databaseUser) {
       // User no longer exists in database, invalidate the session
@@ -256,7 +271,7 @@ export const authCallbacks = {
 
     const account = await getAccountByUserId(databaseUser.id);
 
-    return updateTokenFromUser(token, {
+    return updateTokenFromUser(message.token, {
       name: databaseUser.name,
       email: databaseUser.email,
       image: databaseUser.image,
@@ -267,19 +282,16 @@ export const authCallbacks = {
   },
   /**
    * Updates the session object with the latest user data from the JWT.
-   * @param session - The session object.
-   * @param token - The JWT token.
-   * @returns The updated session object.
    */
-  async session({ session, token }) {
-    if (!session.user) {
-      return session;
+  async session(message: { session: Session; token: JWT }) {
+    if (!message.session.user) {
+      return message.session;
     }
 
     return {
-      ...session,
+      ...message.session,
       // Merge the token snapshot onto the session payload the client consumes.
-      user: mergeTokenIntoSessionUser(session.user, token),
+      user: mergeTokenIntoSessionUser(message.session.user, message.token),
     };
   },
 } satisfies NonNullable<NextAuthConfig['callbacks']>;
