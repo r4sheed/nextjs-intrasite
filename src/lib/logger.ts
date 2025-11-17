@@ -44,6 +44,14 @@ const getLoggerConfig = (): pino.LoggerOptions => {
         'req.headers.cookie',
         'password',
         'token',
+        '*.password',
+        '*.token',
+        'accessToken',
+        'refreshToken',
+        'sessionToken',
+        'apiKey',
+        'secret',
+        'privateKey',
       ],
       censor: '[REDACTED]',
       remove: false,
@@ -177,16 +185,16 @@ export const logger = {
     return rootLogger.child({ module: moduleName });
   },
 
-  forRequest(requestId: string) {
-    return rootLogger.child({ requestId, module: LOG_MODULES.http });
+  forAuth() {
+    return rootLogger.child({ module: LOG_MODULES.auth });
   },
 
   forDatabase() {
     return rootLogger.child({ module: LOG_MODULES.database });
   },
 
-  forAuth() {
-    return rootLogger.child({ module: LOG_MODULES.auth });
+  forRequest(requestId: string) {
+    return rootLogger.child({ requestId, module: LOG_MODULES.http });
   },
 
   forAnalytics() {
