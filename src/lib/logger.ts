@@ -193,8 +193,8 @@ export const logger = {
     return rootLogger.child({ module: LOG_MODULES.database });
   },
 
-  forRequest(requestId: string) {
-    return rootLogger.child({ requestId, module: LOG_MODULES.http });
+  forRequest(requestId: string, moduleName: LogModule = LOG_MODULES.http) {
+    return rootLogger.child({ requestId, module: moduleName });
   },
 
   forAnalytics() {
