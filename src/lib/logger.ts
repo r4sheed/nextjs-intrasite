@@ -132,7 +132,7 @@ const rootLogger = pino(getLoggerConfig());
 /**
  * Predefined logging modules.
  */
-export const LOG_MODULES = {
+export const logModules = {
   auth: 'auth',
   database: 'database',
   http: 'http',
@@ -141,7 +141,7 @@ export const LOG_MODULES = {
   ui: 'ui',
 } as const;
 
-export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
+export type LogModule = (typeof logModules)[keyof typeof logModules];
 
 /**
  * Application logging utility.
@@ -186,26 +186,26 @@ export const logger = {
   },
 
   forAuth() {
-    return rootLogger.child({ module: LOG_MODULES.auth });
+    return rootLogger.child({ module: logModules.auth });
   },
 
   forDatabase() {
-    return rootLogger.child({ module: LOG_MODULES.database });
+    return rootLogger.child({ module: logModules.database });
   },
 
-  forRequest(requestId: string, moduleName: LogModule = LOG_MODULES.http) {
+  forRequest(requestId: string, moduleName: LogModule = logModules.http) {
     return rootLogger.child({ requestId, module: moduleName });
   },
 
   forAnalytics() {
-    return rootLogger.child({ module: LOG_MODULES.analytics });
+    return rootLogger.child({ module: logModules.analytics });
   },
 
   forMail() {
-    return rootLogger.child({ module: LOG_MODULES.mail });
+    return rootLogger.child({ module: logModules.mail });
   },
 
   forUI() {
-    return rootLogger.child({ module: LOG_MODULES.ui });
+    return rootLogger.child({ module: logModules.ui });
   },
 };
