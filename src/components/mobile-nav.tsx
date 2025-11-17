@@ -17,8 +17,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
-
 export function MobileNav({
   items,
   className,
@@ -27,7 +25,6 @@ export function MobileNav({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-
   const t = useTranslations('navigation');
 
   return (
