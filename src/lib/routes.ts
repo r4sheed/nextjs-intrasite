@@ -58,19 +58,11 @@ export const routes = {
       url: '/auth/login',
       label: NAV_LABELS.loginTitle,
       access: 'auth',
-      meta: {
-        showInNavigation: true,
-        navigationOrder: 1,
-      },
     },
     signUp: {
       url: '/auth/signup',
       label: NAV_LABELS.signUpTitle,
       access: 'auth',
-      meta: {
-        showInNavigation: true,
-        navigationOrder: 2,
-      },
     },
     forgotPassword: {
       url: '/auth/forgot-password',
@@ -82,6 +74,11 @@ export const routes = {
       label: NAV_LABELS.newPasswordTitle,
       access: 'auth',
     },
+    logout: {
+      url: '/auth/logout',
+      label: NAV_LABELS.logoutTitle,
+      access: 'protected',
+    },
     verify: {
       url: '/auth/verify',
       label: NAV_LABELS.verifyEmailTitle,
@@ -92,10 +89,6 @@ export const routes = {
     url: '/settings',
     label: NAV_LABELS.settingsTitle,
     access: 'protected',
-    meta: {
-      showInNavigation: true,
-      navigationOrder: 3,
-    },
   },
   admin: {
     url: '/test/admin',

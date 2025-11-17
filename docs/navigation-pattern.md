@@ -98,7 +98,9 @@ import { routes } from '@/lib/navigation';
 export function MyComponent() {
   const t = useTranslations();
 
-  return <Link href={routes.settings.url}>{t(routes.settings.label)}</Link>;
+  return (
+    <Link href={routes.settings.url}>{t(routes.auth.settings.label)}</Link>
+  );
 }
 ```
 
@@ -157,7 +159,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
 function SettingsPage() {
   const breadcrumbs = [
     { url: routes.home.url, label: routes.home.label },
-    { url: routes.settings.url, label: routes.settings.label },
+    { url: routes.settings.url, label: routes.auth.settings.label },
   ];
 
   return <Breadcrumbs items={breadcrumbs} />;
