@@ -78,7 +78,7 @@ export function MobileNav({
               </MobileLink>
               {items.map((item, index) => (
                 <MobileLink key={index} href={item.href} onOpenChange={setOpen}>
-                  {item.label}
+                  {t(item.label)}
                 </MobileLink>
               ))}
             </div>
