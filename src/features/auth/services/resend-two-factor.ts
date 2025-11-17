@@ -1,5 +1,5 @@
 import { AppError, internalServerError } from '@/lib/errors';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/tmp_logger';
 import { type Response, response } from '@/lib/response';
 
 import { getTwoFactorTokenById } from '@/features/auth/data/two-factor-token';

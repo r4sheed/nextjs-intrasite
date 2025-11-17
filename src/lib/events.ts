@@ -1,7 +1,7 @@
 // import va from '@vercel/analytics';
 import { z } from 'zod';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/tmp_logger';
 
 const eventSchema = z.object({
   name: z.enum(['set_layout']),

@@ -2,7 +2,7 @@ import { AuthError } from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
 import { AppError, internalServerError } from '@/lib/errors';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/tmp_logger';
 import { routes } from '@/lib/navigation';
 import { type Response, response } from '@/lib/response';
 import { maskEmail } from '@/lib/utils';

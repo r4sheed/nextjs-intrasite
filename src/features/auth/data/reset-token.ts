@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/tmp_logger';
 import { db } from '@/lib/prisma';
 
 import type { PasswordResetToken } from '@prisma/client';
