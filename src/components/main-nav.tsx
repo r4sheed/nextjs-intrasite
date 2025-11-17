@@ -17,6 +17,7 @@ export function MainNav({
   items: ReadonlyArray<{ href: string; label: string }>;
 }) {
   const pathname = usePathname();
+
   const t = useTranslations('navigation');
 
   return (
