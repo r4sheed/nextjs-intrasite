@@ -142,11 +142,11 @@ export const sendTwoFactorTokenEmail = async (
     react: TwoFactorTemplate(templateProps),
   });
   if (error) {
-    logger.forModule('mail').error('Error sending two-factor code email', {
+    logger.forModule('mail').error({
       email: options.email,
       sessionId: options.sessionId,
       error,
-    });
+    }, 'Error sending two-factor code email');
     return;
   }
   return data;
