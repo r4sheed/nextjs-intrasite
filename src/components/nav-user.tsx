@@ -151,12 +151,14 @@ const UserDropdownContent = ({
             </Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <LogoutTrigger>
-            <DropdownMenuItem>
-              <LogOut />
-              {t(NAV_LABELS.logoutTitle)}
-            </DropdownMenuItem>
-          </LogoutTrigger>
+          <DropdownMenuGroup>
+            <Link href={routes.auth.logout.url}>
+              <DropdownMenuItem>
+                <LogOut />
+                {t(NAV_LABELS.logoutTitle)}
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuGroup>
         </>
       )}
     </DropdownMenuContent>
