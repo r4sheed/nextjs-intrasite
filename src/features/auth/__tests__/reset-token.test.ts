@@ -74,8 +74,11 @@ describe('Password Reset Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[findPasswordResetToken] Database error:',
-        dbError
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
+        expect.objectContaining({
+          search: expect.objectContaining({ token: 'test-token' }),
+          error: dbError,
+        })
       );
 
       consoleErrorSpy.mockRestore();
@@ -166,8 +169,13 @@ describe('Password Reset Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[findPasswordResetToken] Database error:',
-        dbError
+        expect.stringMatching(
+          /^\[\d{2}:\d{2}:\d{2}\]\[ERROR\] Database error in findPasswordResetToken$/
+        ),
+        {
+          search: { email: 'test@example.com' },
+          error: dbError,
+        }
       );
 
       consoleErrorSpy.mockRestore();
@@ -276,8 +284,11 @@ describe('Password Reset Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[findPasswordResetToken] Database error:',
-        prismaError
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
+        expect.objectContaining({
+          search: expect.objectContaining({ token: 'test-token' }),
+          error: prismaError,
+        })
       );
 
       consoleErrorSpy.mockRestore();
@@ -368,8 +379,12 @@ describe('Password Reset Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[getPasswordResetTokenByEmailAndToken] Database error:',
-        dbError
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
+        expect.objectContaining({
+          email: 'test@example.com',
+          token: 'test-token',
+          error: dbError,
+        })
       );
 
       consoleErrorSpy.mockRestore();

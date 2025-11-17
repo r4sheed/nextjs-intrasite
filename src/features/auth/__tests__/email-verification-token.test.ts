@@ -74,8 +74,11 @@ describe('Email Verification Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[findVerificationToken] Database error:',
-        dbError
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
+        expect.objectContaining({
+          search: expect.objectContaining({ token: 'test-token' }),
+          error: dbError,
+        })
       );
 
       consoleErrorSpy.mockRestore();
@@ -166,8 +169,13 @@ describe('Email Verification Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[findVerificationToken] Database error:',
-        dbError
+        expect.stringMatching(
+          /^\[\d{2}:\d{2}:\d{2}\]\[ERROR\] Database error in findVerificationToken$/
+        ),
+        {
+          search: { email: 'test@example.com' },
+          error: dbError,
+        }
       );
 
       consoleErrorSpy.mockRestore();
@@ -320,8 +328,12 @@ describe('Email Verification Token Data Layer', () => {
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[getVerificationTokenByEmailAndToken] Database error:',
-        dbError
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
+        expect.objectContaining({
+          email: 'test@example.com',
+          token: 'test-token',
+          error: dbError,
+        })
       );
 
       consoleErrorSpy.mockRestore();
