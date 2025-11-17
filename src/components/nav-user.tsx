@@ -35,8 +35,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-import { LogoutTrigger } from '@/features/auth/components/logout-trigger';
-
 /**
  * Generates 2-character initials from a user's name
  * @param name - The user's full name
