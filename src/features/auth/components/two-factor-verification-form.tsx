@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useState, startTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -71,6 +72,7 @@ const useTwoFactorMutations = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const { update: updateSession } = useSession();
 
   const sessionId = searchParams.get('sessionId');
   const email = searchParams.get('email');
@@ -88,6 +90,20 @@ const useTwoFactorMutations = () => {
       }
 
       setIsRedirecting(true);
+
+      if (updateSession) {
+        try {
+          await updateSession();
+        } catch {
+          // Session update failed - continue with login flow
+          // This is not critical for the login process
+        }
+      }
+
+      startTransition(() => {
+        // Refresh server components to update session in SessionProvider
+        router.refresh();
+      });
 
       try {
         router.replace(middlewareConfig.defaultLoginRedirect);
