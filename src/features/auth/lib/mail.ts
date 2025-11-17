@@ -43,10 +43,13 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    logger.forModule('mail').error('Error sending verification email', {
-      email,
-      error,
-    });
+    logger.forModule('mail').error(
+      {
+        email,
+        error,
+      },
+      'Error sending verification email'
+    );
     return;
   }
 
@@ -83,10 +86,13 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    logger.forModule('mail').error('Error sending reset password email', {
-      email,
-      error,
-    });
+    logger.forModule('mail').error(
+      {
+        email,
+        error,
+      },
+      'Error sending password reset email'
+    );
     return;
   }
 
