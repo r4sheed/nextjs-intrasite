@@ -1,6 +1,7 @@
 import pino from 'pino';
 
 import { env } from '@/lib/env';
+import { AppError } from '@/lib/errors';
 
 /**
  * Valid log levels supported by Pino.
@@ -65,17 +66,6 @@ const getLoggerConfig = (): pino.LoggerOptions => {
       req: pino.stdSerializers.req,
       res: pino.stdSerializers.res,
     },
-
-    /**
-     * Allows custom preprocessing of log calls.
-     */
-    hooks: {
-      logMethod(inputArgs, method, _level) {
-        // Pino's logMethod hook allows modifying arguments before logging
-        // inputArgs: [msg?, obj?, ...args]
-        return method.apply(this, inputArgs);
-      },
-    },
   };
 
   if (isDevelopment) {
@@ -101,20 +91,7 @@ const getLoggerConfig = (): pino.LoggerOptions => {
   if (isTest) {
     return {
       ...baseConfig,
-      level: 'error',
-      transport: {
-        targets: [
-          {
-            target: 'pino-pretty',
-            level: 'error',
-            options: {
-              colorize: false,
-              singleLine: true,
-              ignore: 'pid,hostname,time',
-            },
-          },
-        ],
-      },
+      level: 'silent',
     };
   }
 
@@ -130,7 +107,61 @@ const getLoggerConfig = (): pino.LoggerOptions => {
 const rootLogger = pino(getLoggerConfig());
 
 /**
- * Predefined logging modules.
+ * Extracts log context from an Error instance.
+ * Handles both standard Errors and AppErrors with additional metadata.
+ */
+const getErrorContext = (error: Error) => {
+  const isAppError = error instanceof AppError;
+
+  return {
+    err: error,
+    ...(isAppError && {
+      code: error.code,
+      httpStatus: error.httpStatus,
+      details: error.details,
+      errorMessage: error.errorMessage,
+    }),
+  };
+};
+
+/**
+ * Gets the appropriate message string from an Error instance.
+ */
+const getErrorMessage = (error: Error): string => {
+  return error instanceof AppError ? error.errorMessage.key : error.message;
+};
+
+/**
+ * Type definition for log methods with overloaded signatures.
+ */
+type LogMethod = {
+  (message: string): void;
+  (context: Record<string, unknown>, message?: string): void;
+  (error: Error, message?: string): void;
+};
+
+/**
+ * Factory function to create log methods with unified logic.
+ * Handles three signatures: string, object with optional message, or Error with optional message.
+ */
+const createLogMethod =
+  (level: pino.Level): LogMethod =>
+  (arg1: string | Record<string, unknown> | Error, arg2?: string) => {
+    if (typeof arg1 === 'string') {
+      return rootLogger[level](arg1);
+    }
+
+    if (arg1 instanceof Error) {
+      const context = getErrorContext(arg1);
+      const message = arg2 ?? getErrorMessage(arg1);
+      return rootLogger[level](context, message);
+    }
+
+    return arg2 ? rootLogger[level](arg1, arg2) : rootLogger[level](arg1);
+  };
+
+/**
+ * Predefined logging modules for consistent categorization.
  */
 export const logModules = {
   auth: 'auth',
@@ -144,68 +175,102 @@ export const logModules = {
 export type LogModule = (typeof logModules)[keyof typeof logModules];
 
 /**
- * Application logging utility.
+ * Application logging utility with support for structured logging,
+ * error handling, and module-specific child loggers.
+ *
+ * @example
+ * // Simple message
+ * logger.info('User logged in');
+ *
+ * @example
+ * // With context
+ * logger.info({ userId: '123' }, 'User logged in');
+ *
+ * @example
+ * // With Error
+ * logger.error(error, 'Failed to process request');
+ *
+ * @example
+ * // Child logger for specific module
+ * const authLogger = logger.forAuth();
+ * authLogger.info('Authentication successful');
  */
 export const logger = {
-  debug(context: Record<string, unknown>, message?: string) {
-    return message
-      ? rootLogger.debug(context, message)
-      : rootLogger.debug(context);
-  },
+  /**
+   * Log at debug level.
+   * Use for detailed diagnostic information during development.
+   */
+  debug: createLogMethod('debug'),
 
-  info(context: Record<string, unknown>, message?: string) {
-    return message
-      ? rootLogger.info(context, message)
-      : rootLogger.info(context);
-  },
+  /**
+   * Log at info level.
+   * Use for general informational messages about application flow.
+   */
+  info: createLogMethod('info'),
 
-  warn(context: Record<string, unknown>, message?: string) {
-    return message
-      ? rootLogger.warn(context, message)
-      : rootLogger.warn(context);
-  },
+  /**
+   * Log at warn level.
+   * Use for warning messages about potentially harmful situations.
+   */
+  warn: createLogMethod('warn'),
 
-  error(context: Record<string, unknown>, message?: string) {
-    return message
-      ? rootLogger.error(context, message)
-      : rootLogger.error(context);
-  },
+  /**
+   * Log at error level.
+   * Use for error events that might still allow the application to continue.
+   */
+  error: createLogMethod('error'),
 
-  fatal(context: Record<string, unknown>, message?: string) {
-    return message
-      ? rootLogger.fatal(context, message)
-      : rootLogger.fatal(context);
-  },
+  /**
+   * Log at fatal level.
+   * Use for severe errors that will lead the application to abort.
+   */
+  fatal: createLogMethod('fatal'),
 
-  child(context: Record<string, unknown>) {
-    return rootLogger.child(context);
-  },
+  /**
+   * Creates a child logger with additional context.
+   * @param context - Context object to be included in all logs from this child.
+   * @returns Child logger instance.
+   */
+  child: (context: Record<string, unknown>) => rootLogger.child(context),
 
-  forModule(moduleName: LogModule | string) {
-    return rootLogger.child({ module: moduleName });
-  },
+  /**
+   * Creates a child logger for a specific module.
+   * @param moduleName - Name of the module (can be predefined or custom).
+   * @returns Child logger instance tagged with the module name.
+   */
+  forModule: (moduleName: LogModule | string) =>
+    rootLogger.child({ module: moduleName }),
 
-  forAuth() {
-    return rootLogger.child({ module: logModules.auth });
-  },
+  /**
+   * Creates a child logger for authentication operations.
+   */
+  forAuth: () => rootLogger.child({ module: logModules.auth }),
 
-  forDatabase() {
-    return rootLogger.child({ module: logModules.database });
-  },
+  /**
+   * Creates a child logger for database operations.
+   */
+  forDatabase: () => rootLogger.child({ module: logModules.database }),
 
-  forRequest(requestId: string, moduleName: LogModule = logModules.http) {
-    return rootLogger.child({ requestId, module: moduleName });
-  },
+  /**
+   * Creates a child logger for HTTP request handling.
+   * @param requestId - Unique identifier for the request.
+   * @param moduleName - Optional module name (defaults to 'http').
+   */
+  forRequest: (requestId: string, moduleName: LogModule = logModules.http) =>
+    rootLogger.child({ requestId, module: moduleName }),
 
-  forAnalytics() {
-    return rootLogger.child({ module: logModules.analytics });
-  },
+  /**
+   * Creates a child logger for analytics operations.
+   */
+  forAnalytics: () => rootLogger.child({ module: logModules.analytics }),
 
-  forMail() {
-    return rootLogger.child({ module: logModules.mail });
-  },
+  /**
+   * Creates a child logger for mail operations.
+   */
+  forMail: () => rootLogger.child({ module: logModules.mail }),
 
-  forUI() {
-    return rootLogger.child({ module: logModules.ui });
-  },
+  /**
+   * Creates a child logger for UI operations.
+   */
+  forUI: () => rootLogger.child({ module: logModules.ui }),
 };
