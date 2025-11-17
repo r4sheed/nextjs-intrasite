@@ -310,9 +310,9 @@ export const AUTH_LABELS = {
   twoFactorDescription: 'labels.two-factor-description',
 
   // Form field labels (used in various forms)
-  emailLabel: 'labels.email',
-  passwordLabel: 'labels.password',
-  currentPasswordLabel: 'labels.current-password',
+  emailLabel: 'labels.email-label',
+  passwordLabel: 'labels.password-label',
+  currentPasswordLabel: 'labels.current-password-label',
 
   // Field descriptions (used for help text)
   currentPasswordDescription: 'labels.current-password-description',
@@ -333,8 +333,8 @@ export const AUTH_LABELS = {
 export const AUTH_LABELS = {
   // Security section specific (what if we need these elsewhere?)
   securitySection: {
-    changePasswordTitle: 'labels.change-password-title',
-    updatePasswordButton: 'labels.update-password-button',
+    changePasswordTitle: 'labels.change-password',
+    updatePasswordButton: 'labels.update-password',
   },
   twoFactorSection: {
     twoFactorTitle: 'labels.two-factor-title',
