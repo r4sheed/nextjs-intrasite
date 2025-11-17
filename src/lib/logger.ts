@@ -125,12 +125,12 @@ const rootLogger = pino(getLoggerConfig());
  * Predefined logging modules.
  */
 export const LOG_MODULES = {
-  AUTH: 'auth',
-  DATABASE: 'database',
-  HTTP: 'http',
-  ANALYTICS: 'analytics',
-  MAIL: 'mail',
-  UI: 'ui',
+  auth: 'auth',
+  database: 'database',
+  http: 'http',
+  analytics: 'analytics',
+  mail: 'mail',
+  ui: 'ui',
 } as const;
 
 export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
@@ -178,18 +178,26 @@ export const logger = {
   },
 
   forRequest(requestId: string) {
-    return rootLogger.child({ requestId, module: LOG_MODULES.HTTP });
+    return rootLogger.child({ requestId, module: LOG_MODULES.http });
   },
 
   forDatabase() {
-    return rootLogger.child({ module: LOG_MODULES.DATABASE });
+    return rootLogger.child({ module: LOG_MODULES.database });
   },
 
   forAuth() {
-    return rootLogger.child({ module: LOG_MODULES.AUTH });
+    return rootLogger.child({ module: LOG_MODULES.auth });
   },
 
   forAnalytics() {
-    return rootLogger.child({ module: LOG_MODULES.ANALYTICS });
+    return rootLogger.child({ module: LOG_MODULES.analytics });
+  },
+
+  forMail() {
+    return rootLogger.child({ module: LOG_MODULES.mail });
+  },
+
+  forUI() {
+    return rootLogger.child({ module: LOG_MODULES.ui });
   },
 };
