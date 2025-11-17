@@ -229,14 +229,12 @@ export const logger = {
   /**
    * Creates a child logger with additional context.
    * @param context - Context object to be included in all logs from this child.
-   * @returns Child logger instance.
    */
   child: (context: Record<string, unknown>) => rootLogger.child(context),
 
   /**
    * Creates a child logger for a specific module.
    * @param moduleName - Name of the module (can be predefined or custom).
-   * @returns Child logger instance tagged with the module name.
    */
   forModule: (moduleName: LogModule | string) =>
     rootLogger.child({ module: moduleName }),
