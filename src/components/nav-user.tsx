@@ -1,13 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
+  LogIn,
   LogOut,
   Sparkles,
   User,
+  UserPlus,
 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,13 +31,17 @@ import {
 } from '@/components/ui/sidebar';
 
 import { LogoutTrigger } from '@/features/auth/components/logout-trigger';
+import { routes } from '@/lib/routes';
+
+import { useTranslations } from 'next-intl';
+import { AUTH_LABELS } from '../features/auth/lib/strings';
 
 /**
  * Generates 2-character initials from a user's name
  * @param name - The user's full name
  * @returns 2 uppercase characters for avatar fallback
  */
-function generateInitials(name: string | undefined | null): string {
+const generateInitials = (name: string | undefined | null): string => {
   if (!name || typeof name !== 'string') {
     return '??';
   }
@@ -60,7 +67,7 @@ function generateInitials(name: string | undefined | null): string {
   const first = words[0]?.[0] || '';
   const second = words[1]?.[0] || '';
   return (first + second).toUpperCase() || '??';
-}
+};
 
 interface User {
   name?: string | null;
@@ -68,14 +75,119 @@ interface User {
   image?: string | null;
 }
 
-export function NavUser({ user }: { user: User | null | undefined }) {
+/**
+ * Avatar component for the user menu
+ */
+const UserAvatar = ({
+  user,
+  avatarFallback,
+}: {
+  user: User;
+  avatarFallback: string;
+}) => (
+  <Avatar className="h-8 w-8 rounded-lg">
+    <AvatarImage src={user.image ?? undefined} alt={user.name ?? undefined} />
+    <AvatarFallback className="rounded-lg">{avatarFallback}</AvatarFallback>
+  </Avatar>
+);
+
+/**
+ * Dropdown content component based on user authentication status
+ */
+const UserDropdownContent = ({
+  user,
+  isGuest,
+}: {
+  user: User;
+  isGuest: boolean;
+}) => {
   const { isMobile } = useSidebar();
+  const t = useTranslations('navigation');
 
-  if (!user) {
-    return null;
-  }
+  return (
+    <DropdownMenuContent
+      className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+      side={isMobile ? 'bottom' : 'right'}
+      align="end"
+      sideOffset={4}
+    >
+      <DropdownMenuLabel className="p-0 font-normal">
+        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+          <UserAvatar
+            user={user}
+            avatarFallback={generateInitials(user.name)}
+          />
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-semibold">{user.name}</span>
+            <span className="truncate text-xs">{user.email}</span>
+          </div>
+        </div>
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      {isGuest ? (
+        <DropdownMenuGroup>
+          <Link href={routes.auth.login.url}>
+            <DropdownMenuItem>
+              <LogIn />
+              {t(AUTH_LABELS.loginButton)}
+            </DropdownMenuItem>
+          </Link>
+          <Link href={routes.auth.signUp.url}>
+            <DropdownMenuItem>
+              <UserPlus />
+              {t(AUTH_LABELS.signupButton)}
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuGroup>
+      ) : (
+        <>
+          <DropdownMenuGroup>
+            <DropdownMenuItem>
+              <Sparkles />
+              Upgrade to Pro
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem>
+              <BadgeCheck />
+              Account
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <CreditCard />
+              Billing
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Bell />
+              Notifications
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <LogoutTrigger>
+            <DropdownMenuItem>
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
+          </LogoutTrigger>
+        </>
+      )}
+    </DropdownMenuContent>
+  );
+};
 
-  const avatarFallback = generateInitials(user.name);
+/**
+ * User navigation component that renders based on the provided user data.
+ * If no user is provided, renders a guest menu with login/signup options.
+ */
+const NavUser = ({ user }: { user: User | null | undefined }) => {
+  const displayUser = user || {
+    name: 'Guest',
+    email: null,
+    image: '/assets/avatars/guest.png',
+  };
+  const isGuest = !user;
+
+  const avatarFallback = generateInitials(displayUser.name);
 
   return (
     <SidebarMenu>
@@ -86,77 +198,21 @@ export function NavUser({ user }: { user: User | null | undefined }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={user.image ?? undefined}
-                  alt={user.name ?? undefined}
-                />
-                <AvatarFallback className="rounded-lg">
-                  {avatarFallback}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar user={displayUser} avatarFallback={avatarFallback} />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold">
+                  {displayUser.name}
+                </span>
+                <span className="truncate text-xs">{displayUser.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={user.image ?? undefined}
-                    alt={user.name ?? undefined}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {avatarFallback}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <LogoutTrigger>
-              <DropdownMenuItem>
-                <LogOut />
-                Log out
-              </DropdownMenuItem>
-            </LogoutTrigger>
-          </DropdownMenuContent>
+          <UserDropdownContent user={displayUser} isGuest={isGuest} />
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
   );
-}
+};
+
+export { NavUser };
