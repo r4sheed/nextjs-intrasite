@@ -3,59 +3,118 @@ import pino from 'pino';
 import { env } from '@/lib/env';
 
 /**
- * Logger configuration based on environment
+ * Valid log levels supported by Pino.
  */
-const getLoggerConfig = () => {
+export type LogLevel =
+  | 'fatal'
+  | 'error'
+  | 'warn'
+  | 'info'
+  | 'debug'
+  | 'trace'
+  | 'silent';
+
+/**
+ * Builds the Pino logger configuration depending on the environment.
+ */
+const getLoggerConfig = (): pino.LoggerOptions => {
   const isDevelopment = env.NODE_ENV === 'development';
   const isTest = env.NODE_ENV === 'test';
 
-  // Base configuration
   const baseConfig: pino.LoggerOptions = {
     level: env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
-    formatters: {
-      level: label => ({ level: label }),
+
+    /**
+     * Adds metadata fields to every log entry.
+     */
+    mixin() {
+      return {
+        environment: env.NODE_ENV,
+        service: env.APP_NAME,
+        version: env.APP_VERSION,
+      };
     },
+
+    /**
+     * Removes or masks sensitive information from logs.
+     */
+    redact: {
+      paths: [
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'password',
+        'token',
+      ],
+      censor: '[REDACTED]',
+      remove: false,
+    },
+
+    /**
+     * Serializers for complex objects.
+     */
     serializers: {
       error: pino.stdSerializers.err,
       req: pino.stdSerializers.req,
       res: pino.stdSerializers.res,
     },
+
+    /**
+     * Allows custom preprocessing of log calls.
+     */
+    hooks: {
+      logMethod(inputArgs, method) {
+        // inputArgs: [object, msg?]
+        if (
+          typeof inputArgs[1] === 'string' &&
+          typeof inputArgs[0] === 'object'
+        ) {
+          inputArgs[0] = { ...inputArgs[0], logEvent: inputArgs[1] };
+        }
+        method.apply(this, inputArgs);
+      },
+    },
   };
 
-  // Development configuration with pretty printing
   if (isDevelopment) {
     return {
       ...baseConfig,
       transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l',
-          ignore: 'pid,hostname',
-          singleLine: false,
-        },
+        targets: [
+          {
+            target: 'pino-pretty',
+            level: baseConfig.level,
+            options: {
+              colorize: true,
+              singleLine: false,
+              ignore: 'pid,hostname',
+              translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
+            },
+          },
+        ],
       },
     };
   }
 
-  // Test environment - minimal output
   if (isTest) {
     return {
       ...baseConfig,
-      level: 'error', // Only log errors during tests
+      level: 'error',
       transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: false,
-          translateTime: false,
-          ignore: 'pid,hostname,time',
-          singleLine: true,
-        },
+        targets: [
+          {
+            target: 'pino-pretty',
+            level: 'error',
+            options: {
+              colorize: false,
+              singleLine: true,
+              ignore: 'pid,hostname,time',
+            },
+          },
+        ],
       },
     };
   }
 
-  // Production configuration - JSON for log aggregation (goes to stdout)
   return {
     ...baseConfig,
     timestamp: pino.stdTimeFunctions.isoTime,
@@ -63,21 +122,17 @@ const getLoggerConfig = () => {
 };
 
 /**
- * Root logger instance
+ * Root logger instance used internally for all child loggers.
  */
 const rootLogger = pino(getLoggerConfig());
 
 /**
- * Module registry for consistent module naming
- * Add new modules here as the application grows
+ * Predefined logging modules.
  */
 export const LOG_MODULES = {
-  // Core system modules
   AUTH: 'auth',
   DATABASE: 'database',
   HTTP: 'http',
-
-  // Feature modules
   ANALYTICS: 'analytics',
   MAIL: 'mail',
   UI: 'ui',
@@ -86,105 +141,60 @@ export const LOG_MODULES = {
 export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
 
 /**
- * Simple logger interface - message first, then optional context
+ * Application logging utility.
  */
 export const logger = {
-  /**
-   * Log at debug level
-   */
-  debug: (message: string, context?: Record<string, unknown>) => {
-    if (context) {
-      rootLogger.debug(context, message);
-    } else {
-      rootLogger.debug(message);
-    }
+  debug(context: Record<string, unknown>, message?: string) {
+    return message
+      ? rootLogger.debug(context, message)
+      : rootLogger.debug(context);
   },
 
-  /**
-   * Log at info level
-   */
-  info: (message: string, context?: Record<string, unknown>) => {
-    if (context) {
-      rootLogger.info(context, message);
-    } else {
-      rootLogger.info(message);
-    }
+  info(context: Record<string, unknown>, message?: string) {
+    return message
+      ? rootLogger.info(context, message)
+      : rootLogger.info(context);
   },
 
-  /**
-   * Log at warn level
-   */
-  warn: (message: string, context?: Record<string, unknown>) => {
-    if (context) {
-      rootLogger.warn(context, message);
-    } else {
-      rootLogger.warn(message);
-    }
+  warn(context: Record<string, unknown>, message?: string) {
+    return message
+      ? rootLogger.warn(context, message)
+      : rootLogger.warn(context);
   },
 
-  /**
-   * Log at error level
-   */
-  error: (message: string, context?: Record<string, unknown>) => {
-    if (context) {
-      rootLogger.error(context, message);
-    } else {
-      rootLogger.error(message);
-    }
+  error(context: Record<string, unknown>, message?: string) {
+    return message
+      ? rootLogger.error(context, message)
+      : rootLogger.error(context);
   },
 
-  /**
-   * Log at fatal level
-   */
-  fatal: (message: string, context?: Record<string, unknown>) => {
-    if (context) {
-      rootLogger.fatal(context, message);
-    } else {
-      rootLogger.fatal(message);
-    }
+  fatal(context: Record<string, unknown>, message?: string) {
+    return message
+      ? rootLogger.fatal(context, message)
+      : rootLogger.fatal(context);
   },
 
-  /**
-   * Create a child logger with persistent context
-   * Useful for adding context that applies to multiple log calls
-   */
-  child: (context: Record<string, unknown>) => {
+  child(context: Record<string, unknown>) {
     return rootLogger.child(context);
   },
 
-  /**
-   * Create a logger for a specific module/feature
-   * Accepts both predefined modules from LOG_MODULES and custom module names
-   */
-  forModule: (moduleName: LogModule | string) => {
+  forModule(moduleName: LogModule | string) {
     return rootLogger.child({ module: moduleName });
   },
 
-  /**
-   * Create a logger for HTTP requests
-   */
-  forRequest: (requestId: string) => {
+  forRequest(requestId: string) {
     return rootLogger.child({ requestId, module: LOG_MODULES.HTTP });
   },
 
-  /**
-   * Create a logger for database operations
-   */
-  forDatabase: () => {
+  forDatabase() {
     return rootLogger.child({ module: LOG_MODULES.DATABASE });
   },
 
-  /**
-   * Create a logger for authentication operations
-   */
-  forAuth: () => {
+  forAuth() {
     return rootLogger.child({ module: LOG_MODULES.AUTH });
   },
 
-  /**
-   * Create a logger for analytics operations
-   */
-  forAnalytics: () => {
+  forAnalytics() {
     return rootLogger.child({ module: LOG_MODULES.ANALYTICS });
   },
 };
