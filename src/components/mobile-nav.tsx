@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import Link, { LinkProps } from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { routes } from '@/lib/routes';
 import { NAV_LABELS } from '@/lib/strings';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 
 export function MobileNav({
   items,
@@ -27,6 +30,9 @@ export function MobileNav({
   const [open, setOpen] = React.useState(false);
 
   const t = useTranslations('navigation');
+  const user = useCurrentUser();
+
+  const isGuest = !user;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -81,6 +87,41 @@ export function MobileNav({
                   {t(item.label)}
                 </MobileLink>
               ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="text-muted-foreground text-sm font-medium">
+              {t(NAV_LABELS.accountTitle)}
+            </div>
+            <div className="flex flex-col gap-3">
+              {isGuest ? (
+                <>
+                  <MobileLink
+                    href={routes.auth.login.url}
+                    onOpenChange={setOpen}
+                  >
+                    {t(NAV_LABELS.loginTitle)}
+                  </MobileLink>
+                  <MobileLink
+                    href={routes.auth.signUp.url}
+                    onOpenChange={setOpen}
+                  >
+                    {t(NAV_LABELS.signUpTitle)}
+                  </MobileLink>
+                </>
+              ) : (
+                <>
+                  <MobileLink href={routes.settings.url} onOpenChange={setOpen}>
+                    {t(NAV_LABELS.settingsTitle)}
+                  </MobileLink>
+                  <MobileLink
+                    href={routes.auth.logout.url}
+                    onOpenChange={setOpen}
+                  >
+                    {t(NAV_LABELS.logoutTitle)}
+                  </MobileLink>
+                </>
+              )}
             </div>
           </div>
         </div>
