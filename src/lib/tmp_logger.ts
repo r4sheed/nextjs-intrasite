@@ -47,7 +47,9 @@ export type LogModule = (typeof logModules)[keyof typeof logModules];
 const createConsoleMethod =
   (level: 'debug' | 'log' | 'warn' | 'error'): LogMethod =>
   (arg1: any, arg2?: any) => {
-    const time = new Date().toISOString().split('T')[1].slice(0, 8);
+    const isoString = new Date().toISOString();
+    const timePart = isoString.split('T')[1];
+    const time = timePart ? timePart.slice(0, 8) : '00:00:00';
     const consoleMethod = level === 'log' ? 'info' : level;
 
     // 1. If Error is the first argument
