@@ -18,7 +18,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.verify.url}?type=email&token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger.forModule('mail').info(
+  logger.forMail().info(
     {
       email,
       token,
@@ -43,7 +43,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   });
 
   if (error) {
-    logger.forModule('mail').error(
+    logger.forMail().error(
       {
         email,
         error,
@@ -61,7 +61,7 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   const url = `${MAIL_BASE_URL}${routes.auth.newPassword.url}?token=${token}&email=${encodeURIComponent(email)}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger.forModule('mail').info(
+  logger.forMail().info(
     {
       email,
       token,
@@ -117,7 +117,7 @@ export const sendTwoFactorTokenEmail = async (
   )}`;
 
   // TEMPORARY: Log to console instead of sending email to avoid daily limit
-  logger.forModule('mail').info(
+  logger.forMail().info(
     {
       email: options.email,
       token: options.token,
@@ -142,7 +142,7 @@ export const sendTwoFactorTokenEmail = async (
     react: TwoFactorTemplate(templateProps),
   });
   if (error) {
-    logger.forModule('mail').error({
+    logger.forMail().error({
       email: options.email,
       sessionId: options.sessionId,
       error,
