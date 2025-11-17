@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { PasswordResetToken } from '@prisma/client';
@@ -35,7 +36,13 @@ const findPasswordResetToken = async (
     }
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findPasswordResetToken] Database error:', error);
+    logger.forDatabase().error(
+      {
+        search,
+        error,
+      },
+      'Database error in findPasswordResetToken'
+    );
     return null;
   }
 };
@@ -113,9 +120,13 @@ export const getPasswordResetTokenByEmailAndToken = async (
     });
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error(
-      '[getPasswordResetTokenByEmailAndToken] Database error:',
-      error
+    logger.forDatabase().error(
+      {
+        email,
+        token,
+        error,
+      },
+      'Database error in getPasswordResetTokenByEmailAndToken'
     );
     return null;
   }

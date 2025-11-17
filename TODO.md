@@ -315,84 +315,6 @@ function useRelativeTime(date: Date | string, sync?: boolean) {
 
 ---
 
-### ⚠️ Centralized Logging System
-
-**Priority:** Medium  
-**Status:** Not Started
-
-Implement a centralized logging service to replace scattered `console.log` and `console.error` calls throughout the codebase.
-
-**Current Issues:**
-
-- Multiple TODO comments referencing the need for centralized logging:
-  - `src/features/auth/services/update-password.ts:90` - "TODO: Log the error properly using a centralized logger"
-  - `src/features/auth/services/reset-password.ts:65` - "TODO: Log the error properly using a centralized logger"
-  - `src/features/auth/services/login-user.ts:112` - "TODO: Log the error for debugging"
-- Direct `console.log` usage (currently only in JSDoc examples - cleaned up)
-
-**Proposed Solution:**
-
-Create a centralized logger utility at `src/lib/logger.ts`:
-
-```typescript
-// src/lib/logger.ts
-
-type LogLevel = 'info' | 'warn' | 'error' | 'debug';
-
-interface LogContext {
-  [key: string]: unknown;
-}
-
-export const logger = {
-  info: (message: string, context?: LogContext) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[INFO] ${message}`, context || '');
-    }
-    // Production: send to monitoring service (e.g., Sentry, LogRocket, DataDog)
-  },
-
-  warn: (message: string, context?: LogContext) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(`[WARN] ${message}`, context || '');
-    }
-    // Production: send to monitoring service
-  },
-
-  error: (message: string, error?: unknown, context?: LogContext) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`[ERROR] ${message}`, { error, ...context });
-    }
-    // Production: send to error tracking service (e.g., Sentry)
-  },
-
-  debug: (message: string, context?: LogContext) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug(`[DEBUG] ${message}`, context || '');
-    }
-  },
-};
-```
-
-**Implementation Steps:**
-
-1. Create `src/lib/logger.ts` with the logger utility
-2. Replace TODO comments with `logger.error()` calls in:
-   - `src/features/auth/services/update-password.ts`
-   - `src/features/auth/services/reset-password.ts`
-   - `src/features/auth/services/login-user.ts`
-3. Consider integrating with a production monitoring service (Sentry, LogRocket, etc.)
-4. Update error handling guidelines to mandate logger usage
-
-**Affected Files:**
-
-- `src/features/auth/services/update-password.ts`
-- `src/features/auth/services/reset-password.ts`
-- `src/features/auth/services/login-user.ts`
-
----
-
----
-
 ### 🔐 Stronger Password Requirements in Schema
 
 **Priority:** Very Low
@@ -1174,5 +1096,83 @@ The code currently sets `emailVerified = null` when email changes (commented out
 - Test token expiration
 - Test multiple pending requests prevention
 - Test security logging
+
+---
+
+### 📊 Preparing the Project for a Future External Logging/Monitoring Service
+
+**Priority:** Medium  
+**Status:** In Progress
+
+**Description:**  
+Prepare the project for easy integration with external logging and monitoring services like Axiom, Sentry, or DataDog by establishing proper logging patterns and infrastructure.
+
+**Implementation Steps:**
+
+1. **Standardize structured logging**
+   - Use `logger.info`/`debug`/`error` everywhere
+   - Remove all stray `console.log` calls
+   - Use child loggers for request/auth/db context (already supported)
+
+2. **Add consistent context to important events**
+   - Auth events: always include `userId`
+   - Requests: always include `requestId`
+   - Database: include action/query names
+   - Future external tools rely heavily on this contextual metadata
+
+3. **Keep production JSON output stable**
+   - Don't over-engineer it
+   - Stick with clean JSON output in production
+   - External services (Axiom/Sentry) can easily ingest it
+
+4. **Prepare to swap out or add a transport**
+   - Later you'll replace your pino transport with:
+     - Axiom's transport
+     - Sentry's integration
+   - This takes about five minutes if the logger is centralized
+
+5. **Mark key API events**
+   - Log: request start, request success, request error
+   - These become extremely useful once logs flow into a dashboard
+
+6. **Centralize error handling**
+   - Every thrown error should reach `logger.error()`
+   - Add a global error handler (Next.js middleware or wrapper)
+   - Ensures external services automatically receive error events
+
+7. **Keep the logger isolated**
+   - Keep everything in a single entry point like `src/lib/logger.ts`
+   - Future upgrade = editing just this file, nothing else
+
+**Benefits:**
+
+- ✅ Easy integration with external monitoring services
+- ✅ Better observability and debugging capabilities
+- ✅ Standardized logging patterns across the application
+- ✅ Future-proof logging infrastructure
+- ✅ Improved error tracking and alerting
+
+**Current Status:**
+
+- ✅ Pino logger implemented with structured output
+- ✅ Child logger support for contextual logging
+- ✅ Environment-based configuration (development/pretty, production/JSON)
+- 🔄 Need to add request logging middleware
+- 🔄 Need to ensure all console.log calls are replaced
+- 🔄 Need to add global error handler
+
+**Affected Files:**
+
+- `src/lib/logger.ts` (already implemented)
+- `src/proxy.ts` (add request logging)
+- `src/app/layout.tsx` (add global error boundary)
+- All files with `console.log` calls (replace with logger)
+
+**Next Steps:**
+
+1. Add request logging proxy to track API events
+2. Audit and replace remaining `console.log` calls
+3. Add global error handler for uncaught errors
+4. Test integration with external logging service (when needed)
 
 ---

@@ -1,4 +1,5 @@
 import { internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
@@ -166,7 +167,13 @@ export const updateUserSettingsService = async ({
       data: buildSuccessData(updatedUser, isOAuthAccount),
     });
   } catch (error) {
-    console.error('Failed to update user settings', error);
+    logger.forAuth().error(
+      {
+        userId,
+        error,
+      },
+      'Failed to update user settings'
+    );
     return response.failure(internalServerError());
   }
 };

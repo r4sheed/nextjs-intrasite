@@ -1,4 +1,5 @@
 import { internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 import { type Response, response } from '@/lib/response';
 
@@ -76,8 +77,14 @@ export const updatePassword = async (
     });
   } catch (error) {
     // Catch any Prisma errors related to the transaction (e.g., connection failure, constraint violation)
-    // TODO: Log the error properly using a centralized logger
-    console.log(error);
+    logger.error(
+      {
+        userId: existingUser.id,
+        email,
+        error,
+      },
+      'Failed to update password during transaction'
+    );
     return response.failure(internalServerError());
   }
 };

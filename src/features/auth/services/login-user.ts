@@ -2,6 +2,7 @@ import { AuthError } from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
 import { AppError, internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { routes } from '@/lib/navigation';
 import { type Response, response } from '@/lib/response';
 import { maskEmail } from '@/lib/utils';
@@ -173,8 +174,13 @@ export const loginUser = async (
       return response.failure(error);
     }
 
-    // TODO: Log the error for debugging
-    console.error('Unexpected login error:', error);
+    logger.error(
+      {
+        error,
+        email: values.email,
+      },
+      'Unexpected error during user login'
+    );
 
     // Return generic error for unexpected errors
     return response.failure(internalServerError());

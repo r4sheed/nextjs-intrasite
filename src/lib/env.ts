@@ -1,4 +1,8 @@
+import type { LogLevel } from '@/lib/logger';
+
 interface RequiredEnv {
+  APP_NAME: string;
+  APP_VERSION: string;
   DATABASE_URL: string;
   NEXTAUTH_SECRET: string;
   NEXTAUTH_URL: string;
@@ -6,6 +10,7 @@ interface RequiredEnv {
 
 interface OptionalEnv {
   NODE_ENV?: string;
+  LOG_LEVEL?: LogLevel;
   POSTGRES_USER?: string;
   POSTGRES_PASSWORD?: string;
   POSTGRES_DB?: string;

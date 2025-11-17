@@ -1,4 +1,5 @@
 import { AppError, internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { type Response, response } from '@/lib/response';
 
 import { getTwoFactorTokenById } from '@/features/auth/data/two-factor-token';
@@ -51,9 +52,13 @@ export const resendTwoFactorCode = async (
       return response.failure(error);
     }
 
-    console.error('[SERVICE] Error resending 2FA code:', {
-      message: error instanceof Error ? error.message : String(error),
-    });
+    logger.forAuth().error(
+      {
+        sessionId,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Error resending 2FA code'
+    );
     return response.failure(internalServerError());
   }
 };

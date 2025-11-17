@@ -108,14 +108,14 @@ const useLoginMutation = () => {
       if (updateSession) {
         try {
           await updateSession();
-        } catch (error) {
-          console.error('Failed to update session after login:', error);
+        } catch {
+          // Session update failed - continue with login flow
+          // This is not critical for the login process
         }
       }
 
       // Check for redirect requirement (2FA verification)
       if (response.data?.redirectUrl) {
-        console.log('redirecting', response.data.redirectUrl);
         router.push(response.data.redirectUrl);
         return;
       }

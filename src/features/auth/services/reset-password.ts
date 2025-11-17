@@ -1,5 +1,6 @@
 import { siteFeatures } from '@/lib/config';
 import { AppError, internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { type Response, response } from '@/lib/response';
 
 import { getUserByEmail } from '@/features/auth/data/user';
@@ -58,8 +59,13 @@ export const resetPassword = async (
     if (error instanceof AppError) {
       return response.failure(error);
     }
-    // TODO: Log the error properly using a centralized logger
-    console.error('Error during password reset:', error);
+    logger.error(
+      {
+        error,
+        email: values.email,
+      },
+      'Unexpected error during password reset'
+    );
     return response.failure(internalServerError());
   }
 };

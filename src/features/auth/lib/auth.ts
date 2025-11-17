@@ -2,6 +2,7 @@ import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
@@ -196,10 +197,14 @@ export const authCallbacks = {
           where: { id: twoFactorConfirmation.id },
         });
       } catch (error) {
-        console.error(
-          '[AUTH] Failed to delete 2FA confirmation for user',
-          existingUser.id,
-          error
+        logger.forAuth().error(
+          {
+            userId: existingUser.id,
+            confirmationId: twoFactorConfirmation.id,
+            error: error instanceof Error ? error.message : String(error),
+            code: 'AUTH_2FA_CLEANUP_FAILED',
+          },
+          'Failed to delete 2FA confirmation'
         );
         // Don't allow sign-in if cleanup fails
         return false;

@@ -1,6 +1,7 @@
 import { AuthError } from 'next-auth';
 
 import { internalServerError } from '@/lib/errors';
+import { logger } from '@/lib/logger';
 import { type Response, response } from '@/lib/response';
 
 import {
@@ -99,9 +100,13 @@ export const verifyTwoFactorCode = async (
     } catch (error) {
       if (error instanceof AuthError) {
         // Handle NextAuth errors
-        console.error(
-          '[SERVICE] Sign-in failed after 2FA verification:',
-          error
+        logger.forAuth().error(
+          {
+            sessionId,
+            userId: user.id,
+            error,
+          },
+          'Sign-in failed after 2FA verification'
         );
         return response.failure(internalServerError());
       }
@@ -117,7 +122,13 @@ export const verifyTwoFactorCode = async (
       },
     });
   } catch (error) {
-    console.error('[SERVICE] Error verifying 2FA code:', error);
+    logger.forAuth().error(
+      {
+        sessionId,
+        error,
+      },
+      'Error verifying 2FA code'
+    );
     return response.failure(internalServerError());
   }
 };

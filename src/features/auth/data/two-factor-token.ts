@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import type { TwoFactorToken } from '@prisma/client';
@@ -23,7 +24,13 @@ export const getTwoFactorTokenByUserId = async (
       orderBy: { createdAt: 'desc' },
     });
   } catch (error) {
-    console.error('[DATA] Error fetching 2FA token by userId:', error);
+    logger.forDatabase().error(
+      {
+        userId,
+        error,
+      },
+      'Error fetching 2FA token by userId'
+    );
     return null;
   }
 };
@@ -44,7 +51,13 @@ export const getTwoFactorTokenByToken = async (
       where: { token },
     });
   } catch (error) {
-    console.error('[DATA] Error fetching 2FA token by token:', error);
+    logger.forDatabase().error(
+      {
+        token,
+        error,
+      },
+      'Error fetching 2FA token by token'
+    );
     return null;
   }
 };
@@ -63,7 +76,13 @@ export const getTwoFactorTokenById = async (
       where: { id },
     });
   } catch (error) {
-    console.error('[DATA] Error fetching 2FA token by id:', error);
+    logger.forDatabase().error(
+      {
+        id,
+        error,
+      },
+      'Error fetching 2FA token by id'
+    );
     return null;
   }
 };
@@ -92,7 +111,15 @@ export const createTwoFactorToken = async (
       },
     });
   } catch (error) {
-    console.error('[DATA] Error creating 2FA token:', error);
+    logger.forDatabase().error(
+      {
+        userId,
+        token,
+        expires,
+        error,
+      },
+      'Error creating 2FA token'
+    );
     return null;
   }
 };
@@ -117,7 +144,14 @@ export const deleteTwoFactorTokensBefore = async (
     });
     return true;
   } catch (error) {
-    console.error('[DATA] Error deleting stale 2FA tokens:', error);
+    logger.forDatabase().error(
+      {
+        userId,
+        before,
+        error,
+      },
+      'Error deleting stale 2FA tokens'
+    );
     return null;
   }
 };
@@ -137,7 +171,13 @@ export const incrementTwoFactorAttempts = async (
       data: { attempts: { increment: 1 } },
     });
   } catch (error) {
-    console.error('[DATA] Error incrementing 2FA attempts:', error);
+    logger.forDatabase().error(
+      {
+        tokenId,
+        error,
+      },
+      'Error incrementing 2FA attempts'
+    );
     return null;
   }
 };
@@ -157,7 +197,13 @@ export const deleteTwoFactorToken = async (
     });
     return true;
   } catch (error) {
-    console.error('[DATA] Error deleting 2FA token:', error);
+    logger.forDatabase().error(
+      {
+        tokenId,
+        error,
+      },
+      'Error deleting 2FA token'
+    );
     return null;
   }
 };

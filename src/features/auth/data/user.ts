@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import { User } from '@/features/auth/models';
@@ -57,7 +58,14 @@ const findUser = async <T = PrismaUser>(
     return user as T | null;
   } catch (error) {
     // Log error for debugging but return null (let service layer handle the error)
-    console.error('[findUser] Database error:', error);
+    logger.forDatabase().error(
+      {
+        where,
+        select,
+        error,
+      },
+      'Database error in findUser'
+    );
     return null;
   }
 };
