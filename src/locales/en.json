@@ -165,18 +165,22 @@
     "validation-failed": "Input validation failed. Please check your entries."
   },
   "navigation": {
-    "auth": {
-      "admin": "Admin",
-      "client": "Client",
-      "forgot-password": "Forgot password",
-      "login": "Sign in",
-      "new-password": "New password",
-      "server": "Server",
-      "settings": "Settings",
-      "sign-up": "Sign up",
-      "verify-email": "Verify email"
-    },
-    "error": "Error",
-    "home": "Home"
+    "labels": {
+      "account-title": "Account",
+      "admin-title": "Admin",
+      "client-title": "Client",
+      "error-title": "Error",
+      "forgot-password-title": "Forgot password",
+      "home-title": "Home",
+      "login-title": "Log in",
+      "logout-title": "Sign out",
+      "menu-title": "Menu",
+      "new-password-title": "New password",
+      "server-title": "Server",
+      "settings-title": "Settings",
+      "sign-up-title": "Sign up",
+      "verify-email-title": "Verify email",
+      "toggle-menu-label": "Toggle menu"
+    }
   }
 }

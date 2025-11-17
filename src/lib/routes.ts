@@ -1,3 +1,5 @@
+import { NAV_LABELS } from '@/lib/strings';
+
 /**
  * Enumerates access levels supported by application routes.
  * - `public`: Accessible for all visitors.
@@ -43,13 +45,18 @@ type RouteNode = {
 export const routes = {
   home: {
     url: '/',
-    label: 'home',
+    label: NAV_LABELS.homeTitle,
+    access: 'public',
+  },
+  error: {
+    url: '/error',
+    label: NAV_LABELS.errorTitle,
     access: 'public',
   },
   auth: {
     login: {
       url: '/auth/login',
-      label: 'auth.login',
+      label: NAV_LABELS.loginTitle,
       access: 'auth',
       meta: {
         showInNavigation: true,
@@ -58,7 +65,7 @@ export const routes = {
     },
     signUp: {
       url: '/auth/signup',
-      label: 'auth.sign-up',
+      label: NAV_LABELS.signUpTitle,
       access: 'auth',
       meta: {
         showInNavigation: true,
@@ -67,23 +74,23 @@ export const routes = {
     },
     forgotPassword: {
       url: '/auth/forgot-password',
-      label: 'auth.forgot-password',
+      label: NAV_LABELS.forgotPasswordTitle,
       access: 'auth',
     },
     newPassword: {
       url: '/auth/new-password',
-      label: 'auth.new-password',
+      label: NAV_LABELS.newPasswordTitle,
       access: 'auth',
     },
     verify: {
       url: '/auth/verify',
-      label: 'auth.verify',
+      label: NAV_LABELS.verifyEmailTitle,
       access: 'public',
     },
   },
   settings: {
     url: '/settings',
-    label: 'auth.settings',
+    label: NAV_LABELS.settingsTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -92,7 +99,7 @@ export const routes = {
   },
   admin: {
     url: '/test/admin',
-    label: 'auth.admin',
+    label: NAV_LABELS.adminTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -101,7 +108,7 @@ export const routes = {
   },
   client: {
     url: '/test/client',
-    label: 'auth.client',
+    label: NAV_LABELS.clientTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -109,16 +116,11 @@ export const routes = {
   },
   server: {
     url: '/test/server',
-    label: 'auth.server',
+    label: NAV_LABELS.serverTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
     },
-  },
-  error: {
-    url: '/error',
-    label: 'error',
-    access: 'public',
   },
 } as const satisfies RouteNode;
 
