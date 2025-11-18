@@ -74,11 +74,13 @@ function mapConstant(constant: ParsedConstant): MappedConstant {
     domain,
     category,
     jsonPath: `${domain}.${category}`,
-    keys: keys.map(key => ({
-      key: key.key,
-      value: key.value,
-      jsonKey: extractJsonKey(key.value), // Extract short key from full i18n key
-    })),
+    keys: keys
+      .filter(key => key.value.trim() !== '')
+      .map(key => ({
+        key: key.key,
+        value: key.value,
+        jsonKey: extractJsonKey(key.value), // Extract short key from full i18n key
+      })),
     isCustomObject: false,
   };
 }

@@ -134,6 +134,30 @@ describe('Mapper Module', () => {
       expect(mapping.keys).toHaveLength(2);
     });
 
+    it('should filter out empty value keys', () => {
+      const constants = [
+        {
+          constantName: 'AUTH_LABELS',
+          keys: [
+            { key: 'adminTitle', value: '' }, // Empty value - should be filtered out
+            { key: 'loginButton', value: 'labels.login-button' }, // Valid key
+            { key: 'signupTitle', value: '   ' }, // Whitespace only - should be filtered out
+          ],
+          filePath: 'src/features/auth/lib/strings.ts',
+          lineNumber: 10,
+        },
+      ];
+
+      const result = mapConstants(constants);
+
+      expect(result.standardMappings).toHaveLength(1);
+      const mapping = result.standardMappings[0]!;
+      expect(mapping.keys).toHaveLength(1); // Only the valid key should remain
+      expect(mapping.keys[0]!.key).toBe('loginButton');
+      expect(mapping.keys[0]!.value).toBe('labels.login-button');
+      expect(mapping.keys[0]!.jsonKey).toBe('login-button');
+    });
+
     it('should handle custom object mappings', () => {
       // Note: Currently no custom mappings defined, so this will be standard
       const constants = [
