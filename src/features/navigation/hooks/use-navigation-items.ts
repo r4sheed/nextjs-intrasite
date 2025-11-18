@@ -6,8 +6,9 @@ import { navigationItems } from '@/features/navigation/lib/navigation';
 import type { NavigationItem } from '../types';
 
 /**
- * Hook that returns filtered navigation items based on the current user's authentication status.
+ * Hook that returns filtered navigation items based on the current user's authentication status and roles.
  * Guests see 'public' and 'guest' items, authenticated users see 'public' and 'protected' items.
+ * Additionally, items with specific roles are only shown to users with matching roles.
  */
 export const useNavigationItems = (): readonly NavigationItem[] => {
   const user = useCurrentUser();
@@ -24,6 +25,13 @@ export const useNavigationItems = (): readonly NavigationItem[] => {
       // Logged-in user should not see guest-only routes
       if (!isGuest && item.access === 'guest') {
         return false;
+      }
+
+      // If roles are specified, check if user has required role
+      if (item.meta?.roles && item.meta.roles.length > 0) {
+        if (!user?.role || !item.meta.roles.includes(user.role)) {
+          return false;
+        }
       }
 
       return true;
