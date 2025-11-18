@@ -1,3 +1,4 @@
+import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 
 import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
@@ -79,6 +80,7 @@ export const routes = {
     access: 'protected',
     meta: {
       showInNavigation: true,
+      roles: [UserRole.MODERATOR],
     },
   },
   client: {
