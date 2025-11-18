@@ -1,5 +1,6 @@
-import { navigationItems } from '@/lib/navigation';
 import { apiRoutes, routes } from '@/lib/routes';
+
+import { navigationItems } from '@/features/navigation/lib/navigation';
 
 /**
  * Middleware configuration for authentication and route protection.
@@ -35,9 +36,9 @@ export const siteConfig = {
     github: 'https://github.com/shadcn-ui/ui',
   },
   navItems: navigationItems.map(item => ({
-    label: item.label,
+    title: item.title,
     href: item.href,
-    protected: item.protected,
+    access: item.access,
   })),
 } as const;
 

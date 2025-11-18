@@ -1,38 +1,50 @@
-import { NAV_LABELS } from '@/lib/strings';
+import { z } from 'zod';
+
+import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
 
 /**
- * Enumerates access levels supported by application routes.
- * - `public`: Accessible for all visitors.
- * - `auth`: Auth related flows (login/signup) that should be hidden once authenticated.
- * - `protected`: Requires an authenticated session (future: plus optional role checks).
+ * Runtime definition of available access levels.
+ * Used to create the Zod enum and for other logic if needed.
  */
-export type RouteAccess = 'public' | 'auth' | 'protected';
+const ROUTE_ACCESS_LEVELS = ['public', 'guest', 'protected'] as const;
 
 /**
- * Additional metadata that can be attached to a route definition.
- * Exposes navigation visibility, ordering and optional role requirements.
+ * Zod schema for route metadata.
+ * Defines optional properties for navigation and role-based access.
  */
-export interface RouteMeta {
+const RouteMetaSchema = z.object({
   /**
    * Determines if the route should appear in primary navigation.
    */
-  showInNavigation?: boolean;
+  showInNavigation: z.boolean().readonly().optional(),
   /**
    * Controls ordering when rendering navigation items.
    */
-  navigationOrder?: number;
+  navigationOrder: z.number().readonly().optional(),
   /**
-   * Optional list of roles required to access the route (future use).
+   * Optional list of roles required to access the route.
    */
-  roles?: readonly string[];
-}
+  roles: z.array(z.string()).readonly().optional(),
+});
 
-export interface RouteDefinition {
-  url: string;
-  label: string;
-  access: RouteAccess;
-  meta?: RouteMeta;
-}
+/**
+ * Zod schema for a single route definition.
+ * Acts as the single source of truth for validation and type inference.
+ */
+const RouteDefinitionSchema = z.object({
+  url: z.string().startsWith('/'),
+  title: z.string(),
+  access: z.enum(ROUTE_ACCESS_LEVELS),
+  meta: RouteMetaSchema.optional(),
+});
+
+/**
+ * Inferred types from Zod schemas.
+ * This ensures the TypeScript types perfectly match the runtime validation logic.
+ */
+export type RouteAccess = (typeof ROUTE_ACCESS_LEVELS)[number];
+export type RouteMeta = z.infer<typeof RouteMetaSchema>;
+export type RouteDefinition = z.infer<typeof RouteDefinitionSchema>;
 
 type RouteNode = {
   [key: string]: RouteNode | RouteDefinition;
@@ -45,31 +57,33 @@ type RouteNode = {
 export const routes = {
   home: {
     url: '/',
-    label: NAV_LABELS.homeTitle,
+    title: NAVIGATION_LABELS.homeTitle,
     access: 'public',
   },
   error: {
     url: '/error',
-    label: NAV_LABELS.errorTitle,
+    title: NAVIGATION_LABELS.errorTitle,
     access: 'public',
   },
   settings: {
     url: '/settings',
-    label: NAV_LABELS.settingsTitle,
-    access: 'protected',
-  },
-  admin: {
-    url: '/test/admin',
-    label: NAV_LABELS.adminTitle,
+    title: NAVIGATION_LABELS.settingsTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
-      navigationOrder: 4,
+    },
+  },
+  admin: {
+    url: '/test/admin',
+    title: NAVIGATION_LABELS.adminTitle,
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
     },
   },
   client: {
     url: '/test/client',
-    label: NAV_LABELS.clientTitle,
+    title: NAVIGATION_LABELS.clientTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -77,7 +91,7 @@ export const routes = {
   },
   server: {
     url: '/test/server',
-    label: NAV_LABELS.serverTitle,
+    title: NAVIGATION_LABELS.serverTitle,
     access: 'protected',
     meta: {
       showInNavigation: true,
@@ -86,32 +100,32 @@ export const routes = {
   auth: {
     login: {
       url: '/auth/login',
-      label: NAV_LABELS.loginTitle,
-      access: 'auth',
+      title: NAVIGATION_LABELS.loginTitle,
+      access: 'guest',
     },
     signUp: {
       url: '/auth/signup',
-      label: NAV_LABELS.signUpTitle,
-      access: 'auth',
+      title: NAVIGATION_LABELS.signUpTitle,
+      access: 'guest',
     },
     forgotPassword: {
       url: '/auth/forgot-password',
-      label: NAV_LABELS.forgotPasswordTitle,
-      access: 'auth',
+      title: NAVIGATION_LABELS.forgotPasswordTitle,
+      access: 'guest',
     },
     newPassword: {
       url: '/auth/new-password',
-      label: NAV_LABELS.newPasswordTitle,
-      access: 'auth',
+      title: NAVIGATION_LABELS.newPasswordTitle,
+      access: 'guest',
     },
     logout: {
       url: '/auth/logout',
-      label: NAV_LABELS.logoutTitle,
+      title: NAVIGATION_LABELS.logoutTitle,
       access: 'protected',
     },
     verify: {
       url: '/auth/verify',
-      label: NAV_LABELS.verifyEmailTitle,
+      title: NAVIGATION_LABELS.verifyEmailTitle,
       access: 'public',
     },
   },
@@ -123,27 +137,17 @@ type ImmutableRouteDefinition = Readonly<Omit<RouteDefinition, 'meta'>> &
   Readonly<{ meta?: Readonly<RouteMeta> }>;
 
 /**
- * Type guard used when traversing the nested route tree.
+ * Type guard using Zod for robust runtime validation.
+ * Checks if a value matches the RouteDefinitionSchema structure.
  */
-function isRouteDefinition(value: unknown): value is RouteDefinition {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
+const isRouteDefinition = (value: unknown): value is RouteDefinition => {
+  return RouteDefinitionSchema.safeParse(value).success;
+};
 
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.url === 'string' &&
-    typeof candidate.label === 'string' &&
-    (candidate.access === 'public' ||
-      candidate.access === 'auth' ||
-      candidate.access === 'protected')
-  );
-}
-
-function collectRouteDefinitions(
+const collectRouteDefinitions = (
   node: RouteNode | RouteDefinition,
   accumulator: RouteDefinition[]
-): void {
+): void => {
   // Depth-first traversal to flatten nested route objects into plain definitions.
   if (isRouteDefinition(node)) {
     accumulator.push(node);
@@ -158,13 +162,13 @@ function collectRouteDefinitions(
       );
     }
   });
-}
+};
 
-function freezeRoute(route: RouteDefinition): ImmutableRouteDefinition {
+const freezeRoute = (route: RouteDefinition): ImmutableRouteDefinition => {
   // Deep freeze ensures downstream consumers cannot mutate shared route metadata.
   return Object.freeze({
     url: route.url,
-    label: route.label,
+    title: route.title,
     access: route.access,
     ...(route.meta && {
       meta: Object.freeze({
@@ -175,7 +179,7 @@ function freezeRoute(route: RouteDefinition): ImmutableRouteDefinition {
       } satisfies RouteMeta),
     }),
   });
-}
+};
 
 const routeDefinitions: readonly ImmutableRouteDefinition[] = (() => {
   const collected: RouteDefinition[] = [];
@@ -193,12 +197,12 @@ export type Routes = RoutesTree;
  * import { getAllRoutes } from '@/lib/routes';
  *
  * const protectedOnly = getAllRoutes().filter(
- *   route => route.access === 'protected'
+ * route => route.access === 'protected'
  * );
  */
-export function getAllRoutes(): readonly ImmutableRouteDefinition[] {
+export const getAllRoutes = (): readonly ImmutableRouteDefinition[] => {
   return routeDefinitions;
-}
+};
 
 /**
  * API endpoint routes used internally for backend logic.
@@ -210,8 +214,8 @@ export const apiRoutes = {
 const publicRouteEntries = routeDefinitions.filter(
   route => route.access === 'public'
 );
-const authRouteEntries = routeDefinitions.filter(
-  route => route.access === 'auth'
+const guestRouteEntries = routeDefinitions.filter(
+  route => route.access === 'guest'
 );
 const protectedRouteEntries = routeDefinitions.filter(
   route => route.access === 'protected'
@@ -236,12 +240,12 @@ export const publicRoutes = Object.freeze(
  * Logged-in users should not access these.
  *
  * @example
- * import { authRoutes } from '@/lib/routes';
+ * import { guestRoutes } from '@/lib/routes';
  *
- * authRoutes.includes('/auth/login'); // true
+ * guestRoutes.includes('/auth/login'); // true
  */
-export const authRoutes = Object.freeze(
-  authRouteEntries.map(route => route.url)
+export const guestRoutes = Object.freeze(
+  guestRouteEntries.map(route => route.url)
 ) as readonly string[];
 
 /**
@@ -261,5 +265,5 @@ export const protectedRoutes = Object.freeze(
  * Using Set.has() instead of Array.includes() for O(1) lookups.
  */
 export const publicRouteSet = new Set(publicRoutes);
-export const authRouteSet = new Set(authRoutes);
+export const guestRouteSet = new Set(guestRoutes);
 export const protectedRouteSet = new Set(protectedRoutes);

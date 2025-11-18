@@ -1,6 +1,6 @@
 import { logger } from '@/lib/tmp_logger';
 import { mail } from '@/lib/mail';
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import { maskEmail } from '@/lib/utils';
 
 import { ResetTemplate } from '@/features/auth/components/reset-template';

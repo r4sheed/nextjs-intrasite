@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import Link, { LinkProps } from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { NAV_LABELS } from '@/lib/strings';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -17,15 +16,40 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-export function MobileNav({
-  items,
+import { useNavigationItems } from '@/features/navigation/hooks/use-navigation-items';
+import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
+
+const MobileLink = ({
+  href,
+  onOpenChange,
   className,
-}: {
-  items: ReadonlyArray<{ href: string; label: string }>;
+  children,
+  ...props
+}: LinkProps & {
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
   className?: string;
-}) {
+}) => {
+  const router = useRouter();
+  return (
+    <Link
+      href={href}
+      onClick={() => {
+        router.push(href.toString());
+        onOpenChange?.(false);
+      }}
+      className={cn('text-2xl font-medium', className)}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+};
+
+const MobileNav = ({ className }: { className?: string }) => {
   const [open, setOpen] = React.useState(false);
   const t = useTranslations('navigation');
+  const items = useNavigationItems();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,10 +76,13 @@ export function MobileNav({
                 )}
               />
             </div>
-            <span className="sr-only"> {t(NAV_LABELS.toggleMenuLabel)}</span>
+            <span className="sr-only">
+              {' '}
+              {t(NAVIGATION_LABELS.toggleMenuLabel)}
+            </span>
           </div>
           <span className="flex h-8 items-center text-lg leading-none font-medium">
-            {t(NAV_LABELS.menuTitle)}
+            {t(NAVIGATION_LABELS.menuTitle)}
           </span>
         </Button>
       </PopoverTrigger>
@@ -69,15 +96,15 @@ export function MobileNav({
         <div className="flex flex-col gap-12 overflow-auto px-6 py-6">
           <div className="flex flex-col gap-4">
             <div className="text-muted-foreground text-sm font-medium">
-              {t(NAV_LABELS.menuTitle)}
+              {t(NAVIGATION_LABELS.menuTitle)}
             </div>
             <div className="flex flex-col gap-3">
               <MobileLink href="/" onOpenChange={setOpen}>
-                {t(NAV_LABELS.homeTitle)}
+                {t(NAVIGATION_LABELS.homeTitle)}
               </MobileLink>
               {items.map((item, index) => (
                 <MobileLink key={index} href={item.href} onOpenChange={setOpen}>
-                  {t(item.label)}
+                  {t(item.title)}
                 </MobileLink>
               ))}
             </div>
@@ -86,31 +113,6 @@ export function MobileNav({
       </PopoverContent>
     </Popover>
   );
-}
+};
 
-function MobileLink({
-  href,
-  onOpenChange,
-  className,
-  children,
-  ...props
-}: LinkProps & {
-  onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const router = useRouter();
-  return (
-    <Link
-      href={href}
-      onClick={() => {
-        router.push(href.toString());
-        onOpenChange?.(false);
-      }}
-      className={cn('text-2xl font-medium', className)}
-      {...props}
-    >
-      {children}
-    </Link>
-  );
-}
+export { MobileNav };

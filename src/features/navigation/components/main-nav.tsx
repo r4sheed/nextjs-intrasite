@@ -9,16 +9,12 @@ import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 
-export function MainNav({
-  items,
-  className,
-  ...props
-}: React.ComponentProps<'nav'> & {
-  items: ReadonlyArray<{ href: string; label: string }>;
-}) {
-  const pathname = usePathname();
+import { useNavigationItems } from '@/features/navigation/hooks/use-navigation-items';
 
+const MainNav = ({ className, ...props }: React.ComponentProps<'nav'>) => {
+  const pathname = usePathname();
   const t = useTranslations('navigation');
+  const items = useNavigationItems();
 
   return (
     <nav className={cn('items-center', className)} {...props}>
@@ -28,10 +24,12 @@ export function MainNav({
             href={item.href}
             className={cn(pathname === item.href && 'text-primary')}
           >
-            {t(item.label)}
+            {t(item.title)}
           </Link>
         </Button>
       ))}
     </nav>
   );
-}
+};
+
+export { MainNav };

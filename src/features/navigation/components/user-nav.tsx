@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { routes } from '@/lib/routes';
-import { NAV_LABELS } from '@/lib/strings';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -34,6 +33,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+
+import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
 
 /**
  * Generates 2-character initials from a user's name
@@ -128,13 +129,13 @@ const UserDropdownContent = ({
           <Link href={routes.auth.login.url}>
             <DropdownMenuItem>
               <LogIn />
-              {t(NAV_LABELS.loginTitle)}
+              {t(NAVIGATION_LABELS.loginTitle)}
             </DropdownMenuItem>
           </Link>
           <Link href={routes.auth.signUp.url}>
             <DropdownMenuItem>
               <UserPlus />
-              {t(NAV_LABELS.signUpTitle)}
+              {t(NAVIGATION_LABELS.signUpTitle)}
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
@@ -144,7 +145,7 @@ const UserDropdownContent = ({
             <Link href={routes.settings.url}>
               <DropdownMenuItem>
                 <BadgeCheck />
-                {t(NAV_LABELS.accountTitle)}
+                {t(NAVIGATION_LABELS.accountTitle)}
               </DropdownMenuItem>
             </Link>
           </DropdownMenuGroup>
@@ -153,7 +154,7 @@ const UserDropdownContent = ({
             <Link href={routes.auth.logout.url}>
               <DropdownMenuItem>
                 <LogOut />
-                {t(NAV_LABELS.logoutTitle)}
+                {t(NAVIGATION_LABELS.logoutTitle)}
               </DropdownMenuItem>
             </Link>
           </DropdownMenuGroup>
@@ -167,7 +168,7 @@ const UserDropdownContent = ({
  * User navigation component that renders based on the provided user data.
  * If no user is provided, renders a guest menu with login/signup options.
  */
-const NavUser = ({ user }: { user: User | null | undefined }) => {
+const UserNav = ({ user }: { user: User | null | undefined }) => {
   const displayUser = user || {
     name: 'Guest', // TODO: i18n
     email: null,
@@ -203,4 +204,4 @@ const NavUser = ({ user }: { user: User | null | undefined }) => {
   );
 };
 
-export { NavUser };
+export { UserNav };
