@@ -73,8 +73,50 @@ export function kebabToCamel(str: string): string {
 }
 
 /**
+ * Get list of all strings.ts files recursively
+ * Returns absolute paths to all strings files
+ */
+export function getStringsFiles(): string[] {
+  const stringsFiles: string[] = [];
+
+  // Add core strings file
+  if (CORE_STRINGS_PATH) {
+    stringsFiles.push(join(process.cwd(), CORE_STRINGS_PATH));
+  }
+
+  // Find feature strings files
+  const featuresDir = join(process.cwd(), FEATURES_DIR);
+  try {
+    const features = readdirSync(featuresDir, { withFileTypes: true })
+      .filter(item => item.isDirectory())
+      .map(item => item.name);
+
+    for (const feature of features) {
+      const stringsPath = join(
+        featuresDir,
+        feature,
+        STRINGS_DIR,
+        STRINGS_FILE_NAME
+      );
+      try {
+        // Check if file exists (basic check)
+        readdirSync(join(featuresDir, feature, STRINGS_DIR));
+        stringsFiles.push(stringsPath);
+      } catch {
+        // Directory doesn't exist, skip
+      }
+    }
+  } catch {
+    // Features directory doesn't exist, skip
+  }
+
+  return stringsFiles;
+}
+
+/**
  * Get the rank of a label suffix for sorting
  * Lower rank = higher priority (appears first)
+ * Exported for use in sort.ts
  */
 export function getLabelSuffixRank(key: string): number {
   const normalized = key.toLowerCase();

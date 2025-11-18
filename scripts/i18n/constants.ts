@@ -4,8 +4,6 @@
  * Centralized constants for i18n scripts
  */
 
-import { getLanguages } from './helpers';
-
 // Directory paths
 export const LOCALES_DIR = 'src/locales';
 export const FEATURES_DIR = 'src/features';
@@ -15,10 +13,8 @@ export const CORE_STRINGS_PATH = 'src/lib/errors/strings.ts';
 export const STRINGS_DIR = 'lib';
 export const STRINGS_FILE_NAME = 'strings.ts';
 
-// File patterns - dynamically generated from available languages
-export const ROOT_LOCALE_FILES = getLanguages().map(
-  lang => `${lang}.json`
-) as readonly string[];
+// File patterns - statically defined for now
+export const ROOT_LOCALE_FILES = ['en.json', 'hu.json'] as const;
 
 // Label suffix ordering (lower number = higher priority)
 export const LABEL_SUFFIX_ORDER = [

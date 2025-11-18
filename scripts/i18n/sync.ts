@@ -1,35 +1,44 @@
 #!/usr/bin/env tsx
 /**
- * i18n Sync Script
+ * i18n Strings-First Sync Script
  *
- * Synchronizes translation files:
- * - Adds missing Hungarian translations with [HU] placeholders
- * - Removes extra Hungarian translations not in English
- * - Updates TypeScript constants to match JSON files
+ * Generates JSON files from strings.ts constants (strings-first approach)
+ * This is the main sync script that replaces the old JSON-first workflow
+ *
+ * Features:
+ * - Generates JSON from strings.ts files
+ * - Removes keys not present in strings.ts
+ * - Merges domain files into combined locale files
+ * - Sorts all files for consistency
+ * - Validates the result
  *
  * Usage:
- *   npm run i18n:sync
- *   npm run i18n:sync --dry-run  # Preview changes without applying
+ *   npx tsx scripts/i18n/sync-strings-first.ts [--dry-run]
  */
-import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+
+import { existsSync, readdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { LOCALES_DIR } from './constants';
+import { getStringsFiles, getLanguages, getDomains } from './helpers';
 import {
-  getLanguages,
-  getDomains,
-  getConstantsPath,
-  kebabToCamel,
-  getLabelSuffixRank,
-} from './helpers';
-import { sortAllI18nFiles, sortObjectKeys, compareLabelKeys } from './sort';
+  mapConstants,
+  validateConstantName,
+  validateKeyFormat,
+  type MappedConstant,
+} from './mapper';
+import { parseStringsFiles, type ParsedStringsFile } from './parser';
+import { sortObjectKeys } from './sort';
 
 const isDryRun = process.argv.includes('--dry-run');
 
+/**
+ * Constants to exclude from i18n sync (e.g., error codes that won't be translated)
+ */
+const EXCLUDED_CONSTANTS = ['_CODES'];
+
 interface SyncAction {
-  type: 'add' | 'remove' | 'update' | 'missing';
+  type: 'add' | 'remove' | 'update';
   file: string;
   key: string;
   value?: string;
@@ -39,23 +48,45 @@ interface SyncAction {
 const actions: SyncAction[] = [];
 
 /**
- * Get all keys from a nested object with their values
+ * Generate empty JSON structure from mapped constants (for new keys only)
  */
-function getAllKeysWithValues(
-  obj: Record<string, unknown>,
-  prefix = ''
-): Array<{ key: string; value: unknown }> {
-  const result: Array<{ key: string; value: unknown }> = [];
+function generateEmptyStructureFromMappings(
+  mappings: MappedConstant[]
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
 
-  for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
+  for (const mapping of mappings) {
+    const { domain, category, keys } = mapping;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      result.push(
-        ...getAllKeysWithValues(value as Record<string, unknown>, fullKey)
-      );
+    // Ensure domain exists
+    if (!result[domain]) {
+      result[domain] = {};
+    }
+
+    const domainObj = result[domain] as Record<string, unknown>;
+
+    // If category is empty, add keys directly under domain
+    if (!category) {
+      for (const key of keys) {
+        const jsonKey = key.jsonKey;
+        domainObj[jsonKey] = '';
+      }
     } else {
-      result.push({ key: fullKey, value });
+      // Ensure category exists
+      if (!domainObj[category]) {
+        domainObj[category] = {};
+      }
+
+      // Add keys with empty values
+      for (const key of keys) {
+        const jsonKey = key.jsonKey;
+        (
+          (result[domain] as Record<string, unknown>)[category] as Record<
+            string,
+            unknown
+          >
+        )[jsonKey] = '';
+      }
     }
   }
 
@@ -63,74 +94,393 @@ function getAllKeysWithValues(
 }
 
 /**
- * Set nested property in object
+ * Generate placeholder translation value
+ * In a real implementation, this would use actual translations
  */
-function setNestedProperty(
-  obj: Record<string, unknown>,
-  path: string,
-  value: unknown
-): void {
-  const parts = path.split('.');
-  let current = obj;
+function generatePlaceholderValue(i18nKey: string): string {
+  // Extract the last part after the last dot
+  const parts = i18nKey.split('.');
+  const key = parts[parts.length - 1];
 
-  for (let i = 0; i < parts.length - 1; i++) {
-    const part = parts[i];
-    if (!part) continue;
-    if (!current[part]) {
-      current[part] = {};
+  if (!key) {
+    return 'MISSING_KEY';
+  }
+
+  // Convert kebab-case to Title Case
+  return key
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Update domain JSON file with new data
+ */
+async function updateDomainJson(
+  domain: string,
+  newData: Record<string, unknown>,
+  locale: string
+): Promise<void> {
+  const domainFile = join(
+    process.cwd(),
+    'src',
+    'locales',
+    locale,
+    `${domain}.json`
+  );
+
+  let existingData: Record<string, unknown> = {};
+  if (existsSync(domainFile)) {
+    const content = await readFile(domainFile, 'utf-8');
+    existingData = JSON.parse(content);
+  }
+
+  // Soft merge: preserve existing values, add missing keys as empty strings
+  const mergedData = addMissingKeys(existingData, newData);
+
+  // Remove keys that are not in the new structure
+  const filteredData = removeExtraKeys(mergedData, newData);
+
+  // Sort keys for consistency
+  const sortedData = sortObjectKeys(filteredData) as Record<string, unknown>;
+
+  const originalContent = existsSync(domainFile)
+    ? await readFile(domainFile, 'utf-8')
+    : '';
+  const newContent = JSON.stringify(sortedData, null, 2) + '\n';
+
+  if (originalContent !== newContent) {
+    if (!isDryRun) {
+      await writeFile(domainFile, newContent, 'utf-8');
     }
-    current = current[part] as Record<string, unknown>;
-  }
 
-  const lastPart = parts[parts.length - 1];
-  if (lastPart) {
-    current[lastPart] = value;
+    // Track changes for dry run output
+    const existingKeys = getAllKeys(existingData);
+    const newKeys = getAllKeys(sortedData);
+
+    for (const key of newKeys) {
+      if (!existingKeys.includes(key)) {
+        actions.push({
+          type: 'add',
+          file: domainFile,
+          key,
+          value: getNestedValue(sortedData, key),
+        });
+      }
+    }
+
+    for (const key of existingKeys) {
+      if (!newKeys.includes(key)) {
+        actions.push({
+          type: 'remove',
+          file: domainFile,
+          key,
+        });
+      }
+    }
+
+    console.log(`   ${isDryRun ? 'Would update' : 'Updated'}: ${domainFile}`);
+  } else {
+    console.log(`   - No changes: ${domainFile}`);
   }
 }
 
 /**
- * Remove nested property from object
+ * Get nested value from object by dotted key
  */
-function removeNestedProperty(
-  obj: Record<string, unknown>,
-  path: string
-): void {
-  const parts = path.split('.');
+function getNestedValue(obj: Record<string, unknown>, key: string): string {
+  const parts = key.split('.');
   let current = obj;
 
-  for (let i = 0; i < parts.length - 1; i++) {
-    const part = parts[i];
-    if (!part || !current[part]) return;
-    current = current[part] as Record<string, unknown>;
+  for (const part of parts) {
+    if (current && typeof current === 'object' && !Array.isArray(current)) {
+      current = (current as Record<string, unknown>)[part] as Record<
+        string,
+        unknown
+      >;
+    } else {
+      return 'UNKNOWN';
+    }
   }
 
-  const lastPart = parts[parts.length - 1];
-  if (lastPart) {
-    delete current[lastPart];
-  }
+  return typeof current === 'string' ? current : 'UNKNOWN';
 }
 
 /**
- * Remove the domain prefix from a translation key
+ * Add missing keys from new structure to existing data with empty strings,
+ * preserving existing values
  */
-function getRelativeKey(fullKey: string, domain: string): string {
-  const prefix = `${domain}.`;
-  if (fullKey.startsWith(prefix)) {
-    return fullKey.slice(prefix.length);
+function addMissingKeys(
+  existing: Record<string, unknown>,
+  newStructure: Record<string, unknown>
+): Record<string, unknown> {
+  const result = { ...existing };
+
+  for (const [key, value] of Object.entries(newStructure)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      // Nested object - recurse
+      const existingValue = result[key];
+      if (
+        existingValue &&
+        typeof existingValue === 'object' &&
+        !Array.isArray(existingValue)
+      ) {
+        result[key] = addMissingKeys(
+          existingValue as Record<string, unknown>,
+          value as Record<string, unknown>
+        );
+      } else {
+        // New nested object - copy with empty strings
+        result[key] = addMissingKeys({}, value as Record<string, unknown>);
+      }
+    } else {
+      // Primitive value - only add if key doesn't exist
+      if (!(key in result)) {
+        result[key] = '';
+      }
+      // If key exists, preserve existing value
+    }
   }
 
-  return fullKey;
+  return result;
 }
 
 /**
- * Sync locale files (EN → HU)
+ * Remove keys from existing data that are not in the new structure
  */
-async function syncLocaleFiles(
+function removeExtraKeys(
+  existing: Record<string, unknown>,
+  newStructure: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(newStructure)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      // Nested object - recurse if exists in existing
+      const existingValue = existing[key];
+      if (
+        existingValue &&
+        typeof existingValue === 'object' &&
+        !Array.isArray(existingValue)
+      ) {
+        result[key] = removeExtraKeys(
+          existingValue as Record<string, unknown>,
+          value as Record<string, unknown>
+        );
+      } else {
+        // New structure has nested object, but existing doesn't - copy empty
+        result[key] = value;
+      }
+    } else {
+      // Primitive value - copy from existing if exists, otherwise from new
+      if (key in existing) {
+        result[key] = existing[key];
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Merge all domain-specific JSON files into single locale files
+ */
+async function mergeLocaleFiles(locale: string): Promise<void> {
+  const localeDir = join(process.cwd(), 'src', 'locales', locale);
+  const outputFile = join(process.cwd(), 'src', 'locales', `${locale}.json`);
+
+  if (!existsSync(localeDir)) {
+    console.log(`   ⚠️  Locale directory not found: ${localeDir} (skipped)`);
+    return;
+  }
+
+  const files = readdirSync(localeDir)
+    .filter(file => file.endsWith('.json'))
+    .sort();
+
+  if (files.length === 0) {
+    console.log(`   ⚠️  No JSON files found in: ${localeDir} (skipped)`);
+    return;
+  }
+
+  console.log(`   📦 Merging ${files.length} files for locale: ${locale}`);
+
+  const merged: Record<string, unknown> = {};
+
+  for (const file of files) {
+    const filePath = join(localeDir, file);
+    const content = await readFile(filePath, 'utf-8');
+
+    try {
+      const json = JSON.parse(content);
+      Object.assign(merged, json);
+    } catch (error) {
+      console.error(`   ❌ Failed to parse: ${file} - ${error}`);
+      throw error;
+    }
+  }
+
+  // Sort keys alphabetically for consistency
+  const sorted = sortObjectKeys(merged);
+
+  // Write merged file
+  if (!isDryRun) {
+    await writeFile(
+      outputFile,
+      JSON.stringify(sorted, null, 2) + '\n',
+      'utf-8'
+    );
+  }
+  console.log(`   ${isDryRun ? 'Would create' : 'Created'}: ${outputFile}`);
+}
+
+/**
+ * Run validation script
+ */
+async function runValidation(): Promise<boolean> {
+  console.log('\n🔍 Running validation...');
+
+  const languages = getLanguages();
+  const baseLang = 'en';
+
+  if (!languages.includes(baseLang)) {
+    console.error(`❌ Base language (${baseLang}) must exist`);
+    process.exit(1);
+  }
+
+  const domains = getDomains(baseLang);
+
+  console.log(`📂 Detected languages: ${languages.join(', ')}`);
+  console.log(`📂 Detected domains: ${domains.join(', ')}\n`);
+
+  const errors: Array<{
+    type: string;
+    file: string;
+    key: string;
+    details?: string;
+  }> = [];
+  const warnings: Array<{
+    type: string;
+    file: string;
+    key: string;
+    details?: string;
+  }> = [];
+
+  // Validate each domain - compare all languages against the base language (en)
+  const otherLanguages = languages.filter(lang => lang !== baseLang);
+
+  for (const domain of domains) {
+    const basePath = join(
+      process.cwd(),
+      'src',
+      'locales',
+      baseLang,
+      `${domain}.json`
+    );
+
+    if (!existsSync(basePath)) {
+      errors.push({
+        type: 'missing',
+        file: basePath,
+        key: '',
+        details: `Missing base language (${baseLang}) file for domain: ${domain}`,
+      });
+      continue;
+    }
+
+    console.log(`   📦 Checking ${domain}...`);
+
+    // Compare base language against each other language
+    for (const targetLang of otherLanguages) {
+      const targetPath = join(
+        process.cwd(),
+        'src',
+        'locales',
+        targetLang,
+        `${domain}.json`
+      );
+
+      if (!existsSync(targetPath)) {
+        errors.push({
+          type: 'missing',
+          file: targetPath,
+          key: '',
+          details: `Missing ${targetLang} locale file for domain: ${domain}`,
+        });
+        continue;
+      }
+
+      await compareLocaleFiles(
+        basePath,
+        targetPath,
+        baseLang,
+        targetLang,
+        domain,
+        errors,
+        warnings
+      );
+    }
+  }
+
+  // Validate merged files
+  console.log('\n   📦 Checking merged files...');
+  await validateMergedFiles(languages, baseLang, errors, warnings);
+
+  // Print results
+  if (errors.length === 0 && warnings.length === 0) {
+    console.log('   ✅ Validation passed');
+    return true;
+  }
+
+  if (errors.length > 0) {
+    console.log(`   ❌ ${errors.length} Error(s):`);
+    for (const error of errors) {
+      console.log(`      ${error.details}`);
+    }
+  }
+
+  if (warnings.length > 0) {
+    console.log(`   ⚠️  ${warnings.length} Warning(s):`);
+    for (const warning of warnings) {
+      console.log(`      ${warning.details}`);
+    }
+  }
+
+  return errors.length === 0;
+}
+
+/**
+ * Get all keys from a nested object
+ */
+function getAllKeys(obj: Record<string, unknown>, prefix = ''): string[] {
+  const keys: string[] = [];
+
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      keys.push(...getAllKeys(value as Record<string, unknown>, fullKey));
+    } else {
+      keys.push(fullKey);
+    }
+  }
+
+  return keys;
+}
+
+/**
+ * Compare two locale files for a specific language pair
+ */
+async function compareLocaleFiles(
   sourcePath: string,
   targetPath: string,
   sourceLang: string,
   targetLang: string,
-  domain: string
+  domain: string,
+  errors: Array<{ type: string; file: string; key: string; details?: string }>,
+  warnings: Array<{ type: string; file: string; key: string; details?: string }>
 ): Promise<void> {
   const sourceContent = await readFile(sourcePath, 'utf-8');
   const targetContent = await readFile(targetPath, 'utf-8');
@@ -138,544 +488,313 @@ async function syncLocaleFiles(
   const sourceJson = JSON.parse(sourceContent);
   const targetJson = JSON.parse(targetContent);
 
-  const sourceKeys = getAllKeysWithValues(sourceJson);
-  const targetKeys = getAllKeysWithValues(targetJson);
+  const sourceKeys = getAllKeys(sourceJson);
+  const targetKeys = getAllKeys(targetJson);
 
-  let changed = false;
-
-  // Add missing keys to target
-  for (const { key, value } of sourceKeys) {
-    const targetHasKey = targetKeys.some(item => item.key === key);
-
-    if (!targetHasKey) {
-      const placeholder = `[${targetLang.toUpperCase()}] ${value}`;
-      setNestedProperty(targetJson, key, placeholder);
-      actions.push({
-        type: 'add',
-        file: targetPath,
-        key,
-        value: placeholder,
-      });
-      changed = true;
-    }
-  }
-
-  // Remove extra keys from target
-  const sourceKeyStrings = sourceKeys.map(item => item.key);
-  for (const { key } of targetKeys) {
-    if (!sourceKeyStrings.includes(key)) {
-      removeNestedProperty(targetJson, key);
-      actions.push({
-        type: 'remove',
-        file: targetPath,
-        key,
-      });
-      changed = true;
-    }
-  }
-
-  // Write back if changed
-  if (changed && !isDryRun) {
-    const sorted = sortObjectKeys(targetJson);
-    await writeFile(
-      targetPath,
-      JSON.stringify(sorted, null, 2) + '\n',
-      'utf-8'
-    );
-  }
-
-  console.log(
-    `   ${domain}: ${actions.filter(a => a.file === targetPath).length} changes`
-  );
-}
-
-function mergeConstantLines(
-  lines: string[],
-  desired: Map<string, string>
-): {
-  lines: string[];
-  changed: boolean;
-  changes: Array<{
-    key: string;
-    type: 'update';
-    oldValue?: string;
-    newValue: string;
-  }>;
-  missing: Array<{ key: string; newValue: string }>;
-} {
-  const updatedLines: string[] = [];
-  const changes: Array<{
-    key: string;
-    type: 'update';
-    oldValue?: string;
-    newValue: string;
-  }> = [];
-  const missing: Array<{ key: string; newValue: string }> = [];
-  let changed = false;
-
-  for (let index = 0; index < lines.length; index++) {
-    const line = lines[index]!;
-    const trimmed = line.trim();
-
-    const singleLineMatch = trimmed.match(/^([A-Za-z0-9_]+):\s*'([^']+)',?$/);
-    if (singleLineMatch) {
-      const key = singleLineMatch[1] as string;
-      const value = singleLineMatch[2] as string;
-      const existingValue = desired.get(key);
-      if (existingValue !== undefined) {
-        desired.delete(key);
-        if (existingValue !== value) {
-          changed = true;
-          changes.push({
-            key,
-            type: 'update',
-            oldValue: value,
-            newValue: existingValue,
-          });
-          const indent = line.slice(0, line.indexOf(trimmed));
-          updatedLines.push(`${indent}${key}: '${existingValue}',`);
-          continue;
-        }
-      }
-    }
-
-    const multiLineKeyMatch = trimmed.match(/^([A-Za-z0-9_]+):$/);
-    if (multiLineKeyMatch && index + 1 < lines.length) {
-      const nextLine = lines[index + 1]!;
-      const nextTrimmed = nextLine.trim();
-      const multiLineValueMatch = nextTrimmed.match(/^'([^']+)',?$/);
-
-      if (multiLineValueMatch) {
-        const key = multiLineKeyMatch[1] as string;
-        const value = multiLineValueMatch[1] as string;
-        const existingValue = desired.get(key);
-        if (existingValue !== undefined) {
-          desired.delete(key);
-          updatedLines.push(line);
-          if (existingValue !== value) {
-            changed = true;
-            changes.push({
-              key,
-              type: 'update',
-              oldValue: value,
-              newValue: existingValue,
-            });
-            const indent = nextLine.slice(0, nextLine.indexOf(nextTrimmed));
-            updatedLines.push(`${indent}'${existingValue}',`);
-          } else {
-            updatedLines.push(nextLine);
-          }
-          index += 1;
-          continue;
-        }
-      }
-    }
-
-    updatedLines.push(line);
-  }
-
-  if (desired.size > 0) {
-    for (const [key, value] of desired.entries()) {
-      missing.push({ key, newValue: value });
-    }
-  }
-
-  return { lines: updatedLines, changed, changes, missing };
-}
-
-/**
- * Sync flat constants (for 'errors' domain)
- */
-async function syncFlatConstants(
-  constantsPath: string,
-  localeKeys: Array<{ key: string; value: unknown }>,
-  domain: string,
-  constantsContent: string
-): Promise<void> {
-  const constantName = `CORE_${domain.toUpperCase()}`;
-
-  // Extract keys (remove domain prefix)
-  const keys = localeKeys
-    .map(({ key }) => {
-      const parts = key.split('.');
-      if (parts.length < 2) return null;
-      const keyName = parts.slice(1).join('-'); // errors.not-found → not-found
-      return { key: keyName, value: getRelativeKey(key, domain) };
-    })
-    .filter((item): item is { key: string; value: string } => item !== null);
-
-  // Check if constant exists
-  const regex = new RegExp(
-    `export const ${constantName} = \\{([\\s\\S]*?)\\} as const;`,
-    'm'
-  );
-  const match = constantsContent.match(regex);
-
-  if (!match) {
-    console.log(`   ⚠️  Constant ${constantName} not found, skipping sync`);
-    return;
-  }
-
-  const camelizedEntries = [...keys]
-    .sort((a, b) => a.key.localeCompare(b.key))
-    .map(({ key, value }) => [kebabToCamel(key), value] as const);
-  const body = match[1] as string;
-  const lines = body.split(/\r?\n/);
-  const {
-    lines: mergedLines,
-    changed,
-    changes,
-    missing,
-  } = mergeConstantLines(lines, new Map(camelizedEntries));
-
-  if (missing.length > 0) {
-    for (const item of missing) {
-      actions.push({
+  // Find missing keys (in source but not in target)
+  for (const key of sourceKeys) {
+    if (!targetKeys.includes(key)) {
+      errors.push({
         type: 'missing',
-        file: constantsPath,
-        key: `${constantName}.${item.key}`,
-        detail: `key ${item.key} not present in ${constantName}`,
-        value: item.newValue,
+        file: targetPath,
+        key,
+        details: `Missing ${targetLang} translation for: ${key}`,
       });
     }
   }
 
-  if (!changed) {
-    return;
-  }
-
-  const newProps = mergedLines.join('\n');
-  const newConstant = `export const ${constantName} = {
-${newProps}
-} as const;`;
-  const updatedContent = constantsContent.replace(regex, newConstant);
-  if (!isDryRun) {
-    await writeFile(constantsPath, updatedContent, 'utf-8');
-  }
-  for (const change of changes) {
-    actions.push({
-      type: 'update',
-      file: constantsPath,
-      key: `${constantName}.${change.key}`,
-      detail: `${change.key}: ${change.oldValue} → ${change.newValue}`,
-      value: change.newValue,
-    });
-  }
-}
-
-/**
- * Extract last part of key (after last dot)
- */
-function getKeyName(fullKey: string): string {
-  const parts = fullKey.split('.');
-  return parts[parts.length - 1] || fullKey;
-}
-
-function addLabelGroupSeparators(lines: string[]): string[] {
-  const result: string[] = [];
-  let prevRank: number | null = null;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    const match = trimmed.match(/^([A-Za-z0-9_]+):/);
-    if (match) {
-      const rank = getLabelSuffixRank(match[1]!);
-      if (prevRank !== null && rank !== prevRank) {
-        result.push('');
-      }
-      prevRank = rank;
-    }
-    result.push(line);
-  }
-
-  return result;
-}
-
-/**
- * Sync TypeScript constants file
- */
-async function syncConstants(
-  constantsPath: string,
-  localePath: string,
-  domain: string
-): Promise<void> {
-  if (!existsSync(constantsPath)) {
-    console.log(`   ⚠️  Constants file not found: ${constantsPath}`);
-    return;
-  }
-
-  const constantsContent = await readFile(constantsPath, 'utf-8');
-  const localeContent = await readFile(localePath, 'utf-8');
-
-  const localeJson = JSON.parse(localeContent);
-  const localeKeys = getAllKeysWithValues(localeJson);
-
-  // Special handling for 'errors' domain (flat structure)
-  if (domain === 'errors') {
-    await syncFlatConstants(
-      constantsPath,
-      localeKeys,
-      domain,
-      constantsContent
-    );
-    return;
-  }
-
-  // Group keys by category (errors, success, labels, etc.) for nested structures
-  const categorized = new Map<string, Array<{ key: string; value: string }>>();
-
-  for (const { key } of localeKeys) {
-    const parts = key.split('.');
-    if (parts.length < 3) continue; // Need domain.category.key
-
-    const category = parts[1]; // e.g., "errors", "success", "labels"
-    if (!category) continue;
-
-    if (!categorized.has(category)) {
-      categorized.set(category, []);
-    }
-
-    categorized.get(category)?.push({
-      key: getKeyName(key),
-      value: getRelativeKey(key, domain),
-    });
-  }
-
-  // Update constants file
-  let updatedContent = constantsContent;
-  let changed = false;
-
-  for (const [category, keys] of categorized.entries()) {
-    const constantName = `${domain.toUpperCase()}_${category.toUpperCase()}`;
-    const compareEntries =
-      category === 'labels'
-        ? (a: { key: string }, b: { key: string }) =>
-            compareLabelKeys(a.key, b.key)
-        : (a: { key: string }, b: { key: string }) =>
-            a.key.localeCompare(b.key);
-    const sortedKeys = [...keys].sort(compareEntries);
-
-    // Check if constant exists
-    const regex = new RegExp(
-      `export const ${constantName} = \\{([\\s\\S]*?)\\} as const;`,
-      'm'
-    );
-    const match = updatedContent.match(regex);
-
-    if (!match) {
-      // Create new constant
-      const propsLines = sortedKeys.map(
-        ({ key, value }) => `  ${kebabToCamel(key)}: '${value}',`
-      );
-      const propsWithSeparators =
-        category === 'labels'
-          ? addLabelGroupSeparators(propsLines)
-          : propsLines;
-      const props = propsWithSeparators.join('\n');
-
-      const newConstant = `
-/**
- * ${domain.charAt(0).toUpperCase() + domain.slice(1)} ${category} messages (i18n keys)
- */
-export const ${constantName} = {
-${props}
-} as const;
-`;
-
-      updatedContent += '\n' + newConstant;
-      actions.push({
-        type: 'add',
-        file: constantsPath,
-        key: constantName,
+  // Find extra keys (in target but not in source)
+  for (const key of targetKeys) {
+    if (!sourceKeys.includes(key)) {
+      warnings.push({
+        type: 'extra',
+        file: targetPath,
+        key,
+        details: `Extra ${targetLang} translation (not in ${sourceLang}): ${key}`,
       });
-      changed = true;
-    } else {
-      // Update existing constant
-      const camelizedEntries = sortedKeys.map(
-        ({ key, value }) => [kebabToCamel(key), value] as const
-      );
-
-      const body = match[1] as string;
-      const lines = body.split(/\r?\n/);
-      const {
-        lines: mergedLines,
-        changed: hasChanges,
-        changes,
-        missing,
-      } = mergeConstantLines(lines, new Map(camelizedEntries));
-
-      if (missing.length > 0) {
-        for (const item of missing) {
-          actions.push({
-            type: 'missing',
-            file: constantsPath,
-            key: `${constantName}.${item.key}`,
-            detail: `key ${item.key} not present in ${constantName}`,
-            value: item.newValue,
-          });
-        }
-      }
-
-      if (hasChanges) {
-        const processedLines =
-          category === 'labels'
-            ? addLabelGroupSeparators(mergedLines)
-            : mergedLines;
-        const newProps = processedLines.join('\n');
-        const newConstant = `export const ${constantName} = {
-${newProps}
-} as const;`;
-        updatedContent = updatedContent.replace(regex, newConstant);
-        for (const change of changes) {
-          actions.push({
-            type: change.type,
-            file: constantsPath,
-            key: `${constantName}.${change.key}`,
-            detail: `${change.key}: ${change.oldValue} → ${change.newValue}`,
-            value: change.newValue,
-          });
-        }
-        changed = true;
-      }
     }
   }
 
-  // Write back if changed
-  if (changed && !isDryRun) {
-    await writeFile(constantsPath, updatedContent, 'utf-8');
-  }
-}
-
-async function runMergeScript(): Promise<void> {
   console.log(
-    '🔗 Running i18n merge to regenerate the combined locale files...'
+    `      ${domain}: ${sourceKeys.length} keys, ${errors.length} missing, ${warnings.length} extra`
   );
-  return new Promise((resolve, reject) => {
-    const mergeProcess = spawn('npm', ['run', 'i18n:merge'], {
-      stdio: 'inherit',
-      shell: true,
-    });
-
-    mergeProcess.on('close', code => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(`i18n merge exited with status ${code}`));
-    });
-
-    mergeProcess.on('error', error => reject(error));
-  });
-}
-
-async function runValidateScript(): Promise<void> {
-  console.log('� Running i18n validate to check for any issues...');
-  return new Promise((resolve, reject) => {
-    const validateProcess = spawn('npm', ['run', 'i18n:validate'], {
-      stdio: 'inherit',
-      shell: true,
-    });
-
-    validateProcess.on('close', code => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      console.log(`⚠️  Validation found issues (exit code: ${code})`);
-      resolve(); // Don't fail the sync, just warn
-    });
-
-    validateProcess.on('error', error => reject(error));
-  });
 }
 
 /**
- * Main function
+ * Validate merged locale files
  */
-async function main() {
-  console.log(`\n🔄 Syncing i18n files${isDryRun ? ' (DRY RUN)' : ''}...\n`);
+async function validateMergedFiles(
+  languages: string[],
+  baseLang: string,
+  errors: Array<{ type: string; file: string; key: string; details?: string }>,
+  warnings: Array<{ type: string; file: string; key: string; details?: string }>
+): Promise<void> {
+  const otherLanguages = languages.filter(lang => lang !== baseLang);
 
-  const languages = getLanguages();
-  const enIndex = languages.indexOf('en');
-  const huIndex = languages.indexOf('hu');
+  for (const targetLang of otherLanguages) {
+    const baseMergedPath = join(
+      process.cwd(),
+      'src',
+      'locales',
+      `${baseLang}.json`
+    );
+    const targetMergedPath = join(
+      process.cwd(),
+      'src',
+      'locales',
+      `${targetLang}.json`
+    );
 
-  if (enIndex === -1 || huIndex === -1) {
-    console.error('❌ English and Hungarian languages must exist');
+    if (!existsSync(baseMergedPath)) {
+      errors.push({
+        type: 'missing',
+        file: baseMergedPath,
+        key: '',
+        details: `Missing merged base language (${baseLang}) file: ${baseLang}.json`,
+      });
+      continue;
+    }
+
+    if (!existsSync(targetMergedPath)) {
+      errors.push({
+        type: 'missing',
+        file: targetMergedPath,
+        key: '',
+        details: `Missing merged ${targetLang} locale file: ${targetLang}.json`,
+      });
+      continue;
+    }
+
+    // Compare merged base vs target
+    await compareLocaleFiles(
+      baseMergedPath,
+      targetMergedPath,
+      baseLang,
+      targetLang,
+      'merged',
+      errors,
+      warnings
+    );
+  }
+}
+
+/**
+ * Validate all parsed data
+ */
+function validateParsedData(parsedFiles: ParsedStringsFile[]): {
+  valid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+
+  for (const file of parsedFiles) {
+    for (const constant of file.constants) {
+      // Validate constant name format
+      const nameValidation = validateConstantName(constant.constantName);
+      if (!nameValidation.valid) {
+        errors.push(
+          ...nameValidation.errors.map(
+            (error: string) =>
+              `${file.filePath}:${constant.lineNumber}: ${error}`
+          )
+        );
+      }
+
+      // Validate key formats
+      for (const key of constant.keys) {
+        const keyValidation = validateKeyFormat(key.key);
+        if (!keyValidation.valid) {
+          errors.push(
+            ...keyValidation.errors.map(
+              (error: string) =>
+                `${file.filePath}:${constant.lineNumber}: ${error}`
+            )
+          );
+        }
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Main sync function
+ */
+async function syncStringsFirst(): Promise<void> {
+  console.log(`\n🔄 Strings-first sync${isDryRun ? ' (DRY RUN)' : ''}...\n`);
+
+  // Get all strings files
+  const stringsFiles = getStringsFiles();
+  console.log(`📂 Found ${stringsFiles.length} strings files:`);
+  for (const file of stringsFiles) {
+    console.log(`   - ${file}`);
+  }
+  console.log('');
+
+  if (stringsFiles.length === 0) {
+    console.log('⚠️  No strings files found. Nothing to sync.');
+    return;
+  }
+
+  // Parse all strings files
+  console.log('🔍 Parsing strings files...');
+  const parsedFiles = await parseStringsFiles(stringsFiles);
+
+  // Validate parsed data
+  const validation = validateParsedData(parsedFiles);
+  if (!validation.valid) {
+    console.error('❌ Validation errors:');
+    for (const error of validation.errors) {
+      console.error(`   ${error}`);
+    }
     process.exit(1);
   }
 
-  const domains = getDomains('en');
+  // Collect all constants
+  const allConstants = parsedFiles.flatMap(file => file.constants);
 
-  // Sync each domain
-  for (const domain of domains) {
-    const enPath = join(process.cwd(), LOCALES_DIR, 'en', `${domain}.json`);
-    const huPath = join(process.cwd(), LOCALES_DIR, 'hu', `${domain}.json`);
+  // Filter out excluded constants (e.g., error codes that won't be translated)
+  const filteredConstants = allConstants.filter(
+    constant =>
+      !EXCLUDED_CONSTANTS.some(excluded =>
+        constant.constantName.endsWith(excluded)
+      )
+  );
 
-    console.log(`📦 Syncing ${domain}...`);
+  console.log(
+    `📊 Found ${allConstants.length} constants across all files (${allConstants.length - filteredConstants.length} excluded)\n`
+  );
 
-    // Sync EN → HU
-    await syncLocaleFiles(enPath, huPath, 'en', 'hu', domain);
+  // Map constants to JSON structure
+  console.log('🗺️  Mapping constants to JSON structure...');
+  const mappingResult = mapConstants(filteredConstants);
 
-    // Sync constants (if exists)
-    const constantsPath = getConstantsPath(domain);
+  console.log(`   Standard mappings: ${mappingResult.standardMappings.length}`);
+  console.log(`   Custom mappings: ${mappingResult.customMappings.length}\n`);
 
-    if (constantsPath && existsSync(constantsPath)) {
-      await syncConstants(constantsPath, enPath, domain);
+  // Generate JSON for each language
+  const languages = getLanguages();
+
+  for (const lang of languages) {
+    console.log(`🌍 Processing language: ${lang}`);
+
+    // Generate empty structure from standard mappings
+    const standardJson = generateEmptyStructureFromMappings(
+      mappingResult.standardMappings
+    );
+
+    // Apply custom mappings
+    for (const customMapping of mappingResult.customMappings) {
+      const { domain, category, keys } = customMapping;
+      if (!standardJson[domain]) standardJson[domain] = {};
+      const domainObj = standardJson[domain] as Record<string, unknown>;
+      if (!domainObj[category]) domainObj[category] = {};
+
+      const categoryObj = domainObj[category] as Record<string, unknown>;
+      for (const key of keys) {
+        categoryObj[key.jsonKey] = '';
+      }
     }
+
+    // Update domain files
+    for (const [domain, domainData] of Object.entries(standardJson)) {
+      await updateDomainJson(
+        domain,
+        { [domain]: domainData } as Record<string, unknown>,
+        lang
+      );
+    }
+
+    // Merge domain files into combined locale file
+    await mergeLocaleFiles(lang);
   }
 
-  // Print results
+  // Sort all files
   if (!isDryRun) {
+    console.log('\n🔄 Sorting all files...');
+    // Import and run sort functionality
+    const { sortAllI18nFiles } = await import('./sort');
     await sortAllI18nFiles();
   }
+
+  // Run validation
+  const validationPassed = await runValidation();
+
+  // Print summary
   console.log('\n' + '='.repeat(60));
 
   if (actions.length === 0) {
     console.log('✅ Everything is already in sync!\n');
-    if (!isDryRun) {
-      await runValidateScript();
-      await runMergeScript();
-    }
-    return;
-  }
-
-  console.log(`\n${isDryRun ? '📋' : '✅'} ${actions.length} Action(s):\n`);
-
-  const grouped = new Map<string, SyncAction[]>();
-  for (const action of actions) {
-    if (!grouped.has(action.file)) {
-      grouped.set(action.file, []);
-    }
-    grouped.get(action.file)?.push(action);
-  }
-
-  for (const [file, fileActions] of grouped.entries()) {
-    console.log(`   ${file}`);
-    for (const action of fileActions) {
-      const detailSuffix = action.detail ? ` (${action.detail})` : '';
-      if (action.type === 'add') {
-        console.log(
-          `      + Add: ${action.key}${action.value ? ` = ${action.value}` : ''}${detailSuffix}`
-        );
-      } else if (action.type === 'remove') {
-        console.log(`      - Remove: ${action.key}${detailSuffix}`);
-      } else if (action.type === 'missing') {
-        console.log(`      ! Missing: ${action.key}${detailSuffix}`);
-      } else {
-        console.log(`      ~ Update: ${action.key}${detailSuffix}`);
-      }
-    }
-    console.log('');
-  }
-
-  if (isDryRun) {
-    console.log('🔍 Dry run - no files were modified');
-    console.log('   Run without --dry-run to apply changes\n');
   } else {
-    console.log('✅ Sync complete!\n');
-    await runValidateScript();
-    await runMergeScript();
+    console.log(`\n${isDryRun ? '📋' : '✅'} ${actions.length} Action(s):\n`);
+
+    const grouped = new Map<string, SyncAction[]>();
+    for (const action of actions) {
+      if (!grouped.has(action.file)) {
+        grouped.set(action.file, []);
+      }
+      grouped.get(action.file)?.push(action);
+    }
+
+    for (const [file, fileActions] of grouped.entries()) {
+      console.log(`   ${file}`);
+      for (const action of fileActions) {
+        const detailSuffix = action.detail ? ` (${action.detail})` : '';
+        if (action.type === 'add') {
+          console.log(
+            `      + Add: ${action.key}${action.value ? ` = "${action.value}"` : ''}${detailSuffix}`
+          );
+        } else if (action.type === 'remove') {
+          console.log(`      - Remove: ${action.key}${detailSuffix}`);
+        } else {
+          console.log(`      ~ Update: ${action.key}${detailSuffix}`);
+        }
+      }
+      console.log('');
+    }
+
+    if (isDryRun) {
+      console.log('🔍 Dry run - no files were modified');
+    } else {
+      console.log('✅ Sync complete!');
+    }
+  }
+
+  if (!validationPassed) {
+    console.log(
+      '\n⚠️  Validation found issues. Please review the output above.'
+    );
+  }
+
+  console.log('\n📝 Next steps:');
+  console.log('   1. Review generated JSON files');
+  console.log('   2. Add actual translations for placeholder values');
+  console.log('   3. Commit changes');
+}
+
+/**
+ * Main execution
+ */
+export async function main() {
+  try {
+    await syncStringsFirst();
+  } catch (error) {
+    console.error(
+      '\n❌ Sync failed:',
+      error instanceof Error ? error.message : error
+    );
+    process.exit(1);
   }
 }
 
-main();
+// Run if called directly
+if (
+  import.meta.url === `file://${process.argv[1]}` ||
+  process.argv[1]?.includes('sync.ts')
+) {
+  main();
+}

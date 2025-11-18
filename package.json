@@ -16,10 +16,8 @@
     "test:feature": "tsx scripts/test-feature.ts",
     "feature:create": "tsx scripts/create-feature.ts",
     "i18n:manage": "tsx scripts/i18n/manage.ts",
-    "i18n:validate": "tsx scripts/i18n/validate.ts",
     "i18n:sync": "tsx scripts/i18n/sync.ts",
-    "i18n:merge": "tsx scripts/i18n/merge.ts",
-    "i18n:sort": "tsx scripts/i18n/sort.ts"
+    "i18n:watch": "tsx scripts/i18n/watch.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -75,6 +73,7 @@
     "@types/react": "19.2.4",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
+    "chokidar": "^4.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "eslint-config-prettier": "^10.1.8",
