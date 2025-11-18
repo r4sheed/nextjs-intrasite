@@ -1,3 +1,50 @@
+### 🔗 Nested Routing for Settings Page
+
+**Priority:** Medium  
+**Status:** Not Started
+
+**Description:**  
+Implement nested routing for the settings page to allow direct navigation to specific sections via URL paths (e.g., /settings/advanced). Currently, sections are managed via client-side state, but URL-based navigation would improve UX and shareability. This is similar to alias routes seen in blogs where instead of query parameters like /settings?section=advanced, we use clean paths like /settings/advanced.
+
+**Features:**
+
+- **URL-based section selection:** Map URL paths to specific sections (e.g., /settings/advanced → AdvancedSection)
+- **Fallback to default:** If no specific section in URL, default to profile section
+- **Browser back/forward support:** Update URL when switching sections, support browser navigation
+- **SEO-friendly:** Each section could have its own meta tags if needed
+
+**Implementation Details:**
+
+- Use Next.js dynamic routes with catch-all segments for /settings/[...section]
+- Update routing in src/lib/routes.ts to include nested settings routes
+- Modify settings-page.tsx to read section from URL params and set active section accordingly
+- Handle invalid section names gracefully with fallback to default
+
+**Benefits:**
+
+- ✅ Direct linkable sections (e.g., share /settings/security directly)
+- ✅ Better UX for deep linking and bookmarks
+- ✅ Browser history support for section navigation
+- ✅ Shareable URLs without query parameters
+- ✅ Cleaner URL structure compared to hash-based or query-based navigation
+
+**Affected Files:**
+
+- `src/lib/routes.ts` (add nested routes for settings sections)
+- `src/app/(app)/(page)/(content)/(protected)/settings/page.tsx` (update to handle dynamic routing)
+- `src/app/(app)/(page)/(content)/(protected)/settings/[...section]/page.tsx` (new dynamic route file)
+- `src/app/(app)/(page)/(content)/(protected)/_components/settings-page.tsx` (modify to read from URL params)
+
+**Testing:**
+
+- Test direct navigation to /settings/advanced loads advanced section
+- Test switching sections updates URL in browser
+- Test invalid section (e.g., /settings/invalid) redirects to /settings or defaults to profile
+- Test browser back/forward buttons work with section changes
+- Test that existing sidebar navigation still works
+
+---
+
 ### ⏱️ Resend Cooldown Timer for 2FA
 
 **Priority:** Medium  
@@ -1174,5 +1221,42 @@ Prepare the project for easy integration with external logging and monitoring se
 2. Audit and replace remaining `console.log` calls
 3. Add global error handler for uncaught errors
 4. Test integration with external logging service (when needed)
+
+---
+
+### 🐛 Login Callback Redirect Bug
+
+**Priority:** High  
+**Status:** Not Started
+
+**Description:**  
+When accessing a protected page (e.g., /test/client), the user is redirected to login with a callback URL. However, after successful login, the user is redirected to the default page instead of the original callback URL. This breaks the expected user flow and can be confusing.
+
+**Proposed Solution:**  
+Fix the login redirect logic to properly handle the callback URL parameter. Ensure that after authentication, the user is redirected to the intended page.
+
+**Implementation Steps:**
+
+1. Review the middleware that handles protected routes and sets the callback URL.
+2. Update the login success handler to check for and use the callback URL.
+3. Test the flow with various protected pages.
+
+**Benefits:**
+
+- ✅ Fixes broken user flow for protected pages
+- ✅ Improves user experience and security
+- ✅ Ensures proper redirect after authentication
+
+**Affected Files:**
+
+- `src/middleware.ts` (callback URL handling)
+- `src/features/auth/actions/login-user.ts` (login success redirect)
+- `src/lib/routes.ts` (default redirect logic)
+
+**Testing:**
+
+- Test accessing protected page → login → redirect to original page
+- Test normal login without callback
+- Test invalid callback URLs
 
 ---

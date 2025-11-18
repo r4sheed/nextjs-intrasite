@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { NavUser } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
+import { UserNav } from '@/features/navigation/components/user-nav';
 
 export const PAGES_NEW = [
   '/docs/components/button-group',
@@ -161,7 +161,7 @@ export function AppSidebar({
         <div className="from-background via-background/80 to-background/50 sticky -bottom-1 z-10 h-16 shrink-0 bg-gradient-to-t blur-xs" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <UserNav user={user} />
       </SidebarFooter>
     </Sidebar>
   );

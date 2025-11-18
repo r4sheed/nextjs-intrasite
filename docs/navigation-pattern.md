@@ -98,7 +98,7 @@ import { routes } from '@/lib/navigation';
 export function MyComponent() {
   const t = useTranslations();
 
-  return <Link href={routes.settings.url}>{t(routes.settings.label)}</Link>;
+  return <Link href={routes.settings.url}>{t(routes.settings.title)}</Link>;
 }
 ```
 
@@ -130,7 +130,7 @@ import { routes } from '@/lib/navigation';
 
 interface BreadcrumbItem {
   url: string;
-  label: string;
+  title: string;
 }
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
@@ -142,9 +142,9 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
         {items.map((item, index) => (
           <li key={item.url}>
             {index < items.length - 1 ? (
-              <Link href={item.url}>{t(item.label)}</Link>
+              <Link href={item.url}>{t(item.title)}</Link>
             ) : (
-              <span>{t(item.label)}</span>
+              <span>{t(item.title)}</span>
             )}
           </li>
         ))}
@@ -156,8 +156,8 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
 // Usage:
 function SettingsPage() {
   const breadcrumbs = [
-    { url: routes.home.url, label: routes.home.label },
-    { url: routes.settings.url, label: routes.settings.label },
+    { url: routes.home.url, title: routes.home.title },
+    { url: routes.settings.url, title: routes.settings.title },
   ];
 
   return <Breadcrumbs items={breadcrumbs} />;

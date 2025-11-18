@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 
 import { execute } from '@/hooks/use-action';

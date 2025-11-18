@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 
 import { middlewareConfig } from '@/lib/config';
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import {
   createStrictPrefixMatcher,
   matchesRoute,
   normalizePathname,
   validateCallbackUrl,
 } from '@/lib/proxy';
-import { authRouteSet, protectedRouteSet, publicRouteSet } from '@/lib/routes';
+import { guestRouteSet, protectedRouteSet, publicRouteSet } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';
 
@@ -43,11 +43,11 @@ export default auth(req => {
 
   // Support both exact and dynamic route matching (e.g., /posts/[id])
   const isPublicRoute = matchesRoute(pathname, publicRouteSet);
-  const isAuthRoute = matchesRoute(pathname, authRouteSet);
+  const isGuestRoute = matchesRoute(pathname, guestRouteSet);
   const isExplicitProtectedRoute = matchesRoute(pathname, protectedRouteSet);
 
   const isProtectedRoute =
-    isExplicitProtectedRoute || (!isPublicRoute && !isAuthRoute);
+    isExplicitProtectedRoute || (!isPublicRoute && !isGuestRoute);
 
   // Allow internal API Auth Routes (e.g., NextAuth/Auth.js internal calls)
   if (isApiAuthRoute) {
@@ -55,7 +55,7 @@ export default auth(req => {
   }
 
   // Redirect Logged-in Users from Auth Routes (e.g /login or /signup pages)
-  if (isLoggedIn && isAuthRoute) {
+  if (isLoggedIn && isGuestRoute) {
     return NextResponse.redirect(
       new URL(middlewareConfig.defaultLoginRedirect, url)
     );

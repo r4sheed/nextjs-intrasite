@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { siteFeatures } from '@/lib/config';
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import { type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';

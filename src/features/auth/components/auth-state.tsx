@@ -2,7 +2,7 @@ import { AlertCircleIcon, Info } from 'lucide-react';
 
 import Link from 'next/link';
 
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';

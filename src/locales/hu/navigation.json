@@ -1,17 +1,21 @@
 {
   "navigation": {
-    "auth": {
-      "admin": "Admin",
-      "client": "Kliens",
-      "forgot-password": "Elfelejtett jelszó",
-      "login": "Bejelentkezés",
-      "new-password": "Új jelszó",
-      "server": "Szerver",
-      "settings": "Beállítások",
-      "sign-up": "Regisztráció",
-      "verify-email": "Email megerősítés"
-    },
-    "error": "Hiba",
-    "home": "Kezdőlap"
+    "labels": {
+      "account-title": "Fiók",
+      "admin-title": "Adminisztrátor",
+      "client-title": "Kliens",
+      "error-title": "Hiba",
+      "forgot-password-title": "Elfelejtett jelszó",
+      "home-title": "Kezdőlap",
+      "login-title": "Bejelentkezés",
+      "logout-title": "Kijelentkezés",
+      "menu-title": "Menü",
+      "new-password-title": "Új jelszó",
+      "server-title": "Szerver",
+      "settings-title": "Beállítások",
+      "sign-up-title": "Regisztráció",
+      "verify-email-title": "Email megerősítés",
+      "toggle-menu-label": "Menü váltása"
+    }
   }
 }

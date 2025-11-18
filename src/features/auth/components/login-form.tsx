@@ -14,7 +14,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { siteFeatures } from '@/lib/config';
 import { middlewareConfig } from '@/lib/config';
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 import { Status, type ActionSuccess, type ErrorResponse } from '@/lib/response';
 import { translateFieldErrors } from '@/lib/translation';
 import { cn } from '@/lib/utils';

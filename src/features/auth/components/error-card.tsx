@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-import { routes } from '@/lib/navigation';
+import { routes } from '@/features/navigation/lib/navigation';
 
 import {
   Empty,

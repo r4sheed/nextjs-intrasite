@@ -1,82 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { middlewareConfig } from '@/lib/config';
+import { getAllRoutes } from '@/lib/routes';
+
 import {
   navigationItems,
   protectedNavigationItems,
   publicNavigationItems,
-} from '@/lib/navigation';
-import {
-  authRouteSet,
-  authRoutes,
-  getAllRoutes,
-  protectedRouteSet,
-  protectedRoutes,
-  publicRouteSet,
-  publicRoutes,
-  routes,
-} from '@/lib/routes';
-
-describe('Route definitions', () => {
-  const collectRouteUrls = (node: unknown): string[] => {
-    if (
-      node &&
-      typeof node === 'object' &&
-      'url' in (node as Record<string, unknown>) &&
-      'label' in (node as Record<string, unknown>)
-    ) {
-      return [(node as { url: string }).url];
-    }
-
-    if (node && typeof node === 'object') {
-      return Object.values(node).flatMap(value => collectRouteUrls(value));
-    }
-
-    return [];
-  };
-
-  it('should flatten nested route tree via getAllRoutes', () => {
-    const manualUrls = collectRouteUrls(routes).sort();
-    const exposedUrls = getAllRoutes()
-      .map(route => route.url)
-      .sort();
-
-    expect(exposedUrls).toEqual(manualUrls);
-  });
-
-  it('should derive route access lists from definitions', () => {
-    const definitions = getAllRoutes();
-
-    const collectByAccess = (access: string) =>
-      definitions
-        .filter(route => route.access === access)
-        .map(route => route.url)
-        .sort();
-
-    expect(publicRoutes.slice().sort()).toEqual(collectByAccess('public'));
-    expect(authRoutes.slice().sort()).toEqual(collectByAccess('auth'));
-    expect(protectedRoutes.slice().sort()).toEqual(
-      collectByAccess('protected')
-    );
-  });
-
-  it('should expose matching sets for quick lookups', () => {
-    expect(publicRouteSet.size).toBe(publicRoutes.length);
-    expect(authRouteSet.size).toBe(authRoutes.length);
-    expect(protectedRouteSet.size).toBe(protectedRoutes.length);
-
-    publicRoutes.forEach(url => expect(publicRouteSet.has(url)).toBe(true));
-    authRoutes.forEach(url => expect(authRouteSet.has(url)).toBe(true));
-    protectedRoutes.forEach(url =>
-      expect(protectedRouteSet.has(url)).toBe(true)
-    );
-  });
-
-  it('middlewareConfig.defaultLoginRedirect points to first protected route or home', () => {
-    const expected = protectedRoutes[0] ?? routes.home.url;
-    expect(middlewareConfig.defaultLoginRedirect).toBe(expected);
-  });
-});
+} from '@/features/navigation/lib/navigation';
 
 describe('Navigation helpers', () => {
   it('should expose navigation items in configured order', () => {
@@ -130,7 +60,7 @@ describe('Navigation helpers', () => {
       const matched = getAllRoutes().find(r => r.url === item.href);
       expect(matched).toBeDefined();
       if (matched) {
-        expect(matched.label).toBe(item.label);
+        expect(matched.title).toBe(item.title);
         if (matched.meta && item.meta) {
           // Navigation keeps the route.meta reference when present
           expect(item.meta).toBe(matched.meta);

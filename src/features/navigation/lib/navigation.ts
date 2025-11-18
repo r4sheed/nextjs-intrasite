@@ -1,21 +1,9 @@
 import { getAllRoutes } from '@/lib/routes';
 
-import type { RouteAccess, RouteMeta } from '@/lib/routes';
+import type { NavigationItem } from '../types';
 
 export { routes, getAllRoutes } from '@/lib/routes';
-export type { RouteAccess, RouteDefinition, RouteMeta } from '@/lib/routes';
-
-/**
- * Normalised navigation item derived from the route definitions.
- * Provides consistent shape for layout components rendering navigation links.
- */
-export interface NavigationItem {
-  label: string;
-  href: string;
-  access: RouteAccess;
-  protected: boolean;
-  meta?: RouteMeta;
-}
+export type { RouteDefinition } from '@/lib/routes';
 
 interface NavigationItemWithOrder extends NavigationItem {
   order: number;
@@ -29,10 +17,9 @@ const navigationItemsWithOrder: readonly NavigationItemWithOrder[] = (() => {
   const items = getAllRoutes()
     .filter(route => route.meta?.showInNavigation)
     .map<NavigationItemWithOrder>(route => ({
-      label: route.label,
+      title: route.title,
       href: route.url,
       access: route.access,
-      protected: route.access === 'protected',
       meta: route.meta,
       order: route.meta?.navigationOrder ?? Number.MAX_SAFE_INTEGER,
     }));
@@ -60,10 +47,9 @@ const navigationItemsWithOrder: readonly NavigationItemWithOrder[] = (() => {
 export const navigationItems = Object.freeze(
   navigationItemsWithOrder.map(item =>
     Object.freeze({
-      label: item.label,
+      title: item.title,
       href: item.href,
       access: item.access,
-      protected: item.protected,
       ...(item.meta && { meta: item.meta }),
     })
   )

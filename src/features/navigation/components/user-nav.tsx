@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   BadgeCheck,
   Bell,
@@ -12,6 +11,11 @@ import {
   User,
   UserPlus,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import Link from 'next/link';
+
+import { routes } from '@/lib/routes';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -30,11 +34,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-import { LogoutTrigger } from '@/features/auth/components/logout-trigger';
-import { routes } from '@/lib/routes';
-
-import { useTranslations } from 'next-intl';
-import { AUTH_LABELS } from '../features/auth/lib/strings';
+import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
 
 /**
  * Generates 2-character initials from a user's name
@@ -129,46 +129,35 @@ const UserDropdownContent = ({
           <Link href={routes.auth.login.url}>
             <DropdownMenuItem>
               <LogIn />
-              {t(AUTH_LABELS.loginButton)}
+              {t(NAVIGATION_LABELS.loginTitle)}
             </DropdownMenuItem>
           </Link>
           <Link href={routes.auth.signUp.url}>
             <DropdownMenuItem>
               <UserPlus />
-              {t(AUTH_LABELS.signupButton)}
+              {t(NAVIGATION_LABELS.signUpTitle)}
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
       ) : (
         <>
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <Sparkles />
-              Upgrade to Pro
-            </DropdownMenuItem>
+            <Link href={routes.settings.url}>
+              <DropdownMenuItem>
+                <BadgeCheck />
+                {t(NAVIGATION_LABELS.accountTitle)}
+              </DropdownMenuItem>
+            </Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <BadgeCheck />
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard />
-              Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
-            </DropdownMenuItem>
+            <Link href={routes.auth.logout.url}>
+              <DropdownMenuItem>
+                <LogOut />
+                {t(NAVIGATION_LABELS.logoutTitle)}
+              </DropdownMenuItem>
+            </Link>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <LogoutTrigger>
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </LogoutTrigger>
         </>
       )}
     </DropdownMenuContent>
@@ -179,11 +168,11 @@ const UserDropdownContent = ({
  * User navigation component that renders based on the provided user data.
  * If no user is provided, renders a guest menu with login/signup options.
  */
-const NavUser = ({ user }: { user: User | null | undefined }) => {
+const UserNav = ({ user }: { user: User | null | undefined }) => {
   const displayUser = user || {
-    name: 'Guest',
+    name: 'Guest', // TODO: i18n
     email: null,
-    image: '/assets/avatars/guest.png',
+    image: '/assets/avatars/guest.png', // TODO: move to constants
   };
   const isGuest = !user;
 
@@ -215,4 +204,4 @@ const NavUser = ({ user }: { user: User | null | undefined }) => {
   );
 };
 
-export { NavUser };
+export { UserNav };
