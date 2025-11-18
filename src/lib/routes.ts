@@ -53,6 +53,36 @@ export const routes = {
     label: NAV_LABELS.errorTitle,
     access: 'public',
   },
+  settings: {
+    url: '/settings',
+    label: NAV_LABELS.settingsTitle,
+    access: 'protected',
+  },
+  admin: {
+    url: '/test/admin',
+    label: NAV_LABELS.adminTitle,
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+      navigationOrder: 4,
+    },
+  },
+  client: {
+    url: '/test/client',
+    label: NAV_LABELS.clientTitle,
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+    },
+  },
+  server: {
+    url: '/test/server',
+    label: NAV_LABELS.serverTitle,
+    access: 'protected',
+    meta: {
+      showInNavigation: true,
+    },
+  },
   auth: {
     login: {
       url: '/auth/login',
@@ -83,36 +113,6 @@ export const routes = {
       url: '/auth/verify',
       label: NAV_LABELS.verifyEmailTitle,
       access: 'public',
-    },
-  },
-  settings: {
-    url: '/settings',
-    label: NAV_LABELS.settingsTitle,
-    access: 'protected',
-  },
-  admin: {
-    url: '/test/admin',
-    label: NAV_LABELS.adminTitle,
-    access: 'protected',
-    meta: {
-      showInNavigation: true,
-      navigationOrder: 4,
-    },
-  },
-  client: {
-    url: '/test/client',
-    label: NAV_LABELS.clientTitle,
-    access: 'protected',
-    meta: {
-      showInNavigation: true,
-    },
-  },
-  server: {
-    url: '/test/server',
-    label: NAV_LABELS.serverTitle,
-    access: 'protected',
-    meta: {
-      showInNavigation: true,
     },
   },
 } as const satisfies RouteNode;
