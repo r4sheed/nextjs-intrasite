@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { navigationItems } from '@/features/navigation/lib/navigation';
 
-import type { NavigationItem } from '../types';
+import type { NavigationItem } from '@/features/navigation/types';
 
 /**
  * Hook that returns filtered navigation items based on the current user's authentication status and roles.
