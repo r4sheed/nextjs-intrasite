@@ -1223,3 +1223,40 @@ Prepare the project for easy integration with external logging and monitoring se
 4. Test integration with external logging service (when needed)
 
 ---
+
+### 🐛 Login Callback Redirect Bug
+
+**Priority:** High  
+**Status:** Not Started
+
+**Description:**  
+When accessing a protected page (e.g., /test/client), the user is redirected to login with a callback URL. However, after successful login, the user is redirected to the default page instead of the original callback URL. This breaks the expected user flow and can be confusing.
+
+**Proposed Solution:**  
+Fix the login redirect logic to properly handle the callback URL parameter. Ensure that after authentication, the user is redirected to the intended page.
+
+**Implementation Steps:**
+
+1. Review the middleware that handles protected routes and sets the callback URL.
+2. Update the login success handler to check for and use the callback URL.
+3. Test the flow with various protected pages.
+
+**Benefits:**
+
+- ✅ Fixes broken user flow for protected pages
+- ✅ Improves user experience and security
+- ✅ Ensures proper redirect after authentication
+
+**Affected Files:**
+
+- `src/middleware.ts` (callback URL handling)
+- `src/features/auth/actions/login-user.ts` (login success redirect)
+- `src/lib/routes.ts` (default redirect logic)
+
+**Testing:**
+
+- Test accessing protected page → login → redirect to original page
+- Test normal login without callback
+- Test invalid callback URLs
+
+---
