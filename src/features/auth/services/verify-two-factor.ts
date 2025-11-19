@@ -1,7 +1,7 @@
 import { AuthError } from 'next-auth';
 
 import { internalServerError } from '@/lib/errors';
-import { logger } from '@/lib/tmp_logger';
+import { logger } from '@/lib/logger';
 import { type Response, response } from '@/lib/response';
 
 import {

@@ -2,7 +2,7 @@ import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import { siteFeatures } from '@/lib/config';
-import { logger } from '@/lib/tmp_logger';
+import { logger } from '@/lib/logger';
 import { db } from '@/lib/prisma';
 
 import { authConfig } from '@/features/auth/auth.config';
