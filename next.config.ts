@@ -3,6 +3,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['pino', 'pino-pretty', 'thread-stream'],
   // Enable React Compiler for automatic memoization (Next.js 16)
   reactCompiler: true,
   // Image config adjustments
