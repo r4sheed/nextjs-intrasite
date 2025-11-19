@@ -1,11 +1,11 @@
 import { logger } from '@/lib/logger';
 import { mail } from '@/lib/mail';
-import { routes } from '@/features/navigation/lib/navigation';
 import { maskEmail } from '@/lib/utils';
 
 import { ResetTemplate } from '@/features/auth/components/reset-template';
 import { TwoFactorTemplate } from '@/features/auth/components/two-factor-template';
 import { VerificationTemplate } from '@/features/auth/components/verification-template';
+import { routes } from '@/features/navigation/lib/navigation';
 
 const MAIL_BASE_URL = 'http://localhost:3000';
 const DEFAULT_FROM = 'onboarding@resend.dev';
