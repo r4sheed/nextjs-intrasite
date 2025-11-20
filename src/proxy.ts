@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 import { middlewareConfig } from '@/lib/config';
-import { routes } from '@/features/navigation/lib/navigation';
 import {
   createStrictPrefixMatcher,
   matchesRoute,
@@ -11,6 +10,7 @@ import {
 import { guestRouteSet, protectedRouteSet, publicRouteSet } from '@/lib/routes';
 
 import { auth } from '@/features/auth/lib/auth';
+import { routes } from '@/features/navigation/lib/navigation';
 
 // Create strict matcher for API auth routes to avoid false positives
 const apiAuthMatcher = createStrictPrefixMatcher(
