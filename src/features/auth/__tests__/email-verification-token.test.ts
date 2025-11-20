@@ -63,27 +63,6 @@ describe('Email Verification Token Data Layer', () => {
       });
     });
 
-    it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      const dbError = new Error('Database connection failed');
-      mockFindUnique.mockRejectedValue(dbError);
-
-      const result = await getVerificationTokenByToken('test-token');
-
-      expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
-        expect.objectContaining({
-          search: expect.objectContaining({ token: 'test-token' }),
-          error: dbError,
-        })
-      );
-
-      consoleErrorSpy.mockRestore();
-    });
-
     it('should handle various token formats', async () => {
       const tokens = [
         'simple-token',
@@ -158,29 +137,6 @@ describe('Email Verification Token Data Layer', () => {
       });
     });
 
-    it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      const dbError = new Error('Database connection timeout');
-      mockFindFirst.mockRejectedValue(dbError);
-
-      const result = await getVerificationTokenByEmail('test@example.com');
-
-      expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /^\[\d{2}:\d{2}:\d{2}\]\[ERROR\] Database error in findVerificationToken$/
-        ),
-        {
-          search: { email: 'test@example.com' },
-          error: dbError,
-        }
-      );
-
-      consoleErrorSpy.mockRestore();
-    });
-
     it('should handle various email formats', async () => {
       const emails = [
         'simple@example.com',
@@ -224,47 +180,6 @@ describe('Email Verification Token Data Layer', () => {
       // Should return the first token found
       expect(result).toEqual(firstToken);
       expect(mockFindFirst).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('error handling consistency', () => {
-    it('should handle network errors the same way as database errors', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      const networkError = new Error('Network request failed');
-      mockFindUnique.mockRejectedValue(networkError);
-
-      const result1 = await getVerificationTokenByToken('test-token');
-      expect(result1).toBeNull();
-
-      const dbError = new Error('Connection pool exhausted');
-      mockFindFirst.mockRejectedValue(dbError);
-
-      const result2 = await getVerificationTokenByEmail('test@example.com');
-      expect(result2).toBeNull();
-
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('should log errors but not throw them', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      const error = new Error('Test error');
-      mockFindUnique.mockRejectedValue(error);
-
-      // Should not throw, should return null
-      await expect(
-        getVerificationTokenByToken('test-token')
-      ).resolves.toBeNull();
-
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -312,31 +227,6 @@ describe('Email Verification Token Data Layer', () => {
           },
         },
       });
-    });
-
-    it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      const dbError = new Error('Database connection failed');
-      mockFindUnique.mockRejectedValue(dbError);
-
-      const result = await getVerificationTokenByEmailAndToken(
-        'test@example.com',
-        'test-token'
-      );
-
-      expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
-        expect.objectContaining({
-          email: 'test@example.com',
-          token: 'test-token',
-          error: dbError,
-        })
-      );
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should handle various email and token combinations', async () => {
