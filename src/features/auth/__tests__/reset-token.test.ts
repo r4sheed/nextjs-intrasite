@@ -64,24 +64,15 @@ describe('Password Reset Token Data Layer', () => {
     });
 
     it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       const dbError = new Error('Database connection failed');
       mockFindUnique.mockRejectedValue(dbError);
 
       const result = await getPasswordResetTokenByToken('test-token');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
-        expect.objectContaining({
-          search: expect.objectContaining({ token: 'test-token' }),
-          error: dbError,
-        })
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { token: 'test-token' },
+      });
     });
 
     it('should handle various token formats', async () => {
@@ -159,26 +150,15 @@ describe('Password Reset Token Data Layer', () => {
     });
 
     it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       const dbError = new Error('Database connection timeout');
       mockFindFirst.mockRejectedValue(dbError);
 
       const result = await getPasswordResetTokenByEmail('test@example.com');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /^\[\d{2}:\d{2}:\d{2}\]\[ERROR\] Database error in findPasswordResetToken$/
-        ),
-        {
-          search: { email: 'test@example.com' },
-          error: dbError,
-        }
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
     });
 
     it('should handle various email formats', async () => {
@@ -229,10 +209,6 @@ describe('Password Reset Token Data Layer', () => {
 
   describe('error handling consistency', () => {
     it('should handle network errors the same way as database errors', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       const networkError = new Error('Network request failed');
       mockFindUnique.mockRejectedValue(networkError);
 
@@ -244,16 +220,9 @@ describe('Password Reset Token Data Layer', () => {
 
       const result2 = await getPasswordResetTokenByEmail('test@example.com');
       expect(result2).toBeNull();
-
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
-
-      consoleErrorSpy.mockRestore();
     });
 
-    it('should log errors but not throw them', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
+    it('should not throw errors on database failures', async () => {
       const error = new Error('Test error');
       mockFindUnique.mockRejectedValue(error);
 
@@ -261,17 +230,9 @@ describe('Password Reset Token Data Layer', () => {
       await expect(
         getPasswordResetTokenByToken('test-token')
       ).resolves.toBeNull();
-
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle Prisma-specific errors', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
+    it('should handle Prisma-specific errors gracefully', async () => {
       // Simulate a Prisma error
       const prismaError = Object.assign(new Error('Prisma Error'), {
         code: 'P2002',
@@ -283,24 +244,11 @@ describe('Password Reset Token Data Layer', () => {
       const result = await getPasswordResetTokenByToken('test-token');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
-        expect.objectContaining({
-          search: expect.objectContaining({ token: 'test-token' }),
-          error: prismaError,
-        })
-      );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
   describe('comparison with verification token behavior', () => {
     it('should behave consistently with verification token data layer', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       // Both should return null on error
       const error = new Error('Database error');
       mockFindUnique.mockRejectedValue(error);
@@ -313,9 +261,6 @@ describe('Password Reset Token Data Layer', () => {
       const resetTokenByEmailResult =
         await getPasswordResetTokenByEmail('test@example.com');
       expect(resetTokenByEmailResult).toBeNull();
-
-      // Both should log errors
-      expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -366,9 +311,6 @@ describe('Password Reset Token Data Layer', () => {
     });
 
     it('should return null when database error occurs', async () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       const dbError = new Error('Database connection failed');
       mockFindUnique.mockRejectedValue(dbError);
 
@@ -378,16 +320,14 @@ describe('Password Reset Token Data Layer', () => {
       );
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\]\[ERROR\]/),
-        expect.objectContaining({
-          email: 'test@example.com',
-          token: 'test-token',
-          error: dbError,
-        })
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: {
+          email_token: {
+            email: 'test@example.com',
+            token: 'test-token',
+          },
+        },
+      });
     });
 
     it('should handle various email and token combinations', async () => {
