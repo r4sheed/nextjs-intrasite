@@ -7,7 +7,7 @@ import { AUTH_ERRORS } from '@/features/auth/lib/strings';
  * Validates email and UUID token for email verification process
  */
 export const verifyEmailSchema = z.object({
-  email: z.string().email({ message: AUTH_ERRORS.emailInvalid }),
+  email: z.email({ message: AUTH_ERRORS.emailInvalid }),
   token: z.uuid({ message: AUTH_ERRORS.tokenInvalid }),
 });
 
