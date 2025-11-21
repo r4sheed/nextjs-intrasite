@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
-// import { Callout } from "@/components/callout"
+import { Callout } from '@/components/callout';
 // import { CodeBlockCommand } from "@/components/code-block-command"
 // import { CodeCollapsibleWrapper } from "@/components/code-collapsible-wrapper"
 // import { CodeTabs } from "@/components/code-tabs"
@@ -325,7 +325,7 @@ export const mdxComponents = {
     <div className={cn(className)} {...props} />
   ),
   Button,
-  //   Callout,
+  Callout,
   Accordion,
   AccordionContent,
   AccordionItem,
