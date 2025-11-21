@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { PAGES_NEW } from '@/lib/docs';
+
 import {
   Sidebar,
   SidebarContent,
@@ -18,57 +20,23 @@ import {
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { UserNav } from '@/features/navigation/components/user-nav';
 
-export const PAGES_NEW = [
-  '/docs/components/button-group',
-  '/docs/components/empty',
-  '/docs/components/field',
-  '/docs/components/input',
-  '/docs/components/item',
-  '/docs/components/kbd',
-  '/docs/components/spinner',
-  '/docs/components/native-select',
-];
-
-export const PAGES_UPDATED = ['/docs/components/button'];
+import type { source } from '@/lib/source';
 
 const TOP_LEVEL_SECTIONS = [
   { name: 'Get Started', href: '/docs' },
   {
-    name: 'Components',
-    href: '/docs/components',
-  },
-  {
-    name: 'Directory',
-    href: '/docs/directory',
-  },
-  {
-    name: 'MCP Server',
-    href: '/docs/mcp',
-  },
-  {
-    name: 'Forms',
-    href: '/docs/forms',
-  },
-  {
-    name: 'Changelog',
-    href: '/docs/changelog',
+    name: 'News',
+    href: '/news',
   },
 ];
+
 const EXCLUDED_SECTIONS = ['installation', 'dark-mode'];
 const EXCLUDED_PAGES = ['/docs', '/docs/changelog'];
 
-interface DocsItem {
-  $id?: string;
-  name: string;
-  type: string;
-  url?: string;
-  children?: DocsItem[];
-}
-
 export function AppSidebar({
-  items,
+  tree,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { items: { children: DocsItem[] } }) {
+}: React.ComponentProps<typeof Sidebar> & { tree: typeof source.pageTree }) {
   const pathname = usePathname();
   const user = useCurrentUser();
 
@@ -109,7 +77,7 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {items.children.map(item => {
+        {tree.children.map(item => {
           if (EXCLUDED_SECTIONS.includes(item.$id ?? '')) {
             return null;
           }
@@ -120,16 +88,11 @@ export function AppSidebar({
                 {item.name}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                {item.type === 'folder' && item.children && (
+                {item.type === 'folder' && (
                   <SidebarMenu className="gap-0.5">
                     {item.children.map(item => {
-                      if (item.type === 'page' && item.url?.includes('/mcp')) {
-                        return null;
-                      }
-
                       return (
                         item.type === 'page' &&
-                        item.url &&
                         !EXCLUDED_PAGES.includes(item.url) && (
                           <SidebarMenuItem key={item.url}>
                             <SidebarMenuButton
@@ -140,7 +103,7 @@ export function AppSidebar({
                               <Link href={item.url}>
                                 <span className="absolute inset-0 flex w-(--sidebar-width) bg-transparent" />
                                 {item.name}
-                                {item.url && PAGES_NEW.includes(item.url) && (
+                                {PAGES_NEW.includes(item.url) && (
                                   <span
                                     className="flex size-2 rounded-full bg-blue-500"
                                     title="New"
