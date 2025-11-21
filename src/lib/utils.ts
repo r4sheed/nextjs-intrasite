@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function absoluteUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_APP_URL}${path}`;
+}
+
 /**
  * Masks an email address for display purposes (privacy).
  * Shows first character, asterisks, and the domain.
