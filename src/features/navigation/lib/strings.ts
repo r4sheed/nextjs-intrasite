@@ -20,6 +20,8 @@ export const NAVIGATION_LABELS = {
   logoutTitle: 'labels.logout-title',
   menuTitle: 'labels.menu-title',
   newPasswordTitle: 'labels.new-password-title',
+  newsArticleTitle: 'labels.news-article-title',
+  newsTitle: 'labels.news-title',
   serverTitle: 'labels.server-title',
   settingsTitle: 'labels.settings-title',
   signUpTitle: 'labels.sign-up-title',
