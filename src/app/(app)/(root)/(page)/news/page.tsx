@@ -17,6 +17,7 @@ import {
 
 export const revalidate = false;
 export const dynamic = 'force-static';
+export const dynamicParams = false;
 
 const GRADIENT_PALETTES: string[] = [
   'from-sky-100 to-indigo-200',
