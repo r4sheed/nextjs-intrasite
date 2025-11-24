@@ -1,9 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 
+import { OpenInV0Cta } from '@/components/open-in-v0-cta';
+
 import { PostPreviewCard } from '@/features/posts/components/post';
 import { getAllPosts } from '@/features/posts/data/post';
 import { POSTS_LABELS } from '@/features/posts/lib/strings';
-
 export const revalidate = false;
 export const dynamic = 'force-static';
 export const dynamicParams = false;
@@ -65,7 +66,9 @@ export default async function PostsPage() {
         <div className="no-scrollbar overflow-y-auto px-8">
           <div className="h-12" />
         </div>
-        <div className="flex flex-1 flex-col gap-12 px-6"></div>
+        <div className="flex flex-1 flex-col gap-12 px-6">
+          <OpenInV0Cta />
+        </div>
       </div>
     </div>
   );
