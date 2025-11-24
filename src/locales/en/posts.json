@@ -4,11 +4,11 @@
       "next-label": "Next",
       "no-posts-label": "No posts found.",
       "previous-label": "Previous",
-      "back-to-posts-button": "Back to Posts",
+      "back-to-posts-button": "Back to News",
       "read-more-button": "Read more",
       "docs-link": "Docs",
       "description": "Latest news, updates, and articles from our team.",
-      "title": "Posts"
+      "title": "News"
     }
   }
 }

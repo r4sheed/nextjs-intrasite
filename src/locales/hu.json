@@ -192,11 +192,11 @@
       "next-label": "Következő",
       "no-posts-label": "Nincsenek bejegyzések.",
       "previous-label": "Előző",
-      "back-to-posts-button": "Vissza a bejegyzésekhez",
+      "back-to-posts-button": "Vissza a hírekhez",
       "read-more-button": "Olvass tovább",
       "docs-link": "Dokumentáció",
       "description": "Legfrissebb hírek, frissítések és cikkek csapatunktól.",
-      "title": "Bejegyzések"
+      "title": "Hírek"
     }
   }
 }
