@@ -186,5 +186,17 @@
       "verify-email-title": "Verify email",
       "toggle-menu-label": "Toggle menu"
     }
+  },
+  "posts": {
+    "labels": {
+      "next-label": "Next",
+      "no-posts-label": "No posts found.",
+      "previous-label": "Previous",
+      "back-to-posts-button": "Back to Posts",
+      "read-more-button": "Read more",
+      "docs-link": "Docs",
+      "description": "Latest news, updates, and articles from our team.",
+      "title": "Posts"
+    }
   }
 }

@@ -1,6 +1,7 @@
 import fm from 'front-matter';
 import { findNeighbour } from 'fumadocs-core/page-tree';
 import { Newspaper, ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import z from 'zod';
 
 import Link from 'next/link';
@@ -13,6 +14,8 @@ import { DocsTableOfContents } from '@/components/docs-toc';
 import { OpenInV0Cta } from '@/components/open-in-v0-cta';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+import { POSTS_LABELS } from '@/features/posts/lib/strings';
 
 import { mdxComponents } from '@/mdx-components';
 
@@ -98,6 +101,8 @@ export default async function Page(props: {
     })
     .parse(attributes);
 
+  const t = await getTranslations('posts');
+
   return (
     <div className="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
       <div className="flex min-w-0 flex-1 flex-col">
@@ -116,7 +121,7 @@ export default async function Page(props: {
                       size="sm"
                       className="h-8 shadow-none md:h-7 md:text-[0.8rem]"
                     >
-                      <Newspaper /> Back to News
+                      <Newspaper /> {t(POSTS_LABELS.backToPostsButton)}
                     </Button>
                   </Link>
                   {neighbours.previous && (
@@ -128,7 +133,9 @@ export default async function Page(props: {
                     >
                       <Link href={neighbours.previous.url}>
                         <ArrowLeft />
-                        <span className="sr-only">Previous</span>
+                        <span className="sr-only">
+                          {t(POSTS_LABELS.previousLabel)}
+                        </span>
                       </Link>
                     </Button>
                   )}
@@ -140,7 +147,9 @@ export default async function Page(props: {
                       asChild
                     >
                       <Link href={neighbours.next.url}>
-                        <span className="sr-only">Next</span>
+                        <span className="sr-only">
+                          {t(POSTS_LABELS.nextLabel)}
+                        </span>
                         <ArrowRight />
                       </Link>
                     </Button>
@@ -158,14 +167,7 @@ export default async function Page(props: {
                 {links?.doc && (
                   <Badge asChild variant="secondary" className="rounded-full">
                     <a href={links.doc} target="_blank" rel="noreferrer">
-                      Docs <ArrowUpRight />
-                    </a>
-                  </Badge>
-                )}
-                {links?.api && (
-                  <Badge asChild variant="secondary" className="rounded-full">
-                    <a href={links.api} target="_blank" rel="noreferrer">
-                      API Reference <ArrowUpRight />
+                      {t(POSTS_LABELS.docsLink)} <ArrowUpRight />
                     </a>
                   </Badge>
                 )}
