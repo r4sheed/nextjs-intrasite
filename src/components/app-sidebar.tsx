@@ -22,13 +22,7 @@ import { UserNav } from '@/features/navigation/components/user-nav';
 
 import type { source } from '@/lib/source';
 
-const TOP_LEVEL_SECTIONS = [
-  { name: 'Get Started', href: '/docs' },
-  {
-    name: 'News',
-    href: '/news',
-  },
-];
+const TOP_LEVEL_SECTIONS = [{ name: 'Get Started', href: '/docs' }];
 
 const EXCLUDED_SECTIONS = ['installation', 'dark-mode'];
 const EXCLUDED_PAGES = ['/docs', '/docs/changelog'];
