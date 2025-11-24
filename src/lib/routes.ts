@@ -1,4 +1,5 @@
 import { UserRole } from '@prisma/client';
+import { docs } from 'source.config';
 import { z } from 'zod';
 
 import { NAVIGATION_LABELS } from '@/features/navigation/lib/strings';
@@ -64,6 +65,19 @@ export const routes = {
   error: {
     url: '/error',
     title: NAVIGATION_LABELS.errorTitle,
+    access: 'public',
+  },
+  docs: {
+    url: '/docs',
+    title: NAVIGATION_LABELS.docsTitle,
+    access: 'public',
+    meta: {
+      showInNavigation: true,
+    },
+  },
+  docsArticle: {
+    url: `/docs/[...slug]`,
+    title: NAVIGATION_LABELS.docsArticleTitle,
     access: 'public',
   },
   news: {

@@ -13,6 +13,8 @@ export const NAVIGATION_LABELS = {
   accountTitle: 'labels.account-title',
   adminTitle: 'labels.admin-title',
   clientTitle: 'labels.client-title',
+  docsArticleTitle: 'labels.docs-article-title',
+  docsTitle: 'labels.docs-title',
   errorTitle: 'labels.error-title',
   forgotPasswordTitle: 'labels.forgot-password-title',
   homeTitle: 'labels.home-title',
