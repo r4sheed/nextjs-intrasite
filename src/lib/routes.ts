@@ -84,9 +84,6 @@ export const routes = {
     url: '/news',
     title: NAVIGATION_LABELS.newsTitle,
     access: 'public',
-    meta: {
-      showInNavigation: true,
-    },
   },
   newsArticle: {
     url: '/news/[...slug]',
