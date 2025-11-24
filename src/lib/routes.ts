@@ -66,6 +66,19 @@ export const routes = {
     title: NAVIGATION_LABELS.errorTitle,
     access: 'public',
   },
+  news: {
+    url: '/news',
+    title: NAVIGATION_LABELS.newsTitle,
+    access: 'public',
+    meta: {
+      showInNavigation: true,
+    },
+  },
+  newsArticle: {
+    url: '/news/[...slug]',
+    title: NAVIGATION_LABELS.newsArticleTitle,
+    access: 'public',
+  },
   settings: {
     url: '/settings',
     title: NAVIGATION_LABELS.settingsTitle,
