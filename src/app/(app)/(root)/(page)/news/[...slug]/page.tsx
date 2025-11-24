@@ -67,7 +67,7 @@ export async function generateMetadata(props: {
           )}&description=${encodeURIComponent(doc.description)}`,
         },
       ],
-      creator: '@shadcn',
+      creator: doc.author || '@admin',
     },
   };
 }
@@ -110,15 +110,15 @@ export default async function Page(props: {
                   {doc.title}
                 </h1>
                 <div className="docs-nav bg-background/80 border-border/50 fixed inset-x-0 bottom-0 isolate z-50 flex items-center gap-2 border-t px-6 py-4 backdrop-blur-sm sm:static sm:z-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:pt-1.5 sm:backdrop-blur-none">
-                  {/* <Link href="/news">
+                  <Link href="/news">
                     <Button
                       variant="secondary"
                       size="sm"
                       className="h-8 shadow-none md:h-7 md:text-[0.8rem]"
                     >
-                      <Newspaper /> Latest News
+                      <Newspaper /> Back to News
                     </Button>
-                  </Link> */}
+                  </Link>
                   {neighbours.previous && (
                     <Button
                       variant="secondary"
