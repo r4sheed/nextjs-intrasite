@@ -70,7 +70,7 @@ export async function generateMetadata(props: {
           )}&description=${encodeURIComponent(doc.description)}`,
         },
       ],
-      creator: doc.author || '@admin',
+      creator: doc.author,
     },
   };
 }
